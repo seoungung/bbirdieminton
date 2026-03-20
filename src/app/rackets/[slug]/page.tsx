@@ -152,6 +152,9 @@ export default async function RacketDetailPage({ params }: Props) {
                     에디터 픽
                   </span>
                 )}
+                <span className="mt-1 shrink-0 bg-white/5 text-white/40 text-[10px] font-medium px-2.5 py-1 rounded-full border border-white/10">
+                  2026 상반기 기준
+                </span>
               </div>
             </div>
 

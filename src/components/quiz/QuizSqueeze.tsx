@@ -41,10 +41,23 @@ export function QuizSqueeze({ level, levelLabel, stibeeTag, onUnlock }: QuizSque
       <h3 className="text-[17px] font-bold text-white mb-1">
         🎯 {levelLabel}에게 딱 맞는 라켓이 있어요
       </h3>
-      <p className="text-white/50 text-sm mb-5 leading-relaxed">
-        무게, 밸런스, 강성까지 고려한 맞춤 라켓 3종을<br />
-        지금 바로 확인하세요
+      <p className="text-white/50 text-sm mb-3 leading-relaxed">
+        이메일 하나로 아래 3가지를 무료로 받아보세요
       </p>
+      <ul className="text-left text-sm text-white/70 mb-5 space-y-1.5">
+        <li className="flex items-start gap-2">
+          <span className="text-[#beff00] mt-0.5">✓</span>
+          <span>내 레벨에 딱 맞는 <strong className="text-white">추천 라켓 3종</strong> (무게·밸런스·강성 분석 포함)</span>
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="text-[#beff00] mt-0.5">✓</span>
+          <span>배린이가 흔히 하는 <strong className="text-white">라켓 구매 실수 Top 5</strong></span>
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="text-[#beff00] mt-0.5">✓</span>
+          <span>다음 레벨까지 <strong className="text-white">업그레이드 로드맵</strong></span>
+        </li>
+      </ul>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input
