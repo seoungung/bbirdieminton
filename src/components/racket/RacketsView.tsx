@@ -109,12 +109,12 @@ export function RacketsView({ rackets }: { rackets: Racket[] }) {
           <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setFilterOpen(false)} />
         )}
 
-        <div className="flex gap-8">
-          {/* 좌측 사이드바 — 데스크톱 고정 / 모바일 드로어 */}
+        <div className="flex gap-8 items-start">
+          {/* 좌측 사이드바 — 데스크톱 sticky / 모바일 드로어 */}
           <div
             className={cn(
               'shrink-0 transition-all duration-200',
-              'hidden md:block w-56',
+              'hidden md:block w-56 sticky top-[56px] max-h-[calc(100vh-56px)] overflow-y-auto',
               filterOpen && '!fixed !block right-0 top-0 h-full w-72 bg-background z-50 border-l border-border shadow-xl overflow-y-auto p-4 pt-14'
             )}
           >
