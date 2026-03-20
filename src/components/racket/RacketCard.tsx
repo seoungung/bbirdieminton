@@ -58,9 +58,9 @@ export function RacketCard({ racket }: { racket: Racket }) {
                 <Image
                   src={BRAND_LOGOS[racket.brand]}
                   alt={racket.brand}
-                  width={64}
-                  height={24}
-                  className="object-contain object-left max-h-6 w-auto"
+                  width={54}
+                  height={18}
+                  className="object-contain object-left max-h-[18px] w-auto"
                   unoptimized
                 />
               ) : (

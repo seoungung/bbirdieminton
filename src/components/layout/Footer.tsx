@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Fragment } from 'react'
 
 const LEGAL_LINKS = [
@@ -13,9 +14,19 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
 
         {/* 로고 */}
-        <p className="text-white font-extrabold text-[18px] tracking-tight mb-5">
-          Birdminton
-        </p>
+        <div className="flex items-center gap-2 mb-5">
+          <Image
+            src="/symbol_birdieminton-white.png"
+            alt="birdieminton symbol"
+            width={26}
+            height={26}
+            className="object-contain"
+            unoptimized
+          />
+          <p className="text-white font-extrabold text-[18px] tracking-tight">
+            birdieminton
+          </p>
+        </div>
 
         {/* 법적 링크 */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-5 text-[12px]">

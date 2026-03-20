@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 
@@ -21,9 +22,19 @@ export default function Header() {
           {/* 로고 */}
           <Link
             href="/"
-            className="text-[18px] font-extrabold tracking-tight shrink-0 hover:text-[#BEFF00] transition-colors"
+            className="flex items-center gap-2 shrink-0 hover:opacity-85 transition-opacity"
           >
-            Birdminton
+            <Image
+              src="/symbol_birdieminton-color.png"
+              alt="birdieminton symbol"
+              width={28}
+              height={28}
+              className="object-contain"
+              unoptimized
+            />
+            <span className="text-[18px] font-extrabold tracking-tight text-white hover:text-[#BEFF00] transition-colors">
+              birdieminton
+            </span>
           </Link>
 
           {/* 데스크톱 메뉴 */}
