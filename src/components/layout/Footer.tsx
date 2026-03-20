@@ -11,7 +11,7 @@ const LEGAL_LINKS = [
 export default function Footer() {
   return (
     <footer className="bg-[#1C1C1C] text-white/50 text-[13px]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 py-10">
 
         {/* 로고 */}
         <div className="flex items-center gap-2 mb-5">

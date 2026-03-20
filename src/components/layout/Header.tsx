@@ -17,7 +17,7 @@ export default function Header() {
     <header className="sticky top-0 z-50">
       {/* 메인 네비게이션 */}
       <nav className="bg-black text-white border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-[56px] flex items-center justify-between gap-4">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 h-[56px] flex items-center justify-between gap-4">
 
           {/* 로고 */}
           <Link
