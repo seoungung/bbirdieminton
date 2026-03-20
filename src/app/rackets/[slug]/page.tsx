@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { ChevronRight, ExternalLink, ShoppingCart } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
@@ -6,6 +7,7 @@ import { RacketRadarChart } from '@/components/racket/RacketRadarChart'
 import { RacketSpec } from '@/components/racket/RacketSpec'
 import { RacketImageGallery } from '@/components/racket/RacketImageGallery'
 import { RacketCard } from '@/components/racket/RacketCard'
+import { BRAND_LOGOS } from '@/lib/brandLogos'
 import type { Metadata } from 'next'
 import type { Racket } from '@/types/racket'
 
@@ -125,9 +127,22 @@ export default async function RacketDetailPage({ params }: Props) {
 
             {/* 섹션 1: 브랜드 + 제품명 */}
             <div>
-              <p className="text-xs font-semibold text-muted-foreground tracking-widest uppercase mb-1">
-                {racket.brand}
-              </p>
+              <div className="mb-2 h-8 flex items-center">
+                {BRAND_LOGOS[racket.brand] ? (
+                  <Image
+                    src={BRAND_LOGOS[racket.brand]}
+                    alt={racket.brand}
+                    width={100}
+                    height={32}
+                    className="object-contain object-left max-h-8 w-auto"
+                    unoptimized
+                  />
+                ) : (
+                  <p className="text-xs font-semibold text-muted-foreground tracking-widest uppercase">
+                    {racket.brand}
+                  </p>
+                )}
+              </div>
               <div className="flex items-start gap-2 flex-wrap">
                 <h1 className="text-[28px] sm:text-[32px] font-bold leading-tight tracking-[-0.025em]">
                   {racket.name}

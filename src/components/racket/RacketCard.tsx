@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Racket } from '@/types/racket'
 import { useCompare } from '@/context/CompareContext'
 import { cn } from '@/lib/utils'
+import { BRAND_LOGOS } from '@/lib/brandLogos'
 
 function parseFirstUrl(raw: string | null): string | null {
   if (!raw) return null
@@ -52,7 +53,20 @@ export function RacketCard({ racket }: { racket: Racket }) {
           </div>
 
           <div className="p-3">
-            <p className="text-[13px] text-muted-foreground mb-0.5 font-medium">{racket.brand}</p>
+            <div className="mb-1 h-6 flex items-center">
+              {BRAND_LOGOS[racket.brand] ? (
+                <Image
+                  src={BRAND_LOGOS[racket.brand]}
+                  alt={racket.brand}
+                  width={64}
+                  height={24}
+                  className="object-contain object-left max-h-6 w-auto"
+                  unoptimized
+                />
+              ) : (
+                <p className="text-[13px] text-muted-foreground font-medium">{racket.brand}</p>
+              )}
+            </div>
             <h3 className="font-semibold text-base mb-2 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
               {racket.name}
             </h3>
