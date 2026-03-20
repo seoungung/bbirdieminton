@@ -11,6 +11,8 @@ export interface Racket {
   brand: Brand
   image_url: string | null
   image_urls: string[] | null
+  price_min: number | null
+  price_max: number | null
   price_range: string | null
   weight: string | null
   balance: Balance | null
