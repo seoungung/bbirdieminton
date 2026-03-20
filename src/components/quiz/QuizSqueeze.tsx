@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useQuizStore } from '@/stores/quiz-store'
 
 interface QuizSqueezeProps {
   level: string
@@ -13,6 +14,7 @@ export function QuizSqueeze({ level, levelLabel, stibeeTag, onUnlock }: QuizSque
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const gender = useQuizStore((s) => s.gender)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,7 +25,7 @@ export function QuizSqueeze({ level, levelLabel, stibeeTag, onUnlock }: QuizSque
       await fetch('/api/quiz-subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, level, stibeeTag }),
+        body: JSON.stringify({ email, level, stibeeTag, gender }),
       })
       onUnlock()
     } catch {

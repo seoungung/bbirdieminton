@@ -2,14 +2,14 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function POST(req: Request) {
   try {
-    const { email, level, stibeeTag } = await req.json()
+    const { email, level, stibeeTag, gender } = await req.json()
     if (!email || !email.includes('@')) {
       return Response.json({ error: 'invalid email' }, { status: 400 })
     }
 
     const supabase = await createClient()
     await supabase.from('subscribers').upsert(
-      { email, level_tag: stibeeTag, source: 'quiz' },
+      { email, level_tag: stibeeTag, source: 'quiz', gender: gender ?? '' },
       { onConflict: 'email' }
     )
 

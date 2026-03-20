@@ -9,7 +9,7 @@ import { QuizQuestionCard } from '@/components/quiz/QuizQuestion'
 
 export default function QuizPage() {
   const router = useRouter()
-  const { isStarted, currentQuestion, answers, start, setAnswer, next, back, reset } = useQuizStore()
+  const { isStarted, currentQuestion, answers, start, setAnswer, setGender, next, back, reset } = useQuizStore()
 
   const question = QUIZ_QUESTIONS[currentQuestion - 1]
 
@@ -36,7 +36,7 @@ export default function QuizPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
       {!isStarted ? (
-        <QuizStart onStart={handleStart} />
+        <QuizStart onStart={handleStart} onGenderSelect={setGender} />
       ) : (
         <QuizQuestionCard
           question={question}
