@@ -7,14 +7,19 @@ import { useCompare } from '@/context/CompareContext'
 import { cn } from '@/lib/utils'
 import { BRAND_LOGOS } from '@/lib/brandLogos'
 
+function isValidSrc(s: string): boolean {
+  return s.startsWith('/') || s.startsWith('http://') || s.startsWith('https://')
+}
+
 function parseFirstUrl(raw: string | null): string | null {
   if (!raw) return null
   const trimmed = raw.trim()
   if (trimmed.startsWith('{')) {
     const match = trimmed.match(/"([^"]+)"/)
-    return match ? match[1] : null
+    const url = match ? match[1] : null
+    return url && isValidSrc(url) ? url : null
   }
-  return trimmed
+  return isValidSrc(trimmed) ? trimmed : null
 }
 
 export function RacketCard({ racket }: { racket: Racket }) {

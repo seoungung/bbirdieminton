@@ -13,14 +13,20 @@ interface RacketImageGalleryProps {
 /**
  * PostgreSQL 배열 리터럴 {"url1","url2"} 또는 일반 URL / string[] 에서 URL 배열 추출
  */
+function isValidSrc(s: string): boolean {
+  return s.startsWith('/') || s.startsWith('http://') || s.startsWith('https://')
+}
+
 function parseUrls(raw: string | string[] | null | undefined): string[] {
   if (!raw) return []
-  if (Array.isArray(raw)) return raw.filter(Boolean)
+  if (Array.isArray(raw)) return raw.filter(isValidSrc)
   const trimmed = raw.trim()
   if (trimmed.startsWith('{')) {
-    return [...trimmed.slice(1, -1).matchAll(/"([^"]+)"/g)].map((m) => m[1])
+    return [...trimmed.slice(1, -1).matchAll(/"([^"]+)"/g)]
+      .map((m) => m[1])
+      .filter(isValidSrc)
   }
-  return trimmed ? [trimmed] : []
+  return isValidSrc(trimmed) ? [trimmed] : []
 }
 
 export function RacketImageGallery({ imageUrl, imageUrls, name }: RacketImageGalleryProps) {

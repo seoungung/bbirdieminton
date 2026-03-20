@@ -69,16 +69,17 @@ export function RacketsView({ rackets }: { rackets: Racket[] }) {
 
   return (
     <div className="min-h-screen bg-background pb-24">
+      {/* 헤딩 — 중앙 정렬, 여유로운 패딩 */}
       <div className="border-b border-border">
-        <div className="max-w-[90rem] mx-auto px-4 py-4 sm:py-6">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-1">라켓 도감</h1>
-          <p className="text-base text-muted-foreground">내게 맞는 라켓을 찾아보세요</p>
+        <div className="max-w-[90rem] mx-auto px-4 py-14 sm:py-20 text-center">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-3">라켓 도감</h1>
+          <p className="text-base sm:text-lg text-muted-foreground">내게 맞는 라켓을 찾아보세요</p>
         </div>
       </div>
 
-      <div className="max-w-[90rem] mx-auto px-4 py-6">
-        {/* 검색 + 필터 토글 */}
-        <div className="flex gap-2 mb-3">
+      <div className="max-w-[90rem] mx-auto px-4 py-8">
+        {/* 모바일 검색 + 필터 토글 */}
+        <div className="flex gap-2 mb-4 md:hidden">
           <input
             type="search"
             placeholder="라켓 이름, 브랜드 검색..."
@@ -94,7 +95,7 @@ export function RacketsView({ rackets }: { rackets: Racket[] }) {
           <button
             onClick={() => setFilterOpen(p => !p)}
             className={cn(
-              'md:hidden flex items-center gap-1.5 h-10 px-3 rounded-lg border text-sm transition-colors',
+              'flex items-center gap-1.5 h-10 px-3 rounded-lg border text-sm transition-colors',
               filterOpen ? 'border-foreground bg-foreground text-background' : 'border-border'
             )}
           >
@@ -103,35 +104,17 @@ export function RacketsView({ rackets }: { rackets: Racket[] }) {
           </button>
         </div>
 
-        {/* 정렬 바 */}
-        <div className="flex gap-1.5 mb-5 overflow-x-auto pb-1 scrollbar-none">
-          {SORT_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => handleSort(opt.value)}
-              className={cn(
-                'shrink-0 text-sm px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap font-medium',
-                currentSort === opt.value
-                  ? 'bg-[#beff00] text-black border-[#beff00]'
-                  : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
-              )}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-
         {/* 모바일 필터 오버레이 */}
         {filterOpen && (
           <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setFilterOpen(false)} />
         )}
 
         <div className="flex gap-8">
-          {/* 필터 사이드바 — 데스크톱 + 모바일 드로어 */}
+          {/* 좌측 사이드바 — 데스크톱 고정 / 모바일 드로어 */}
           <div
             className={cn(
               'shrink-0 transition-all duration-200',
-              'hidden md:block w-52',
+              'hidden md:block w-56',
               filterOpen && '!fixed !block right-0 top-0 h-full w-72 bg-background z-50 border-l border-border shadow-xl overflow-y-auto p-4 pt-14'
             )}
           >
@@ -143,11 +126,47 @@ export function RacketsView({ rackets }: { rackets: Racket[] }) {
                 <X size={20} />
               </button>
             )}
+
+            {/* 데스크톱 검색 */}
+            <div className="hidden md:block mb-4">
+              <input
+                type="search"
+                placeholder="라켓 이름, 브랜드 검색..."
+                defaultValue={searchParams.get('q') ?? ''}
+                onChange={e => {
+                  const params = new URLSearchParams(searchParams.toString())
+                  if (e.target.value) params.set('q', e.target.value)
+                  else params.delete('q')
+                  window.history.replaceState(null, '', '?' + params.toString())
+                }}
+                className="w-full h-10 px-3 rounded-lg border border-border bg-background text-sm outline-none focus:border-foreground transition-colors"
+              />
+            </div>
+
             <RacketFilter totalCount={rackets.length} filteredCount={filtered.length} />
           </div>
 
-          {/* 라켓 그리드 */}
+          {/* 우측 콘텐츠 */}
           <div className="flex-1 min-w-0">
+            {/* 정렬 바 */}
+            <div className="flex gap-1.5 mb-5 overflow-x-auto pb-1 scrollbar-none">
+              {SORT_OPTIONS.map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => handleSort(opt.value)}
+                  className={cn(
+                    'shrink-0 text-sm px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap font-medium',
+                    currentSort === opt.value
+                      ? 'bg-[#beff00] text-black border-[#beff00]'
+                      : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            {/* 라켓 그리드 */}
             {filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 text-muted-foreground">
                 <span className="text-4xl mb-3">🏸</span>
