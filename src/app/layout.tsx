@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import { CompareProvider } from '@/context/CompareContext'
 import { RacketCompareTray } from '@/components/racket/RacketCompareTray'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   title: '버드민턴 | 배드민턴 라켓 백과사전',
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
           <RacketCompareTray />
         </CompareProvider>
+        <Analytics />
       </body>
     </html>
   )
