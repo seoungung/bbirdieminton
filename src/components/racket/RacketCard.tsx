@@ -52,23 +52,23 @@ export function RacketCard({ racket }: { racket: Racket }) {
           </div>
 
           <div className="p-3">
-            <p className="text-[11px] text-muted-foreground mb-0.5 font-medium">{racket.brand}</p>
-            <h3 className="font-semibold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+            <p className="text-[13px] text-muted-foreground mb-0.5 font-medium">{racket.brand}</p>
+            <h3 className="font-semibold text-base mb-2 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
               {racket.name}
             </h3>
             <div className="flex flex-wrap gap-1 mb-2">
               {racket.type.map((t) => (
-                <span key={t} className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-full">
+                <span key={t} className="text-[12px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-full">
                   {t}
                 </span>
               ))}
               {racket.level.slice(0, 2).map((l) => (
-                <span key={l} className="text-[10px] border border-border text-muted-foreground px-1.5 py-0.5 rounded-full">
+                <span key={l} className="text-[12px] border border-border text-muted-foreground px-1.5 py-0.5 rounded-full">
                   {l}
                 </span>
               ))}
             </div>
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <div className="flex items-center justify-between text-[13px] text-muted-foreground">
               <span className="font-medium">{racket.weight ?? '-'}</span>
               <span>{racket.price_range ?? '-'}</span>
             </div>
@@ -81,10 +81,10 @@ export function RacketCard({ racket }: { racket: Racket }) {
         onClick={() => toggle({ slug: racket.slug, name: racket.name })}
         disabled={!selected && isFull}
         className={cn(
-          'absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded-full border transition-colors',
+          'absolute top-2 right-2 text-[11px] font-semibold px-2 py-0.5 rounded-full border transition-colors',
           selected
-            ? 'bg-black text-white border-black'
-            : 'bg-white/90 backdrop-blur-sm text-muted-foreground border-border hover:border-foreground hover:text-foreground',
+            ? 'bg-black text-[#beff00] border-black'
+            : 'bg-[#beff00] text-black border-[#beff00] hover:bg-[#a8e600] hover:border-[#a8e600]',
           !selected && isFull && 'opacity-30 cursor-not-allowed'
         )}
       >

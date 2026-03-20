@@ -71,8 +71,8 @@ export function RacketsView({ rackets }: { rackets: Racket[] }) {
     <div className="min-h-screen bg-background">
       <div className="border-b border-border">
         <div className="max-w-screen-xl mx-auto px-4 py-4 sm:py-6">
-          <h1 className="text-xl sm:text-2xl font-bold mb-1">라켓 도감</h1>
-          <p className="text-sm text-muted-foreground">내게 맞는 라켓을 찾아보세요</p>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1">라켓 도감</h1>
+          <p className="text-base text-muted-foreground">내게 맞는 라켓을 찾아보세요</p>
         </div>
       </div>
 
@@ -110,9 +110,9 @@ export function RacketsView({ rackets }: { rackets: Racket[] }) {
               key={opt.value}
               onClick={() => handleSort(opt.value)}
               className={cn(
-                'shrink-0 text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap',
+                'shrink-0 text-sm px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap font-medium',
                 currentSort === opt.value
-                  ? 'bg-foreground text-background border-foreground'
+                  ? 'bg-[#beff00] text-black border-[#beff00]'
                   : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
               )}
             >

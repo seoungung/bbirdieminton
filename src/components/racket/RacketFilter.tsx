@@ -16,9 +16,9 @@ function FilterChip({ label, active, onClick }: FilterChipProps) {
     <button
       onClick={onClick}
       className={cn(
-        'text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap',
+        'text-sm px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap font-medium',
         active
-          ? 'bg-foreground text-background border-foreground'
+          ? 'bg-[#beff00] text-black border-[#beff00]'
           : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
       )}
     >
@@ -35,7 +35,7 @@ interface FilterSectionProps {
 function FilterSection({ title, children }: FilterSectionProps) {
   return (
     <div>
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+      <p className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
         {title}
       </p>
       <div className="flex flex-wrap gap-1.5">{children}</div>
