@@ -86,7 +86,7 @@ export default async function RacketDetailPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-screen-lg mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 py-6">
 
         {/* 브레드크럼 */}
         <nav className="flex items-center gap-1 text-xs text-muted-foreground mb-5">

@@ -30,12 +30,12 @@ function SkeletonLayout() {
   return (
     <div className="min-h-screen bg-background">
       <div className="border-b border-border">
-        <div className="max-w-screen-xl mx-auto px-4 py-4 sm:py-6">
+        <div className="max-w-6xl mx-auto px-4 py-4 sm:py-6">
           <div className="h-7 w-24 bg-muted rounded animate-pulse mb-1" />
           <div className="h-4 w-40 bg-muted rounded animate-pulse" />
         </div>
       </div>
-      <div className="max-w-screen-xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="h-10 bg-muted rounded-lg animate-pulse mb-5" />
         <div className="flex gap-1.5 mb-5">
           {[1,2,3].map(i => <div key={i} className="h-7 w-16 bg-muted rounded-full animate-pulse" />)}
