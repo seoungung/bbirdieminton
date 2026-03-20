@@ -68,7 +68,7 @@ export function RacketsView({ rackets }: { rackets: Racket[] }) {
   }, [rackets, searchParams])
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       <div className="border-b border-border">
         <div className="max-w-screen-xl mx-auto px-4 py-4 sm:py-6">
           <h1 className="text-2xl sm:text-3xl font-bold mb-1">라켓 도감</h1>

@@ -34,7 +34,7 @@ export function QuizResult({ level }: QuizResultProps) {
   const lines = data.description.split('\n')
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pb-16">
+    <div className="min-h-screen bg-[#0a0a0a] pb-28">
       <div className="max-w-lg mx-auto px-4 pt-8 space-y-6">
 
         {/* ① 레벨 배지 + 태그라인 */}

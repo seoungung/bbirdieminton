@@ -62,7 +62,7 @@ export default function AdminPage() {
   // ── 로그인 화면 ──────────────────────────────
   if (!stats) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
           <p className="text-[#beff00] text-xs font-bold uppercase tracking-widest mb-2">Admin</p>
           <h1 className="text-2xl font-extrabold text-white mb-6">관리자 대시보드</h1>
@@ -93,7 +93,7 @@ export default function AdminPage() {
   const maxGender = Math.max(...Object.values(stats.byGender), 1)
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white px-4 py-10 max-w-3xl mx-auto">
+    <div className="min-h-screen bg-background text-white px-4 py-10 pb-28 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
           <p className="text-[#beff00] text-xs font-bold uppercase tracking-widest mb-1">Admin</p>

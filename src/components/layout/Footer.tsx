@@ -10,7 +10,7 @@ const LEGAL_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="bg-[#1C1C1C] text-white/50 text-[13px] mt-20">
+    <footer className="bg-[#1C1C1C] text-white/50 text-[13px]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
 
         {/* 로고 */}
