@@ -128,12 +128,12 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 13, axis: 'environment',
-    question: '처음 체육관(실내 배드민턴장)에 갔을 때 어땠나요?',
+    question: '실내 배드민턴 체육관(동호회·클럽)에 처음 방문했을 때를 떠올려보세요. 어땠나요?',
     options: [
-      { label: 'A', text: '아직 안 가봤어요', score: 1 },
+      { label: 'A', text: '아직 한 번도 안 가봤어요', score: 1 },
       { label: 'B', text: '갔는데 눈치 보여서 제대로 못 쳤어요', score: 2 },
-      { label: 'C', text: '어색했지만 어느 정도 어울렸어요', score: 3 },
-      { label: 'D', text: '자연스럽게 게임에 끼었어요', score: 4 },
+      { label: 'C', text: '어색하긴 했지만 어느 정도 어울렸어요', score: 3 },
+      { label: 'D', text: '어색함 없이 자연스럽게 게임에 끼었어요', score: 4 },
     ],
   },
   {
