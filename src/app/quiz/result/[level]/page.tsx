@@ -39,6 +39,52 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // 블러 구간 내부 콘텐츠 (공통으로 사용)
+  const lockedContent = (
+    <>
+      {/* 라켓 조건 */}
+      <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
+        <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">내 라켓 조건</p>
+        <div className="space-y-3">
+          {[
+            { label: '추천 무게', value: result.racketCondition.weight },
+            { label: '밸런스', value: result.racketCondition.balance },
+            { label: '강성 (Flex)', value: result.racketCondition.flex },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-start justify-between gap-4">
+              <span className="text-sm text-white/40 shrink-0">{label}</span>
+              <span className="text-sm text-white font-semibold text-right">{value}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 pt-4 border-t border-white/6">
+          <p className="text-xs text-white/40 leading-relaxed">{result.racketCondition.reason}</p>
+        </div>
+      </div>
+
+      {/* 추천 라켓 */}
+      <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
+        <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">추천 라켓 보러가기</p>
+        <Link
+          href={`/rackets?level=${encodeURIComponent(level)}`}
+          className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#beff00] text-[#0a0a0a] font-bold text-sm rounded-xl hover:brightness-105 transition-all"
+        >
+          {level} 맞춤 라켓 보기
+        </Link>
+      </div>
+
+      {/* 다음 레벨 */}
+      <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6">
+        <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">다음 목표</p>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="px-3 py-1 bg-white/8 rounded-full text-sm font-bold text-white">{result.nextLevel}</div>
+          <span className="text-white/30 text-sm">을 향해</span>
+        </div>
+        <p className="text-sm text-white/60 leading-relaxed">{result.nextLevelTip}</p>
+      </div>
+    </>
+  )
+
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       <div className="max-w-xl mx-auto px-4 py-10 sm:py-16">
@@ -103,63 +149,42 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
         </div>
 
         {/* -- 블러 구간 -- */}
-        <div className="relative">
-          {/* 실제 콘텐츠 */}
-          <div className={unlocked ? '' : 'select-none pointer-events-none'}>
-            {/* 라켓 조건 */}
-            <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
-              <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">내 라켓 조건</p>
-              <div className="space-y-3">
-                {[
-                  { label: '추천 무게', value: result.racketCondition.weight },
-                  { label: '밸런스', value: result.racketCondition.balance },
-                  { label: '강성 (Flex)', value: result.racketCondition.flex },
-                ].map(({ label, value }) => (
-                  <div key={label} className="flex items-start justify-between gap-4">
-                    <span className="text-sm text-white/40 shrink-0">{label}</span>
-                    <span className="text-sm text-white font-semibold text-right">{value}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 pt-4 border-t border-white/6">
-                <p className="text-xs text-white/40 leading-relaxed">{result.racketCondition.reason}</p>
-              </div>
-            </div>
-
-            {/* 추천 라켓 */}
-            <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
-              <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">추천 라켓 보러가기</p>
-              <Link
-                href={`/rackets?level=${encodeURIComponent(level)}`}
-                className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#beff00] text-[#0a0a0a] font-bold text-sm rounded-xl hover:brightness-105 transition-all"
-              >
-                {level} 맞춤 라켓 보기
-              </Link>
-            </div>
-
-            {/* 다음 레벨 */}
-            <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6">
-              <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">다음 목표</p>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="px-3 py-1 bg-white/8 rounded-full text-sm font-bold text-white">{result.nextLevel}</div>
-                <span className="text-white/30 text-sm">을 향해</span>
-              </div>
-              <p className="text-sm text-white/60 leading-relaxed">{result.nextLevelTip}</p>
-            </div>
-          </div>
-
-          {/* 블러 오버레이 */}
+        <div>
+          {/* 훅 배너 */}
           {!unlocked && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div
-                className="absolute inset-0 rounded-2xl"
-                style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', background: 'rgba(10,10,10,0.5)' }}
-              />
-              <div className="relative z-10 w-full px-2">
-                <QuizSqueeze level={level} onUnlock={() => setUnlocked(true)} />
+            <div className="bg-[#beff00]/5 border border-[#beff00]/15 rounded-2xl p-5 mb-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">🔒</span>
+                <p className="text-sm font-bold text-white">딱 이것만 확인하면 라켓 선택 끝</p>
               </div>
+              <ul className="space-y-1.5">
+                {['내 레벨에 맞는 라켓 무게·강성 조건', '지금 바로 살 수 있는 추천 라켓 3종', '다음 레벨 달성 로드맵'].map(item => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-white/60">
+                    <span className="text-[#beff00] text-xs font-bold">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
+
+          {/* 블러 상태: 콘텐츠 미리보기 + 그라데이션 */}
+          {!unlocked && (
+            <>
+              <div className="relative" style={{ maxHeight: '280px', overflow: 'hidden' }}>
+                <div className="pointer-events-none select-none opacity-60 blur-[2px]">
+                  {lockedContent}
+                </div>
+                <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+              </div>
+
+              {/* 스퀴즈 폼 */}
+              <QuizSqueeze level={level} onUnlock={() => setUnlocked(true)} />
+            </>
+          )}
+
+          {/* 언락 후: 전체 콘텐츠 표시 */}
+          {unlocked && lockedContent}
         </div>
 
         {/* 블러 해제 후 CTA */}
