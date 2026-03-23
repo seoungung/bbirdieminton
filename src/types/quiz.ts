@@ -1,62 +1,33 @@
-export type QuizLevel = 'beginner' | 'novice' | 'd_class' | 'c_class'
+export type QuizLevel = '왕초보' | '초심자' | 'D조' | 'C조'
 
-export interface QuizOption {
-  label: string
+export interface QuizChoice {
   text: string
-  score: number
+  score: number // 1~4
 }
 
 export interface QuizQuestion {
   id: number
-  axis: string
   question: string
-  options: QuizOption[]
+  choices: QuizChoice[]
 }
 
-export interface RadarStats {
-  power: number
-  control: number
-  endurance: number
-  skill: number
-  experience: number
-  mental: number
-}
-
-export interface RecommendedRacket {
-  name: string
-  brand: string
-  price: string
-  reason: string
-  slug: string
-}
-
-export interface LevelData {
-  id: QuizLevel
+export interface QuizResult {
+  level: QuizLevel
+  score: number
   label: string
-  scoreRange: [number, number]
-  emoji: string
-  tagline: string
   description: string
-  radar: RadarStats
-  radarComment: string
+  radarStats: {
+    power: number
+    control: number
+    speed: number
+    stamina: number
+    technique: number
+    tactics: number
+  }
   racketCondition: {
     weight: string
-    weightDesc: string
     balance: string
-    balanceDesc: string
     flex: string
-    flexDesc: string
-    price: string
-    priceDesc: string
-    comment: string
   }
-  recommendedRackets: RecommendedRacket[]
-  racketComment: string
-  nextLevel: {
-    label: string
-    checklist: string[]
-    comment: string
-  }
-  ogColor: string
-  stibeeTag: string
+  nextLevel: string
 }
