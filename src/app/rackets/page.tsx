@@ -18,6 +18,7 @@ async function fetchRackets(): Promise<Racket[]> {
     const { data, error } = await supabase
       .from('rackets')
       .select('*')
+      .neq('status', 'discontinued')
       .order('is_popular', { ascending: false })
     if (error) return []
     return (data ?? []) as Racket[]

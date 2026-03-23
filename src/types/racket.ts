@@ -4,11 +4,14 @@ export type PlayType = '공격형' | '수비형' | '올라운드'
 export type Balance = 'head-heavy' | 'even' | 'head-light'
 export type Flex = 'stiff' | 'medium' | 'flexible'
 
+export type RacketStatus = 'active' | 'discontinued' | 'limited'
+
 export interface Racket {
   id: string
   slug: string
   name: string
   brand: Brand
+  status: RacketStatus
   image_url: string | null
   image_urls: string[] | null
   price_min: number | null

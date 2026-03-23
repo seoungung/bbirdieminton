@@ -45,6 +45,7 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
         .from('rackets')
         .select('id, slug, name, brand, price_range, stat_power, stat_control, stat_speed, image_url')
         .contains('level', [level])
+        .neq('status', 'discontinued')
         .order('is_popular', { ascending: false })
         .limit(3)
       setRecommendedRackets(rackets ?? [])
