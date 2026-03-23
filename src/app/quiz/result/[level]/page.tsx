@@ -1,148 +1,83 @@
+'use client'
+
+import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { ArrowLeft, RotateCcw, ChevronRight } from 'lucide-react'
-import { RacketRadarChart } from '@/components/racket/RacketRadarChart'
-import { RacketCard } from '@/components/racket/RacketCard'
-import { ShareSection } from '@/components/quiz/QuizResultClient'
-import { BlurSection } from '@/components/quiz/BlurSection'
-import { createClient } from '@/lib/supabase/server'
-import { LEVEL_RESULTS } from '@/data/quizQuestions'
-import type { Metadata } from 'next'
-import type { Racket } from '@/types/racket'
+import { Copy, Check, RotateCcw } from 'lucide-react'
+import { LEVEL_RESULTS } from '@/lib/quiz/results'
+import { QuizRadarChart } from '@/components/quiz/QuizRadarChart'
+import { QuizSqueeze } from '@/components/quiz/QuizSqueeze'
+import { createClient } from '@/lib/supabase/client'
+import type { QuizLevel } from '@/lib/quiz/questions'
 
-type QuizLevel = '왕초보' | '초심자' | 'D조' | 'C조'
+const VALID_LEVELS: QuizLevel[] = ['왕초보', '초심자', 'D조', 'C조']
 
-interface Props {
-  params: Promise<{ level: string }>
-  searchParams: Promise<{ score?: string }>
-}
+export default function QuizResultPage({ params }: { params: Promise<{ level: string }> }) {
+  const { level: rawLevel } = use(params)
+  const level = decodeURIComponent(rawLevel) as QuizLevel
+  const result = VALID_LEVELS.includes(level) ? LEVEL_RESULTS[level] : LEVEL_RESULTS['왕초보']
 
-const LEVEL_COLORS: Record<QuizLevel, string> = {
-  '왕초보': 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
-  '초심자': 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30',
-  'D조':   'bg-orange-500/20 text-orange-300 border border-orange-500/30',
-  'C조':   'bg-red-500/20 text-red-300 border border-red-500/30',
-}
+  const [unlocked, setUnlocked] = useState(false)
+  const [copied, setCopied] = useState(false)
 
-const LEVEL_EMOJIS: Record<QuizLevel, string> = {
-  '왕초보': '\uD83C\uDF31',
-  '초심자': '\uD83C\uDFC3',
-  'D조': '\u26A1',
-  'C조': '\uD83D\uDD25',
-}
+  // 블러 해제 조건 체크
+  useEffect(() => {
+    // 1. localStorage 확인
+    if (localStorage.getItem('quiz_unlocked') === 'true') {
+      setUnlocked(true)
+      return
+    }
+    // 2. 로그인 확인
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setUnlocked(true)
+    })
+  }, [])
 
-async function getRecommendedRackets(level: QuizLevel): Promise<Racket[]> {
-  try {
-    const supabase = await createClient()
-    const { data } = await supabase
-      .from('rackets')
-      .select('*')
-      .contains('level', [level])
-      .order('editor_pick', { ascending: false })
-      .order('is_popular', { ascending: false })
-      .limit(3)
-    return (data ?? []) as Racket[]
-  } catch {
-    return []
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(window.location.href)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { level } = await params
-  const decodedLevel = decodeURIComponent(level) as QuizLevel
-  if (!LEVEL_RESULTS[decodedLevel]) return {}
-  const result = LEVEL_RESULTS[decodedLevel]
-  return {
-    title: `내 레벨은 "${decodedLevel}" | 버디민턴 레벨 테스트`,
-    description: result.label,
-    openGraph: {
-      title: `내 배드민턴 레벨은 "${decodedLevel}"`,
-      description: result.label,
-    },
-  }
-}
-
-export default async function QuizResultPage({ params, searchParams }: Props) {
-  const { level } = await params
-  const { score: scoreStr } = await searchParams
-  const decodedLevel = decodeURIComponent(level) as QuizLevel
-  const result = LEVEL_RESULTS[decodedLevel]
-  if (!result) notFound()
-
-  const score = scoreStr ? parseInt(scoreStr, 10) : null
-  const rackets = await getRecommendedRackets(decodedLevel)
-
-  const { power, control, speed, stamina, technique, tactics } = result.radarStats
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
-      <div className="max-w-xl mx-auto px-4 py-8">
+      <div className="max-w-xl mx-auto px-4 py-10 sm:py-16">
 
-        {/* 뒤로가기 */}
-        <Link
-          href="/quiz"
-          className="inline-flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors mb-8"
-        >
-          <ArrowLeft size={12} />
-          다시 테스트하기
-        </Link>
+        {/* -- 공개 영역 -- */}
 
-        {/* 레벨 배지 + 한 줄 정의 */}
+        {/* 레벨 배지 */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <span className={
-              'text-sm font-bold px-4 py-2 rounded-full ' +
-              LEVEL_COLORS[decodedLevel]
-            }>
-              {LEVEL_EMOJIS[decodedLevel]} {decodedLevel}
-            </span>
-            {score !== null && (
-              <span className="text-xs text-white/30 font-medium">
-                {score}점 / 68점
-              </span>
-            )}
+          <div className="inline-flex items-center gap-2 bg-[#beff00]/10 border border-[#beff00]/20 text-[#beff00] text-xs font-bold px-4 py-1.5 rounded-full mb-4 tracking-widest uppercase">
+            내 레벨
           </div>
-          <h1 className="text-[26px] sm:text-[30px] font-bold text-white leading-[1.3] tracking-[-0.02em]">
-            {result.label}
+          <div className="text-6xl mb-3">{result.emoji}</div>
+          <h1 className="text-[42px] sm:text-[56px] font-extrabold text-white tracking-[-0.04em] mb-2">
+            {result.level}
           </h1>
+          <p className="text-white/60 text-base leading-relaxed">{result.tagline}</p>
         </div>
 
         {/* 레벨 설명 */}
-        <div className="bg-white/5 border border-white/8 rounded-2xl p-5 mb-6">
-          <p className="text-[15px] text-white/70 leading-[1.8]">
-            {result.description}
-          </p>
+        <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
+          <p className="text-white/70 text-[15px] leading-[1.85]">{result.description}</p>
         </div>
 
         {/* 레이더 차트 */}
-        <div className="bg-white/5 border border-white/8 rounded-2xl p-5 mb-6">
-          <h3 className="text-sm font-semibold text-white/80 mb-4">내 플레이 스타일</h3>
+        <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
+          <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-5">능력치 분석</p>
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="shrink-0">
-              <RacketRadarChart
-                power={power}
-                control={control}
-                speed={speed}
-                durability={stamina}
-                repulsion={technique}
-                maneuver={tactics}
-              />
-            </div>
-            <div className="flex-1 w-full space-y-2.5">
-              {[
-                { label: '파워', value: power },
-                { label: '컨트롤', value: control },
-                { label: '스피드', value: speed },
-                { label: '체력', value: stamina },
-                { label: '기술', value: technique },
-                { label: '전술', value: tactics },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex items-center gap-3 text-sm">
-                  <span className="text-white/40 text-xs w-12 shrink-0">{label}</span>
-                  <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#beff00] rounded-full" style={{ width: value + '%' }} />
+            <QuizRadarChart labels={result.radarLabels} data={result.radarData} />
+            <div className="w-full space-y-2">
+              {result.radarLabels.map((label, i) => (
+                <div key={label} className="flex items-center gap-3">
+                  <span className="text-xs text-white/40 w-12 shrink-0">{label}</span>
+                  <div className="flex-1 h-1.5 bg-white/8 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#beff00] rounded-full transition-all duration-700"
+                      style={{ width: `${result.radarData[i]}%` }}
+                    />
                   </div>
-                  <span className="text-xs font-medium w-6 text-right tabular-nums text-white/60">{value}</span>
+                  <span className="text-xs text-white/30 w-8 text-right">{result.radarData[i]}</span>
                 </div>
               ))}
             </div>
@@ -150,78 +85,89 @@ export default async function QuizResultPage({ params, searchParams }: Props) {
         </div>
 
         {/* 공유 버튼 */}
-        <div className="flex justify-center mb-8">
-          <ShareSection level={decodedLevel} score={score ?? 0} />
+        <div className="flex gap-2 mb-8">
+          <button
+            onClick={handleCopy}
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#1a1a1a] border border-white/8 rounded-2xl text-sm text-white/60 hover:text-white hover:border-white/20 transition-colors"
+          >
+            {copied ? <Check size={15} className="text-[#beff00]" /> : <Copy size={15} />}
+            {copied ? '복사됨!' : '링크 복사'}
+          </button>
+          <Link
+            href="/quiz"
+            className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#1a1a1a] border border-white/8 rounded-2xl text-sm text-white/60 hover:text-white hover:border-white/20 transition-colors"
+          >
+            <RotateCcw size={15} />
+            다시 테스트
+          </Link>
         </div>
 
-        {/* 블러 섹션 */}
-        <BlurSection level={decodedLevel}>
-          <div className="space-y-6">
+        {/* -- 블러 구간 -- */}
+        <div className="relative">
+          {/* 실제 콘텐츠 */}
+          <div className={unlocked ? '' : 'select-none pointer-events-none'}>
             {/* 라켓 조건 */}
-            <div className="bg-white/5 border border-white/8 rounded-2xl p-5">
-              <h3 className="text-sm font-semibold text-white/80 mb-4">
-                {decodedLevel}에게 맞는 라켓 조건
-              </h3>
-              <div className="grid grid-cols-3 gap-3">
+            <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
+              <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">내 라켓 조건</p>
+              <div className="space-y-3">
                 {[
-                  { label: '무게', value: result.racketCondition.weight },
+                  { label: '추천 무게', value: result.racketCondition.weight },
                   { label: '밸런스', value: result.racketCondition.balance },
-                  { label: '강성', value: result.racketCondition.flex },
+                  { label: '강성 (Flex)', value: result.racketCondition.flex },
                 ].map(({ label, value }) => (
-                  <div key={label} className="bg-white/5 rounded-xl p-3 text-center">
-                    <p className="text-[10px] text-white/40 mb-1">{label}</p>
-                    <p className="text-xs font-semibold text-white leading-tight">{value}</p>
+                  <div key={label} className="flex items-start justify-between gap-4">
+                    <span className="text-sm text-white/40 shrink-0">{label}</span>
+                    <span className="text-sm text-white font-semibold text-right">{value}</span>
                   </div>
                 ))}
               </div>
-              <p className="mt-3 text-xs text-white/50 leading-relaxed">
-                {result.tip}
-              </p>
+              <div className="mt-4 pt-4 border-t border-white/6">
+                <p className="text-xs text-white/40 leading-relaxed">{result.racketCondition.reason}</p>
+              </div>
             </div>
 
-            {/* 추천 라켓 3종 */}
-            {rackets.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-white/80 mb-3">
-                  {decodedLevel} 추천 라켓
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {rackets.map(r => (
-                    <RacketCard key={r.id} racket={r} />
-                  ))}
-                </div>
-                <Link
-                  href={'/rackets?level=' + encodeURIComponent(decodedLevel)}
-                  className="mt-3 flex items-center justify-center gap-1 text-xs text-[#beff00] hover:brightness-90 transition-all"
-                >
-                  {decodedLevel} 라켓 전체 보기
-                  <ChevronRight size={12} />
-                </Link>
-              </div>
-            )}
+            {/* 추천 라켓 */}
+            <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
+              <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">추천 라켓 보러가기</p>
+              <Link
+                href={`/rackets?level=${encodeURIComponent(level)}`}
+                className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#beff00] text-[#0a0a0a] font-bold text-sm rounded-xl hover:brightness-105 transition-all"
+              >
+                {level} 맞춤 라켓 보기
+              </Link>
+            </div>
 
-            {/* 다음 레벨 안내 */}
-            <div className="bg-white/5 border border-white/8 rounded-2xl p-5">
-              <h3 className="text-sm font-semibold text-white/80 mb-2">
-                다음 목표: {result.nextLevel}
-              </h3>
-              <p className="text-xs text-white/50 leading-relaxed">
-                꾸준한 연습과 올바른 장비 선택이 레벨업을 앞당겨 줘요. 버디민턴이 응원합니다!
-              </p>
+            {/* 다음 레벨 */}
+            <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6">
+              <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">다음 목표</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="px-3 py-1 bg-white/8 rounded-full text-sm font-bold text-white">{result.nextLevel}</div>
+                <span className="text-white/30 text-sm">을 향해</span>
+              </div>
+              <p className="text-sm text-white/60 leading-relaxed">{result.nextLevelTip}</p>
             </div>
           </div>
-        </BlurSection>
 
-        {/* 다시 테스트 버튼 */}
-        <div className="mt-8 text-center">
-          <Link
-            href="/quiz"
-            className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition-colors"
-          >
-            <RotateCcw size={14} />
-            다시 테스트하기
-          </Link>
+          {/* 블러 오버레이 */}
+          {!unlocked && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div
+                className="absolute inset-0 rounded-2xl"
+                style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', background: 'rgba(10,10,10,0.5)' }}
+              />
+              <div className="relative z-10 w-full px-2">
+                <QuizSqueeze level={level} onUnlock={() => setUnlocked(true)} />
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* 블러 해제 후 CTA */}
+        {unlocked && (
+          <div className="mt-6 text-center">
+            <p className="text-xs text-white/25">이메일로 맞춤 라켓 가이드를 보내드릴게요</p>
+          </div>
+        )}
 
       </div>
     </div>
