@@ -2,7 +2,7 @@
 
 import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Copy, Check, RotateCcw } from 'lucide-react'
+import { Copy, Check, RotateCcw, ChevronRight } from 'lucide-react'
 import { LEVEL_RESULTS } from '@/lib/quiz/results'
 import { QuizRadarChart } from '@/components/quiz/QuizRadarChart'
 import { QuizSqueeze } from '@/components/quiz/QuizSqueeze'
@@ -18,6 +18,10 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
 
   const [unlocked, setUnlocked] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [recommendedRackets, setRecommendedRackets] = useState<{
+    id: string; slug: string; name: string; brand: string;
+    price_range: string | null; stat_power: number | null; image_url: string | null;
+  }[]>([])
 
   // 블러 해제 조건 체크
   useEffect(() => {
@@ -32,6 +36,21 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
       if (data.user) setUnlocked(true)
     })
   }, [])
+
+  // 추천 라켓 fetch
+  useEffect(() => {
+    const fetchRackets = async () => {
+      const supabase = createClient()
+      const { data: rackets } = await supabase
+        .from('rackets')
+        .select('id, slug, name, brand, price_range, stat_power, stat_control, stat_speed, image_url')
+        .contains('level', [level])
+        .order('is_popular', { ascending: false })
+        .limit(3)
+      setRecommendedRackets(rackets ?? [])
+    }
+    fetchRackets()
+  }, [level])
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(window.location.href)
@@ -62,15 +81,88 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
         </div>
       </div>
 
-      {/* 추천 라켓 */}
+      {/* 능력치 해석 */}
       <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
-        <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">추천 라켓 보러가기</p>
-        <Link
-          href={`/rackets?level=${encodeURIComponent(level)}`}
-          className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#beff00] text-[#0a0a0a] font-bold text-sm rounded-xl hover:brightness-105 transition-all"
-        >
-          {level} 맞춤 라켓 보기
-        </Link>
+        <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">능력치 해석</p>
+        <div className="space-y-3">
+          {result.radarInsights.map((insight, i) => {
+            const [label, ...rest] = insight.split(': ')
+            return (
+              <div key={i} className="flex items-start gap-3">
+                <span className="text-xs font-bold text-[#beff00] bg-[#beff00]/10 px-2 py-0.5 rounded-md shrink-0 mt-0.5 w-10 text-center">
+                  {label}
+                </span>
+                <p className="text-sm text-white/60 leading-relaxed">{rest.join(': ')}</p>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* 추천 라켓 3종 */}
+      <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-xs font-semibold text-white/40 uppercase tracking-widest">추천 라켓</p>
+          <Link href={`/rackets?level=${encodeURIComponent(level)}`} className="text-xs text-[#beff00] hover:underline">
+            전체 보기 →
+          </Link>
+        </div>
+        <div className="space-y-3">
+          {recommendedRackets.map((racket, i) => (
+            <Link
+              key={racket.id}
+              href={`/rackets/${racket.slug}`}
+              className="flex items-center gap-4 p-3 bg-white/4 hover:bg-white/8 rounded-xl transition-colors group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-[#beff00]/10 border border-[#beff00]/20 flex items-center justify-center text-xs font-bold text-[#beff00] shrink-0">
+                {i + 1}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white truncate group-hover:text-[#beff00] transition-colors">
+                  {racket.brand} {racket.name}
+                </p>
+                <p className="text-xs text-white/40">{racket.price_range}</p>
+              </div>
+              <ChevronRight size={14} className="text-white/20 group-hover:text-white/40 shrink-0" />
+            </Link>
+          ))}
+          {recommendedRackets.length === 0 && (
+            <Link
+              href={`/rackets?level=${encodeURIComponent(level)}`}
+              className="flex items-center justify-center gap-2 w-full py-3.5 text-sm text-[#beff00] hover:underline"
+            >
+              {level} 맞춤 라켓 보러가기 →
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {/* 이번 달 집중 포인트 */}
+      <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
+        <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">이번 달 이것만 하세요</p>
+        <div className="space-y-2.5">
+          {result.focusThisMonth.map((item, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <span className="w-6 h-6 rounded-full bg-[#beff00] text-[#0a0a0a] text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                {i + 1}
+              </span>
+              <p className="text-sm text-white/70 leading-relaxed">{item}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 실수 경보 */}
+      <div className="bg-red-500/5 border border-red-500/15 rounded-2xl p-5 sm:p-6 mb-5">
+        <p className="text-xs font-semibold text-red-400/70 uppercase tracking-widest mb-4">⚠️ 이 레벨에서 자주 하는 실수</p>
+        <div className="space-y-2.5">
+          {result.commonMistakes.map((mistake, i) => (
+            <div key={i} className="flex items-start gap-2.5">
+              <span className="text-red-400/60 text-sm shrink-0">•</span>
+              <p className="text-sm text-white/60 leading-relaxed">{mistake}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* 다음 레벨 */}
@@ -127,6 +219,19 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* 공감 포인트 - 공개 영역 */}
+        <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
+          <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">이런 경험 있죠?</p>
+          <div className="space-y-3">
+            {result.empathyPoints.map((point, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <span className="text-base shrink-0">😅</span>
+                <p className="text-sm text-white/70 leading-relaxed">&ldquo;{point}&rdquo;</p>
+              </div>
+            ))}
           </div>
         </div>
 
