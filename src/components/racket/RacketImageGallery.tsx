@@ -21,6 +21,14 @@ function parseUrls(raw: string | string[] | null | undefined): string[] {
   if (!raw) return []
   if (Array.isArray(raw)) return raw.filter(isValidSrc)
   const trimmed = raw.trim()
+  // JSON 배열 형식: ["url1","url2",...]
+  if (trimmed.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(trimmed)
+      if (Array.isArray(parsed)) return parsed.filter((s: unknown) => typeof s === 'string' && isValidSrc(s))
+    } catch { /* fallthrough */ }
+  }
+  // PostgreSQL 배열 리터럴: {"url1","url2"}
   if (trimmed.startsWith('{')) {
     return [...trimmed.slice(1, -1).matchAll(/"([^"]+)"/g)]
       .map((m) => m[1])
