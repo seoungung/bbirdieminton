@@ -1,0 +1,37 @@
+import Link from 'next/link'
+import Image from 'next/image'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { LoginForm } from '@/components/auth/LoginForm'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '로그인 | 버디민턴',
+}
+
+export default async function LoginPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) redirect('/')
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center px-4 py-16">
+      <div className="w-full max-w-sm">
+        {/* 로고 */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 mb-6">
+            <Image src="/symbol_birdieminton-color.png" alt="birdieminton" width={32} height={32} unoptimized />
+            <span className="text-lg font-extrabold text-white tracking-tight">birdieminton</span>
+          </Link>
+          <h1 className="text-[22px] font-bold text-white tracking-[-0.02em]">시작하기</h1>
+          <p className="text-sm text-white/40 mt-1">배드민턴 라켓 도감 · 레벨 테스트</p>
+        </div>
+
+        {/* 폼 */}
+        <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-6">
+          <LoginForm />
+        </div>
+      </div>
+    </div>
+  )
+}
