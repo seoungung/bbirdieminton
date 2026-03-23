@@ -7,6 +7,7 @@ import { RacketRadarChart } from '@/components/racket/RacketRadarChart'
 import { RacketSpec } from '@/components/racket/RacketSpec'
 import { RacketImageGallery } from '@/components/racket/RacketImageGallery'
 import { RacketCard } from '@/components/racket/RacketCard'
+import { ShareButton } from '@/components/racket/ShareButton'
 import { BRAND_LOGOS } from '@/lib/brandLogos'
 import type { Metadata } from 'next'
 import type { Racket } from '@/types/racket'
@@ -28,13 +29,46 @@ async function getRacket(slug: string): Promise<Racket | null> {
 async function getRelated(current: Racket): Promise<Racket[]> {
   try {
     const supabase = await createClient()
-    const { data } = await supabase
+
+    // 1차: 같은 레벨 & 같은 타입 (최대 4개)
+    const { data: byLevelType } = await supabase
       .from('rackets')
       .select('*')
       .neq('slug', current.slug)
+      .overlaps('level', current.level)
+      .overlaps('type', current.type)
       .order('is_popular', { ascending: false })
       .limit(4)
-    return (data ?? []) as Racket[]
+
+    if ((byLevelType ?? []).length >= 4) return byLevelType as Racket[]
+
+    // 2차: 같은 레벨만 (부족분 보충)
+    const existingSlugs = (byLevelType ?? []).map((r: Racket) => r.slug)
+    const need = 4 - existingSlugs.length
+    const { data: byLevel } = await supabase
+      .from('rackets')
+      .select('*')
+      .neq('slug', current.slug)
+      .not('slug', 'in', `(${existingSlugs.map(s => `"${s}"`).join(',')})`)
+      .overlaps('level', current.level)
+      .order('is_popular', { ascending: false })
+      .limit(need)
+
+    const combined = [...(byLevelType ?? []), ...(byLevel ?? [])]
+    if (combined.length >= 4) return combined.slice(0, 4) as Racket[]
+
+    // 3차: 인기순 fallback
+    const fallbackSlugs = combined.map((r: Racket) => r.slug)
+    const needMore = 4 - fallbackSlugs.length
+    const { data: fallback } = await supabase
+      .from('rackets')
+      .select('*')
+      .neq('slug', current.slug)
+      .not('slug', 'in', `(${fallbackSlugs.map(s => `"${s}"`).join(',')})`)
+      .order('is_popular', { ascending: false })
+      .limit(needMore)
+
+    return [...combined, ...(fallback ?? [])].slice(0, 4) as Racket[]
   } catch { return [] }
 }
 
@@ -44,16 +78,24 @@ function getNaverUrl(name: string): string {
   return 'https://search.shopping.naver.com/search/all?query=' + encodeURIComponent(query)
 }
 
+function getCoupangUrl(name: string): string {
+  const match = name.match(/\(([^)]+)\)/)
+  const query = match ? match[1] : name
+  return 'https://www.coupang.com/np/search?q=' + encodeURIComponent(query)
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const racket = await getRacket(slug)
   if (!racket) return {}
+  const ogUrl = `/api/og?name=${encodeURIComponent(racket.name)}&brand=${encodeURIComponent(racket.brand)}&level=${encodeURIComponent(racket.level[0] ?? '')}&type=${encodeURIComponent(racket.type[0] ?? '')}`
   return {
-    title: racket.name + ' | 버드민턴 라켓 도감',
+    title: racket.name + ' | 버디민턴 라켓 도감',
     description: racket.brand + ' ' + racket.name + ' 상세 스펙 — ' + racket.type.join(', ') + ' / ' + racket.level.join(', ') + ' 추천',
     openGraph: {
       title: racket.name,
       description: racket.type.join(', ') + ' · ' + racket.level.join(', '),
+      images: [{ url: ogUrl, width: 1200, height: 630 }],
     },
   }
 }
@@ -83,6 +125,7 @@ export default async function RacketDetailPage({ params }: Props) {
   const pros = racket.pros ?? []
   const cons = racket.cons ?? []
   const naverUrl = getNaverUrl(racket.name)
+  const coupangUrl = getCoupangUrl(racket.name)
 
   return (
     <div className="min-h-screen bg-background">
@@ -110,16 +153,29 @@ export default async function RacketDetailPage({ params }: Props) {
             <RacketSpec racket={racket} />
 
             {/* 구매 버튼 */}
-            <a
-              href={naverUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-3 bg-[#03C75A] text-white font-bold text-sm rounded-xl hover:brightness-105 transition-all"
-            >
-              <ShoppingCart size={16} />
-              네이버 최저가 보기
-              <ExternalLink size={13} className="opacity-70" />
-            </a>
+            <div className="space-y-2">
+              <a
+                href={naverUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-[#03C75A] text-white font-bold text-sm rounded-xl hover:brightness-105 transition-all"
+              >
+                <ShoppingCart size={16} />
+                네이버 최저가 보기
+                <ExternalLink size={13} className="opacity-70" />
+              </a>
+              <a
+                href={coupangUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-[#E7242E] text-white font-bold text-sm rounded-xl hover:brightness-105 transition-all"
+              >
+                <ShoppingCart size={16} />
+                쿠팡에서 보기
+                <ExternalLink size={13} className="opacity-70" />
+              </a>
+              <ShareButton racketName={racket.name} />
+            </div>
           </div>
 
           {/* ── 오른쪽: 정보 영역 ── */}
