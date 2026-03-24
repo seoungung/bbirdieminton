@@ -27,8 +27,8 @@ function WeightDiagram() {
       <rect width="520" height="130" fill="transparent" />
 
       {/* 방향 라벨 */}
-      <text x="10"  y="18" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="Pretendard, sans-serif">가볍다 ←</text>
-      <text x="430" y="18" fill="rgba(255,255,255,0.35)" fontSize="10" fontFamily="Pretendard, sans-serif">→ 무겁다</text>
+      <text x="10"  y="18" fill="rgba(0,0,0,0.35)" fontSize="10" fontFamily="Pretendard, sans-serif">가볍다 ←</text>
+      <text x="430" y="18" fill="rgba(0,0,0,0.35)" fontSize="10" fontFamily="Pretendard, sans-serif">→ 무겁다</text>
 
       {/* 세그먼트 */}
       {segments.map((seg, i) => {
@@ -40,7 +40,7 @@ function WeightDiagram() {
             <text x={x + w / 2} y="49" textAnchor="middle" fill={seg.textColor} fontSize="15" fontWeight="800" fontFamily="Pretendard, sans-serif">{seg.label}</text>
             <text x={x + w / 2} y="65" textAnchor="middle" fill={seg.textColor} fontSize="9.5" fontFamily="Pretendard, sans-serif" opacity="0.8">{seg.sub}</text>
             {/* 아래 레이블 */}
-            <text x={x + w / 2} y="95" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9.5" fontFamily="Pretendard, sans-serif">{seg.note}</text>
+            <text x={x + w / 2} y="95" textAnchor="middle" fill="rgba(0,0,0,0.45)" fontSize="9.5" fontFamily="Pretendard, sans-serif">{seg.note}</text>
           </g>
         )
       })}
@@ -56,7 +56,7 @@ function BalanceDiagram() {
   // 세 가지 라켓 실루엣: 헤드라이트 / 이븐 / 헤드헤비
   const configs = [
     { label: '헤드라이트', dotY: 110, handleW: 16, headOpacity: 0.3, handleOpacity: 0.9, accent: '#beff00', desc: '손잡이 쪽 무게중심' },
-    { label: '이븐밸런스', dotY: 72,  handleW: 12, headOpacity: 0.6, handleOpacity: 0.6, accent: '#ffffff', desc: '중앙 무게중심' },
+    { label: '이븐밸런스', dotY: 72,  handleW: 12, headOpacity: 0.6, handleOpacity: 0.6, accent: '#111111', desc: '중앙 무게중심' },
     { label: '헤드헤비',   dotY: 34,  handleW: 8,  headOpacity: 0.9, handleOpacity: 0.3, accent: '#f97316', desc: '헤드 쪽 무게중심' },
   ]
   return (
@@ -68,19 +68,19 @@ function BalanceDiagram() {
         return (
           <g key={cfg.label}>
             {/* 헤드 타원 */}
-            <ellipse cx={cx} cy="40" rx="26" ry="30" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
+            <ellipse cx={cx} cy="40" rx="26" ry="30" fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="2" />
             {/* 헤드 내부 채움 (강도 표현) */}
             <ellipse cx={cx} cy="40" rx="26" ry="30" fill={cfg.accent} opacity={cfg.headOpacity * 0.18} />
             {/* 샤프트 */}
-            <line x1={cx} y1="70" x2={cx} y2="105" stroke="rgba(255,255,255,0.35)" strokeWidth="2.5" />
+            <line x1={cx} y1="70" x2={cx} y2="105" stroke="rgba(0,0,0,0.2)" strokeWidth="2.5" />
             {/* 손잡이 */}
             <rect x={cx - cfg.handleW / 2} y="105" width={cfg.handleW} height="30" rx="3" fill={cfg.accent} opacity={cfg.handleOpacity * 0.6} />
             {/* 무게중심 점 */}
             <circle cx={cx} cy={cfg.dotY} r="5" fill={cfg.accent} />
             <circle cx={cx} cy={cfg.dotY} r="8" fill={cfg.accent} opacity="0.2" />
             {/* 레이블 */}
-            <text x={cx} y="148" textAnchor="middle" fill="rgba(255,255,255,0.75)" fontSize="10.5" fontWeight="700" fontFamily="Pretendard, sans-serif">{cfg.label}</text>
-            <text x={cx} y="158" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8.5" fontFamily="Pretendard, sans-serif">{cfg.desc}</text>
+            <text x={cx} y="148" textAnchor="middle" fill="rgba(0,0,0,0.75)" fontSize="10.5" fontWeight="700" fontFamily="Pretendard, sans-serif">{cfg.label}</text>
+            <text x={cx} y="158" textAnchor="middle" fill="rgba(0,0,0,0.35)" fontSize="8.5" fontFamily="Pretendard, sans-serif">{cfg.desc}</text>
           </g>
         )
       })}
@@ -92,7 +92,7 @@ function ShaftDiagram() {
   // 세 가지 굽힘 곡선
   const shafts = [
     { label: 'Flexible', color: '#beff00', d: 'M 60 30 Q 90 90 60 130',  deflect: '많이 휘어짐',  sub: '왕초보·초심자' },
-    { label: 'Medium',   color: '#ffffff', d: 'M 190 30 Q 208 80 190 130', deflect: '중간',         sub: '초심자~D조' },
+    { label: 'Medium',   color: '#111111', d: 'M 190 30 Q 208 80 190 130', deflect: '중간',         sub: '초심자~D조' },
     { label: 'Stiff',    color: '#f97316', d: 'M 320 30 Q 325 80 320 130', deflect: '거의 안 휘어짐', sub: 'D조~C조' },
   ]
   return (
@@ -103,20 +103,20 @@ function ShaftDiagram() {
         return (
           <g key={s.label}>
             {/* 기준선 (직선) */}
-            <line x1={baseX} y1="30" x2={baseX} y2="130" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" strokeDasharray="4 3" />
+            <line x1={baseX} y1="30" x2={baseX} y2="130" stroke="rgba(0,0,0,0.08)" strokeWidth="1.5" strokeDasharray="4 3" />
             {/* 굽힘 곡선 */}
             <path d={s.d} fill="none" stroke={s.color} strokeWidth="3" strokeLinecap="round" />
             {/* 임팩트 방향 화살표 */}
             <path d={`M ${baseX + 18} 75 L ${baseX + 6} 80`} fill="none" stroke={s.color} strokeWidth="1.5" opacity="0.5" markerEnd="url(#arr)" />
             {/* 레이블 */}
             <text x={baseX} y="145" textAnchor="middle" fill={s.color} fontSize="11" fontWeight="700" fontFamily="Pretendard, sans-serif">{s.label}</text>
-            <text x={baseX} y="157" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8.5" fontFamily="Pretendard, sans-serif">{s.deflect}</text>
-            <text x={baseX} y="169" textAnchor="middle" fill="rgba(255,255,255,0.25)" fontSize="8" fontFamily="Pretendard, sans-serif">{s.sub}</text>
+            <text x={baseX} y="157" textAnchor="middle" fill="rgba(0,0,0,0.35)" fontSize="8.5" fontFamily="Pretendard, sans-serif">{s.deflect}</text>
+            <text x={baseX} y="169" textAnchor="middle" fill="rgba(0,0,0,0.25)" fontSize="8" fontFamily="Pretendard, sans-serif">{s.sub}</text>
           </g>
         )
       })}
       {/* 힘 방향 설명 */}
-      <text x="210" y="20" textAnchor="middle" fill="rgba(255,255,255,0.25)" fontSize="9" fontFamily="Pretendard, sans-serif">← 임팩트 시 휘어지는 정도 비교</text>
+      <text x="210" y="20" textAnchor="middle" fill="rgba(0,0,0,0.25)" fontSize="9" fontFamily="Pretendard, sans-serif">← 임팩트 시 휘어지는 정도 비교</text>
     </svg>
   )
 }
@@ -129,25 +129,25 @@ function FrameDiagram() {
       {/* 아이소메트릭 */}
       <g>
         {/* 외형: 각진 타원 */}
-        <rect x="40" y="18" width="100" height="110" rx="50" ry="45" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2.5" />
+        <rect x="40" y="18" width="100" height="110" rx="50" ry="45" fill="none" stroke="rgba(0,0,0,0.2)" strokeWidth="2.5" />
         {/* 스윗스팟 영역 (넓은) */}
         <rect x="52" y="32" width="76" height="82" rx="38" ry="36" fill="#beff00" opacity="0.12" />
         <rect x="52" y="32" width="76" height="82" rx="38" ry="36" fill="none" stroke="#beff00" strokeWidth="1" strokeDasharray="3 3" opacity="0.4" />
         {/* 라벨 */}
-        <text x="90" y="145" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="11" fontWeight="700" fontFamily="Pretendard, sans-serif">아이소메트릭</text>
-        <text x="90" y="157" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="9" fontFamily="Pretendard, sans-serif">넓은 스윗스팟</text>
+        <text x="90" y="145" textAnchor="middle" fill="rgba(0,0,0,0.75)" fontSize="11" fontWeight="700" fontFamily="Pretendard, sans-serif">아이소메트릭</text>
+        <text x="90" y="157" textAnchor="middle" fill="rgba(0,0,0,0.35)" fontSize="9" fontFamily="Pretendard, sans-serif">넓은 스윗스팟</text>
         {/* 스윗스팟 설명 태그 */}
         <rect x="55" y="68" width="70" height="16" rx="3" fill="rgba(190,255,0,0.15)" />
         <text x="90" y="79" textAnchor="middle" fill="#beff00" fontSize="8.5" fontFamily="Pretendard, sans-serif" fontWeight="700">스윗스팟 넓음</text>
       </g>
 
       {/* 구분선 */}
-      <line x1="230" y1="10" x2="230" y2="165" stroke="rgba(255,255,255,0.07)" strokeWidth="1" />
+      <line x1="230" y1="10" x2="230" y2="165" stroke="rgba(0,0,0,0.08)" strokeWidth="1" />
 
       {/* 오벌 */}
       <g>
         {/* 외형: 계란형 */}
-        <ellipse cx="330" cy="73" rx="50" ry="62" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2.5" />
+        <ellipse cx="330" cy="73" rx="50" ry="62" fill="none" stroke="rgba(0,0,0,0.2)" strokeWidth="2.5" />
         {/* 파워 집중점 */}
         <ellipse cx="330" cy="50" rx="22" ry="22" fill="#f97316" opacity="0.18" />
         <circle cx="330" cy="50" r="6" fill="#f97316" opacity="0.7" />
@@ -165,8 +165,8 @@ function FrameDiagram() {
           )
         })}
         {/* 라벨 */}
-        <text x="330" y="148" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="11" fontWeight="700" fontFamily="Pretendard, sans-serif">오벌</text>
-        <text x="330" y="160" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="9" fontFamily="Pretendard, sans-serif">파워 집중</text>
+        <text x="330" y="148" textAnchor="middle" fill="rgba(0,0,0,0.75)" fontSize="11" fontWeight="700" fontFamily="Pretendard, sans-serif">오벌</text>
+        <text x="330" y="160" textAnchor="middle" fill="rgba(0,0,0,0.35)" fontSize="9" fontFamily="Pretendard, sans-serif">파워 집중</text>
         {/* 파워 설명 태그 */}
         <rect x="290" y="26" width="80" height="16" rx="3" fill="rgba(249,115,22,0.15)" />
         <text x="330" y="37" textAnchor="middle" fill="#f97316" fontSize="8.5" fontFamily="Pretendard, sans-serif" fontWeight="700">파워 집중점</text>
@@ -193,12 +193,12 @@ function TensionDiagram() {
       <rect width="480" height="155" fill="transparent" />
 
       {/* 상단 헤더 */}
-      <text x="240" y="22" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="9.5" fontFamily="Pretendard, sans-serif">맥스텐션 지원 범위</text>
-      <text x="20"  y="38" fill="rgba(255,255,255,0.25)" fontSize="9" fontFamily="Pretendard, sans-serif">22lbs</text>
-      <text x="452" y="38" textAnchor="end" fill="rgba(255,255,255,0.25)" fontSize="9" fontFamily="Pretendard, sans-serif">33lbs+</text>
+      <text x="240" y="22" textAnchor="middle" fill="rgba(0,0,0,0.35)" fontSize="9.5" fontFamily="Pretendard, sans-serif">맥스텐션 지원 범위</text>
+      <text x="20"  y="38" fill="rgba(0,0,0,0.25)" fontSize="9" fontFamily="Pretendard, sans-serif">22lbs</text>
+      <text x="452" y="38" textAnchor="end" fill="rgba(0,0,0,0.25)" fontSize="9" fontFamily="Pretendard, sans-serif">33lbs+</text>
 
       {/* 배경 트랙 */}
-      <rect x={BAR_X} y={BAR_Y} width={BAR_W} height={BAR_H} rx="8" fill="rgba(255,255,255,0.05)" />
+      <rect x={BAR_X} y={BAR_Y} width={BAR_W} height={BAR_H} rx="8" fill="rgba(0,0,0,0.05)" />
 
       {/* 구간 채움 */}
       {zones.map((z, i) => {
@@ -227,7 +227,7 @@ function TensionDiagram() {
       {zones.map((z) => {
         const x = BAR_X + z.pct * BAR_W + (z.width * BAR_W) / 2
         return (
-          <text key={z.label} x={x} y={BAR_Y + BAR_H + 18} textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="8.5" fontFamily="Pretendard, sans-serif">{z.label}</text>
+          <text key={z.label} x={x} y={BAR_Y + BAR_H + 18} textAnchor="middle" fill="rgba(0,0,0,0.4)" fontSize="8.5" fontFamily="Pretendard, sans-serif">{z.label}</text>
         )
       })}
 
@@ -257,33 +257,33 @@ function GuideSection({ id, number, title, subtitle, body, table, tip, tipColor,
     <section id={id} className="scroll-mt-28">
       {/* 섹션 헤더 */}
       <div className="flex items-center gap-3 mb-4">
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white/8 text-white/40 text-[11px] font-bold tracking-widest tabular-nums">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-black/5 text-[#777777] text-[11px] font-bold tracking-widest tabular-nums">
           {number} / 05
         </span>
       </div>
-      <h2 className="text-[28px] sm:text-[34px] font-extrabold text-white tracking-[-0.03em] leading-tight mb-1.5">
+      <h2 className="text-[28px] sm:text-[34px] font-extrabold text-[#111111] tracking-[-0.03em] leading-tight mb-1.5">
         {title}
       </h2>
-      <p className="text-sm text-white/40 mb-7">{subtitle}</p>
+      <p className="text-sm text-[#777777] mb-7">{subtitle}</p>
 
       {/* 다이어그램 */}
-      <div className="bg-[#141414] border border-white/6 rounded-2xl p-4 sm:p-6 mb-7 overflow-hidden">
+      <div className="bg-[#f8f8f8] border border-[#e0e0e0] rounded-2xl p-4 sm:p-6 mb-7 overflow-hidden">
         {diagram}
       </div>
 
       {/* 본문 */}
-      <p className="text-[15px] text-white/65 leading-[2.0] mb-7">{body}</p>
+      <p className="text-[15px] text-[#555555] leading-[2.0] mb-7">{body}</p>
 
       {/* 표 */}
-      <div className="bg-white/[0.03] border border-white/6 rounded-xl overflow-hidden mb-7">
+      <div className="bg-black/[0.03] border border-[#ebebeb] rounded-xl overflow-hidden mb-7">
         <table className="w-full text-sm border-collapse">
           <tbody>
             {table.map(({ key, value }, i) => (
-              <tr key={key} className={i !== table.length - 1 ? 'border-b border-white/5' : ''}>
-                <td className="px-4 py-3 font-bold text-white text-xs whitespace-nowrap align-top w-28">
+              <tr key={key} className={i !== table.length - 1 ? 'border-b border-[#ebebeb]' : ''}>
+                <td className="px-4 py-3 font-bold text-[#111111] text-xs whitespace-nowrap align-top w-28">
                   {key}
                 </td>
-                <td className="px-4 py-3 text-white/50 text-xs leading-relaxed">{value}</td>
+                <td className="px-4 py-3 text-[#777777] text-xs leading-relaxed">{value}</td>
               </tr>
             ))}
           </tbody>
@@ -294,7 +294,7 @@ function GuideSection({ id, number, title, subtitle, body, table, tip, tipColor,
       <div
         className="flex items-start gap-3 p-4 rounded-xl border-l-4"
         style={{
-          background: tipColor === '#ff6b6b' ? 'rgba(255,107,107,0.07)' : 'rgba(190,255,0,0.06)',
+          background: tipColor === '#ff6b6b' ? 'rgba(255,107,107,0.1)' : 'rgba(190,255,0,0.12)',
           borderLeftColor: tipColor,
         }}
       >
@@ -305,7 +305,7 @@ function GuideSection({ id, number, title, subtitle, body, table, tip, tipColor,
       </div>
 
       {/* 섹션 구분 */}
-      <hr className="mt-12 border-white/6" />
+      <hr className="mt-12 border-[#e5e5e5]" />
     </section>
   )
 }
@@ -422,7 +422,7 @@ export default function GuidePage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
 
         {/* 아티클 메타 헤더 */}
@@ -431,15 +431,15 @@ export default function GuidePage() {
             <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-[#beff00]/10 text-[#beff00] text-[11px] font-bold tracking-widest uppercase">
               Guide
             </span>
-            <span className="text-white/20 text-xs">·</span>
-            <span className="text-white/30 text-xs">읽기 약 5분</span>
-            <span className="text-white/20 text-xs">·</span>
-            <time className="text-white/30 text-xs" dateTime="2025-01-01">2025년 1월</time>
+            <span className="text-[#999999] text-xs">·</span>
+            <span className="text-[#999999] text-xs">읽기 약 5분</span>
+            <span className="text-[#999999] text-xs">·</span>
+            <time className="text-[#999999] text-xs" dateTime="2025-01-01">2025년 1월</time>
           </div>
-          <h1 className="text-[36px] sm:text-[52px] font-extrabold text-white leading-[1.12] tracking-[-0.03em] mb-4">
+          <h1 className="text-[36px] sm:text-[52px] font-extrabold text-[#111111] leading-[1.12] tracking-[-0.03em] mb-4">
             라켓 고를 때<br />가장 중요한 5가지
           </h1>
-          <p className="text-[15px] text-white/50 leading-[1.85]">
+          <p className="text-[15px] text-[#777777] leading-[1.85]">
             무게, 밸런스, 샤프트, 프레임, 맥스텐션 — 이 5가지만 알면<br className="hidden sm:block" />
             어떤 라켓이든 직접 고를 수 있어요.
           </p>
@@ -459,12 +459,12 @@ export default function GuidePage() {
             ))}
 
             {/* 하단 CTA */}
-            <div className="bg-[#111] border border-white/8 rounded-2xl p-8 sm:p-10 text-center mt-4">
+            <div className="bg-[#f8f8f8] border border-[#e5e5e5] rounded-2xl p-8 sm:p-10 text-center mt-4">
               <p className="text-[11px] font-bold text-[#beff00] tracking-widest uppercase mb-3">Next Step</p>
-              <h3 className="text-[22px] sm:text-[27px] font-extrabold text-white tracking-[-0.02em] mb-3">
+              <h3 className="text-[22px] sm:text-[27px] font-extrabold text-[#111111] tracking-[-0.02em] mb-3">
                 내 레벨에 맞는 라켓이 궁금하다면?
               </h3>
-              <p className="text-white/40 text-sm mb-7 leading-relaxed">
+              <p className="text-[#777777] text-sm mb-7 leading-relaxed">
                 레벨 테스트로 내 수준을 진단하고,<br className="sm:hidden" /> 딱 맞는 라켓 조건을 확인해보세요.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -476,7 +476,7 @@ export default function GuidePage() {
                 </Link>
                 <Link
                   href="/rackets"
-                  className="px-8 py-3.5 border border-white/20 text-white/70 hover:text-white hover:border-white/40 text-sm rounded-full transition-colors"
+                  className="px-8 py-3.5 border border-[#cccccc] text-[#555555] hover:text-[#111111] hover:border-[#999999] text-sm rounded-full transition-colors"
                 >
                   라켓 도감 보기
                 </Link>
@@ -487,7 +487,7 @@ export default function GuidePage() {
           {/* TOC 사이드바 */}
           <aside className="hidden lg:block">
             <div className="sticky top-24">
-              <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-4">목차</p>
+              <p className="text-[10px] font-bold text-[#999999] uppercase tracking-widest mb-4">목차</p>
               <nav className="flex flex-col gap-0.5">
                 {TOC_ITEMS.map(({ id, label }) => {
                   const isActive = activeId === id
@@ -501,14 +501,14 @@ export default function GuidePage() {
                       <span
                         className="shrink-0 w-0.5 h-4 rounded-full transition-all duration-200"
                         style={{
-                          background: isActive ? '#beff00' : 'rgba(255,255,255,0.1)',
+                          background: isActive ? '#111111' : 'rgba(0,0,0,0.12)',
                           opacity: isActive ? 1 : 0.5,
                         }}
                       />
                       <span
                         className="text-[12.5px] transition-colors duration-200"
                         style={{
-                          color: isActive ? '#beff00' : 'rgba(255,255,255,0.35)',
+                          color: isActive ? '#111111' : '#999999',
                           fontWeight: isActive ? 700 : 400,
                         }}
                       >
@@ -520,8 +520,8 @@ export default function GuidePage() {
               </nav>
 
               {/* 미니 구분선 */}
-              <div className="mt-6 pt-6 border-t border-white/6">
-                <p className="text-[10px] text-white/20 leading-relaxed">
+              <div className="mt-6 pt-6 border-t border-[#e5e5e5]">
+                <p className="text-[10px] text-[#999999] leading-relaxed">
                   배드민턴 입문자를 위한<br />라켓 선택 가이드
                 </p>
               </div>
