@@ -1,8 +1,10 @@
-export type Brand = 'YONEX' | 'VICTOR' | 'LI-NING' | 'MIZUNO' | 'KAWASAKI' | 'FLEET' | 'RSL'
+export type Brand = 'YONEX' | 'VICTOR' | 'LI-NING' | 'MIZUNO' | 'KAWASAKI' | 'FLEET' | 'RSL' | 'APEX' | 'MAXBOLT' | 'PULSE' | 'TRICORE' | 'RIDER' | 'APACS' | 'REDSON' | 'JOOBONG' | 'TRION'
 export type Level = '왕초보' | '초심자' | 'D조' | 'C조'
 export type PlayType = '공격형' | '수비형' | '올라운드'
 export type Balance = 'head-heavy' | 'even' | 'head-light'
 export type Flex = 'stiff' | 'medium' | 'flexible'
+export type FrameBody = 'wide' | 'slim' | 'medium'
+export type HeadShape = 'isometric' | 'oval'
 
 export type RacketStatus = 'active' | 'discontinued' | 'limited'
 
@@ -20,6 +22,9 @@ export interface Racket {
   weight: string | null
   balance: Balance | null
   flex: Flex | null
+  max_tension: number | null
+  frame_body: FrameBody | null
+  head_shape: HeadShape | null
   level: Level[]
   type: PlayType[]
   stat_power: number
@@ -41,7 +46,7 @@ export interface Racket {
   updated_at: string
 }
 
-export const BRANDS: Brand[] = ['YONEX', 'VICTOR', 'LI-NING', 'MIZUNO', 'KAWASAKI', 'FLEET', 'RSL']
+export const BRANDS: Brand[] = ['YONEX', 'VICTOR', 'LI-NING', 'MIZUNO', 'KAWASAKI', 'FLEET', 'RSL', 'APEX', 'MAXBOLT', 'PULSE', 'TRICORE', 'RIDER', 'APACS', 'REDSON', 'JOOBONG', 'TRION']
 export const LEVELS: Level[] = ['왕초보', '초심자', 'D조', 'C조']
 export const PLAY_TYPES: PlayType[] = ['공격형', '수비형', '올라운드']
 export const WEIGHTS = ['6U', '5U', '4U', '3U', '2U']
@@ -62,4 +67,15 @@ export const FLEX_KO: Record<Flex, string> = {
   stiff: '하드',
   medium: '미디엄',
   flexible: '소프트',
+}
+
+export const FRAME_BODY_KO: Record<FrameBody, string> = {
+  wide: '와이드바디',
+  slim: '슬림바디',
+  medium: '미디엄바디',
+}
+
+export const HEAD_SHAPE_KO: Record<HeadShape, string> = {
+  isometric: '아이소메트릭',
+  oval: '오벌',
 }
