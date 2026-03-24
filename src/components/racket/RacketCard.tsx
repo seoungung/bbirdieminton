@@ -14,6 +14,17 @@ function isValidSrc(s: string): boolean {
 function parseFirstUrl(raw: string | null): string | null {
   if (!raw) return null
   const trimmed = raw.trim()
+  // JSON 배열 형식: ["url1","url2"]
+  if (trimmed.startsWith('[')) {
+    try {
+      const arr = JSON.parse(trimmed)
+      const url = Array.isArray(arr) && arr[0] ? String(arr[0]) : null
+      return url && isValidSrc(url) ? url : null
+    } catch {
+      return null
+    }
+  }
+  // PostgreSQL 배열 형식: {"url1","url2"}
   if (trimmed.startsWith('{')) {
     const match = trimmed.match(/"([^"]+)"/)
     const url = match ? match[1] : null
@@ -31,13 +42,13 @@ export function RacketCard({ racket }: { racket: Racket }) {
     <div className="relative group">
       <Link href={'/rackets/' + racket.slug} className="block">
         <article className="rounded-xl border border-border bg-card hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden">
-          <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+          <div className="relative aspect-[4/3] bg-white overflow-hidden">
             {firstImage ? (
               <Image
                 src={firstImage}
                 alt={racket.name}
                 fill
-                className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
                 sizes="(max-width: 768px) 50vw, 33vw"
               />
             ) : (
