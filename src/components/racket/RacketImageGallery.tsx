@@ -57,12 +57,12 @@ export function RacketImageGallery({ imageUrl, imageUrls, name }: RacketImageGal
 
   return (
     <div className="space-y-3">
-      <div className="relative aspect-square rounded-2xl bg-muted overflow-hidden">
+      <div className="relative aspect-square rounded-2xl bg-white overflow-hidden">
         <Image
           src={allImages[selectedIdx]}
           alt={`${name} 이미지 ${selectedIdx + 1}`}
           fill
-          className="object-contain p-6 transition-opacity duration-200"
+          className="object-cover transition-opacity duration-200"
           priority
           sizes="(max-width: 768px) 100vw, 40vw"
         />
@@ -75,7 +75,7 @@ export function RacketImageGallery({ imageUrl, imageUrls, name }: RacketImageGal
               key={i}
               onClick={() => setSelectedIdx(i)}
               className={cn(
-                'relative shrink-0 w-[72px] h-[72px] rounded-xl overflow-hidden border-2 bg-muted transition-all',
+                'relative shrink-0 w-[72px] h-[72px] rounded-xl overflow-hidden border-2 bg-white transition-all',
                 i === selectedIdx
                   ? 'border-foreground'
                   : 'border-transparent hover:border-muted-foreground/50'
@@ -86,7 +86,7 @@ export function RacketImageGallery({ imageUrl, imageUrls, name }: RacketImageGal
                 src={img}
                 alt={`${name} 썸네일 ${i + 1}`}
                 fill
-                className="object-contain p-1.5"
+                className="object-cover"
                 sizes="72px"
               />
             </button>
