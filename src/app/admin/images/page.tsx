@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
-import Link from 'next/link'
 import {
   getRacketsWithImages,
   uploadRacketImage,
@@ -275,24 +274,8 @@ export default function AdminImagesPage() {
   })
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8]">
-      {/* 헤더 */}
-      <header className="bg-white border-b border-[#e5e5e5] sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <p className="text-[10px] font-bold text-[#beff00] uppercase tracking-widest">Admin</p>
-            <h1 className="text-lg font-extrabold text-[#111]">라켓 이미지 관리</h1>
-          </div>
-          <Link
-            href="/admin"
-            className="text-xs text-[#555] hover:text-[#111] transition-colors border border-[#e5e5e5] rounded-lg px-3 py-1.5 bg-white hover:border-[#ccc]"
-          >
-            ← 어드민 홈
-          </Link>
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-4 py-8">
+    <div className="px-4 md:px-8 py-8 max-w-5xl mx-auto">
+      <h1 className="text-2xl font-extrabold text-[#111111] mb-6">라켓 이미지 관리</h1>
         {/* 검색바 */}
         <div className="mb-6">
           <input
@@ -350,8 +333,6 @@ export default function AdminImagesPage() {
             </div>
           </>
         )}
-      </main>
-
       {/* 토스트 알림 */}
       {toast && (
         <div
