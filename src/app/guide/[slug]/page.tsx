@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import ShareButtons from '@/components/guide/ShareButtons'
 import '../guide-prose.css'
 
 interface Guide {
@@ -57,6 +58,8 @@ export default async function GuideDetailPage({ params }: GuideDetailPageProps) 
     day: 'numeric',
   })
 
+  const shareUrl = `https://birdieminton.com/guide/${slug}`
+
   return (
     <article className="px-4 md:px-8 py-12 max-w-[768px] mx-auto">
       {/* Cover image */}
@@ -85,8 +88,11 @@ export default async function GuideDetailPage({ params }: GuideDetailPageProps) 
         dangerouslySetInnerHTML={{ __html: guide.content }}
       />
 
+      {/* Share buttons */}
+      <ShareButtons title={guide.title} url={shareUrl} />
+
       {/* Back link */}
-      <div className="mt-16 pt-6 border-t border-[#e5e5e5]">
+      <div className="mt-8 pt-6 border-t border-[#e5e5e5]">
         <Link
           href="/guide"
           className="inline-flex items-center gap-1.5 text-sm text-[#555555] hover:text-[#111111] transition-colors"
