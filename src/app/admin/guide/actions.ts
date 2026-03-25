@@ -64,3 +64,30 @@ export async function getGuideById(id: string): Promise<Guide | null> {
   if (error) return null
   return data as Guide
 }
+
+export async function uploadGuideImage(
+  formData: FormData
+): Promise<{ url?: string; error?: string }> {
+  const file = formData.get('file') as File | null
+  if (!file || file.size === 0) return { error: '파일이 없습니다.' }
+
+  const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  if (!allowed.includes(file.type)) return { error: '지원하지 않는 파일 형식입니다.' }
+
+  const ext = file.name.split('.').pop() ?? 'jpg'
+  const fileName = `guide-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+  const supabase = createAdminClient()
+  const arrayBuffer = await file.arrayBuffer()
+  const { error } = await supabase.storage
+    .from('guide-images')
+    .upload(fileName, arrayBuffer, { contentType: file.type, upsert: false })
+
+  if (error) return { error: error.message }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('guide-images')
+    .getPublicUrl(fileName)
+
+  return { url: publicUrl }
+}

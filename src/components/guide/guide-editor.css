@@ -3,6 +3,8 @@
   font-weight: 700;
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 0.4rem;
 }
 .ProseMirror h3 {
   font-size: 1.125rem;
@@ -23,6 +25,7 @@
 .ProseMirror ul,
 .ProseMirror ol {
   padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 .ProseMirror ul li {
   list-style-type: disc;
@@ -37,7 +40,10 @@
 }
 .ProseMirror img {
   border-radius: 0.75rem;
-  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0.75rem 0;
+  display: block;
 }
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
@@ -45,4 +51,77 @@
   color: #999999;
   pointer-events: none;
   height: 0;
+}
+.ProseMirror code {
+  background: #f0f0f0;
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  font-size: 0.875em;
+  font-family: monospace;
+}
+.ProseMirror pre {
+  background: #1a1a1a;
+  color: #f8f8f8;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.ProseMirror pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.875rem;
+  color: inherit;
+}
+/* Table styles */
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e5e5;
+}
+.ProseMirror td,
+.ProseMirror th {
+  border: 1px solid #e5e5e5;
+  padding: 0.5rem 0.75rem;
+  min-width: 80px;
+  vertical-align: top;
+  position: relative;
+}
+.ProseMirror th {
+  background: #f8f8f8;
+  font-weight: 700;
+  text-align: left;
+}
+.ProseMirror .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(190, 255, 0, 0.15);
+  pointer-events: none;
+}
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #beff00;
+  cursor: col-resize;
+  pointer-events: auto;
+}
+/* YouTube embed */
+.ProseMirror .youtube-embed {
+  aspect-ratio: 16/9;
+  width: 100%;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+.ProseMirror iframe {
+  width: 100%;
+  border-radius: 0.75rem;
+  margin: 0.75rem 0;
 }
