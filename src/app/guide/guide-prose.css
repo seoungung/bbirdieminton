@@ -1,0 +1,59 @@
+.guide-prose h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 0.5rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  color: #111111;
+}
+.guide-prose h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: #111111;
+}
+.guide-prose p {
+  line-height: 1.625;
+  margin-bottom: 1rem;
+  color: #111111;
+}
+.guide-prose blockquote {
+  border-left: 4px solid #beff00;
+  padding-left: 1rem;
+  color: #555555;
+  margin: 1.5rem 0;
+}
+.guide-prose ul,
+.guide-prose ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+.guide-prose ul {
+  list-style-type: disc;
+}
+.guide-prose ol {
+  list-style-type: decimal;
+}
+.guide-prose li {
+  margin-bottom: 0.25rem;
+  line-height: 1.625;
+}
+.guide-prose img {
+  border-radius: 0.75rem;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+.guide-prose hr {
+  border: none;
+  border-top: 1px solid #e5e5e5;
+  margin: 2rem 0;
+}
+.guide-prose a {
+  color: #beff00;
+  text-decoration: underline;
+}
+.guide-prose strong {
+  font-weight: 700;
+}

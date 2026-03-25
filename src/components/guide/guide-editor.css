@@ -1,0 +1,48 @@
+.ProseMirror h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.ProseMirror h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+.ProseMirror blockquote {
+  border-left: 4px solid #beff00;
+  padding-left: 1rem;
+  color: #555555;
+  margin: 1rem 0;
+}
+.ProseMirror p {
+  margin-bottom: 0.75rem;
+  line-height: 1.625;
+}
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5rem;
+}
+.ProseMirror ul li {
+  list-style-type: disc;
+}
+.ProseMirror ol li {
+  list-style-type: decimal;
+}
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid #e5e5e5;
+  margin: 1.5rem 0;
+}
+.ProseMirror img {
+  border-radius: 0.75rem;
+  width: 100%;
+}
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #999999;
+  pointer-events: none;
+  height: 0;
+}
