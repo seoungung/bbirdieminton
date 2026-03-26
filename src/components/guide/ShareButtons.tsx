@@ -11,6 +11,12 @@ export default function ShareButtons({ title, url }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false)
 
   function handleKakao() {
+    // 모바일: 네이티브 공유 시트 (카카오톡 포함)
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({ title, url }).catch(() => {})
+      return
+    }
+    // 데스크탑: 카카오스토리 공유
     window.open(
       `https://story.kakao.com/share?url=${encodeURIComponent(url)}`,
       '_blank',
