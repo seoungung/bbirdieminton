@@ -3,9 +3,11 @@ import Image from 'next/image'
 import { Fragment } from 'react'
 
 const LEGAL_LINKS = [
-  { href: '/terms',    label: '이용약관' },
-  { href: '/privacy',  label: '개인정보처리방침', bold: true },
-  { href: '/business', label: '사업자정보확인' },
+  { href: '/about',       label: '버디민턴 소개' },
+  { href: '/partnership', label: '제휴 문의' },
+  { href: '/terms',       label: '이용약관' },
+  { href: '/privacy',     label: '개인정보처리방침', bold: true },
+  { href: '/business',    label: '사업자정보확인' },
 ]
 
 export default function Footer() {
@@ -48,14 +50,14 @@ export default function Footer() {
 
         {/* 사업자 정보 */}
         <p className="text-[11px] leading-[1.9] text-white/35 mb-6">
-          상호 : 버드민턴&nbsp;&nbsp;|&nbsp;&nbsp;대표자 : -&nbsp;&nbsp;|&nbsp;&nbsp;사업자등록번호 : -<br />
-          통신판매업신고번호 : -&nbsp;&nbsp;|&nbsp;&nbsp;개인정보책임자 : -&nbsp;&nbsp;|&nbsp;&nbsp;E-mail : hello@birdminton.kr
+          상호 : 버디민턴&nbsp;&nbsp;|&nbsp;&nbsp;대표자 : -&nbsp;&nbsp;|&nbsp;&nbsp;사업자등록번호 : -<br />
+          통신판매업신고번호 : -&nbsp;&nbsp;|&nbsp;&nbsp;개인정보책임자 : -&nbsp;&nbsp;|&nbsp;&nbsp;E-mail : hello@birdieminton.com
         </p>
 
         {/* 구분선 + 카피라이트 */}
         <div className="border-t border-white/10 pt-5">
           <p className="text-[11px] text-white/25 tracking-wide uppercase">
-            COPYRIGHT BIRDMINTON. ALL RIGHTS RESERVED.
+            © {new Date().getFullYear()} BIRDIEMINTON. ALL RIGHTS RESERVED.
           </p>
         </div>
       </div>

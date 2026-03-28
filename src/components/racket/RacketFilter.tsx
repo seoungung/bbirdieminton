@@ -2,7 +2,8 @@
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
-import { BRANDS, LEVELS, PLAY_TYPES, WEIGHTS, PRICE_RANGES } from '@/types/racket'
+import { LEVELS, PLAY_TYPES, WEIGHTS, PRICE_RANGES } from '@/types/racket'
+import type { Brand } from '@/types/racket'
 import { cn } from '@/lib/utils'
 
 interface FilterChipProps {
@@ -46,9 +47,10 @@ function FilterSection({ title, children }: FilterSectionProps) {
 interface RacketFilterProps {
   totalCount: number
   filteredCount: number
+  availableBrands: Brand[]
 }
 
-export function RacketFilter({ totalCount, filteredCount }: RacketFilterProps) {
+export function RacketFilter({ totalCount, filteredCount, availableBrands }: RacketFilterProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -116,9 +118,9 @@ export function RacketFilter({ totalCount, filteredCount }: RacketFilterProps) {
         )}
       </div>
 
-      {/* 브랜드 */}
+      {/* 브랜드 — 실제 데이터 기반 동적 목록 */}
       <FilterSection title="브랜드">
-        {BRANDS.map((b) => (
+        {availableBrands.map((b) => (
           <FilterChip
             key={b}
             label={b}

@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: '/admin', label: '홈', icon: 'home' },
   { href: '/admin/quiz', label: '퀴즈 통계', icon: 'chart' },
   { href: '/admin/images', label: '이미지 관리', icon: 'image' },
+  { href: '/admin/rackets', label: '라켓 데이터', icon: 'racket' },
 ] as const
 
 function NavIcon({ icon, className }: { icon: string; className?: string }) {
@@ -29,6 +30,12 @@ function NavIcon({ icon, className }: { icon: string; className?: string }) {
       return (
         <svg className={cls} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+        </svg>
+      )
+    case 'racket':
+      return (
+        <svg className={cls} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 5.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
         </svg>
       )
     default:

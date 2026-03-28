@@ -37,13 +37,14 @@ export async function generateMetadata({ params }: GuideDetailPageProps): Promis
   const guide = await getGuide(slug)
   if (!guide) return { title: '가이드를 찾을 수 없습니다' }
   return {
-    title: `${guide.title} | Birdieminton 가이드`,
+    title: guide.title,
     description: guide.excerpt || guide.title,
     openGraph: {
       title: guide.title,
       description: guide.excerpt || guide.title,
       ...(guide.cover_image ? { images: [{ url: guide.cover_image }] } : {}),
     },
+    alternates: { canonical: `https://birdieminton.com/guide/${guide.slug}` },
   }
 }
 
@@ -60,8 +61,27 @@ export default async function GuideDetailPage({ params }: GuideDetailPageProps) 
 
   const shareUrl = `https://birdieminton.com/guide/${slug}`
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: guide.title,
+    description: guide.excerpt || guide.title,
+    datePublished: guide.created_at,
+    publisher: {
+      '@type': 'Organization',
+      name: 'birdieminton',
+      logo: { '@type': 'ImageObject', url: 'https://birdieminton.com/symbol_birdieminton-color.png' },
+    },
+    ...(guide.cover_image ? { image: guide.cover_image } : {}),
+    url: shareUrl,
+  }
+
   return (
     <article className="px-4 md:px-8 py-12 max-w-[768px] mx-auto">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Cover image */}
       {guide.cover_image && (
         <div className="mb-8 rounded-2xl overflow-hidden">

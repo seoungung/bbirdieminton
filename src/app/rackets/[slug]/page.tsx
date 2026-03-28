@@ -92,14 +92,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const racket = await getRacket(slug)
   if (!racket) return {}
   const ogUrl = `/api/og?name=${encodeURIComponent(racket.name)}&brand=${encodeURIComponent(racket.brand)}&level=${encodeURIComponent(racket.level[0] ?? '')}&type=${encodeURIComponent(racket.type[0] ?? '')}`
+  const desc = `${racket.brand} ${racket.name} 상세 스펙 — ${racket.type.join(', ')} / ${racket.level.join(', ')} 추천`
   return {
-    title: racket.name + ' | 버디민턴 라켓 도감',
-    description: racket.brand + ' ' + racket.name + ' 상세 스펙 — ' + racket.type.join(', ') + ' / ' + racket.level.join(', ') + ' 추천',
+    title: `${racket.name} 라켓 도감`,
+    description: desc,
     openGraph: {
-      title: racket.name,
-      description: racket.type.join(', ') + ' · ' + racket.level.join(', '),
+      title: `${racket.brand} ${racket.name}`,
+      description: desc,
       images: [{ url: ogUrl, width: 1200, height: 630 }],
     },
+    alternates: { canonical: `https://birdieminton.com/rackets/${racket.slug}` },
   }
 }
 
@@ -130,8 +132,29 @@ export default async function RacketDetailPage({ params }: Props) {
   const naverUrl = getNaverUrl(racket.name)
   const coupangUrl = getCoupangUrl(racket.name)
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: racket.name,
+    description: racket.description ?? `${racket.brand} ${racket.name} — ${racket.type?.join(', ')} / ${racket.level?.join(', ')} 추천`,
+    brand: { '@type': 'Brand', name: racket.brand },
+    ...(racket.image_url ? { image: racket.image_url } : {}),
+    ...(racket.price_min ? {
+      offers: {
+        '@type': 'AggregateOffer',
+        priceCurrency: 'KRW',
+        lowPrice: racket.price_min,
+        ...(racket.price_max ? { highPrice: racket.price_max } : {}),
+      },
+    } : {}),
+  }
+
   return (
     <div className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-6xl mx-auto px-4 py-6">
 
         {/* 브레드크럼 */}

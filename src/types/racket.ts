@@ -1,4 +1,4 @@
-export type Brand = 'YONEX' | 'VICTOR' | 'LI-NING' | 'MIZUNO' | 'KAWASAKI' | 'FLEET' | 'RSL' | 'APEX' | 'MAXBOLT' | 'PULSE' | 'TRICORE' | 'RIDER' | 'APACS' | 'REDSON' | 'JOOBONG' | 'TRION'
+export type Brand = 'YONEX' | 'VICTOR' | 'LI-NING' | 'MIZUNO' | 'KAWASAKI' | 'FLEET' | 'RSL' | 'APEX' | 'MAXBOLT' | 'PULSE' | 'TRICORE' | 'RIDER' | 'APACS' | 'REDSON' | 'JOOBONG' | 'TRION' | 'TECHNIST'
 export type Level = '왕초보' | '초심자' | 'D조' | 'C조'
 export type PlayType = '공격형' | '수비형' | '올라운드'
 export type Balance = 'head-heavy' | 'even' | 'head-light'
@@ -46,11 +46,12 @@ export interface Racket {
   updated_at: string
 }
 
-export const BRANDS: Brand[] = ['YONEX', 'VICTOR', 'LI-NING', 'MIZUNO', 'KAWASAKI', 'FLEET', 'RSL', 'APEX', 'MAXBOLT', 'PULSE', 'TRICORE', 'RIDER', 'APACS', 'REDSON', 'JOOBONG', 'TRION']
+// DB에 실제 존재하는 브랜드만 포함 (필터 UI용)
+export const BRANDS: Brand[] = ['YONEX', 'VICTOR', 'LI-NING', 'MIZUNO', 'KAWASAKI', 'FLEET', 'TECHNIST', 'JOOBONG', 'REDSON', 'TRION', 'APACS']
 export const LEVELS: Level[] = ['왕초보', '초심자', 'D조', 'C조']
 export const PLAY_TYPES: PlayType[] = ['공격형', '수비형', '올라운드']
 export const WEIGHTS = ['6U', '5U', '4U', '3U', '2U']
-export const PRICE_RANGES = ['~5만원', '5~10만원', '10~15만원']
+export const PRICE_RANGES = ['~5만원', '5~10만원', '10~15만원', '15만원+']
 export const SORT_OPTIONS = [
   { value: 'popular', label: '인기순' },
   { value: 'newest', label: '최신순' },

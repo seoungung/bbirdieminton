@@ -12,8 +12,6 @@ const NAV_LINKS = [
   { href: '/rackets', label: '라켓 도감' },
   { href: '/quiz',    label: '레벨 테스트' },
   { href: '/guide',   label: '가이드북' },
-  { href: '/about',   label: '버디민턴 소개' },
-  { href: '/partnership', label: '제휴 문의' },
 ]
 
 export default function Header() {

@@ -4,6 +4,9 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { BRAND_LOGOS } from '@/lib/brandLogos'
 import type { Racket } from '@/types/racket'
+import HeroSlider from '@/components/HeroSlider'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'birdieminton | 배드민턴, 제대로 시작하는 법',
@@ -25,195 +28,243 @@ function parseFirstUrl(raw: string | null): string | null {
   return trimmed.startsWith('/') || trimmed.startsWith('http') ? trimmed : null
 }
 
-const LEVELS = [
-  { label: '왕초보', desc: '라켓을 처음 잡는 분', point: '6U · 유연한 강성', highlight: false },
-  { label: '초심자', desc: '6개월 미만 입문자', point: '5U · 이븐밸런스', highlight: false },
-  { label: 'D조', desc: '동호회 D급', point: '4U · 스탠다드', highlight: true },
-  { label: 'C조', desc: '동호회 C급', point: '3U~4U · Stiff', highlight: true },
+const RANK_STYLES = [
+  { bg: 'bg-[#FFD700]', text: 'text-black', label: '1위' },
+  { bg: 'bg-[#C0C0C0]', text: 'text-black', label: '2위' },
+  { bg: 'bg-[#CD7F32]', text: 'text-white', label: '3위' },
+  { bg: 'bg-[#f0f0f0]', text: 'text-[#666]', label: '4위' },
+  { bg: 'bg-[#f0f0f0]', text: 'text-[#666]', label: '5위' },
 ]
 
-const STEPS = [
-  { num: '01', title: '레벨 진단', desc: '17문항으로 내 배드민턴 레벨을 정확하게 파악해요.' },
-  { num: '02', title: '라켓 추천', desc: '레벨·플레이 스타일에 맞는 라켓을 골라드려요.' },
-  { num: '03', title: '비교 & 선택', desc: '스펙을 나란히 비교하고 최적의 라켓을 결정해요.' },
+const GUIDE_PREVIEWS = [
+  {
+    slug: 'racket-guide',
+    category: '라켓 선택',
+    title: '라켓 잘 고르는 법 — 배린이 완전정복',
+    readTime: '5분',
+    emoji: '🏸',
+    bg: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+  },
+  {
+    slug: 'beginner-escape',
+    category: '레벨업',
+    title: '왕초심 탈출하는 방법 — 6개월 플랜',
+    readTime: '7분',
+    emoji: '🚀',
+    bg: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2d2d2d 100%)',
+  },
+  {
+    slug: 'badminton-basics',
+    category: '기초 지식',
+    title: '배드민턴 기초 지식 모음 — 규칙부터 용어까지',
+    readTime: '6분',
+    emoji: '📖',
+    bg: 'linear-gradient(135deg, #0d2818 0%, #1a4a2e 50%, #0d2818 100%)',
+  },
+  {
+    slug: 'first-gym-guide',
+    category: '체육관 입문',
+    title: '처음 가는 배드민턴 체육관 생존 가이드',
+    readTime: '4분',
+    emoji: '🏢',
+    bg: 'linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 50%, #1a0a2e 100%)',
+  },
 ]
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://birdieminton.com/#organization',
+      name: 'birdieminton',
+      url: 'https://birdieminton.com',
+      logo: 'https://birdieminton.com/symbol_birdieminton-color.png',
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://birdieminton.com/#website',
+      url: 'https://birdieminton.com',
+      name: 'birdieminton',
+      description: '배린이를 위한 배드민턴 라켓 추천 플랫폼',
+      publisher: { '@id': 'https://birdieminton.com/#organization' },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: { '@type': 'EntryPoint', urlTemplate: 'https://birdieminton.com/rackets?q={search_term_string}' },
+        'query-input': 'required name=search_term_string',
+      },
+    },
+  ],
+}
 
 export default async function HomePage() {
   const supabase = await createClient()
-  const { data: rackets } = await supabase
-    .from('rackets')
-    .select('slug, name, brand, image_url, weight, price_min, price_max, editor_pick, is_popular, level, type')
-    .or('is_popular.eq.true,editor_pick.eq.true')
-    .limit(6)
-    .returns<Partial<Racket>[]>()
 
-  const topRackets = rackets ?? []
+  // 인기 순위 라켓 (popular_rank 1~5)
+  const { data: rankedRackets, error: rankError } = await supabase
+    .from('rackets')
+    .select('slug, name, brand, image_url, weight, price_range, popular_rank, type, level')
+    .not('popular_rank', 'is', null)
+    .order('popular_rank', { ascending: true })
+    .limit(5)
+
+  if (rankError) console.error('[popular_rank query error]', rankError)
+
+  type RankedRacket = Pick<Racket, 'slug' | 'name' | 'brand' | 'image_url' | 'weight' | 'price_range' | 'type' | 'level'> & { popular_rank: number }
+  const topRanked = (rankedRackets as RankedRacket[] | null) ?? []
 
   return (
     <main className="min-h-screen bg-white text-[#0a0a0a]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
-      {/* ── HERO ─────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#beff00]/20 via-[#beff00]/5 to-white">
-        <div className="max-w-[90rem] mx-auto px-4 sm:px-8 pt-24 pb-20 text-center relative z-10">
-          <span className="inline-block bg-[#beff00] text-black text-[12px] font-bold uppercase tracking-widest rounded-full px-4 py-1.5 mb-6">
-            배린이 전용 라켓 플랫폼
-          </span>
-          <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight tracking-tight mb-5 text-[#0a0a0a]">
-            내 레벨에 딱 맞는 라켓,<br className="hidden sm:block" />
-            <span className="relative inline-block">
-              <span className="relative z-10">제대로</span>
-              <span className="absolute inset-x-0 bottom-1 h-3 bg-[#beff00] -z-0 rounded" aria-hidden="true" />
-            </span>{' '}고르는 법
-          </h1>
-          <p className="text-[#6b6b6b] text-[16px] sm:text-lg leading-relaxed max-w-lg mx-auto mb-10">
-            어떤 라켓을 사야 할지 모르겠다면?<br />
-            2분 레벨 테스트로 시작하세요.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/quiz"
-              className="px-8 py-4 bg-[#0a0a0a] text-white font-extrabold text-[15px] rounded-2xl hover:bg-[#2a2a2a] transition-all"
-            >
-              무료 레벨 테스트 시작 →
-            </Link>
-            <Link
-              href="/rackets"
-              className="px-8 py-4 border border-[#0a0a0a]/15 text-[#0a0a0a] font-semibold text-[15px] rounded-2xl hover:border-[#0a0a0a]/40 transition-all"
-            >
-              라켓 도감 보기
+      {/* ── 1. HERO SLIDER ───────────────────────────── */}
+      <HeroSlider />
+
+      {/* ── 2. 2026 인기 라켓 순위 ──────────────────── */}
+      <section className="border-t border-[#ebebeb] bg-white">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-8 py-16 sm:py-20">
+
+          {/* 섹션 헤더 */}
+          <div className="flex items-end justify-between mb-10">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[#beff00] bg-[#beff00]/10 px-3 py-1 rounded-full">
+                2026 랭킹
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold mt-3 text-[#0a0a0a]">
+                가장 인기 있는 라켓 순위
+              </h2>
+            </div>
+            <Link href="/rackets" className="hidden sm:block text-[13px] font-semibold text-[#999] hover:text-[#0a0a0a] transition-colors">
+              전체 보기 →
             </Link>
           </div>
-        </div>
-      </section>
 
-      {/* ── HOW IT WORKS ─────────────────────────────── */}
-      <section className="border-t border-[#ebebeb] bg-[#f7f7f7]">
-        <div className="max-w-[90rem] mx-auto px-4 sm:px-8 py-16">
-          <h2 className="text-2xl font-bold text-center mb-12 text-[#0a0a0a]">이렇게 사용하세요</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            {STEPS.map(({ num, title, desc }) => (
-              <div key={num} className="text-center">
-                <p className="text-[#0a0a0a] font-extrabold text-3xl mb-3 bg-[#beff00] w-12 h-12 rounded-full flex items-center justify-center mx-auto text-[16px]">
-                  {num}
-                </p>
-                <h3 className="font-bold text-[16px] mb-2 text-[#0a0a0a]">{title}</h3>
-                <p className="text-[#6b6b6b] text-sm leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+          {/* 랭킹 리스트 */}
+          <div className="flex flex-col gap-3">
+            {topRanked.map((r, i) => {
+              const img = parseFirstUrl(r.image_url ?? null)
+              const logo = r.brand ? BRAND_LOGOS[r.brand] : null
+              const rank = RANK_STYLES[i]
+              const priceLabel = (r as RankedRacket).price_range ?? '-'
 
-      {/* ── LEVEL SYSTEM ─────────────────────────────── */}
-      <section className="border-t border-[#ebebeb]">
-        <div className="max-w-[90rem] mx-auto px-4 sm:px-8 py-16">
-          <h2 className="text-2xl font-bold text-center mb-3 text-[#0a0a0a]">어떤 레벨이세요?</h2>
-          <p className="text-[#6b6b6b] text-sm text-center mb-10">레벨을 모르겠다면 테스트로 확인해보세요</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
-            {LEVELS.map(({ label, desc, point, highlight }) => (
-              <div
-                key={label}
-                className={`rounded-xl border p-5 text-center ${
-                  highlight
-                    ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white'
-                    : 'bg-white border-[#e8e8e8] text-[#0a0a0a]'
-                }`}
-              >
-                <p className={`font-extrabold text-xl mb-1 ${highlight ? 'text-[#beff00]' : 'text-[#0a0a0a]'}`}>
-                  {label}
-                </p>
-                <p className={`text-xs mb-3 ${highlight ? 'text-white/70' : 'text-[#6b6b6b]'}`}>{desc}</p>
-                <p className={`text-[11px] border-t pt-2 ${highlight ? 'border-white/10 text-white/40' : 'border-[#ebebeb] text-[#999]'}`}>
-                  {point}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <Link href="/quiz" className="text-[#0a0a0a] text-sm font-semibold underline underline-offset-4 hover:text-[#6b6b6b] transition-colors">
-              내 레벨 테스트하기 →
-            </Link>
-          </div>
-        </div>
-      </section>
+              return (
+                <Link
+                  key={r.slug}
+                  href={`/rackets/${r.slug}`}
+                  className="group flex items-center gap-4 sm:gap-6 p-4 sm:p-5 rounded-2xl border border-[#ebebeb] hover:border-[#beff00] hover:shadow-sm bg-white transition-all"
+                >
+                  {/* 순위 배지 */}
+                  <div className={`shrink-0 w-10 h-10 rounded-full ${rank.bg} ${rank.text} flex items-center justify-center font-extrabold text-[13px]`}>
+                    {rank.label}
+                  </div>
 
-      {/* ── POPULAR RACKETS ──────────────────────────── */}
-      {topRackets.length > 0 && (
-        <section className="border-t border-[#ebebeb] bg-[#f7f7f7]">
-          <div className="max-w-[90rem] mx-auto px-4 sm:px-8 py-16">
-            <h2 className="text-2xl font-bold text-center mb-2 text-[#0a0a0a]">인기 라켓</h2>
-            <p className="text-[#6b6b6b] text-sm text-center mb-10">에디터가 직접 고른 배린이 추천 라켓</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-              {topRackets.map((r) => {
-                const img = parseFirstUrl(r.image_url ?? null)
-                const priceLabel = r.price_min ? `${Math.round(r.price_min / 10000)}만원~` : '-'
-                const logo = r.brand ? BRAND_LOGOS[r.brand] : null
-                return (
-                  <Link
-                    key={r.slug}
-                    href={`/rackets/${r.slug}`}
-                    className="group rounded-xl bg-white border border-[#e8e8e8] hover:border-[#beff00] hover:shadow-md transition-all overflow-hidden"
-                  >
-                    <div className="relative aspect-square bg-[#f5f5f5]">
-                      {img ? (
-                        <Image
-                          src={img}
-                          alt={r.name ?? ''}
-                          fill
-                          className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
-                          sizes="(max-width: 640px) 50vw, 16vw"
-                        />
+                  {/* 라켓 이미지 */}
+                  <div className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 relative bg-[#f8f8f8] rounded-xl overflow-hidden">
+                    {img ? (
+                      <Image
+                        src={img}
+                        alt={r.name ?? ''}
+                        fill
+                        className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                        sizes="80px"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-2xl">🏸</div>
+                    )}
+                  </div>
+
+                  {/* 라켓 정보 */}
+                  <div className="flex-1 min-w-0">
+                    <div className="h-5 flex items-center mb-1">
+                      {logo ? (
+                        <Image src={logo} alt={r.brand ?? ''} width={52} height={16} className="object-contain object-left max-h-[16px] w-auto" unoptimized />
                       ) : (
-                        <div className="flex items-center justify-center h-full text-2xl">🏸</div>
-                      )}
-                      {r.editor_pick && (
-                        <span className="absolute top-2 left-2 bg-[#0a0a0a] text-white text-[10px] font-medium px-2 py-0.5 rounded-full">
-                          에디터 픽
-                        </span>
+                        <span className="text-[11px] text-[#999]">{r.brand}</span>
                       )}
                     </div>
-                    <div className="p-3">
-                      <div className="h-5 flex items-center mb-1">
-                        {logo ? (
-                          <Image src={logo} alt={r.brand ?? ''} width={48} height={16} className="object-contain object-left max-h-[16px] w-auto" unoptimized />
-                        ) : (
-                          <span className="text-[11px] text-[#999]">{r.brand}</span>
-                        )}
-                      </div>
-                      <p className="text-[13px] font-semibold text-[#0a0a0a] leading-snug line-clamp-2 mb-1">
-                        {r.name}
-                      </p>
-                      <p className="text-[12px] text-[#999]">{priceLabel}</p>
+                    <p className="text-[15px] sm:text-[16px] font-bold text-[#0a0a0a] leading-snug line-clamp-1">
+                      {r.name}
+                    </p>
+                    <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                      {r.weight && (
+                        <span className="text-[11px] text-[#999] bg-[#f5f5f5] px-2 py-0.5 rounded-full">{r.weight}</span>
+                      )}
+                      {Array.isArray(r.type) && r.type[0] && (
+                        <span className="text-[11px] text-[#999] bg-[#f5f5f5] px-2 py-0.5 rounded-full">{r.type[0]}</span>
+                      )}
                     </div>
-                  </Link>
-                )
-              })}
-            </div>
-            <div className="text-center mt-8">
-              <Link href="/rackets" className="text-[13px] font-semibold text-[#6b6b6b] hover:text-[#0a0a0a] transition-colors">
-                전체 라켓 보기 →
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
+                  </div>
 
-      {/* ── BOTTOM CTA ───────────────────────────────── */}
-      <section className="border-t border-[#ebebeb] bg-[#0a0a0a]">
-        <div className="max-w-[90rem] mx-auto px-4 sm:px-8 py-20 text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold mb-4 text-white">
-            배드민턴, 제대로 시작하는 법
-          </h2>
-          <p className="text-white/40 text-sm leading-relaxed mb-8">
-            레벨 테스트 한 번으로 맞춤 라켓을 추천받고<br />
-            배린이 탈출을 시작해보세요.
-          </p>
-          <Link
-            href="/quiz"
-            className="inline-block px-10 py-4 bg-[#beff00] text-black font-extrabold text-[16px] rounded-2xl hover:brightness-110 transition-all"
-          >
-            무료로 시작하기 →
-          </Link>
+                  {/* 가격 + 화살표 */}
+                  <div className="shrink-0 text-right hidden sm:block">
+                    <p className="text-[14px] font-semibold text-[#0a0a0a]">{priceLabel}</p>
+                    <p className="text-[12px] text-[#ccc] mt-0.5 group-hover:text-[#beff00] transition-colors">자세히 →</p>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+
+          <div className="mt-6 sm:hidden text-center">
+            <Link href="/rackets" className="text-[13px] font-semibold text-[#999] hover:text-[#0a0a0a] transition-colors">
+              전체 라켓 보기 →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 3. 가이드북 콘텐츠 ───────────────────────── */}
+      <section className="border-t border-[#ebebeb] bg-[#f7f7f7]">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-8 py-16 sm:py-20">
+
+          {/* 섹션 헤더 */}
+          <div className="mb-10">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-[#0a0a0a]/40 bg-[#0a0a0a]/5 px-3 py-1 rounded-full">
+              가이드북
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold mt-3 text-[#0a0a0a]">
+              배린이를 위한 필수 콘텐츠
+            </h2>
+          </div>
+
+          {/* 커버형 카드 그리드 2×2 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {GUIDE_PREVIEWS.map((g) => (
+              <div
+                key={g.slug}
+                className="relative aspect-[16/9] rounded-2xl overflow-hidden"
+                style={{ background: g.bg }}
+              >
+                {/* 배경 이모지 (장식) */}
+                <div className="absolute inset-0 flex items-center justify-center text-[110px] opacity-[0.08] select-none pointer-events-none">
+                  {g.emoji}
+                </div>
+
+                {/* 읽는 시간 — 우상단 */}
+                <div className="absolute top-4 right-4 z-10">
+                  <span className="text-[11px] font-medium text-white/60 bg-black/30 backdrop-blur-sm px-2.5 py-1 rounded-full">
+                    {g.readTime} 읽기
+                  </span>
+                </div>
+
+                {/* 하단 그라데이션 오버레이 */}
+                <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+
+                {/* 하단 텍스트 */}
+                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 z-10">
+                  <span className="inline-block text-[12px] font-bold uppercase tracking-wider text-[#beff00] bg-[#beff00]/15 px-3 py-1 rounded-full mb-3">
+                    {g.category}
+                  </span>
+                  <h3 className="text-[20px] sm:text-[22px] font-extrabold text-white leading-snug">
+                    {g.title}
+                  </h3>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
