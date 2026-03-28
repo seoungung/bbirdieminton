@@ -187,7 +187,7 @@ function RacketRow({ racket, loadingSlots, onUpload, onDelete }: RacketRowProps)
 export default function AdminImagesPage() {
   const [rackets, setRackets] = useState<RacketImageRow[]>([])
   const [query, setQuery] = useState('')
-  const [hideNoImage, setHideNoImage] = useState(false)
+  const [onlyNoImage, setOnlyNoImage] = useState(false)
   const [loadingSlots, setLoadingSlots] = useState<Record<string, boolean>>({})
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -277,10 +277,10 @@ export default function AdminImagesPage() {
     const q = query.trim().toLowerCase()
     const matchesQuery = !q || r.name.toLowerCase().includes(q) || r.brand.toLowerCase().includes(q)
     if (!matchesQuery) return false
-    if (hideNoImage) {
+    if (onlyNoImage) {
       const urls = parseImageUrls(r.image_url)
       const hasImage = urls.some((u) => u.trim() !== '')
-      if (!hasImage) return false
+      if (hasImage) return false
     }
     return true
   })
@@ -297,12 +297,12 @@ export default function AdminImagesPage() {
             placeholder="라켓 이름 또는 브랜드로 검색"
             className="w-full sm:w-80 h-10 px-4 rounded-xl border border-[#e5e5e5] bg-white text-sm text-[#111] placeholder:text-[#ccc] outline-none focus:border-[#beff00] transition-colors"
           />
-          {/* 이미지 없는 항목 숨기기 토글 */}
+          {/* 이미지 없는 항목만 보기 토글 */}
           <button
             type="button"
-            onClick={() => setHideNoImage((v) => !v)}
+            onClick={() => setOnlyNoImage((v) => !v)}
             className={`flex items-center gap-2 h-10 px-4 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap ${
-              hideNoImage
+              onlyNoImage
                 ? 'bg-[#111] text-[#beff00] border-[#111]'
                 : 'bg-white text-[#555] border-[#e5e5e5] hover:border-[#beff00]'
             }`}
@@ -310,19 +310,19 @@ export default function AdminImagesPage() {
             {/* 토글 스위치 시각화 */}
             <span
               className={`relative inline-flex w-8 h-4 rounded-full transition-colors ${
-                hideNoImage ? 'bg-[#beff00]' : 'bg-[#ddd]'
+                onlyNoImage ? 'bg-[#beff00]' : 'bg-[#ddd]'
               }`}
             >
               <span
                 className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform ${
-                  hideNoImage ? 'translate-x-4' : 'translate-x-0.5'
+                  onlyNoImage ? 'translate-x-4' : 'translate-x-0.5'
                 }`}
               />
             </span>
-            이미지 없는 항목 숨기기
+            이미지 없는 항목만 보기
             {noImageCount > 0 && (
               <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${
-                hideNoImage ? 'bg-[#beff00]/20 text-[#beff00]' : 'bg-[#f0f0f0] text-[#999]'
+                onlyNoImage ? 'bg-[#beff00]/20 text-[#beff00]' : 'bg-[#f0f0f0] text-[#999]'
               }`}>
                 {noImageCount}
               </span>
@@ -357,9 +357,7 @@ export default function AdminImagesPage() {
           <>
             <p className="text-xs text-[#999] mb-3">
               {filtered.length}개 라켓
-              {(query || hideNoImage) && ` (전체 ${rackets.length}개 중`}
-              {hideNoImage && noImageCount > 0 && `, 이미지 없음 ${noImageCount}개 숨김`}
-              {(query || hideNoImage) && `)`}
+              {(query || onlyNoImage) && ` (전체 ${rackets.length}개 중)`}
             </p>
             <div className="flex flex-col gap-3">
               {filtered.map((racket) => (
