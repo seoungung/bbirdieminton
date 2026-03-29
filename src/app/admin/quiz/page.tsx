@@ -47,7 +47,7 @@ export default function AdminQuizPage() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const password = sessionStorage.getItem('admin_password')
+        const password = localStorage.getItem('admin_password')
         const res = await fetch('/api/admin/stats', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

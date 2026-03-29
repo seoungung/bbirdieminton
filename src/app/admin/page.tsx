@@ -16,8 +16,7 @@ export default function AdminHomePage() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        // sessionStorage에서 인증 확인 (layout에서 이미 보장)
-        const password = sessionStorage.getItem('admin_password')
+        const password = localStorage.getItem('admin_password')
         const res = await fetch('/api/admin/stats', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
