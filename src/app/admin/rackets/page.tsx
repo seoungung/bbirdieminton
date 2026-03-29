@@ -12,6 +12,21 @@ interface Toast {
 
 const BRANDS = ['전체', 'YONEX', 'VICTOR', 'LI-NING', 'MIZUNO', 'KAWASAKI', 'FLEET', 'RSL', 'APEX', 'MAXBOLT', 'PULSE', 'TRICORE', 'RIDER', 'APACS', 'REDSON', 'JOOBONG', 'TRION']
 
+const WEIGHT_OPTIONS = ['', '6U', '5U', '4U', '3U', '2U']
+const BALANCE_OPTIONS = ['', 'head-heavy', 'even', 'head-light']
+const FLEX_OPTIONS = ['', 'stiff', 'medium', 'flexible']
+
+const BALANCE_KO: Record<string, string> = {
+  'head-heavy': '헤드헤비',
+  even: '균형형',
+  'head-light': '헤드라이트',
+}
+const FLEX_KO: Record<string, string> = {
+  stiff: '하드',
+  medium: '미디엄',
+  flexible: '소프트',
+}
+
 const TABLE_HEADERS = [
   '브랜드',
   '라켓명',
@@ -27,6 +42,26 @@ const TABLE_HEADERS = [
   '상태',
 ]
 
+interface NewRacketState {
+  name: string
+  slug: string
+  brand: string
+  weight: string
+  balance: string
+  flex: string
+  price_range: string
+}
+
+const INITIAL_RACKET: NewRacketState = {
+  name: '',
+  slug: '',
+  brand: 'YONEX',
+  weight: '',
+  balance: '',
+  flex: '',
+  price_range: '',
+}
+
 export default function AdminRacketsPage() {
   const [rackets, setRackets] = useState<RacketRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -35,8 +70,11 @@ export default function AdminRacketsPage() {
   const [brand, setBrand] = useState('전체')
   const [toasts, setToasts] = useState<Toast[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
-  const [newRacket, setNewRacket] = useState({ name: '', slug: '', brand: 'YONEX' })
+  const [newRacket, setNewRacket] = useState<NewRacketState>(INITIAL_RACKET)
   const [addLoading, setAddLoading] = useState(false)
+  const [extractUrl, setExtractUrl] = useState('')
+  const [extracting, setExtracting] = useState(false)
+  const [extractError, setExtractError] = useState('')
 
   useEffect(() => {
     getRackets().then(({ data, error: err }) => {
@@ -58,6 +96,46 @@ export default function AdminRacketsPage() {
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9가-힣\-]/g, '')
 
+  const closeModal = useCallback(() => {
+    setShowAddModal(false)
+    setNewRacket(INITIAL_RACKET)
+    setExtractUrl('')
+    setExtractError('')
+  }, [])
+
+  const handleExtract = useCallback(async () => {
+    if (!extractUrl.trim()) return
+    setExtracting(true)
+    setExtractError('')
+    try {
+      const password = localStorage.getItem('admin_password')
+      const res = await fetch('/api/admin/racket-extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: extractUrl.trim(), password: password ?? '' }),
+      })
+      const data = await res.json() as Record<string, unknown>
+      if (!res.ok) {
+        setExtractError((data.error as string) ?? '추출에 실패했습니다.')
+        return
+      }
+      setNewRacket((prev) => ({
+        ...prev,
+        ...(typeof data.name === 'string' && data.name ? { name: data.name } : {}),
+        ...(typeof data.slug === 'string' && data.slug ? { slug: data.slug } : {}),
+        ...(typeof data.brand === 'string' && data.brand ? { brand: data.brand } : {}),
+        ...(typeof data.weight === 'string' && data.weight ? { weight: data.weight } : {}),
+        ...(typeof data.balance === 'string' && data.balance ? { balance: data.balance } : {}),
+        ...(typeof data.flex === 'string' && data.flex ? { flex: data.flex } : {}),
+        ...(typeof data.price_range === 'string' && data.price_range ? { price_range: data.price_range } : {}),
+      }))
+    } catch {
+      setExtractError('네트워크 오류가 발생했습니다.')
+    } finally {
+      setExtracting(false)
+    }
+  }, [extractUrl])
+
   const handleAddRacket = useCallback(async () => {
     if (!newRacket.name.trim() || !newRacket.slug.trim()) {
       addToast('라켓명과 슬러그를 입력하세요.', false)
@@ -68,6 +146,10 @@ export default function AdminRacketsPage() {
       name: newRacket.name.trim(),
       slug: newRacket.slug.trim(),
       brand: newRacket.brand,
+      ...(newRacket.weight ? { weight: newRacket.weight } : {}),
+      ...(newRacket.balance ? { balance: newRacket.balance } : {}),
+      ...(newRacket.flex ? { flex: newRacket.flex } : {}),
+      ...(newRacket.price_range ? { price_range: newRacket.price_range } : {}),
     })
     setAddLoading(false)
     if (err) {
@@ -77,10 +159,9 @@ export default function AdminRacketsPage() {
     if (data) {
       setRackets((prev) => [data, ...prev])
     }
-    setShowAddModal(false)
-    setNewRacket({ name: '', slug: '', brand: 'YONEX' })
+    closeModal()
     addToast('라켓이 추가되었습니다.', true)
-  }, [newRacket, addToast])
+  }, [newRacket, addToast, closeModal])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -202,10 +283,39 @@ export default function AdminRacketsPage() {
       {showAddModal && (
         <div
           className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowAddModal(false) }}
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal() }}
         >
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-extrabold text-[#111111] mb-5">새 라켓 추가</h2>
+
+            {/* URL 자동 추출 섹션 */}
+            <div className="mb-5 pb-5 border-b border-[#f0f0f0]">
+              <p className="text-xs font-bold text-[#555] mb-2">URL로 자동 입력</p>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={extractUrl}
+                  onChange={(e) => setExtractUrl(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleExtract() }}
+                  placeholder="쿠팡, 네이버쇼핑, 브랜드 공식몰 URL..."
+                  className="flex-1 h-10 px-3 rounded-xl bg-[#f8f8f8] border border-[#e5e5e5] text-sm text-[#111] placeholder:text-[#bbb] outline-none focus:border-[#beff00] transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={handleExtract}
+                  disabled={!extractUrl.trim() || extracting}
+                  className="h-10 px-4 rounded-xl bg-[#111] text-[#beff00] text-xs font-bold hover:bg-[#222] transition-colors disabled:opacity-40 whitespace-nowrap"
+                >
+                  {extracting ? '추출 중...' : '불러오기'}
+                </button>
+              </div>
+              {extractError && (
+                <p className="text-red-500 text-xs mt-1.5">{extractError}</p>
+              )}
+              <p className="text-[10px] text-[#bbb] mt-1.5">
+                무게·밸런스·강성·가격이 자동으로 입력됩니다. 수치(공격력 등)는 직접 입력하세요.
+              </p>
+            </div>
 
             {/* Brand */}
             <div className="mb-4">
@@ -241,7 +351,7 @@ export default function AdminRacketsPage() {
             </div>
 
             {/* Slug */}
-            <div className="mb-6">
+            <div className="mb-4">
               <label className="block text-xs font-bold text-[#555555] mb-1.5">
                 슬러그 <span className="text-[#999] font-normal">(URL 식별자)</span>
               </label>
@@ -254,10 +364,64 @@ export default function AdminRacketsPage() {
               />
             </div>
 
+            {/* Weight */}
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-[#555555] mb-1.5">무게</label>
+              <select
+                value={newRacket.weight}
+                onChange={(e) => setNewRacket((prev) => ({ ...prev, weight: e.target.value }))}
+                className="h-10 px-4 rounded-xl bg-[#f8f8f8] border border-[#e5e5e5] text-sm text-[#111111] outline-none focus:border-[#beff00] transition-colors w-full"
+              >
+                {WEIGHT_OPTIONS.map((o) => (
+                  <option key={o} value={o}>{o || '-'}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Balance */}
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-[#555555] mb-1.5">밸런스</label>
+              <select
+                value={newRacket.balance}
+                onChange={(e) => setNewRacket((prev) => ({ ...prev, balance: e.target.value }))}
+                className="h-10 px-4 rounded-xl bg-[#f8f8f8] border border-[#e5e5e5] text-sm text-[#111111] outline-none focus:border-[#beff00] transition-colors w-full"
+              >
+                {BALANCE_OPTIONS.map((o) => (
+                  <option key={o} value={o}>{o ? BALANCE_KO[o] : '-'}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Flex */}
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-[#555555] mb-1.5">강성</label>
+              <select
+                value={newRacket.flex}
+                onChange={(e) => setNewRacket((prev) => ({ ...prev, flex: e.target.value }))}
+                className="h-10 px-4 rounded-xl bg-[#f8f8f8] border border-[#e5e5e5] text-sm text-[#111111] outline-none focus:border-[#beff00] transition-colors w-full"
+              >
+                {FLEX_OPTIONS.map((o) => (
+                  <option key={o} value={o}>{o ? FLEX_KO[o] : '-'}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Price Range */}
+            <div className="mb-6">
+              <label className="block text-xs font-bold text-[#555555] mb-1.5">가격대</label>
+              <input
+                type="text"
+                value={newRacket.price_range}
+                onChange={(e) => setNewRacket((prev) => ({ ...prev, price_range: e.target.value }))}
+                placeholder="예: 5만원~10만원"
+                className="h-10 px-4 rounded-xl bg-[#f8f8f8] border border-[#e5e5e5] text-sm text-[#111111] placeholder:text-[#999999] outline-none focus:border-[#beff00] transition-colors w-full"
+              />
+            </div>
+
             {/* Actions */}
             <div className="flex gap-2">
               <button
-                onClick={() => { setShowAddModal(false); setNewRacket({ name: '', slug: '', brand: 'YONEX' }) }}
+                onClick={closeModal}
                 className="flex-1 h-10 rounded-xl border border-[#e5e5e5] text-sm font-semibold text-[#555555] hover:bg-[#f8f8f8] transition-colors"
               >
                 취소

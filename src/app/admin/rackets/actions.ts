@@ -67,6 +67,10 @@ export async function createRacket(data: {
   name: string
   slug: string
   brand: string
+  weight?: string
+  balance?: string
+  flex?: string
+  price_range?: string
 }): Promise<{ data: RacketRow | null; error: string | null }> {
   const supabase = createAdminClient()
   const { data: created, error } = await supabase
@@ -75,6 +79,10 @@ export async function createRacket(data: {
       name: data.name,
       slug: data.slug,
       brand: data.brand,
+      ...(data.weight ? { weight: data.weight } : {}),
+      ...(data.balance ? { balance: data.balance } : {}),
+      ...(data.flex ? { flex: data.flex } : {}),
+      ...(data.price_range ? { price_range: data.price_range } : {}),
     })
     .select(
       'id, slug, name, brand, weight, balance, flex, level, type, price_range, popular_rank, editor_pick, is_popular, status, stat_power, stat_control, stat_speed, stat_durability, stat_repulsion, stat_maneuver, created_at',
