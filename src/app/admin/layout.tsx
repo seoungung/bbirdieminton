@@ -52,7 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [loginLoading, setLoginLoading] = useState(false)
 
   useEffect(() => {
-    const stored = sessionStorage.getItem('admin_authed')
+    const stored = localStorage.getItem('admin_authed')
     if (stored === 'true') {
       setAuthed(true)
     }
@@ -73,14 +73,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       setError('비밀번호가 틀렸습니다.')
       return
     }
-    sessionStorage.setItem('admin_authed', 'true')
-    sessionStorage.setItem('admin_password', password)
+    localStorage.setItem('admin_authed', 'true')
+    localStorage.setItem('admin_password', password)
     setAuthed(true)
   }, [password])
 
   const handleLogout = useCallback(() => {
-    sessionStorage.removeItem('admin_authed')
-    sessionStorage.removeItem('admin_password')
+    localStorage.removeItem('admin_authed')
+    localStorage.removeItem('admin_password')
     window.location.reload()
   }, [])
 
