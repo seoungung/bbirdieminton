@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { getRacketsWithImages } from './images/actions'
 
 interface SummaryStats {
   total: number
@@ -9,23 +10,36 @@ interface SummaryStats {
   weekCount: number
 }
 
+interface ImageStats {
+  total: number
+  withImage: number
+}
+
 export default function AdminHomePage() {
   const [stats, setStats] = useState<SummaryStats | null>(null)
+  const [imageStats, setImageStats] = useState<ImageStats | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchStats() {
       try {
         const password = localStorage.getItem('admin_password')
-        const res = await fetch('/api/admin/stats', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password: password ?? '' }),
-        })
-        if (res.ok) {
-          const data = await res.json()
+        const [statsRes, rackets] = await Promise.all([
+          fetch('/api/admin/stats', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: password ?? '' }),
+          }),
+          getRacketsWithImages(),
+        ])
+        if (statsRes.ok) {
+          const data = await statsRes.json()
           setStats({ total: data.total, todayCount: data.todayCount, weekCount: data.weekCount })
         }
+        const withImage = rackets.filter(
+          (r) => r.image_url !== null && r.image_url.trim() !== '',
+        ).length
+        setImageStats({ total: rackets.length, withImage })
       } catch {
         // silently fail - stats will show as --
       } finally {
@@ -96,6 +110,40 @@ export default function AdminHomePage() {
             <p className="text-xs text-[#999999] mt-0.5">{label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Image status */}
+      <h2 className="text-sm font-bold text-[#555555] uppercase tracking-widest mb-4">이미지 현황</h2>
+      <div className="rounded-2xl bg-white border border-[#e5e5e5] p-5 mb-10">
+        {loading || imageStats === null ? (
+          <div className="flex items-center justify-center h-12">
+            <div className="w-5 h-5 border-2 border-[#e5e5e5] border-t-[#beff00] rounded-full animate-spin" />
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-bold text-[#111111]">
+                {imageStats.withImage} / {imageStats.total}개 등록 완료
+              </span>
+              <Link
+                href="/admin/images?filter=noimage"
+                className="text-xs text-[#999999] hover:text-[#111111] transition-colors"
+              >
+                미등록 {imageStats.total - imageStats.withImage}개 →
+              </Link>
+            </div>
+            <div className="w-full h-2.5 bg-[#f0f0f0] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[#beff00] rounded-full transition-all duration-500"
+                style={{
+                  width: imageStats.total > 0
+                    ? `${Math.round((imageStats.withImage / imageStats.total) * 100)}%`
+                    : '0%',
+                }}
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Shortcut cards */}

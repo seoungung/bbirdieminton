@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { getRackets, type RacketRow } from './actions'
+import { getRackets, createRacket, type RacketRow } from './actions'
 import RacketTableRow from './RacketTableRow'
 
 interface Toast {
@@ -34,6 +34,9 @@ export default function AdminRacketsPage() {
   const [search, setSearch] = useState('')
   const [brand, setBrand] = useState('전체')
   const [toasts, setToasts] = useState<Toast[]>([])
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [newRacket, setNewRacket] = useState({ name: '', slug: '', brand: 'YONEX' })
+  const [addLoading, setAddLoading] = useState(false)
 
   useEffect(() => {
     getRackets().then(({ data, error: err }) => {
@@ -48,6 +51,36 @@ export default function AdminRacketsPage() {
     setToasts((prev) => [...prev, { id, msg, ok }])
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3000)
   }, [])
+
+  const toSlug = (text: string) =>
+    text
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9가-힣\-]/g, '')
+
+  const handleAddRacket = useCallback(async () => {
+    if (!newRacket.name.trim() || !newRacket.slug.trim()) {
+      addToast('라켓명과 슬러그를 입력하세요.', false)
+      return
+    }
+    setAddLoading(true)
+    const { data, error: err } = await createRacket({
+      name: newRacket.name.trim(),
+      slug: newRacket.slug.trim(),
+      brand: newRacket.brand,
+    })
+    setAddLoading(false)
+    if (err) {
+      addToast(`추가 실패: ${err}`, false)
+      return
+    }
+    if (data) {
+      setRackets((prev) => [data, ...prev])
+    }
+    setShowAddModal(false)
+    setNewRacket({ name: '', slug: '', brand: 'YONEX' })
+    addToast('라켓이 추가되었습니다.', true)
+  }, [newRacket, addToast])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -66,11 +99,17 @@ export default function AdminRacketsPage() {
         <p className="text-[#beff00] text-[10px] font-bold uppercase tracking-widest mb-1">
           Admin / Rackets
         </p>
-        <div className="flex items-baseline gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <h1 className="text-2xl font-extrabold text-[#111111]">라켓 데이터 관리</h1>
           {!loading && (
             <span className="text-sm text-[#999999]">총 {rackets.length}개</span>
           )}
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="ml-auto px-4 py-2 rounded-xl bg-[#beff00] text-black font-bold text-sm hover:bg-[#a8e600] transition-colors"
+          >
+            + 새 라켓 추가
+          </button>
         </div>
       </div>
 
@@ -156,6 +195,82 @@ export default function AdminRacketsPage() {
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Add Racket Modal */}
+      {showAddModal && (
+        <div
+          className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowAddModal(false) }}
+        >
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl">
+            <h2 className="text-lg font-extrabold text-[#111111] mb-5">새 라켓 추가</h2>
+
+            {/* Brand */}
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-[#555555] mb-1.5">브랜드</label>
+              <select
+                value={newRacket.brand}
+                onChange={(e) => setNewRacket((prev) => ({ ...prev, brand: e.target.value }))}
+                className="h-10 px-4 rounded-xl bg-[#f8f8f8] border border-[#e5e5e5] text-sm text-[#111111] outline-none focus:border-[#beff00] transition-colors w-full"
+              >
+                {BRANDS.filter((b) => b !== '전체').map((b) => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Racket Name */}
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-[#555555] mb-1.5">라켓명</label>
+              <input
+                type="text"
+                value={newRacket.name}
+                onChange={(e) => {
+                  const name = e.target.value
+                  setNewRacket((prev) => ({
+                    ...prev,
+                    name,
+                    slug: toSlug(`${prev.brand}-${name}`),
+                  }))
+                }}
+                placeholder="예: NANOFLARE 100"
+                className="h-10 px-4 rounded-xl bg-[#f8f8f8] border border-[#e5e5e5] text-sm text-[#111111] placeholder:text-[#999999] outline-none focus:border-[#beff00] transition-colors w-full"
+              />
+            </div>
+
+            {/* Slug */}
+            <div className="mb-6">
+              <label className="block text-xs font-bold text-[#555555] mb-1.5">
+                슬러그 <span className="text-[#999] font-normal">(URL 식별자)</span>
+              </label>
+              <input
+                type="text"
+                value={newRacket.slug}
+                onChange={(e) => setNewRacket((prev) => ({ ...prev, slug: e.target.value }))}
+                placeholder="예: yonex-nanoflare-100"
+                className="h-10 px-4 rounded-xl bg-[#f8f8f8] border border-[#e5e5e5] text-sm text-[#111111] placeholder:text-[#999999] outline-none focus:border-[#beff00] transition-colors w-full"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setShowAddModal(false); setNewRacket({ name: '', slug: '', brand: 'YONEX' }) }}
+                className="flex-1 h-10 rounded-xl border border-[#e5e5e5] text-sm font-semibold text-[#555555] hover:bg-[#f8f8f8] transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleAddRacket}
+                disabled={addLoading}
+                className="flex-1 h-10 rounded-xl bg-[#beff00] text-black font-bold text-sm hover:bg-[#a8e600] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {addLoading ? '추가 중...' : '추가하기'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

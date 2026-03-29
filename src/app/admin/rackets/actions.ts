@@ -62,3 +62,24 @@ export async function updateRacketField(
 
   return { success: true }
 }
+
+export async function createRacket(data: {
+  name: string
+  slug: string
+  brand: string
+}): Promise<{ data: RacketRow | null; error: string | null }> {
+  const supabase = createAdminClient()
+  const { data: created, error } = await supabase
+    .from('rackets')
+    .insert({
+      name: data.name,
+      slug: data.slug,
+      brand: data.brand,
+    })
+    .select(
+      'id, slug, name, brand, weight, balance, flex, level, type, price_range, popular_rank, editor_pick, is_popular, status, stat_power, stat_control, stat_speed, stat_durability, stat_repulsion, stat_maneuver, created_at',
+    )
+    .single()
+  if (error) return { data: null, error: error.message }
+  return { data: created as RacketRow, error: null }
+}
