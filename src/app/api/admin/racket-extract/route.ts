@@ -27,7 +27,30 @@ export async function POST(req: NextRequest) {
     }
 
     const text = await res.text()
+
+    // 차단/에러 페이지 감지
+    const BLOCKED_SIGNALS = [
+      'access denied', 'robot', '로봇이 아닙니다', 'captcha',
+      '접근이 거부', '차단', 'blocked', 'forbidden',
+      'just a moment', 'cloudflare',
+    ]
+    const textLowerCheck = text.slice(0, 500).toLowerCase()
+    if (BLOCKED_SIGNALS.some(s => textLowerCheck.includes(s))) {
+      return Response.json(
+        { error: '이 사이트는 스크래핑을 차단하고 있어요. 브랜드 공식몰이나 다른 쇼핑몰 URL을 시도해보세요.' },
+        { status: 400 },
+      )
+    }
+
     const extracted = parseRacketInfo(text, url)
+
+    // 유효한 데이터가 거의 없으면 실패로 처리
+    if (!extracted.name && !extracted.brand && !extracted.weight) {
+      return Response.json(
+        { error: '라켓 정보를 찾을 수 없어요. 다른 URL을 시도해보세요.' },
+        { status: 400 },
+      )
+    }
 
     return Response.json(extracted)
   } catch (e) {
