@@ -42,6 +42,21 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // 단종 / 품절 / 구매 불가 감지
+    const textLower = text.toLowerCase()
+    const UNAVAILABLE_SIGNALS = [
+      '단종', '생산중단', '판매종료', '판매 종료', '단종된', '단종 제품',
+      '품절', '일시품절', '재고없음', '재고 없음', '입고미정',
+      'discontinued', 'out of stock', 'no longer available', 'sold out',
+    ]
+    const foundUnavailable = UNAVAILABLE_SIGNALS.find(s => textLower.includes(s))
+    if (foundUnavailable) {
+      return Response.json(
+        { error: `구매 불가 제품으로 보여요 ("${foundUnavailable}" 감지). 현재 판매 중인 제품 URL을 사용해주세요.` },
+        { status: 400 },
+      )
+    }
+
     const extracted = parseRacketInfo(text, url)
 
     // 유효한 데이터가 거의 없으면 실패로 처리
