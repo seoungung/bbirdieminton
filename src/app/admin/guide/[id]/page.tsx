@@ -24,6 +24,8 @@ export default function EditGuidePage({ params }: EditGuidePageProps) {
   const [coverPreview, setCoverPreview] = useState('')
   const [content, setContent] = useState('')
   const [published, setPublished] = useState(false)
+  const [publishMode, setPublishMode] = useState<'draft' | 'scheduled' | 'publish'>('draft')
+  const [publishAt, setPublishAt] = useState('')
   const [focusKeyword, setFocusKeyword] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -40,6 +42,14 @@ export default function EditGuidePage({ params }: EditGuidePageProps) {
       setCoverPreview(guide.cover_image)
       setContent(guide.content)
       setPublished(guide.published)
+      if (guide.published) {
+        setPublishMode('publish')
+      } else if ((guide as { publish_at?: string | null }).publish_at) {
+        setPublishMode('scheduled')
+        setPublishAt((guide as { publish_at?: string | null }).publish_at ?? '')
+      } else {
+        setPublishMode('draft')
+      }
       setLoading(false)
     }
     load()
@@ -55,13 +65,16 @@ export default function EditGuidePage({ params }: EditGuidePageProps) {
     else alert(`커버 이미지 업로드 실패: ${result.error}`)
   }
 
-  async function handleSave(pub: boolean) {
+  async function handleSave() {
     if (!title.trim()) { alert('제목을 입력하세요.'); return }
     if (!slug.trim()) { alert('슬러그를 입력하세요.'); return }
+    if (publishMode === 'scheduled' && !publishAt) { alert('예약 발행 날짜를 입력하세요.'); return }
     setSaving(true)
     const result = await updateGuide(id, {
       slug: slug.trim(), title: title.trim(), excerpt: excerpt.trim(),
-      content, cover_image: coverImage, published: pub,
+      content, cover_image: coverImage,
+      published: publishMode === 'publish',
+      publish_at: publishMode === 'scheduled' ? new Date(publishAt).toISOString() : null,
     })
     setSaving(false)
     if (result.success) router.push('/admin/guide')
@@ -148,14 +161,40 @@ export default function EditGuidePage({ params }: EditGuidePageProps) {
             <GuideEditor content={content} onChange={setContent} />
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-3 pt-6 border-t border-[#e5e5e5]">
-            <button onClick={() => handleSave(false)} disabled={saving} className="px-5 py-2.5 rounded-xl border border-[#e5e5e5] text-[#555555] font-bold text-sm hover:bg-[#f0f0f0] transition-colors disabled:opacity-50">임시저장</button>
-            <button onClick={() => handleSave(true)} disabled={saving} className="px-5 py-2.5 rounded-xl bg-[#beff00] text-black font-bold text-sm hover:bg-[#a8e600] transition-colors disabled:opacity-50">
-              {published ? '업데이트' : '발행하기'}
-            </button>
-            <div className="flex-1" />
-            <button onClick={handleDelete} className="px-4 py-2.5 rounded-xl border border-red-200 text-red-500 font-bold text-sm hover:bg-red-50 transition-colors">삭제</button>
+          {/* Publish settings */}
+          <div className="pt-6 border-t border-[#e5e5e5]">
+            <label className="block text-xs font-bold text-[#555555] mb-2">발행 설정</label>
+            <div className="flex gap-2 mb-3">
+              {(['draft', 'scheduled', 'publish'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setPublishMode(mode)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    publishMode === mode
+                      ? 'bg-[#111] text-[#beff00]'
+                      : 'bg-[#f0f0f0] text-[#555]'
+                  }`}
+                >
+                  {mode === 'draft' ? '임시저장' : mode === 'scheduled' ? '예약 발행' : '즉시 발행'}
+                </button>
+              ))}
+            </div>
+            {publishMode === 'scheduled' && (
+              <input
+                type="datetime-local"
+                value={publishAt}
+                onChange={e => setPublishAt(e.target.value)}
+                className="h-10 px-3 rounded-xl bg-[#f8f8f8] border border-[#e5e5e5] text-sm text-[#111] outline-none focus:border-[#beff00] mb-3"
+              />
+            )}
+            <div className="flex items-center gap-3">
+              <button onClick={handleSave} disabled={saving} className="px-5 py-2.5 rounded-xl bg-[#beff00] text-black font-bold text-sm hover:bg-[#a8e600] transition-colors disabled:opacity-50">
+                {saving ? '저장 중...' : publishMode === 'draft' ? '임시저장' : publishMode === 'scheduled' ? '예약 저장' : published ? '업데이트' : '발행하기'}
+              </button>
+              <div className="flex-1" />
+              <button onClick={handleDelete} className="px-4 py-2.5 rounded-xl border border-red-200 text-red-500 font-bold text-sm hover:bg-red-50 transition-colors">삭제</button>
+            </div>
           </div>
         </div>
 

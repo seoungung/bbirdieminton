@@ -9,6 +9,7 @@ interface GuideData {
   content: string
   cover_image: string
   published: boolean
+  publish_at?: string | null
 }
 
 interface Guide extends GuideData {
@@ -17,11 +18,11 @@ interface Guide extends GuideData {
   updated_at: string
 }
 
-export async function createGuide(data: GuideData): Promise<{ success: boolean; error?: string }> {
+export async function createGuide(data: GuideData): Promise<{ success: boolean; id?: string; error?: string }> {
   const supabase = createAdminClient()
-  const { error } = await supabase.from('guides').insert([data])
+  const { data: inserted, error } = await supabase.from('guides').insert([data]).select('id').single()
   if (error) return { success: false, error: error.message }
-  return { success: true }
+  return { success: true, id: (inserted as { id: string }).id }
 }
 
 export async function updateGuide(

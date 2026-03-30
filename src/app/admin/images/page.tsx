@@ -142,11 +142,13 @@ function ImageSlot({ slug, index, url, loading, onUpload, onDelete }: SlotProps)
 interface RacketRowProps {
   racket: RacketImageRow
   loadingSlots: Record<string, boolean>
+  autoSearching: boolean
   onUpload: (slug: string, index: number, file: File) => void
   onDelete: (slug: string, index: number) => void
+  onAutoSearch: (racket: RacketImageRow) => void
 }
 
-function RacketRow({ racket, loadingSlots, onUpload, onDelete }: RacketRowProps) {
+function RacketRow({ racket, loadingSlots, autoSearching, onUpload, onDelete, onAutoSearch }: RacketRowProps) {
   const urls = parseImageUrls(racket.image_url)
   const filledCount = urls.filter((u) => u.trim() !== '').length
 
@@ -159,6 +161,47 @@ function RacketRow({ racket, loadingSlots, onUpload, onDelete }: RacketRowProps)
         <p className="text-xs text-[#999] mt-1">
           {filledCount}/{SLOT_COUNT} 이미지
         </p>
+        {filledCount === 0 && (
+          <button
+            type="button"
+            onClick={() => onAutoSearch(racket)}
+            disabled={autoSearching}
+            className="mt-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-[#f0f0f0] text-[#555] hover:bg-[#e5e5e5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+          >
+            {autoSearching ? (
+              <>
+                <svg
+                  className="w-3 h-3 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+                검색 중...
+              </>
+            ) : (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                자동 검색
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {/* 이미지 슬롯 */}
@@ -189,6 +232,10 @@ export default function AdminImagesPage() {
   const [query, setQuery] = useState('')
   const [onlyNoImage, setOnlyNoImage] = useState(false)
   const [loadingSlots, setLoadingSlots] = useState<Record<string, boolean>>({})
+  const [autoSearchingIds, setAutoSearchingIds] = useState<Set<string>>(new Set())
+  const [bulkSearchProgress, setBulkSearchProgress] = useState<{ current: number; total: number } | null>(null)
+  const [isBulkSearching, setIsBulkSearching] = useState(false)
+  const bulkAbortRef = useRef(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -219,6 +266,18 @@ export default function AdminImagesPage() {
         const urls = parseImageUrls(r.image_url)
         urls[index] = newUrl
         // PostgreSQL 배열 형식으로 재구성
+        const escaped = urls.map((u) => `"${u.replace(/"/g, '\\"')}"`)
+        return { ...r, image_url: `{${escaped.join(',')}}` }
+      }),
+    )
+  }
+
+  function refreshRacketBySlot(id: string, slot: number, newUrl: string) {
+    setRackets((prev) =>
+      prev.map((r) => {
+        if (r.id !== id) return r
+        const urls = parseImageUrls(r.image_url)
+        urls[slot] = newUrl
         const escaped = urls.map((u) => `"${u.replace(/"/g, '\\"')}"`)
         return { ...r, image_url: `{${escaped.join(',')}}` }
       }),
@@ -268,6 +327,104 @@ export default function AdminImagesPage() {
     }
   }
 
+  async function handleAutoSearch(racket: RacketImageRow) {
+    setAutoSearchingIds((prev) => new Set(prev).add(racket.id))
+    try {
+      const res = await fetch('/api/admin/racket-image-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          racketId: racket.id,
+          racketName: racket.name,
+          brand: racket.brand,
+          password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? prompt('관리자 비밀번호를 입력하세요') ?? '',
+        }),
+      })
+      const json = await res.json()
+      if (res.ok && json.url) {
+        refreshRacketBySlot(racket.id, json.slot, json.url)
+        showToast('이미지를 자동으로 찾았습니다.', true)
+      } else {
+        showToast(json.error ?? '자동 검색에 실패했습니다.', false)
+      }
+    } catch {
+      showToast('자동 검색 중 오류가 발생했습니다.', false)
+    } finally {
+      setAutoSearchingIds((prev) => {
+        const next = new Set(prev)
+        next.delete(racket.id)
+        return next
+      })
+    }
+  }
+
+  async function handleBulkAutoSearch() {
+    const noImageRackets = rackets.filter((r) => {
+      const urls = parseImageUrls(r.image_url)
+      return urls.every((u) => u.trim() === '')
+    })
+    if (noImageRackets.length === 0) {
+      showToast('이미지 없는 라켓이 없습니다.', true)
+      return
+    }
+
+    const password = prompt('관리자 비밀번호를 입력하세요') ?? ''
+    if (!password) return
+
+    bulkAbortRef.current = false
+    setIsBulkSearching(true)
+    setBulkSearchProgress({ current: 0, total: noImageRackets.length })
+
+    for (let i = 0; i < noImageRackets.length; i++) {
+      if (bulkAbortRef.current) break
+
+      const racket = noImageRackets[i]
+      setBulkSearchProgress({ current: i + 1, total: noImageRackets.length })
+      setAutoSearchingIds((prev) => new Set(prev).add(racket.id))
+
+      try {
+        const res = await fetch('/api/admin/racket-image-search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            racketId: racket.id,
+            racketName: racket.name,
+            brand: racket.brand,
+            password,
+          }),
+        })
+        const json = await res.json()
+        if (res.ok && json.url) {
+          refreshRacketBySlot(racket.id, json.slot, json.url)
+        }
+      } catch {
+        // 개별 실패는 무시하고 계속 진행
+      } finally {
+        setAutoSearchingIds((prev) => {
+          const next = new Set(prev)
+          next.delete(racket.id)
+          return next
+        })
+      }
+
+      // 요청 간격 (rate limit 방지)
+      if (i < noImageRackets.length - 1 && !bulkAbortRef.current) {
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+      }
+    }
+
+    setIsBulkSearching(false)
+    setBulkSearchProgress(null)
+    showToast('전체 자동 검색이 완료되었습니다.', true)
+  }
+
+  function handleBulkStop() {
+    bulkAbortRef.current = true
+    setIsBulkSearching(false)
+    setBulkSearchProgress(null)
+    showToast('자동 검색이 중지되었습니다.', false)
+  }
+
   const noImageCount = rackets.filter((r) => {
     const urls = parseImageUrls(r.image_url)
     return urls.every((u) => u.trim() === '')
@@ -288,7 +445,7 @@ export default function AdminImagesPage() {
   return (
     <div className="px-4 md:px-8 py-8 max-w-5xl mx-auto">
       <h1 className="text-2xl font-extrabold text-[#111111] mb-6">라켓 이미지 관리</h1>
-        {/* 검색바 + 토글 */}
+        {/* 검색바 + 토글 + 전체 자동 검색 */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <input
             type="search"
@@ -328,6 +485,52 @@ export default function AdminImagesPage() {
               </span>
             )}
           </button>
+
+          {/* 전체 자동 검색 버튼 */}
+          {noImageCount > 0 && (
+            isBulkSearching ? (
+              <button
+                type="button"
+                onClick={handleBulkStop}
+                className="flex items-center gap-2 h-10 px-4 rounded-xl border border-red-300 bg-red-50 text-red-600 text-sm font-medium hover:bg-red-100 transition-colors whitespace-nowrap"
+              >
+                <svg
+                  className="w-3.5 h-3.5 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+                {bulkSearchProgress
+                  ? `${bulkSearchProgress.current}/${bulkSearchProgress.total} 검색 중... (중지)`
+                  : '중지'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleBulkAutoSearch}
+                className="flex items-center gap-2 h-10 px-4 rounded-xl border border-[#e5e5e5] bg-white text-[#555] text-sm font-medium hover:border-[#beff00] hover:text-[#111] transition-colors whitespace-nowrap"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                전체 자동 검색
+              </button>
+            )
+          )}
         </div>
 
         {/* 로딩 상태 */}
@@ -365,8 +568,10 @@ export default function AdminImagesPage() {
                   key={racket.id}
                   racket={racket}
                   loadingSlots={loadingSlots}
+                  autoSearching={autoSearchingIds.has(racket.id)}
                   onUpload={handleUpload}
                   onDelete={handleDelete}
+                  onAutoSearch={handleAutoSearch}
                 />
               ))}
               {filtered.length === 0 && (
