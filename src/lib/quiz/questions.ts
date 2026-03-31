@@ -7,12 +7,12 @@ export interface QuizQuestion {
 export const QUIZ_QUESTIONS: QuizQuestion[] = [
   {
     id: 1,
-    question: '배드민턴을 시작한 지 얼마나 됐나요?',
+    question: '셔틀콕을 원하는 방향으로 보낼 수 있나요?',
     options: [
-      { label: '아직 시작 안 했어요', score: 1 },
-      { label: '3개월 미만', score: 2 },
-      { label: '3개월~1년', score: 3 },
-      { label: '1년 이상', score: 4 },
+      { label: '맞히기도 아직 어려워요', score: 1 },
+      { label: '맞히긴 하는데 방향이 들쭉날쭉해요', score: 2 },
+      { label: '대체로 원하는 방향으로 가요', score: 3 },
+      { label: '코너를 콕 집어서 보낼 수 있어요', score: 4 },
     ],
   },
   {
@@ -127,12 +127,12 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 13,
-    question: '일주일에 몇 번이나 배드민턴을 치나요?',
+    question: '드라이브(낮고 빠른 직선 샷)를 주고받을 수 있나요?',
     options: [
-      { label: '거의 안 쳐요 (월 1회 이하)', score: 1 },
-      { label: '주 1회 정도', score: 2 },
-      { label: '주 2~3회', score: 3 },
-      { label: '주 4회 이상', score: 4 },
+      { label: '드라이브가 뭔지 잘 몰라요', score: 1 },
+      { label: '알지만 대부분 네트에 걸려요', score: 2 },
+      { label: '짧은 드라이브 랠리는 가능해요', score: 3 },
+      { label: '드라이브로 압박하며 포인트를 따요', score: 4 },
     ],
   },
   {
