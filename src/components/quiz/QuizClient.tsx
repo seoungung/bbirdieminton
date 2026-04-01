@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
+import Image from 'next/image'
 import { QUIZ_QUESTIONS, calcLevel } from '@/lib/quiz/questions'
 
 type Step = 'gender' | 'quiz'
@@ -145,6 +146,20 @@ export function QuizClient() {
               {current.question}
             </h2>
           </div>
+
+          {/* 문항 이미지 */}
+          {current.image && (
+            <div className="mb-8 rounded-2xl overflow-hidden bg-[#1a1a1a] border border-white/8">
+              <Image
+                src={current.image}
+                alt={current.question}
+                width={600}
+                height={340}
+                className="w-full h-auto object-cover"
+                priority={currentIdx === 0}
+              />
+            </div>
+          )}
 
           {/* 보기 */}
           <div className="space-y-3">
