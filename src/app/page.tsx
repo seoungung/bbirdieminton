@@ -10,10 +10,10 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'birdieminton | 배드민턴, 제대로 시작하는 법',
-  description: '배린이를 위한 라켓 도감. 레벨 테스트로 내 실력을 진단하고 딱 맞는 라켓을 찾아보세요.',
+  description: '"라켓 쿠팡에서 샀는데 괜찮은 건가요?" 이제 기준이 생겼어요. 레벨 테스트로 내 실력을 진단하고 딱 맞는 라켓을 찾아보세요.',
   openGraph: {
     title: 'birdieminton | 배드민턴, 제대로 시작하는 법',
-    description: '배린이를 위한 라켓 도감. 레벨 테스트로 내 실력을 진단하고 딱 맞는 라켓을 찾아보세요.',
+    description: '"라켓 쿠팡에서 샀는데 괜찮은 건가요?" 이제 기준이 생겼어요. 레벨 테스트로 내 실력을 진단하고 딱 맞는 라켓을 찾아보세요.',
   },
 }
 
