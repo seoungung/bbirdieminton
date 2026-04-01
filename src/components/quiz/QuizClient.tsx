@@ -149,13 +149,12 @@ export function QuizClient() {
 
           {/* 문항 이미지 */}
           {current.image && (
-            <div className="mb-8 rounded-2xl overflow-hidden bg-[#1a1a1a] border border-white/8">
+            <div className="relative mb-8 rounded-2xl overflow-hidden bg-[#1a1a1a] border border-white/8 aspect-[1200/857]">
               <Image
                 src={current.image}
                 alt={current.question}
-                width={600}
-                height={340}
-                className="w-full h-auto object-cover"
+                fill
+                className="object-cover"
                 priority={currentIdx === 0}
               />
             </div>
