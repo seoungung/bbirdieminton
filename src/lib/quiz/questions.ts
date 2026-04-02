@@ -197,9 +197,37 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
 
 export type QuizLevel = '왕초보' | '초심자' | 'D조' | 'C조'
 
-export function calcLevel(totalScore: number): QuizLevel {
-  if (totalScore <= 27) return '왕초보'
-  if (totalScore <= 38) return '초심자'
-  if (totalScore <= 52) return 'D조'
+// Q14(index 13): 라켓 구매 기준 — 레벨 진단 점수에서 제외 (장비 인식은 실력과 무관)
+// 제외 후 범위: 16~64점
+export function calcLevel(answers: number[]): QuizLevel {
+  const totalScore = answers.reduce((sum, score, idx) =>
+    idx === 13 ? sum : sum + score, 0)
+  if (totalScore <= 25) return '왕초보'
+  if (totalScore <= 36) return '초심자'
+  if (totalScore <= 49) return 'D조'
   return 'C조'
+}
+
+// 문항별 답변 점수(1~4)를 레이더 6축으로 변환 (0~100)
+// 파워: Q4(3), Q11(10) — 스매시·클리어 파워
+// 컨트롤: Q1(0), Q3(2), Q8(7), Q9(8) — 방향·서브·백핸드·그립
+// 스피드: Q2(1), Q5(4), Q13(12) — 랠리·풋워크·드라이브
+// 체력: Q7(6), Q12(11) — 게임 경험·약점 인식
+// 전술: Q10(9), Q15(14), Q17(16) — 복식·상대읽기·스타일
+// 네트: Q6(5), Q16(15) — 드롭/헤어핀·네트플레이
+export function calcRadar(scores: number[]): number[] {
+  const s = (i: number) => scores[i] ?? 2
+  const axisScore = (...idxs: number[]): number => {
+    const vals = idxs.map(i => s(i))
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length
+    return Math.round(((avg - 1) / 3) * 100)
+  }
+  return [
+    axisScore(3, 10),       // 파워
+    axisScore(0, 2, 7, 8),  // 컨트롤
+    axisScore(1, 4, 12),    // 스피드
+    axisScore(6, 11),       // 체력
+    axisScore(9, 14, 16),   // 전술
+    axisScore(5, 15),       // 네트
+  ]
 }

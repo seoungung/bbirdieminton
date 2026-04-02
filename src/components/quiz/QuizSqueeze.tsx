@@ -30,22 +30,6 @@ export function QuizSqueeze({ level, onUnlock }: Props) {
 
   return (
     <div className="bg-white border border-[#e5e5e5] rounded-2xl p-6 mt-2 shadow-sm">
-      {/* 소셜 프루프 */}
-      <div className="flex items-center justify-center gap-1.5 mb-4">
-        <div className="flex -space-x-1.5">
-          {['#beff00', '#60a5fa', '#f472b6'].map((color, i) => (
-            <div
-              key={i}
-              className="w-6 h-6 rounded-full border-2 border-white"
-              style={{ background: color }}
-            />
-          ))}
-        </div>
-        <span className="text-xs text-[#999999]">
-          이미 <span className="text-[#111111] font-semibold">2,400+</span>명이 확인했어요
-        </span>
-      </div>
-
       <p className="text-center text-base font-bold text-[#111111] mb-1">이메일 하나로 전체 공개</p>
       <p className="text-center text-xs text-[#999999] mb-5">
         스팸 없이 <span className="text-[#111111] font-medium">맞춤 라켓 가이드</span>만 보내드려요

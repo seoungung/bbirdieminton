@@ -4,6 +4,7 @@ import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Copy, Check, RotateCcw, ChevronRight } from 'lucide-react'
 import { LEVEL_RESULTS } from '@/lib/quiz/results'
+import { calcRadar } from '@/lib/quiz/questions'
 import { QuizRadarChart } from '@/components/quiz/QuizRadarChart'
 import { QuizSqueeze } from '@/components/quiz/QuizSqueeze'
 import { createClient } from '@/lib/supabase/client'
@@ -18,19 +19,28 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
 
   const [unlocked, setUnlocked] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [personalRadar, setPersonalRadar] = useState<number[] | null>(null)
   const [recommendedRackets, setRecommendedRackets] = useState<{
     id: string; slug: string; name: string; brand: string;
     price_range: string | null; stat_power: number | null; image_url: string | null;
   }[]>([])
 
-  // 블러 해제 조건 체크
+  // 개인화 레이더 + 블러 해제 조건 체크
   useEffect(() => {
-    // 1. localStorage 확인
+    // 개인화 레이더
+    const stored = localStorage.getItem('quiz_scores')
+    if (stored) {
+      try {
+        const scores = JSON.parse(stored) as number[]
+        setPersonalRadar(calcRadar(scores))
+      } catch {}
+    }
+
+    // 블러 해제
     if (localStorage.getItem('quiz_unlocked') === 'true') {
       setUnlocked(true)
       return
     }
-    // 2. 로그인 확인
     const supabase = createClient()
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) setUnlocked(true)
@@ -59,48 +69,12 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
     setTimeout(() => setCopied(false), 2000)
   }
 
-  // 블러 구간 내부 콘텐츠 (공통으로 사용)
+  const radarData = personalRadar ?? result.radarData
+
+  // 블러 구간 내부 콘텐츠 — 추천 라켓 최상단
   const lockedContent = (
     <>
-      {/* 라켓 조건 */}
-      <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
-        <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">내 라켓 조건</p>
-        <div className="space-y-3">
-          {[
-            { label: '추천 무게', value: result.racketCondition.weight },
-            { label: '밸런스', value: result.racketCondition.balance },
-            { label: '강성 (Flex)', value: result.racketCondition.flex },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex items-start justify-between gap-4">
-              <span className="text-sm text-white/40 shrink-0">{label}</span>
-              <span className="text-sm text-white font-semibold text-right">{value}</span>
-            </div>
-          ))}
-        </div>
-        <div className="mt-4 pt-4 border-t border-white/6">
-          <p className="text-xs text-white/40 leading-relaxed">{result.racketCondition.reason}</p>
-        </div>
-      </div>
-
-      {/* 능력치 해석 */}
-      <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
-        <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">능력치 해석</p>
-        <div className="space-y-3">
-          {result.radarInsights.map((insight, i) => {
-            const [label, ...rest] = insight.split(': ')
-            return (
-              <div key={i} className="flex items-start gap-3">
-                <span className="text-xs font-bold text-[#beff00] bg-[#beff00]/10 px-2 py-0.5 rounded-md shrink-0 mt-0.5 w-10 text-center">
-                  {label}
-                </span>
-                <p className="text-sm text-white/60 leading-relaxed">{rest.join(': ')}</p>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* 추천 라켓 3종 */}
+      {/* 추천 라켓 — 첫 번째 */}
       <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
         <div className="flex items-center justify-between mb-4">
           <p className="text-xs font-semibold text-white/40 uppercase tracking-widest">추천 라켓</p>
@@ -138,6 +112,26 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
         </div>
       </div>
 
+      {/* 라켓 조건 */}
+      <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
+        <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">내 라켓 조건</p>
+        <div className="space-y-3">
+          {[
+            { label: '추천 무게', value: result.racketCondition.weight },
+            { label: '밸런스', value: result.racketCondition.balance },
+            { label: '강성 (Flex)', value: result.racketCondition.flex },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-start justify-between gap-4">
+              <span className="text-sm text-white/40 shrink-0">{label}</span>
+              <span className="text-sm text-white font-semibold text-right">{value}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 pt-4 border-t border-white/6">
+          <p className="text-xs text-white/40 leading-relaxed">{result.racketCondition.reason}</p>
+        </div>
+      </div>
+
       {/* 이번 달 집중 포인트 */}
       <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
         <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">이번 달 이것만 하세요</p>
@@ -167,13 +161,31 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
       </div>
 
       {/* 다음 레벨 */}
-      <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6">
+      <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
         <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">다음 목표</p>
         <div className="flex items-center gap-3 mb-3">
           <div className="px-3 py-1 bg-white/8 rounded-full text-sm font-bold text-white">{result.nextLevel}</div>
           <span className="text-white/30 text-sm">을 향해</span>
         </div>
         <p className="text-sm text-white/60 leading-relaxed">{result.nextLevelTip}</p>
+      </div>
+
+      {/* 능력치 해석 */}
+      <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6">
+        <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">능력치 해석</p>
+        <div className="space-y-3">
+          {result.radarInsights.map((insight, i) => {
+            const [label, ...rest] = insight.split(': ')
+            return (
+              <div key={i} className="flex items-start gap-3">
+                <span className="text-xs font-bold text-[#beff00] bg-[#beff00]/10 px-2 py-0.5 rounded-md shrink-0 mt-0.5 w-10 text-center">
+                  {label}
+                </span>
+                <p className="text-sm text-white/60 leading-relaxed">{rest.join(': ')}</p>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </>
   )
@@ -201,11 +213,16 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
           <p className="text-white/70 text-[15px] leading-[1.85]">{result.description}</p>
         </div>
 
-        {/* 레이더 차트 */}
+        {/* 레이더 차트 — 개인화 데이터 사용 */}
         <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
-          <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-5">능력치 분석</p>
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-xs font-semibold text-white/40 uppercase tracking-widest">능력치 분석</p>
+            {personalRadar && (
+              <span className="text-[10px] text-[#beff00]/60 bg-[#beff00]/8 px-2 py-0.5 rounded-full">내 답변 기반</span>
+            )}
+          </div>
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            <QuizRadarChart labels={result.radarLabels} data={result.radarData} />
+            <QuizRadarChart labels={result.radarLabels} data={radarData} />
             <div className="w-full space-y-2">
               {result.radarLabels.map((label, i) => (
                 <div key={label} className="flex items-center gap-3">
@@ -213,17 +230,17 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
                   <div className="flex-1 h-1.5 bg-white/8 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-[#beff00] rounded-full transition-all duration-700"
-                      style={{ width: `${result.radarData[i]}%` }}
+                      style={{ width: `${radarData[i]}%` }}
                     />
                   </div>
-                  <span className="text-xs text-white/30 w-8 text-right">{result.radarData[i]}</span>
+                  <span className="text-xs text-white/30 w-8 text-right">{radarData[i]}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* 공감 포인트 - 공개 영역 */}
+        {/* 공감 포인트 */}
         <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
           <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-4">이런 경험 있죠?</p>
           <div className="space-y-3">
@@ -236,21 +253,24 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
           </div>
         </div>
 
-        {/* 공유 버튼 */}
+        {/* 공유 버튼 — 결과 공유 강조 */}
         <div className="flex gap-2 mb-8">
           <button
             onClick={handleCopy}
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#1a1a1a] border border-white/8 rounded-2xl text-sm text-white/60 hover:text-white hover:border-white/20 transition-colors"
+            className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-bold transition-all ${
+              copied
+                ? 'bg-[#beff00] text-[#0a0a0a]'
+                : 'bg-[#beff00]/10 border border-[#beff00]/30 text-[#beff00] hover:bg-[#beff00]/20'
+            }`}
           >
-            {copied ? <Check size={15} className="text-[#beff00]" /> : <Copy size={15} />}
-            {copied ? '복사됨!' : '링크 복사'}
+            {copied ? <Check size={15} /> : <Copy size={15} />}
+            {copied ? '복사됨!' : '결과 공유하기'}
           </button>
           <Link
             href="/quiz"
-            className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#1a1a1a] border border-white/8 rounded-2xl text-sm text-white/60 hover:text-white hover:border-white/20 transition-colors"
+            className="flex items-center justify-center gap-2 px-5 py-3.5 bg-[#1a1a1a] border border-white/8 rounded-2xl text-sm text-white/50 hover:text-white hover:border-white/20 transition-colors"
           >
             <RotateCcw size={15} />
-            다시 테스트
           </Link>
         </div>
 
@@ -274,7 +294,7 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
             </div>
           )}
 
-          {/* 블러 상태: 콘텐츠 미리보기 + 그라데이션 */}
+          {/* 블러 상태 */}
           {!unlocked && (
             <>
               <div className="relative" style={{ maxHeight: '280px', overflow: 'hidden' }}>
@@ -283,20 +303,26 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
                 </div>
                 <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
               </div>
-
-              {/* 스퀴즈 폼 */}
               <QuizSqueeze level={level} onUnlock={() => setUnlocked(true)} />
             </>
           )}
 
-          {/* 언락 후: 전체 콘텐츠 표시 */}
+          {/* 언락 후 전체 콘텐츠 */}
           {unlocked && lockedContent}
         </div>
 
-        {/* 블러 해제 후 CTA */}
+        {/* 언락 후 CTA */}
         {unlocked && (
-          <div className="mt-6 text-center">
-            <p className="text-xs text-white/25">이메일로 맞춤 라켓 가이드를 보내드릴게요</p>
+          <div className="mt-8 space-y-3">
+            <Link
+              href={`/rackets?level=${encodeURIComponent(level)}`}
+              className="flex items-center justify-center gap-2 w-full py-4 bg-[#beff00] text-[#0a0a0a] font-extrabold text-[15px] rounded-2xl hover:bg-[#a8e600] transition-colors"
+            >
+              {level} 맞춤 라켓 전체 보기 →
+            </Link>
+            <p className="text-center text-xs text-white/25">
+              맞춤 가이드를 이메일로 보내드렸어요. 받은편지함을 확인해보세요.
+            </p>
           </div>
         )}
 
