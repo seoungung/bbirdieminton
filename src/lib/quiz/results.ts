@@ -8,6 +8,7 @@ export interface LevelResult {
   radarLabels: string[]
   radarData: number[]   // 0~100, 순서: 파워, 컨트롤, 스피드, 체력, 전술, 네트
   radarInsights: string[]   // 각 축에 대한 해석 텍스트 6개
+  racketPickReason: string   // 추천 라켓 한 줄 이유
   racketCondition: {
     weight: string
     balance: string
@@ -37,6 +38,7 @@ export const LEVEL_RESULTS: Record<QuizLevel, LevelResult> = {
       '전술: 전술보다 지금은 공을 맞추는 것 자체가 목표예요',
       '네트: 네트 앞은 아직 미지의 영역이에요. 나중에 배워요',
     ],
+    racketPickReason: '가볍고 유연해서 팔꿈치 부담 없이 기본기를 쌓을 수 있어요',
     racketCondition: {
       weight: '6U ~ 5U (가벼울수록 좋아요)',
       balance: '헤드라이트 (조작이 쉬워요)',
@@ -76,6 +78,7 @@ export const LEVEL_RESULTS: Record<QuizLevel, LevelResult> = {
       '전술: 아직 전술보다 자기 샷에 집중할 시기예요',
       '네트: 헤어핀을 알지만 아직 불안한 단계예요. 연습하면 빠르게 늘어요',
     ],
+    racketPickReason: '공격과 수비 모두 연습할 수 있는 올라운드 세팅이에요',
     racketCondition: {
       weight: '5U ~ 4U',
       balance: '이븐밸런스',
@@ -115,6 +118,7 @@ export const LEVEL_RESULTS: Record<QuizLevel, LevelResult> = {
       '전술: 패턴 게임을 시작할 준비가 된 단계예요. 상대 빈 공간을 의식해봐요',
       '네트: 헤어핀은 되는데 푸시 타이밍이 아직 불안해요',
     ],
+    racketPickReason: '지금 스타일에 맞는 스펙으로 골랐어요. 쓰던 라켓이랑 비교해봐요',
     racketCondition: {
       weight: '4U ~ 3U',
       balance: '이븐 ~ 헤드헤비',
@@ -154,6 +158,7 @@ export const LEVEL_RESULTS: Record<QuizLevel, LevelResult> = {
       '전술: 상대를 읽기 시작했어요. 패턴을 다양하게 만드는 것이 숙제예요',
       '네트: 네트 플레이가 전술의 핵심이 된 단계예요. 더 날카롭게 다듬어봐요',
     ],
+    racketPickReason: '스트링 세팅까지 조합하면 지금과 확실히 달라져요',
     racketCondition: {
       weight: '3U ~ 2U',
       balance: '플레이 스타일에 따라',

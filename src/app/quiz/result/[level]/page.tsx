@@ -2,6 +2,7 @@
 
 import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Copy, Check, RotateCcw, ChevronRight } from 'lucide-react'
 import { LEVEL_RESULTS } from '@/lib/quiz/results'
 import { calcRadar } from '@/lib/quiz/questions'
@@ -11,6 +12,35 @@ import { createClient } from '@/lib/supabase/client'
 import type { QuizLevel } from '@/lib/quiz/questions'
 
 const VALID_LEVELS: QuizLevel[] = ['왕초보', '초심자', 'D조', 'C조']
+
+function parseFirstUrl(raw: string | null): string | null {
+  if (!raw) return null
+  const trimmed = raw.trim()
+  if (trimmed.startsWith('{')) {
+    const match = trimmed.match(/"([^"]+)"/)
+    const url = match ? match[1] : null
+    return url && (url.startsWith('/') || url.startsWith('http')) ? url : null
+  }
+  return trimmed.startsWith('/') || trimmed.startsWith('http') ? trimmed : null
+}
+
+const BEGINNER_CHECKLIST = [
+  {
+    icon: '👟',
+    title: '배드민턴화',
+    desc: '운동화는 안 돼요. 실내 배드민턴화가 따로 있어요. 미끄러지지 않으려면 필수예요.',
+  },
+  {
+    icon: '🪶',
+    title: '깃털 셔틀콕',
+    desc: '형광 셔틀콕은 대부분 체육관에서 안 받아줘요. 첫날 2~3만원 셔틀콕 비용 각오하세요.',
+  },
+  {
+    icon: '🏢',
+    title: '일반 코트 vs 클럽 코트',
+    desc: '처음엔 일반 코트로 예약해서 쓰는 게 편해요. 클럽 코트는 소속 회원 전용이에요.',
+  },
+]
 
 export default function QuizResultPage({ params }: { params: Promise<{ level: string }> }) {
   const { level: rawLevel } = use(params)
@@ -27,7 +57,6 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
 
   // 개인화 레이더 + 블러 해제 조건 체크
   useEffect(() => {
-    // 개인화 레이더
     const stored = localStorage.getItem('quiz_scores')
     if (stored) {
       try {
@@ -36,7 +65,6 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
       } catch {}
     }
 
-    // 블러 해제
     if (localStorage.getItem('quiz_unlocked') === 'true') {
       setUnlocked(true)
       return
@@ -71,36 +99,50 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
 
   const radarData = personalRadar ?? result.radarData
 
-  // 블러 구간 내부 콘텐츠 — 추천 라켓 최상단
   const lockedContent = (
     <>
-      {/* 추천 라켓 — 첫 번째 */}
+      {/* 추천 라켓 — 이미지 + 추천 이유 포함 */}
       <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2">
           <p className="text-xs font-semibold text-white/40 uppercase tracking-widest">추천 라켓</p>
           <Link href={`/rackets?level=${encodeURIComponent(level)}`} className="text-xs text-[#beff00] hover:underline">
             전체 보기 →
           </Link>
         </div>
+        <p className="text-xs text-white/50 mb-4">{result.racketPickReason}</p>
         <div className="space-y-3">
-          {recommendedRackets.map((racket, i) => (
-            <Link
-              key={racket.id}
-              href={`/rackets/${racket.slug}`}
-              className="flex items-center gap-4 p-3 bg-white/4 hover:bg-white/8 rounded-xl transition-colors group"
-            >
-              <div className="w-8 h-8 rounded-lg bg-[#beff00]/10 border border-[#beff00]/20 flex items-center justify-center text-xs font-bold text-[#beff00] shrink-0">
-                {i + 1}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate group-hover:text-[#beff00] transition-colors">
-                  {racket.brand} {racket.name}
-                </p>
-                <p className="text-xs text-white/40">{racket.price_range}</p>
-              </div>
-              <ChevronRight size={14} className="text-white/20 group-hover:text-white/40 shrink-0" />
-            </Link>
-          ))}
+          {recommendedRackets.map((racket, i) => {
+            const img = parseFirstUrl(racket.image_url)
+            return (
+              <Link
+                key={racket.id}
+                href={`/rackets/${racket.slug}`}
+                className="flex items-center gap-3 p-3 bg-white/4 hover:bg-white/8 rounded-xl transition-colors group"
+              >
+                {/* 이미지 or 번호 뱃지 */}
+                <div className="shrink-0 w-12 h-12 rounded-xl bg-[#111] border border-white/8 overflow-hidden flex items-center justify-center">
+                  {img ? (
+                    <Image
+                      src={img}
+                      alt={racket.name ?? ''}
+                      width={48}
+                      height={48}
+                      className="object-contain w-full h-full p-1"
+                    />
+                  ) : (
+                    <span className="text-xs font-bold text-[#beff00]">{i + 1}</span>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-semibold text-white truncate group-hover:text-[#beff00] transition-colors">
+                    {racket.brand} {racket.name}
+                  </p>
+                  <p className="text-xs text-white/40 mt-0.5">{racket.price_range}</p>
+                </div>
+                <ChevronRight size={14} className="text-white/20 group-hover:text-white/40 shrink-0" />
+              </Link>
+            )
+          })}
           {recommendedRackets.length === 0 && (
             <Link
               href={`/rackets?level=${encodeURIComponent(level)}`}
@@ -111,6 +153,25 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
           )}
         </div>
       </div>
+
+      {/* 왕초보 전용 — 첫 체육관 체크리스트 */}
+      {level === '왕초보' && (
+        <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
+          <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-1">첫 체육관 체크리스트</p>
+          <p className="text-xs text-white/40 mb-4">아무도 미리 알려주지 않는 것들이에요</p>
+          <div className="space-y-4">
+            {BEGINNER_CHECKLIST.map((item) => (
+              <div key={item.title} className="flex items-start gap-3">
+                <span className="text-2xl shrink-0">{item.icon}</span>
+                <div>
+                  <p className="text-sm font-semibold text-white mb-0.5">{item.title}</p>
+                  <p className="text-xs text-white/50 leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 라켓 조건 */}
       <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
@@ -194,8 +255,6 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
     <div className="min-h-screen bg-[#0a0a0a]">
       <div className="max-w-xl mx-auto px-4 py-10 sm:py-16">
 
-        {/* -- 공개 영역 -- */}
-
         {/* 레벨 배지 */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-[#beff00]/10 border border-[#beff00]/20 text-[#beff00] text-xs font-bold px-4 py-1.5 rounded-full mb-4 tracking-widest uppercase">
@@ -213,7 +272,7 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
           <p className="text-white/70 text-[15px] leading-[1.85]">{result.description}</p>
         </div>
 
-        {/* 레이더 차트 — 개인화 데이터 사용 */}
+        {/* 레이더 차트 */}
         <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-5 sm:p-6 mb-5">
           <div className="flex items-center justify-between mb-5">
             <p className="text-xs font-semibold text-white/40 uppercase tracking-widest">능력치 분석</p>
@@ -253,7 +312,7 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
           </div>
         </div>
 
-        {/* 공유 버튼 — 결과 공유 강조 */}
+        {/* 공유 버튼 */}
         <div className="flex gap-2 mb-8">
           <button
             onClick={handleCopy}
@@ -274,9 +333,8 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
           </Link>
         </div>
 
-        {/* -- 블러 구간 -- */}
+        {/* 블러 구간 */}
         <div>
-          {/* 훅 배너 */}
           {!unlocked && (
             <div className="bg-[#beff00]/5 border border-[#beff00]/15 rounded-2xl p-5 mb-4">
               <div className="flex items-center gap-2 mb-3">
@@ -284,7 +342,11 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
                 <p className="text-sm font-bold text-white">딱 이것만 확인하면 라켓 선택 끝</p>
               </div>
               <ul className="space-y-1.5">
-                {['내 레벨에 맞는 라켓 무게·강성 조건', '지금 바로 살 수 있는 추천 라켓 3종', '다음 레벨 달성 로드맵'].map(item => (
+                {[
+                  '내 레벨에 맞는 추천 라켓 3종',
+                  '내 레벨에 맞는 라켓 무게·강성 조건',
+                  level === '왕초보' ? '첫 체육관 가기 전 체크리스트' : '다음 레벨 달성 로드맵',
+                ].map(item => (
                   <li key={item} className="flex items-center gap-2 text-sm text-white/60">
                     <span className="text-[#beff00] text-xs font-bold">✓</span>
                     {item}
@@ -294,7 +356,6 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
             </div>
           )}
 
-          {/* 블러 상태 */}
           {!unlocked && (
             <>
               <div className="relative" style={{ maxHeight: '280px', overflow: 'hidden' }}>
@@ -307,7 +368,6 @@ export default function QuizResultPage({ params }: { params: Promise<{ level: st
             </>
           )}
 
-          {/* 언락 후 전체 콘텐츠 */}
           {unlocked && lockedContent}
         </div>
 
