@@ -1,10 +1,21 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import Image from 'next/image'
 import { QUIZ_QUESTIONS, calcLevel } from '@/lib/quiz/questions'
+
+// 다음 문항 이미지 프리로드
+function preloadImage(src: string) {
+  const link = document.createElement('link')
+  link.rel = 'preload'
+  link.as = 'image'
+  link.href = src
+  document.head.appendChild(link)
+}
+
+const PROGRESS_KEY = 'quiz_progress'
 
 export function QuizClient() {
   const router = useRouter()
@@ -12,6 +23,20 @@ export function QuizClient() {
   const [answers, setAnswers] = useState<number[]>([])
   const [selected, setSelected] = useState<number | null>(null)
   const [animating, setAnimating] = useState(false)
+
+  // 중간 진행 복원
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(PROGRESS_KEY)
+      if (saved) {
+        const { savedAnswers, savedIdx } = JSON.parse(saved) as { savedAnswers: number[]; savedIdx: number }
+        if (savedIdx > 0 && savedIdx < QUIZ_QUESTIONS.length) {
+          setAnswers(savedAnswers)
+          setCurrentIdx(savedIdx)
+        }
+      }
+    } catch {}
+  }, [])
 
   const current = QUIZ_QUESTIONS[currentIdx]
   const total = QUIZ_QUESTIONS.length
@@ -21,29 +46,45 @@ export function QuizClient() {
     if (animating) return
     setSelected(optIdx)
     setAnimating(true)
+    // 다음 문항 이미지 즉시 프리로드
+    const nextQ = QUIZ_QUESTIONS[currentIdx + 1]
+    if (nextQ?.image) preloadImage(nextQ.image)
     setTimeout(() => {
       const newAnswers = [...answers, score]
       if (currentIdx + 1 >= total) {
         const level = calcLevel(newAnswers)
         localStorage.setItem('quiz_scores', JSON.stringify(newAnswers))
+        localStorage.removeItem(PROGRESS_KEY)
         router.push(`/quiz/result/${encodeURIComponent(level)}`)
       } else {
+        const nextIdx = currentIdx + 1
         setAnswers(newAnswers)
-        setCurrentIdx(i => i + 1)
+        setCurrentIdx(nextIdx)
         setSelected(null)
         setAnimating(false)
+        // 진행 저장
+        localStorage.setItem(PROGRESS_KEY, JSON.stringify({ savedAnswers: newAnswers, savedIdx: nextIdx }))
       }
     }, 400)
   }
 
   const handleBack = () => {
     if (currentIdx === 0) {
+      localStorage.removeItem(PROGRESS_KEY)
       router.push('/')
       return
     }
-    setAnswers(a => a.slice(0, -1))
-    setCurrentIdx(i => i - 1)
+    const prevAnswers = answers.slice(0, -1)
+    const prevIdx = currentIdx - 1
+    setAnswers(prevAnswers)
+    setCurrentIdx(prevIdx)
     setSelected(null)
+    // 뒤로 갔을 때도 저장
+    if (prevIdx === 0) {
+      localStorage.removeItem(PROGRESS_KEY)
+    } else {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify({ savedAnswers: prevAnswers, savedIdx: prevIdx }))
+    }
   }
 
   return (
