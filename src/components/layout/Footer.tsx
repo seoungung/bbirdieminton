@@ -4,6 +4,7 @@ import { Fragment } from 'react'
 
 const LEGAL_LINKS = [
   { href: '/about',       label: '버디민턴 소개' },
+  { href: '/shop',        label: '가이드 구매' },
   { href: '/partnership', label: '제휴 문의' },
   { href: '/terms',       label: '이용약관' },
   { href: '/privacy',     label: '개인정보처리방침', bold: true },
@@ -50,8 +51,9 @@ export default function Footer() {
 
         {/* 사업자 정보 */}
         <p className="text-[11px] leading-[1.9] text-white/35 mb-6">
-          상호 : 버디민턴&nbsp;&nbsp;|&nbsp;&nbsp;대표자 : -&nbsp;&nbsp;|&nbsp;&nbsp;사업자등록번호 : -<br />
-          통신판매업신고번호 : -&nbsp;&nbsp;|&nbsp;&nbsp;개인정보책임자 : -&nbsp;&nbsp;|&nbsp;&nbsp;E-mail : hello@birdieminton.com
+          상호 : 버디민턴&nbsp;&nbsp;|&nbsp;&nbsp;대표자 : 양성웅&nbsp;&nbsp;|&nbsp;&nbsp;사업자등록번호 : 227-11-71746<br />
+          통신판매업신고번호 : 신고 진행 중&nbsp;&nbsp;|&nbsp;&nbsp;개인정보책임자 : 양성웅&nbsp;&nbsp;|&nbsp;&nbsp;E-mail : hello@birdieminton.com<br />
+          사업장소재지 : 서울특별시 관악구 은천로35다길 26-13, 101호
         </p>
 
         {/* 구분선 + 카피라이트 */}
