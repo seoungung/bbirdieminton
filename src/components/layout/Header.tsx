@@ -55,11 +55,8 @@ export default function Header() {
         <div className="max-w-[90rem] mx-auto px-4 sm:px-6 h-[56px] flex items-center justify-between gap-4">
 
           {/* 로고 */}
-          <Link href="/" className="flex items-center gap-2 shrink-0 hover:opacity-85 transition-opacity">
-            <Image src="/symbol_birdieminton-color.png" alt="birdieminton symbol" width={28} height={28} className="object-contain" unoptimized />
-            <span className="text-[18px] font-extrabold tracking-tight text-white hover:text-[#BEFF00] transition-colors">
-              birdieminton
-            </span>
+          <Link href="/" className="flex items-center shrink-0 hover:opacity-85 transition-opacity">
+            <Image src="/textlogo_height_birdieminton-white.png" alt="birdieminton" width={28} height={40} className="object-contain h-10 w-auto" unoptimized />
           </Link>
 
           {/* 데스크톱 중앙 메뉴 */}

@@ -17,18 +17,15 @@ export default function Footer() {
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 py-10">
 
         {/* 로고 */}
-        <div className="flex items-center gap-2 mb-5">
+        <div className="flex items-center mb-5">
           <Image
-            src="/symbol_birdieminton-white.png"
-            alt="birdieminton symbol"
+            src="/textlogo_height_birdieminton-color.png"
+            alt="birdieminton"
             width={26}
-            height={26}
-            className="object-contain"
+            height={36}
+            className="object-contain h-9 w-auto"
             unoptimized
           />
-          <p className="text-white font-extrabold text-[18px] tracking-tight">
-            birdieminton
-          </p>
         </div>
 
         {/* 법적 링크 */}

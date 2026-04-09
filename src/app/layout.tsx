@@ -8,6 +8,10 @@ import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://birdieminton.com'),
+  icons: {
+    icon: '/favicon_birdieminton-color.png',
+    shortcut: '/favicon_birdieminton-color.png',
+  },
   title: {
     default: 'birdieminton | 배드민턴, 제대로 시작하는 법',
     template: '%s | birdieminton',
