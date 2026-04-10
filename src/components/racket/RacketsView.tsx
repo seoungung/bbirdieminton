@@ -116,12 +116,20 @@ export function RacketsView({ rackets }: { rackets: Racket[] }) {
 
     if (sort === 'popular') {
       result = [...result].sort((a, b) => {
+        // 1순위: popular_rank (수동 입력 순위)
         const ra = (a as Racket & { popular_rank?: number }).popular_rank
         const rb = (b as Racket & { popular_rank?: number }).popular_rank
         if (ra != null && rb != null) return ra - rb
         if (ra != null) return -1
         if (rb != null) return 1
-        return Number(b.is_popular) - Number(a.is_popular)
+        // 2순위: is_popular (인기 여부)
+        const popDiff = Number(b.is_popular) - Number(a.is_popular)
+        if (popDiff !== 0) return popDiff
+        // 3순위: created_at 최신순
+        const dateDiff = new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        if (dateDiff !== 0) return dateDiff
+        // 4순위: editor_pick
+        return Number(b.editor_pick) - Number(a.editor_pick)
       })
     } else if (sort === 'newest') {
       result = [...result].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
