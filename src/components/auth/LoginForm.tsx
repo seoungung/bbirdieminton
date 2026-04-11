@@ -7,7 +7,7 @@ import { loginWithEmail, signupWithEmail, loginWithGoogle } from '@/app/login/ac
 
 type Mode = 'login' | 'signup'
 
-export function LoginForm() {
+export function LoginForm({ next }: { next?: string }) {
   const [mode, setMode] = useState<Mode>('login')
   const [showPw, setShowPw] = useState(false)
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null)
@@ -32,7 +32,7 @@ export function LoginForm() {
 
   const handleGoogle = () => {
     startTransition(async () => {
-      await loginWithGoogle()
+      await loginWithGoogle(next)
     })
   }
 
@@ -80,6 +80,7 @@ export function LoginForm() {
 
       {/* 이메일/비밀번호 폼 */}
       <form onSubmit={handleSubmit} className="space-y-3">
+        <input type="hidden" name="next" value={next ?? '/'} />
         <div className="relative">
           <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
           <input type="email" name="email" placeholder="이메일" className={inputClass} required />

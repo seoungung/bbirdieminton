@@ -216,7 +216,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── 3. 버디모아 — 모임 관리 CTA ─────────────── */}
+      {/* ── 3. 모임 관리 CTA ──────────────────────────── */}
       <section className="border-t border-[#ebebeb] bg-[#0a0a0a] overflow-hidden">
         <div className="max-w-[90rem] mx-auto px-4 sm:px-8 py-16 sm:py-24">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
@@ -224,7 +224,7 @@ export default async function HomePage() {
             {/* 좌: 텍스트 */}
             <div className="flex-1 text-center lg:text-left">
               <span className="inline-block text-[11px] font-bold uppercase tracking-widest text-[#beff00] bg-[#beff00]/10 px-3 py-1 rounded-full mb-5">
-                🏸 새 기능 · 버디모아
+                🏸 새 기능 · 모임 관리
               </span>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
                 동호회 운영,<br />

@@ -9,10 +9,16 @@ export const metadata: Metadata = {
   title: '로그인 | 버디민턴',
 }
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (user) redirect('/')
+
+  const { next } = await searchParams
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center px-4 py-16">
@@ -28,7 +34,7 @@ export default async function LoginPage() {
 
         {/* 폼 */}
         <div className="bg-[#1a1a1a] border border-white/8 rounded-2xl p-6">
-          <LoginForm />
+          <LoginForm next={next} />
         </div>
       </div>
     </div>
