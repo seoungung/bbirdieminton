@@ -4,17 +4,17 @@ import { getClubUserId } from '@/lib/club/auth'
 import { ClubJoinForm } from '@/components/club/ClubJoinForm'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: '초대코드 입력 | 버디모아' }
+export const metadata: Metadata = { title: '초대코드 입력 | 버디민턴' }
 
 export default async function ClubJoinPage() {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) redirect('/club/login')
+  if (!user) redirect('/login')
 
   const clubUserId = await getClubUserId(supabase)
-  if (!clubUserId) redirect('/club/login')
+  if (!clubUserId) redirect('/login')
 
   return (
     <div className="min-h-screen bg-[#f8f8f8]">

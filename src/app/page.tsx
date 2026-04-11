@@ -224,7 +224,7 @@ export default async function HomePage() {
             {/* 좌: 텍스트 */}
             <div className="flex-1 text-center lg:text-left">
               <span className="inline-block text-[11px] font-bold uppercase tracking-widest text-[#beff00] bg-[#beff00]/10 px-3 py-1 rounded-full mb-5">
-                🏸 새 기능 · 모임 관리
+                🏸 새 기능 · 게임보드
               </span>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
                 동호회 운영,<br />
@@ -254,7 +254,7 @@ export default async function HomePage() {
                   href="/club"
                   className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-[#beff00] text-[#0a0a0a] font-bold text-[15px] rounded-xl hover:brightness-95 transition-all"
                 >
-                  🏸 모임 만들기
+                  🏸 게임보드 만들기
                 </Link>
                 <Link
                   href="/club/join"
@@ -271,7 +271,7 @@ export default async function HomePage() {
                 {/* 헤더 */}
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <p className="text-sm font-bold text-white">화요일 배드민턴 모임</p>
+                    <p className="text-sm font-bold text-white">화요일 배드민턴 게임보드</p>
                     <p className="text-xs text-white/40 mt-0.5">멤버 12명</p>
                   </div>
                   <span className="text-xs font-bold text-[#beff00] bg-[#beff00]/10 px-2.5 py-1 rounded-lg">진행 중</span>

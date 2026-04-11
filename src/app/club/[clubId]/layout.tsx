@@ -16,10 +16,10 @@ export default async function ClubDetailLayout({
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) redirect('/club/login')
+  if (!user) redirect('/login')
 
   const clubUserId = await getClubUserId(supabase)
-  if (!clubUserId) redirect('/club/login')
+  if (!clubUserId) redirect('/login')
 
   // 해당 모임 멤버 여부 확인
   const membership = await getMyMembership(supabase, clubId, clubUserId)

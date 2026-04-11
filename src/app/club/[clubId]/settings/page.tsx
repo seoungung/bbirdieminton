@@ -5,7 +5,7 @@ import { getMyMembership, getClubMembers } from '@/lib/club/client'
 import { SettingsClient } from '@/components/club/SettingsClient'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: '모임 설정 | 버디모아' }
+export const metadata: Metadata = { title: '게임보드 설정 | 버디민턴' }
 
 export default async function SettingsPage({
   params,
@@ -17,10 +17,10 @@ export default async function SettingsPage({
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) redirect('/club/login')
+  if (!user) redirect('/login')
 
   const clubUserId = await getClubUserId(supabase)
-  if (!clubUserId) redirect('/club/login')
+  if (!clubUserId) redirect('/login')
 
   const membership = await getMyMembership(supabase, clubId, clubUserId)
   if (!membership) redirect('/club/home')

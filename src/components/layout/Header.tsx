@@ -18,7 +18,7 @@ const NAV_LINKS: NavLink[] = [
   { href: '/rackets', label: '라켓 도감' },
   { href: '/quiz',    label: '레벨 테스트' },
   { href: '/guide',   label: '가이드북' },
-  { href: '/club',    label: '모임', highlight: true },
+  { href: '/club',    label: '게임보드', highlight: true },
 ]
 
 export default function Header() {
