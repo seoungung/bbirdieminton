@@ -27,8 +27,9 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
   const isClubPath = pathname.startsWith('/club')
+  const isClubRoot = pathname === '/club' || pathname === '/club/'
 
-  if (isClubPath && !user) {
+  if (isClubPath && !isClubRoot && !user) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('next', pathname)
     return NextResponse.redirect(loginUrl)

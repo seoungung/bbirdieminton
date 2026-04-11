@@ -1,23 +1,14 @@
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getClubUserId } from '@/lib/club/auth'
+import { GameBoardLanding } from '@/components/club/GameBoardLanding'
+import type { Metadata } from 'next'
 
-/**
- * /club 진입점.
- * - 로그인 + users 테이블 row 있음 → /club/home 리다이렉트
- * - 그 외 → /club/login 리다이렉트
- */
-export default async function ClubEntryPage() {
+export const metadata: Metadata = {
+  title: '게임보드 | 버디민턴',
+  description: '배드민턴 모임을 만들고 당일 게임을 스마트하게 관리하세요.',
+}
+
+export default async function ClubPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/club/login')
-
-  const clubUserId = await getClubUserId(supabase)
-  if (clubUserId) redirect('/club/home')
-
-  // users 테이블에 row가 없는 경우 (첫 방문) → login에서 upsert 처리
-  redirect('/club/login')
+  const { data: { user } } = await supabase.auth.getUser()
+  return <GameBoardLanding isLoggedIn={!!user} />
 }
