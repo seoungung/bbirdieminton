@@ -216,7 +216,110 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── 3. 가이드북 콘텐츠 ───────────────────────── */}
+      {/* ── 3. 버디모아 — 모임 관리 CTA ─────────────── */}
+      <section className="border-t border-[#ebebeb] bg-[#0a0a0a] overflow-hidden">
+        <div className="max-w-[90rem] mx-auto px-4 sm:px-8 py-16 sm:py-24">
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+
+            {/* 좌: 텍스트 */}
+            <div className="flex-1 text-center lg:text-left">
+              <span className="inline-block text-[11px] font-bold uppercase tracking-widest text-[#beff00] bg-[#beff00]/10 px-3 py-1 rounded-full mb-5">
+                🏸 새 기능 · 버디모아
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
+                동호회 운영,<br />
+                이제 스마트하게
+              </h2>
+              <p className="text-[15px] text-white/50 leading-relaxed mb-8 max-w-md mx-auto lg:mx-0">
+                출석 체크부터 경기 배정, 실력 기반 랭킹까지.<br />
+                매주 반복되는 번거로운 운영을 한 번에 해결하세요.
+              </p>
+
+              {/* 기능 목록 */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-10 justify-center lg:justify-start">
+                {[
+                  { icon: '✅', label: '출석 체크' },
+                  { icon: '🎯', label: '실력 균등 배정' },
+                  { icon: '🏆', label: '자동 랭킹' },
+                ].map(({ icon, label }) => (
+                  <div key={label} className="flex items-center gap-2 text-sm text-white/70 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                    <span>{icon}</span>
+                    <span className="font-medium">{label}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <Link
+                  href="/club"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-[#beff00] text-[#0a0a0a] font-bold text-[15px] rounded-xl hover:brightness-95 transition-all"
+                >
+                  🏸 모임 만들기
+                </Link>
+                <Link
+                  href="/club/join"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 border border-white/20 text-white/70 font-semibold text-[15px] rounded-xl hover:border-white/40 hover:text-white transition-all"
+                >
+                  초대코드로 참여
+                </Link>
+              </div>
+            </div>
+
+            {/* 우: 목업 카드 */}
+            <div className="flex-1 w-full max-w-sm lg:max-w-none">
+              <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-5 space-y-3">
+                {/* 헤더 */}
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="text-sm font-bold text-white">화요일 배드민턴 모임</p>
+                    <p className="text-xs text-white/40 mt-0.5">멤버 12명</p>
+                  </div>
+                  <span className="text-xs font-bold text-[#beff00] bg-[#beff00]/10 px-2.5 py-1 rounded-lg">진행 중</span>
+                </div>
+                {/* 코트 배정 미리보기 */}
+                <div className="bg-[#111] rounded-xl p-3.5">
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-2.5">코트 1</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { team: 'A', color: 'text-blue-400', names: ['김민준', '이서연'] },
+                      { team: 'B', color: 'text-orange-400', names: ['박지호', '최유나'] },
+                    ].map(({ team, color, names }) => (
+                      <div key={team} className="bg-white/5 rounded-lg p-2.5">
+                        <p className={`text-[10px] font-bold mb-1.5 ${color}`}>팀 {team}</p>
+                        {names.map(n => (
+                          <div key={n} className="flex items-center gap-1.5 mb-1">
+                            <div className="w-4 h-4 rounded-full bg-white/10 flex items-center justify-center text-[9px] text-white/60">{n[0]}</div>
+                            <span className="text-[11px] text-white/70">{n}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* 랭킹 미리보기 */}
+                <div className="space-y-1.5">
+                  {[
+                    { rank: '🥇', name: '김민준', pts: 42 },
+                    { rank: '🥈', name: '이서연', pts: 38 },
+                    { rank: '🥉', name: '박지호', pts: 31 },
+                  ].map(({ rank, name, pts }) => (
+                    <div key={name} className="flex items-center justify-between px-3 py-2 bg-white/5 rounded-lg">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-sm">{rank}</span>
+                        <span className="text-sm text-white/80 font-medium">{name}</span>
+                      </div>
+                      <span className="text-sm font-bold text-[#beff00]">{pts}점</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── 4. 가이드북 콘텐츠 ───────────────────────── */}
       <section className="border-t border-[#ebebeb] bg-[#f7f7f7]">
         <div className="max-w-[90rem] mx-auto px-4 sm:px-8 py-16 sm:py-20">
 

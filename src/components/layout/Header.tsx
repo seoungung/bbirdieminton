@@ -8,10 +8,17 @@ import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/app/login/actions'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
-const NAV_LINKS = [
+interface NavLink {
+  href: string
+  label: string
+  highlight?: boolean
+}
+
+const NAV_LINKS: NavLink[] = [
   { href: '/rackets', label: '라켓 도감' },
   { href: '/quiz',    label: '레벨 테스트' },
   { href: '/guide',   label: '가이드북' },
+  { href: '/club',    label: '모임', highlight: true },
 ]
 
 export default function Header() {
@@ -61,10 +68,16 @@ export default function Header() {
 
           {/* 데스크톱 중앙 메뉴 */}
           <div className="hidden md:flex items-center gap-7 text-[14px] font-medium">
-            {NAV_LINKS.map(({ href, label }) => (
-              <Link key={href} href={href} className="text-white/70 hover:text-white transition-colors">
-                {label}
-              </Link>
+            {NAV_LINKS.map(({ href, label, highlight }) => (
+              highlight ? (
+                <Link key={href} href={href} className="flex items-center gap-1.5 text-[#beff00] font-semibold hover:text-[#beff00]/80 transition-colors">
+                  🏸 {label}
+                </Link>
+              ) : (
+                <Link key={href} href={href} className="text-white/70 hover:text-white transition-colors">
+                  {label}
+                </Link>
+              )
             ))}
           </div>
 
@@ -141,10 +154,16 @@ export default function Header() {
         {/* 모바일 드로어 */}
         {open && (
           <div className="md:hidden border-t border-white/10 px-4 pt-4 pb-5 flex flex-col gap-3 text-[14px]">
-            {NAV_LINKS.map(({ href, label }) => (
-              <Link key={href} href={href} onClick={() => setOpen(false)} className="text-white/80 hover:text-white transition-colors py-1">
-                {label}
-              </Link>
+            {NAV_LINKS.map(({ href, label, highlight }) => (
+              highlight ? (
+                <Link key={href} href={href} onClick={() => setOpen(false)} className="flex items-center gap-1.5 text-[#beff00] font-semibold py-1">
+                  🏸 {label}
+                </Link>
+              ) : (
+                <Link key={href} href={href} onClick={() => setOpen(false)} className="text-white/80 hover:text-white transition-colors py-1">
+                  {label}
+                </Link>
+              )
             ))}
             <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
               {user ? (
