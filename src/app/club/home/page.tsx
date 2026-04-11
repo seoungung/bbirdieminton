@@ -26,7 +26,7 @@ export default async function ClubHomePage() {
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
       {/* ── Hero ── */}
-      <div className="bg-[#0a0a0a] py-10 px-4 text-center">
+      <div className="bg-[#0a0a0a] pt-10 pb-6 px-4 text-center">
         <div className="max-w-lg mx-auto">
           <p className="text-[#beff00] text-[10px] font-bold tracking-[0.2em] mb-3 uppercase">
             Birdieminton
@@ -34,46 +34,38 @@ export default async function ClubHomePage() {
           <h1 className="text-[32px] font-extrabold text-white mb-2 tracking-tight">
             🎮 게임보드
           </h1>
-          <p className="text-sm text-white/50 mb-7">
+          <p className="text-sm text-white/50 mb-6">
             함께하는 배드민턴, 더 스마트하게
           </p>
-          <Link
-            href="/club/create"
-            className="inline-flex items-center gap-2 bg-[#beff00] text-[#111] font-bold px-5 py-3 rounded-xl hover:brightness-95 transition-all text-sm"
-          >
-            <Plus size={15} />
-            게임보드 만들기
-          </Link>
 
-          {/* Feature pills */}
-          <div className="flex flex-wrap gap-2 justify-center mt-6">
-            {[
-              '✅ 출석 · 코트 배정',
-              '⚡ 실력 균등 매칭',
-              '🏆 자동 랭킹',
-            ].map((label) => (
-              <span
-                key={label}
-                className="bg-white/8 border border-white/10 text-white/55 text-xs px-3.5 py-1.5 rounded-full"
-              >
-                {label}
-              </span>
-            ))}
+          {/* ── Search bar ── */}
+          <div className="flex gap-2 mb-5">
+            <input
+              type="text"
+              placeholder="게임보드 이름으로 검색..."
+              className="flex-1 bg-white/8 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#beff00]/60 transition-colors"
+            />
+            <button className="bg-[#beff00] text-[#111] px-4 py-2.5 rounded-xl text-sm font-bold hover:brightness-95 transition-all shrink-0">
+              검색
+            </button>
           </div>
-        </div>
-      </div>
 
-      {/* ── Search bar ── */}
-      <div className="bg-white border-b border-[#e5e5e5] py-3 px-4">
-        <div className="max-w-lg mx-auto flex gap-2">
-          <input
-            type="text"
-            placeholder="게임보드 이름으로 검색..."
-            className="flex-1 bg-[#f8f8f8] border border-[#e5e5e5] rounded-xl px-4 py-2.5 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#beff00] transition-colors"
-          />
-          <button className="bg-[#111] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#333] transition-colors">
-            검색
-          </button>
+          {/* ── Action buttons ── */}
+          <div className="flex gap-2">
+            <Link
+              href="/club/create"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#beff00] text-[#111] font-bold py-3 rounded-xl hover:brightness-95 transition-all text-sm"
+            >
+              <Plus size={15} />
+              모임 만들기
+            </Link>
+            <Link
+              href="/club/home"
+              className="flex-1 inline-flex items-center justify-center bg-white/10 border border-white/15 text-white font-semibold py-3 rounded-xl hover:bg-white/15 transition-all text-sm"
+            >
+              내 모임
+            </Link>
+          </div>
         </div>
       </div>
 
