@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getClubUserId } from '@/lib/club/auth'
 import { redirect } from 'next/navigation'
 
@@ -11,6 +12,7 @@ export async function createClubAction(formData: FormData) {
 
   if (!name) return { error: '모임 이름을 입력해주세요.' }
 
+  // 인증 확인은 일반 클라이언트로
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: '로그인이 필요합니다.' }
@@ -18,8 +20,11 @@ export async function createClubAction(formData: FormData) {
   const clubUserId = await getClubUserId(supabase)
   if (!clubUserId) return { error: '사용자 정보를 찾을 수 없습니다.' }
 
+  // INSERT는 service role 클라이언트로 (RLS 우회)
+  const admin = createAdminClient()
+
   // 1. clubs 생성
-  const { data: club, error: clubErr } = await supabase
+  const { data: club, error: clubErr } = await admin
     .from('clubs')
     .insert({ owner_id: clubUserId, name, description, court_count: courtCount })
     .select('id')
@@ -31,7 +36,7 @@ export async function createClubAction(formData: FormData) {
   }
 
   // 2. 생성자를 owner로 club_members에 추가
-  const { error: memberErr } = await supabase
+  const { error: memberErr } = await admin
     .from('club_members')
     .insert({ club_id: club.id, user_id: clubUserId, role: 'owner' })
 
