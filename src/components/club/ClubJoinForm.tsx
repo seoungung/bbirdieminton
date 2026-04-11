@@ -2,10 +2,9 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { getClubByInviteCode } from '@/lib/club/client'
+import { joinClubAction } from '@/app/club/join/actions'
 
-export function ClubJoinForm({ clubUserId }: { clubUserId: string }) {
+export function ClubJoinForm({ clubUserId: _ }: { clubUserId: string }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -13,45 +12,13 @@ export function ClubJoinForm({ clubUserId }: { clubUserId: string }) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (code.trim().length !== 8) {
-      setError('8자리 코드를 입력해주세요.')
-      return
-    }
+    setError(null)
+    const fd = new FormData()
+    fd.set('invite_code', code)
 
     startTransition(async () => {
-      setError(null)
-      const supabase = createClient()
-
-      const club = await getClubByInviteCode(supabase, code.trim().toLowerCase())
-      if (!club) {
-        setError('올바르지 않은 초대코드예요. 다시 확인해주세요.')
-        return
-      }
-
-      // 이미 가입했는지 확인
-      const { data: existing } = await supabase
-        .from('club_members')
-        .select('id')
-        .eq('club_id', club.id)
-        .eq('user_id', clubUserId)
-        .single()
-
-      if (existing) {
-        router.push(`/club/${club.id}`)
-        return
-      }
-
-      // 멤버로 추가
-      const { error: joinErr } = await supabase
-        .from('club_members')
-        .insert({ club_id: club.id, user_id: clubUserId, role: 'member' })
-
-      if (joinErr) {
-        setError('모임 참여에 실패했습니다. 다시 시도해주세요.')
-        return
-      }
-
-      router.push(`/club/${club.id}`)
+      const result = await joinClubAction(fd)
+      if (result?.error) setError(result.error)
     })
   }
 

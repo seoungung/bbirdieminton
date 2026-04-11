@@ -2,49 +2,23 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { createClubAction } from '@/app/club/create/actions'
 
-export function ClubCreateForm({ clubUserId }: { clubUserId: string }) {
+export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [selectedCourt, setSelectedCourt] = useState(2)
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
-    const name = (fd.get('name') as string).trim()
-    const description = (fd.get('description') as string).trim()
-    const courtCount = parseInt(fd.get('court_count') as string, 10)
-
-    if (!name) { setError('모임 이름을 입력해주세요.'); return }
+    fd.set('court_count', String(selectedCourt))
+    setError(null)
 
     startTransition(async () => {
-      setError(null)
-      const supabase = createClient()
-
-      // 1. clubs 테이블에 모임 생성
-      const { data: club, error: clubErr } = await supabase
-        .from('clubs')
-        .insert({ owner_id: clubUserId, name, description: description || null, court_count: courtCount })
-        .select('id')
-        .single()
-
-      if (clubErr || !club) {
-        setError('모임 생성에 실패했습니다. 다시 시도해주세요.')
-        return
-      }
-
-      // 2. 생성자를 owner로 club_members에 추가
-      const { error: memberErr } = await supabase
-        .from('club_members')
-        .insert({ club_id: club.id, user_id: clubUserId, role: 'owner' })
-
-      if (memberErr) {
-        setError('멤버 등록에 실패했습니다.')
-        return
-      }
-
-      router.push(`/club/${club.id}`)
+      const result = await createClubAction(fd)
+      if (result?.error) setError(result.error)
     })
   }
 
@@ -79,12 +53,19 @@ export function ClubCreateForm({ clubUserId }: { clubUserId: string }) {
         <label className="block text-sm font-semibold text-[#111] mb-1.5">코트 수</label>
         <div className="flex gap-2">
           {[1, 2, 3, 4, 5, 6].map((n) => (
-            <label key={n} className="flex-1">
-              <input type="radio" name="court_count" value={n} defaultChecked={n === 2} className="sr-only peer" />
-              <span className="flex items-center justify-center h-10 border border-[#e5e5e5] rounded-xl text-sm font-semibold text-[#999] cursor-pointer peer-checked:bg-[#beff00] peer-checked:border-[#beff00] peer-checked:text-[#111] hover:border-[#beff00] transition-colors">
-                {n}
-              </span>
-            </label>
+            <button
+              key={n}
+              type="button"
+              onClick={() => setSelectedCourt(n)}
+              className={
+                'flex-1 h-10 border rounded-xl text-sm font-semibold transition-colors ' +
+                (selectedCourt === n
+                  ? 'bg-[#beff00] border-[#beff00] text-[#111]'
+                  : 'border-[#e5e5e5] text-[#999] hover:border-[#beff00]')
+              }
+            >
+              {n}
+            </button>
           ))}
         </div>
       </div>
