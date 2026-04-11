@@ -24,7 +24,20 @@ export async function middleware(request: NextRequest) {
   )
 
   // 세션 갱신
-  await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // /club/* 경로 보호 (login 페이지 제외)
+  const { pathname } = request.nextUrl
+  const isClubPath = pathname.startsWith('/club')
+  const isClubLogin = pathname === '/club/login' || pathname.startsWith('/club/login/')
+
+  if (isClubPath && !isClubLogin && !user) {
+    const loginUrl = new URL('/club/login', request.url)
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
 
   return supabaseResponse
 }

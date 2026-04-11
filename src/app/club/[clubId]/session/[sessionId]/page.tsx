@@ -1,0 +1,83 @@
+import { redirect, notFound } from 'next/navigation'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { getClubUserId } from '@/lib/club/auth'
+import { getMyMembership, getClubMembers } from '@/lib/club/client'
+import { AttendanceClient } from '@/components/club/AttendanceClient'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: '출석 체크 | 버디모아' }
+
+export default async function SessionAttendancePage({
+  params,
+}: {
+  params: Promise<{ clubId: string; sessionId: string }>
+}) {
+  const { clubId, sessionId } = await params
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect('/club/login')
+
+  const clubUserId = await getClubUserId(supabase)
+  if (!clubUserId) redirect('/club/login')
+
+  const membership = await getMyMembership(supabase, clubId, clubUserId)
+  if (!membership) redirect('/club/home')
+
+  // 세션 정보
+  const { data: session } = await supabase
+    .from('sessions')
+    .select('*')
+    .eq('id', sessionId)
+    .single()
+  if (!session) notFound()
+
+  // 멤버 목록
+  const members = await getClubMembers(supabase, clubId)
+
+  // 현재 출석 현황
+  const { data: attendances } = await supabase
+    .from('attendances')
+    .select('*')
+    .eq('session_id', sessionId)
+
+  const isManager = ['owner', 'manager'].includes(membership.role)
+
+  return (
+    <div>
+      <header className="bg-white border-b border-[#e5e5e5] px-4 py-4">
+        <div className="max-w-lg mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-base font-bold text-[#111]">
+              {new Date(session.session_date).toLocaleDateString('ko-KR', {
+                month: 'long',
+                day: 'numeric',
+                weekday: 'short',
+              })}
+            </h1>
+            <p className="text-xs text-[#999] mt-0.5">출석 체크</p>
+          </div>
+          {isManager && session.status === 'open' && (
+            <Link
+              href={`/club/${clubId}/session/${sessionId}/match`}
+              className="text-sm font-semibold text-[#111] bg-[#beff00] px-3 py-1.5 rounded-lg hover:brightness-95 transition-all"
+            >
+              경기 배정 →
+            </Link>
+          )}
+        </div>
+      </header>
+
+      <main className="max-w-lg mx-auto px-4 py-5">
+        <AttendanceClient
+          sessionId={sessionId}
+          members={members}
+          initialAttendances={attendances ?? []}
+          isManager={isManager}
+        />
+      </main>
+    </div>
+  )
+}

@@ -1,9 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import Header from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer'
 import { CompareProvider } from '@/context/CompareContext'
-import { RacketCompareTray } from '@/components/racket/RacketCompareTray'
+import { MainShell } from '@/components/layout/MainShell'
 import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
@@ -48,10 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased min-h-screen flex flex-col">
         <CompareProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <RacketCompareTray />
+          <MainShell>{children}</MainShell>
         </CompareProvider>
         <Analytics />
       </body>
