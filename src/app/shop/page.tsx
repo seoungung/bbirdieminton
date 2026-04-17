@@ -13,7 +13,7 @@ export default function ShopPage() {
 
       {/* 1. Hero Section */}
       <section className="py-20 px-5">
-        <div className="max-w-3xl mx-auto text-center">
+        <div className="max-w-[1088px] mx-auto text-center">
           <span className="inline-block bg-[#beff00] text-black text-xs font-bold px-3 py-1 rounded-full mb-6">
             디지털 가이드북
           </span>
@@ -45,7 +45,7 @@ export default function ShopPage() {
 
       {/* 2. "이런 분께 딱입니다" Section */}
       <section className="py-16 px-5">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-[1088px] mx-auto">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-10">
             이런 분께 딱입니다
           </h2>
@@ -85,7 +85,7 @@ export default function ShopPage() {
 
       {/* 3. 구성 Section */}
       <section className="py-16 px-5 bg-[#f8f8f8]">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-[1088px] mx-auto">
           <p className="text-center text-xs font-bold tracking-widest text-[#beff00] uppercase mb-3"
              style={{ color: '#000000', background: 'none' }}>
             <span className="bg-[#beff00] px-2 py-0.5 rounded text-black">GUIDE CONTENTS</span>
@@ -165,7 +165,7 @@ export default function ShopPage() {
 
       {/* 4. 스펙 섹션 */}
       <section className="py-16 px-5">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-[1088px] mx-auto">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-10">상품 정보</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
@@ -191,7 +191,7 @@ export default function ShopPage() {
 
       {/* 5. 구매 섹션 */}
       <section id="purchase" className="py-20 px-5">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-[1088px] mx-auto">
           <div className="bg-[#f8f8f8] rounded-3xl p-8 sm:p-12 text-center">
             <div className="flex items-baseline justify-center gap-3 mb-2">
               <span className="text-[#999999] line-through text-lg">29,900원</span>
@@ -222,7 +222,7 @@ export default function ShopPage() {
 
       {/* 6. FAQ Section */}
       <section className="py-16 px-5">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-[1088px] mx-auto">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-10">자주 묻는 질문</h2>
           <div className="flex flex-col gap-3">
             {[
@@ -265,7 +265,7 @@ export default function ShopPage() {
 
       {/* 7. Footer CTA Strip */}
       <section className="py-16 px-5 bg-[#f8f8f8]">
-        <div className="max-w-3xl mx-auto text-center">
+        <div className="max-w-[1088px] mx-auto text-center">
           <p className="text-[#555555] text-base mb-5">아직 내 레벨을 모른다면?</p>
           <Link
             href="/quiz"

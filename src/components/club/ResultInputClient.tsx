@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { updatePlayerStatsForMatch } from '@/app/club/[clubId]/ranking/actions'
 
 interface MatchPlayer {
   id: string
@@ -48,6 +49,13 @@ export function ResultInputClient({ sessionId, clubId, matches, isManager }: Pro
     setScores((prev) => ({ ...prev, [matchId]: { ...prev[matchId], [side]: val } }))
   }
 
+  const hasExistingScores = matches.some(m => m.team_a_score !== null || m.team_b_score !== null)
+
+  // 저장 전 DB 점수 (재수정 시 역집계용)
+  const originalScores: Record<string, { a: number | null; b: number | null }> = Object.fromEntries(
+    matches.map((m) => [m.id, { a: m.team_a_score, b: m.team_b_score }])
+  )
+
   const handleSave = () => {
     startTransition(async () => {
       const supabase = createClient()
@@ -59,6 +67,15 @@ export function ResultInputClient({ sessionId, clubId, matches, isManager }: Pro
             .from('matches')
             .update({ team_a_score: a, team_b_score: b })
             .eq('id', matchId)
+          // 스탯 업데이트 (fire-and-forget)
+          updatePlayerStatsForMatch(
+            matchId,
+            clubId,
+            originalScores[matchId]?.a ?? null,
+            originalScores[matchId]?.b ?? null,
+            a,
+            b,
+          ).catch(console.error)
         }
       }
 
@@ -69,7 +86,11 @@ export function ResultInputClient({ sessionId, clubId, matches, isManager }: Pro
         .eq('id', sessionId)
 
       setSaved(true)
-      router.push(`/club/${clubId}/ranking`)
+      if (!hasExistingScores) {
+        router.push(`/club/${clubId}/ranking`)
+      } else {
+        setTimeout(() => setSaved(false), 2000)
+      }
     })
   }
 
@@ -156,10 +177,10 @@ export function ResultInputClient({ sessionId, clubId, matches, isManager }: Pro
       {isManager && (
         <button
           onClick={handleSave}
-          disabled={isPending || saved}
+          disabled={isPending}
           className="w-full py-4 bg-[#beff00] text-[#111] font-bold rounded-xl hover:brightness-95 transition-all disabled:opacity-50"
         >
-          {isPending ? '저장 중...' : saved ? '저장 완료!' : '결과 저장 · 랭킹 확인'}
+          {isPending ? '저장 중...' : saved ? '저장 완료 ✓' : hasExistingScores ? '점수 수정 저장' : '결과 저장 · 랭킹 확인'}
         </button>
       )}
     </div>

@@ -1,4 +1,6 @@
 import { redirect, notFound } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership, getClubMembers } from '@/lib/club/client'
@@ -17,10 +19,10 @@ export default async function MatchAssignPage({
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) redirect('/club/login')
+  if (!user) redirect('/login')
 
   const clubUserId = await getClubUserId(supabase)
-  if (!clubUserId) redirect('/club/login')
+  if (!clubUserId) redirect('/login')
 
   const membership = await getMyMembership(supabase, clubId, clubUserId)
   if (!membership || !['owner', 'manager'].includes(membership.role)) {
@@ -65,16 +67,26 @@ export default async function MatchAssignPage({
 
   return (
     <div>
-      <header className="bg-white border-b border-[#e5e5e5] px-4 py-4">
-        <div className="max-w-lg mx-auto">
-          <h1 className="text-base font-bold text-[#111]">경기 배정</h1>
-          <p className="text-xs text-[#999] mt-0.5">
-            출석 {attendedMembers.length}명 · 코트 {club.court_count}면 · {session.match_mode}
-          </p>
+      <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
+        <div className="max-w-[1088px] mx-auto flex items-center justify-between">
+          <Link
+            href={`/club/${clubId}/session/${sessionId}`}
+            className="flex items-center gap-1.5 text-[#555] hover:text-[#111] transition-colors"
+          >
+            <ArrowLeft size={18} />
+            <span className="text-sm">뒤로</span>
+          </Link>
+          <div className="text-center">
+            <h1 className="font-bold text-[#111] text-base">경기 배정</h1>
+            <p className="text-xs text-[#999] mt-0.5">
+              출석 {attendedMembers.length}명 · 코트 {club.court_count}면 · {session.match_mode}
+            </p>
+          </div>
+          <div className="w-16" />
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 py-5">
+      <main className="max-w-[1088px] mx-auto px-4 py-5">
         <MatchAssignClient
           sessionId={sessionId}
           clubId={clubId}

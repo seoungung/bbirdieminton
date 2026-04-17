@@ -155,7 +155,7 @@ export default async function RacketDetailPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-[1088px] mx-auto px-4 py-6">
 
         {/* 브레드크럼 */}
         <nav className="flex items-center gap-1 text-xs text-muted-foreground mb-5">

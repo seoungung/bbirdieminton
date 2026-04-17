@@ -91,15 +91,13 @@ export function MatchAssignClient({
   return (
     <div className="space-y-5">
       {/* 재배정 버튼 */}
-      {matchMode !== 'custom' && (
-        <button
-          onClick={regenerate}
-          className="flex items-center gap-2 text-sm font-semibold text-[#555] border border-[#e5e5e5] px-4 py-2 rounded-xl hover:bg-[#f8f8f8] transition-colors"
-        >
-          <RotateCcw size={14} />
-          다시 배정
-        </button>
-      )}
+      <button
+        onClick={regenerate}
+        className="flex items-center gap-2 text-sm font-semibold text-[#555] border border-[#e5e5e5] px-4 py-2 rounded-xl hover:bg-[#f8f8f8] transition-colors"
+      >
+        <RotateCcw size={14} />
+        다시 배정
+      </button>
 
       {/* 코트별 배정 결과 */}
       {courts.map((court) => (

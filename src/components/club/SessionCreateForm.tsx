@@ -9,7 +9,6 @@ const MATCH_MODES: { value: MatchMode; label: string; desc: string }[] = [
   { value: 'skill_balance', label: '실력 균등', desc: '스킬 점수 기반으로 팀을 균등하게 배분' },
   { value: 'game_count', label: '게임수 균등', desc: '경기 수가 적은 순으로 우선 배정' },
   { value: 'random', label: '랜덤', desc: '완전 무작위로 팀 배정' },
-  { value: 'custom', label: '수동', desc: '운영자가 직접 팀을 배정' },
 ]
 
 export function SessionCreateForm({

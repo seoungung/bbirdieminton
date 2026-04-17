@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { LoginForm } from '@/components/auth/LoginForm'
@@ -16,20 +15,20 @@ export default async function LoginPage({
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (user) redirect('/')
-
   const { next } = await searchParams
+
+  // 이미 로그인된 유저(소셜/이메일)는 홈으로 이동
+  if (user && !user.is_anonymous) redirect(next ?? '/')
+  // 이미 익명 세션인 유저도 바로 목적지로 이동 (로그인 폼 불필요)
+  if (user?.is_anonymous) redirect(next ?? '/club/home')
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center px-4 py-16">
       <div className="w-full max-w-sm">
         {/* 로고 */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center mb-6">
-            <Image src="/textlogo_width_birdieminton-white.png" alt="birdieminton" width={150} height={32} className="object-contain h-8 w-auto" unoptimized />
-          </Link>
-          <h1 className="text-[22px] font-bold text-white tracking-[-0.02em]">시작하기</h1>
-          <p className="text-sm text-white/40 mt-1">배드민턴 라켓 도감 · 레벨 테스트</p>
+          <h1 className="text-[22px] font-bold text-white tracking-[-0.02em]">버디민턴</h1>
+          <p className="text-sm text-white/40 mt-1">배드민턴 관리 플랫폼</p>
         </div>
 
         {/* 폼 */}

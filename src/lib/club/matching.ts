@@ -7,8 +7,8 @@ export function getActiveCount(courtCount: number): number {
 
 /**
  * 실력 균등 배정 (skill_balance)
- * skill_score 기준 정렬 후 뱀 방향으로 팀 배분.
- * 예) [1위, 4위, 5위, 8위] vs [2위, 3위, 6위, 7위]
+ * skill_score 기준 정렬 후 스네이크 방향으로 팀 배분.
+ * 예) [1위, 4위] vs [2위, 3위] (팀별 실력 균등)
  */
 export function skillBalanceMatch(
   players: ClubMember[],
@@ -28,7 +28,7 @@ export function gameCountMatch(
   stats: PlayerStats[],
   courtCount: number
 ): CourtAssignment[] {
-  const statsMap = new Map(stats.map((s) => [s.member_id, s.total_games]))
+  const statsMap = new Map(stats.map((s) => [s.member_id, s.games_played]))
   const sorted = [...players].sort(
     (a, b) => (statsMap.get(a.id) ?? 0) - (statsMap.get(b.id) ?? 0)
   )
@@ -47,18 +47,27 @@ export function randomMatch(players: ClubMember[], courtCount: number): CourtAss
 
 /**
  * 공통: players 배열을 코트별 팀A / 팀B 로 나눔.
- * 4명씩 묶어 앞 2명 = 팀A, 뒤 2명 = 팀B
+ * 4명 그룹은 스네이크: [1위, 4위] vs [2위, 3위]
  */
 function buildCourts(players: ClubMember[], courtCount: number): CourtAssignment[] {
   const courts: CourtAssignment[] = []
   for (let i = 0; i < courtCount; i++) {
     const group = players.slice(i * 4, i * 4 + 4)
     if (group.length < 2) break
-    courts.push({
-      courtNumber: i + 1,
-      teamA: group.slice(0, Math.ceil(group.length / 2)),
-      teamB: group.slice(Math.ceil(group.length / 2)),
-    })
+    if (group.length === 4) {
+      // 스네이크: [1위, 4위] vs [2위, 3위]
+      courts.push({
+        courtNumber: i + 1,
+        teamA: [group[0], group[3]],
+        teamB: [group[1], group[2]],
+      })
+    } else {
+      courts.push({
+        courtNumber: i + 1,
+        teamA: group.slice(0, Math.ceil(group.length / 2)),
+        teamB: group.slice(Math.ceil(group.length / 2)),
+      })
+    }
   }
   return courts
 }

@@ -20,18 +20,20 @@ export function RankingTable({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" role="table" aria-label="모임 랭킹">
       {ranking.map((row) => {
         const isMe = row.member.user_id === currentUserId
         const rankColor = RANK_COLORS[row.rank - 1] ?? 'text-[#999]'
         const winRate =
-          row.total_games > 0
-            ? Math.round((row.wins / row.total_games) * 100)
-            : 0
+          row.games_played > 0
+            ? ((row.wins / row.games_played) * 100).toFixed(1)
+            : '0.0'
 
         return (
           <div
             key={row.id}
+            role="row"
+            aria-current={isMe ? 'true' : undefined}
             className={
               'flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-colors ' +
               (isMe
@@ -71,14 +73,14 @@ export function RankingTable({
                 )}
               </div>
               <p className="text-xs text-[#999]">
-                {row.wins}승 {row.losses}패 · 승률 {winRate}%
+                {row.games_played}전 {row.wins}승 {row.losses}패 · {winRate}%
               </p>
             </div>
 
             {/* 승점 */}
             <div className="text-right shrink-0">
-              <p className="text-lg font-black text-[#111]">{row.points}</p>
-              <p className="text-[10px] text-[#999]">승점</p>
+              <p className="text-lg font-black text-[#111]">{winRate}<span className="text-xs font-normal">%</span></p>
+              <p className="text-[10px] text-[#999]">승률</p>
             </div>
           </div>
         )

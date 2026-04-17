@@ -3,36 +3,81 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, useRef, useTransition } from 'react'
+import { usePathname } from 'next/navigation'
 import { Menu, X, User, ChevronDown, LayoutDashboard, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/app/login/actions'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
-interface NavLink {
-  href: string
-  label: string
-  highlight?: boolean
-}
-
-const NAV_LINKS: NavLink[] = [
-  { href: '/rackets', label: '라켓 도감' },
-  { href: '/quiz',    label: '레벨 테스트' },
-  { href: '/guide',   label: '가이드북' },
-  { href: '/club',    label: '게임보드', highlight: true },
-]
+// 데모 체험 링크: 로그인 상태면 /club/home, 아니면 로그인 페이지
+const getDemoHref = (isLoggedIn: boolean) =>
+  isLoggedIn ? '/club/home' : '/login?next=%2Fclub%2Fhome'
 
 export default function Header() {
   const [open, setOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [anonName, setAnonName] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const pathname = usePathname()
+  const loginHref = `/login?next=${encodeURIComponent(pathname)}`
 
   useEffect(() => {
+    // 1) 캐시된 닉네임을 즉시 복원 (깜빡임 방지)
+    const cached = localStorage.getItem('birdieminton_anon_name')
+    if (cached) setAnonName(cached)
+
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => setUser(data.user))
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+
+    // 2) 서버에서 세션 검증 후 닉네임 확정
+    supabase.auth.getUser().then(async ({ data }) => {
+      setUser(data.user)
+      if (data.user?.is_anonymous) {
+        // 캐시가 없을 때만 DB 조회
+        if (!cached) {
+          const { data: profile } = await supabase
+            .from('users')
+            .select('name')
+            .eq('birdieminton_user_id', data.user.id)
+            .single()
+          if (profile?.name) {
+            setAnonName(profile.name)
+            localStorage.setItem('birdieminton_anon_name', profile.name)
+          }
+        }
+      } else if (!data.user) {
+        // 실제로 로그아웃 상태일 때만 초기화
+        setAnonName(null)
+        localStorage.removeItem('birdieminton_anon_name')
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null)
+      if (session?.user?.is_anonymous) {
+        // 캐시 우선 사용
+        const cachedNow = localStorage.getItem('birdieminton_anon_name')
+        if (cachedNow) {
+          setAnonName(cachedNow)
+        } else {
+          const supabaseInner = createClient()
+          const { data: profile } = await supabaseInner
+            .from('users')
+            .select('name')
+            .eq('birdieminton_user_id', session.user.id)
+            .single()
+          if (profile?.name) {
+            setAnonName(profile.name)
+            localStorage.setItem('birdieminton_anon_name', profile.name)
+          }
+        }
+      } else if (!session?.user) {
+        // 완전 로그아웃 시에만 초기화
+        setAnonName(null)
+        localStorage.removeItem('birdieminton_anon_name')
+      }
+      // 소셜 로그인 유저: anonName은 null 유지 (표시명은 OAuth 메타데이터 사용)
     })
     return () => subscription.unsubscribe()
   }, [])
@@ -49,9 +94,11 @@ export default function Header() {
   }, [])
 
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined
-  const displayName = user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? ''
+  // 익명 유저는 users 테이블 닉네임 우선, 소셜은 OAuth 메타데이터
+  const displayName = anonName ?? user?.user_metadata?.full_name ?? user?.email?.split('@')[0] ?? '게스트'
 
   const handleLogout = () => {
+    localStorage.removeItem('birdieminton_anon_name')
     setDropdownOpen(false)
     startTransition(() => logout())
   }
@@ -59,7 +106,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50">
       <nav className="bg-black text-white border-b border-white/10">
-        <div className="max-w-[90rem] mx-auto px-4 sm:px-6 h-[56px] flex items-center justify-between gap-4">
+        <div className="max-w-[1088px] mx-auto px-4 sm:px-6 h-[56px] flex items-center justify-between gap-4">
 
           {/* 로고 */}
           <Link href="/" className="flex items-center shrink-0 hover:opacity-85 transition-opacity">
@@ -68,17 +115,16 @@ export default function Header() {
 
           {/* 데스크톱 중앙 메뉴 */}
           <div className="hidden md:flex items-center gap-7 text-[14px] font-medium">
-            {NAV_LINKS.map(({ href, label, highlight }) => (
-              highlight ? (
-                <Link key={href} href={href} className="flex items-center gap-1.5 text-[#beff00] font-semibold hover:text-[#beff00]/80 transition-colors">
-                  🏸 {label}
-                </Link>
-              ) : (
-                <Link key={href} href={href} className="text-white/70 hover:text-white transition-colors">
-                  {label}
-                </Link>
-              )
-            ))}
+            {/* 데모 체험: 로그인 상태면 /club/home, 아니면 로그인 페이지 */}
+            <Link
+              href={getDemoHref(!!user)}
+              className="flex items-center gap-1.5 text-[#beff00] font-semibold hover:text-[#beff00]/80 transition-colors"
+            >
+              🏸 데모 체험
+            </Link>
+            <Link href="/survey" className="text-white/70 hover:text-white transition-colors">
+              설문 참여
+            </Link>
           </div>
 
           {/* 오른쪽: 로그인 / 프로필 드롭다운 */}
@@ -137,7 +183,7 @@ export default function Header() {
               </>
             ) : (
               <Link
-                href="/login"
+                href={loginHref}
                 className="text-[13px] px-4 py-[7px] rounded-full border border-white/30 hover:border-white transition-colors"
               >
                 로그인
@@ -154,17 +200,20 @@ export default function Header() {
         {/* 모바일 드로어 */}
         {open && (
           <div className="md:hidden border-t border-white/10 px-4 pt-4 pb-5 flex flex-col gap-3 text-[14px]">
-            {NAV_LINKS.map(({ href, label, highlight }) => (
-              highlight ? (
-                <Link key={href} href={href} onClick={() => setOpen(false)} className="flex items-center gap-1.5 text-[#beff00] font-semibold py-1">
-                  🏸 {label}
-                </Link>
-              ) : (
-                <Link key={href} href={href} onClick={() => setOpen(false)} className="text-white/80 hover:text-white transition-colors py-1">
-                  {label}
-                </Link>
-              )
-            ))}
+            <Link
+              href={getDemoHref(!!user)}
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-1.5 text-[#beff00] font-semibold py-1"
+            >
+              🏸 데모 체험
+            </Link>
+            <Link
+              href="/survey"
+              onClick={() => setOpen(false)}
+              className="text-white/80 hover:text-white transition-colors py-1"
+            >
+              설문 참여
+            </Link>
             <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
               {user ? (
                 <>
@@ -192,7 +241,7 @@ export default function Header() {
                     마이페이지
                   </Link>
                   <button
-                    onClick={() => { setOpen(false); startTransition(() => logout()) }}
+                    onClick={() => { localStorage.removeItem('birdieminton_anon_name'); setOpen(false); startTransition(() => logout()) }}
                     disabled={isPending}
                     className="flex items-center gap-2 py-2.5 px-3 rounded-xl border border-red-500/20 text-[13px] text-red-400/70 hover:text-red-400 transition-colors"
                   >
@@ -202,7 +251,7 @@ export default function Header() {
                 </>
               ) : (
                 <Link
-                  href="/login"
+                  href={loginHref}
                   onClick={() => setOpen(false)}
                   className="block text-center py-2.5 rounded-full border border-white/30 text-[13px] text-white/70"
                 >

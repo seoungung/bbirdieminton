@@ -104,8 +104,8 @@ export async function getClubRanking(
     .from('player_stats')
     .select('*, member:club_members(*, user:users(*))')
     .eq('club_id', clubId)
-    .order('points', { ascending: false })
     .order('wins', { ascending: false })
+    .order('win_rate', { ascending: false })
 
   if (error) throw error
 

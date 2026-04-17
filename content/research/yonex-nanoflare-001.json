@@ -1,0 +1,65 @@
+{
+  "slug": "yonex-nanoflare-001",
+  "name": "NANOFLARE 001 ABILITY",
+  "brand": "YONEX",
+  "status": "active",
+  "image_url": "https://www.yonex.com/media/catalog/product/i/n/int_nf-001a_187-1_02.png?quality=80&bg-color=248,248,248,0.75&fit=bounds&height=819&width=600&canvas=600:819",
+  "image_urls": [
+    "https://www.yonex.com/media/catalog/product/i/n/int_nf-001a_187-1_02.png?quality=80&bg-color=248,248,248,0.75&fit=bounds&height=819&width=600&canvas=600:819"
+  ],
+  "price_min": 49000,
+  "price_max": 73000,
+  "price_range": "5~10만원",
+  "weight": "5U",
+  "balance": "head-light",
+  "flex": "flexible",
+  "max_tension": 27,
+  "frame_body": "slim",
+  "head_shape": "isometric",
+  "level": ["왕초보", "초심자"],
+  "type": ["올라운드"],
+  "stat_power": 40,
+  "stat_control": 65,
+  "stat_speed": 85,
+  "stat_durability": 65,
+  "stat_repulsion": 70,
+  "stat_maneuver": 88,
+  "description": "78g 초경량 헤드라이트 설계로 손목·어깨 부담이 거의 없는 요넥스 입문용 라켓. 유연한 샤프트의 슬링샷 효과 덕분에 적은 힘으로도 클리어가 잘 나가며, 아이소메트릭 헤드로 스윗스팟이 넓어 빗맞아도 공이 넘어간다.",
+  "editor_pick": false,
+  "is_popular": true,
+  "recommended_for": "손목이 약한 여성·청소년·어르신, 또는 생애 첫 라켓을 요넥스 브랜드로 시작하고 싶은 왕초보",
+  "pros": [
+    "78g 초경량으로 손목·어깨 부담이 매우 적음",
+    "헤드라이트 + 하이플렉스 조합으로 빠른 수비·네트 반응 속도",
+    "아이소메트릭 헤드로 스윗스팟이 넓어 초보자도 실수를 줄일 수 있음"
+  ],
+  "cons": [
+    "5U 경량 특성상 스매시 파워가 부족하게 느껴질 수 있음",
+    "상급자로 성장 시 무게감 부족으로 교체 필요성이 빨리 생김",
+    "같은 가격대 국산 라켓 대비 내구성이 상대적으로 약하다는 후기 있음"
+  ],
+  "editor_comment": "요넥스 브랜드 신뢰성 + 초경량 설계, 손목이 특히 약한 배린이에게 딱 맞는 첫 라켓",
+  "review_summary": "국내외 리뷰에서 '가볍고 빠르다'는 평이 일치하며 손목 부담 최소화 측면에서 입문자들에게 꾸준히 호평받는다. 다만 파워보다 스피드에 특화된 설계라 공격형을 원하는 배린이에게는 다소 아쉬울 수 있다는 의견도 있다.",
+  "review_links": [
+    {
+      "title": "요넥스 나노플레어 001 다나와 가격비교 및 스펙",
+      "url": "https://prod.danawa.com/info/?pcode=14889917"
+    },
+    {
+      "title": "요넥스 2025 나노플레어 001 어빌리티 다나와",
+      "url": "https://prod.danawa.com/info/?pcode=72913757"
+    },
+    {
+      "title": "Yonex Nanoflare 001 Ability - Badminton Avenue",
+      "url": "https://www.badmintonavenue.com/products/yonex-nanoflare-001-ability-badminton-racket"
+    }
+  ],
+  "specs_source": [
+    "https://www.yonex.com/badminton/racquets/nanoflare/nanoflare-001-ability",
+    "https://www.yonexmall.com/m2/mgate.php?refer=%2Fshop%2Fgoods%2Fgoods_view.php%3F&goodsno=5677",
+    "https://prod.danawa.com/info/?pcode=72913757"
+  ],
+  "stats_source": "estimated",
+  "confidence": 0.88,
+  "needs_human_review": false
+}

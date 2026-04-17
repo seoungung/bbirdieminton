@@ -5,7 +5,7 @@
 export type ClubPlan = 'free' | 'pro' | 'club_plus'
 export type MemberRole = 'owner' | 'manager' | 'member'
 export type SessionStatus = 'open' | 'in_progress' | 'closed'
-export type MatchMode = 'custom' | 'game_count' | 'skill_balance' | 'random'
+export type MatchMode = 'game_count' | 'skill_balance' | 'random'  // 'custom' 제거 (UI 미구현)
 export type TeamSide = 'A' | 'B'
 
 // ── DB 기본 타입 ──────────────────────────────
@@ -24,11 +24,17 @@ export interface Club {
   owner_id: string | null
   name: string
   description: string | null
+  location: string | null
+  activity_place: string | null
+  category: string | null
+  thumbnail_color: string
+  thumbnail_url: string | null
   invite_code: string
   max_members: number
   court_count: number
   plan: ClubPlan
   created_at: string
+  updated_at: string
 }
 
 export interface ClubMember {
@@ -38,6 +44,7 @@ export interface ClubMember {
   role: MemberRole
   skill_score: number
   joined_at: string
+  removed_at: string | null  // 강퇴 시각 (null = 활성 멤버)
 }
 
 export interface Session {
@@ -47,6 +54,7 @@ export interface Session {
   session_date: string
   match_mode: MatchMode
   status: SessionStatus
+  notes: string | null
   created_at: string
 }
 
@@ -63,7 +71,12 @@ export interface Match {
   court_number: number
   team_a_score: number | null
   team_b_score: number | null
-  played_at: string
+  match_mode: MatchMode | null
+  excluded_from_ranking: boolean
+  started_at: string | null
+  ended_at: string | null
+  created_at: string
+  updated_at: string
 }
 
 export interface MatchPlayer {
@@ -77,11 +90,35 @@ export interface PlayerStats {
   id: string
   club_id: string
   member_id: string
-  total_games: number
   wins: number
   losses: number
-  win_streak: number
-  points: number
+  games_played: number
+  win_rate: number
+  updated_at: string
+}
+
+/** 정기모임 (일회성 이벤트) */
+export interface ClubEvent {
+  id: string
+  club_id: string
+  title: string
+  event_date: string
+  start_time: string | null
+  end_time: string | null
+  place: string | null
+  fee: string | null
+  max_attend: number
+  created_by: string | null
+  created_at: string
+}
+
+export type EventAttendStatus = 'going' | 'not_going'
+
+export interface ClubEventAttendance {
+  id: string
+  event_id: string
+  member_id: string
+  status: EventAttendStatus
   updated_at: string
 }
 

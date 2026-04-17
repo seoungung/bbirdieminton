@@ -19,7 +19,7 @@ export default async function MyPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
-      <div className="max-w-xl mx-auto px-4 py-10">
+      <div className="max-w-[1088px] mx-auto px-4 py-10">
 
         {/* 프로필 헤더 */}
         <div className="flex items-center gap-4 mb-8 p-5 bg-[#1a1a1a] border border-white/8 rounded-2xl">

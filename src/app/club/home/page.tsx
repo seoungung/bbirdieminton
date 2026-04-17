@@ -1,118 +1,105 @@
-import Link from 'next/link'
-import { redirect } from 'next/navigation'
-import { Plus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ensureClubUser, getClubUserId } from '@/lib/club/auth'
 import { getMyClubs, fillMemberCounts } from '@/lib/club/client'
-import { ClubCard } from '@/components/club/ClubCard'
+import { ClubListClient } from '@/components/club/ClubListClient'
+import { DEMO_CLUBS } from '@/lib/club/demoData'
 import type { Metadata } from 'next'
+import type { Club } from '@/types/club'
 
-export const metadata: Metadata = { title: '게임보드 | 버디민턴' }
+export const metadata: Metadata = { title: '모임 리스트 | 버디민턴', description: '내가 속한 배드민턴 모임 목록을 확인하세요' }
+
+interface ClubWithCount extends Club {
+  memberCount: number
+}
+
+async function fillAllClubMemberCounts(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  clubs: Club[]
+): Promise<ClubWithCount[]> {
+  if (clubs.length === 0) return []
+  const ids = clubs.map((c) => c.id)
+  const { data } = await supabase.from('club_members').select('club_id').in('club_id', ids)
+  const countMap: Record<string, number> = {}
+  for (const row of data ?? []) {
+    countMap[row.club_id] = (countMap[row.club_id] ?? 0) + 1
+  }
+  return clubs.map((c) => ({ ...c, memberCount: countMap[c.id] ?? 0 }))
+}
 
 export default async function ClubHomePage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // 비로그인 → 데모 모임 카드 3개 표시
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#f8f8f8]">
+        <ClubListClient myClubs={[]} allClubs={DEMO_CLUBS as never} isGuest />
+      </div>
+    )
+  }
 
   await ensureClubUser(supabase, user).catch(() => {})
   const clubUserId = await getClubUserId(supabase)
-  if (!clubUserId) redirect('/login')
+
+  // clubUserId 없어도 빈 리스트로 보여줌 (로그인은 됐지만 club user 미생성)
+  if (!clubUserId) {
+    return (
+      <div className="min-h-screen bg-[#f8f8f8]">
+        <ClubListClient myClubs={[]} allClubs={[]} />
+      </div>
+    )
+  }
 
   const clubs = await getMyClubs(supabase, clubUserId)
   const clubsWithCount = await fillMemberCounts(supabase, clubs)
 
+  // location, activity_place, thumbnail_color 포함해서 조회
+  const { data: rawAllClubs } = await supabase
+    .from('clubs')
+    .select('id, name, description, court_count, created_at, owner_id, invite_code, max_members, plan, location, activity_place, thumbnail_color, thumbnail_url, category')
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  // leaderName: owner 멤버의 이름을 별도 조회
+  const realClubs = rawAllClubs ?? []
+  const ownerIds = [...new Set(realClubs.map((c: Record<string, unknown>) => c.owner_id as string).filter(Boolean))]
+  const { data: ownerUsers } = ownerIds.length > 0
+    ? await supabase.from('users').select('id, name').in('id', ownerIds)
+    : { data: [] }
+  const ownerMap: Record<string, string> = {}
+  for (const u of ownerUsers ?? []) ownerMap[u.id] = u.name
+
+  const mappedClubs = realClubs.map((c: Record<string, unknown>) => ({
+    ...c,
+    location: c.location ?? '',
+    thumbnailColor: c.thumbnail_color ?? '#f0f0f0',
+    thumbnail_url: c.thumbnail_url ?? null,
+    leaderName: ownerMap[c.owner_id as string] ?? '',
+  }))
+
+  const allClubsWithCount = await fillAllClubMemberCounts(supabase, mappedClubs as unknown as Club[])
+
+  // 전체 모임에 데모 클럽도 포함 (체험용으로 항상 표시)
+  const demoAsClubs = DEMO_CLUBS.map(d => ({
+    id: d.id,
+    name: d.name,
+    description: d.description,
+    court_count: d.court_count,
+    created_at: d.created_at,
+    memberCount: d.memberCount,
+    isDemo: true,
+    location: d.location,
+    leaderName: d.leaderName,
+    thumbnailColor: d.thumbnailColor,
+  }))
+
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
-      {/* ── Hero ── */}
-      <div className="bg-[#0a0a0a] pt-10 pb-6 px-4 text-center">
-        <div className="max-w-lg mx-auto">
-          <p className="text-[#beff00] text-[10px] font-bold tracking-[0.2em] mb-3 uppercase">
-            Birdieminton
-          </p>
-          <h1 className="text-[32px] font-extrabold text-white mb-2 tracking-tight">
-            🎮 게임보드
-          </h1>
-          <p className="text-sm text-white/50 mb-6">
-            함께하는 배드민턴, 더 스마트하게
-          </p>
-
-          {/* ── Search bar ── */}
-          <div className="flex gap-2 mb-5">
-            <input
-              type="text"
-              placeholder="게임보드 이름으로 검색..."
-              className="flex-1 bg-white/8 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#beff00]/60 transition-colors"
-            />
-            <button className="bg-[#beff00] text-[#111] px-4 py-2.5 rounded-xl text-sm font-bold hover:brightness-95 transition-all shrink-0">
-              검색
-            </button>
-          </div>
-
-          {/* ── Action buttons ── */}
-          <div className="flex gap-2">
-            <Link
-              href="/club/create"
-              className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#beff00] text-[#111] font-bold py-3 rounded-xl hover:brightness-95 transition-all text-sm"
-            >
-              <Plus size={15} />
-              모임 만들기
-            </Link>
-            <Link
-              href="/club/home"
-              className="flex-1 inline-flex items-center justify-center bg-white/10 border border-white/15 text-white font-semibold py-3 rounded-xl hover:bg-white/15 transition-all text-sm"
-            >
-              내 모임
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Club list ── */}
-      <main className="max-w-lg mx-auto px-4 py-5 space-y-3">
-        {clubsWithCount.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="text-5xl mb-4">🏸</div>
-            <p className="font-bold text-[#111] text-lg mb-1">
-              참여한 게임보드가 없어요
-            </p>
-            <p className="text-sm text-[#999] mb-6">
-              새 게임보드를 만들거나 초대코드로 참여해보세요
-            </p>
-            <div className="flex gap-3">
-              <Link
-                href="/club/create"
-                className="px-5 py-2.5 bg-[#beff00] text-[#111] font-semibold text-sm rounded-xl hover:brightness-95 transition-all"
-              >
-                게임보드 만들기
-              </Link>
-              <Link
-                href="/club/join"
-                className="px-5 py-2.5 bg-white border border-[#e5e5e5] text-[#111] font-semibold text-sm rounded-xl hover:bg-[#f8f8f8] transition-all"
-              >
-                초대코드 입력
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <>
-            <p className="text-xs text-[#999] font-medium px-1">
-              참여 중인 게임보드 {clubsWithCount.length}개
-            </p>
-            {clubsWithCount.map((club) => (
-              <ClubCard key={club.id} club={club} />
-            ))}
-            <Link
-              href="/club/join"
-              className="flex items-center justify-center gap-2 w-full py-3.5 border border-dashed border-[#bbb] rounded-2xl text-sm text-[#999] hover:border-[#beff00] hover:text-[#111] transition-colors"
-            >
-              <Plus size={16} />
-              초대코드로 다른 게임보드 참여
-            </Link>
-          </>
-        )}
-      </main>
+      <ClubListClient
+        myClubs={clubsWithCount as never}
+        allClubs={[...allClubsWithCount, ...demoAsClubs] as never}
+      />
     </div>
   )
 }

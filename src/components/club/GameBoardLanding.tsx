@@ -29,7 +29,7 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
 
   const handleLoginConfirm = () => {
     setShowLoginModal(false)
-    router.push('/login?next=/club')
+    router.push('/login?next=%2Fclub')
   }
 
   const handleCreateSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -47,7 +47,7 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
     <>
       {/* ── Hero ── */}
       <div className="bg-[#0a0a0a] pt-10 pb-6 px-4 text-center">
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-[1088px] mx-auto">
           <p className="text-[#beff00] text-[10px] font-bold tracking-[0.2em] mb-3 uppercase">Birdieminton</p>
           <h1 className="text-[32px] font-extrabold text-white mb-2 tracking-tight">🎮 게임보드</h1>
           <p className="text-sm text-white/50 mb-6">함께하는 배드민턴, 더 스마트하게</p>
@@ -84,7 +84,7 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
       </div>
 
       {/* ── Info cards ── */}
-      <div className="max-w-lg mx-auto px-4 py-8 space-y-3">
+      <div className="max-w-[1088px] mx-auto px-4 py-8 space-y-3">
         <p className="text-xs text-[#999] font-semibold px-1 mb-4">게임보드란?</p>
         {[
           { icon: '📋', title: '출석 · 코트 배정', desc: '오늘 참석자를 확인하고 코트별로 자동 배정합니다' },

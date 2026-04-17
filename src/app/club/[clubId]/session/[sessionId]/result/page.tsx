@@ -17,10 +17,10 @@ export default async function ResultPage({
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) redirect('/club/login')
+  if (!user) redirect('/login')
 
   const clubUserId = await getClubUserId(supabase)
-  if (!clubUserId) redirect('/club/login')
+  if (!clubUserId) redirect('/login')
 
   const membership = await getMyMembership(supabase, clubId, clubUserId)
   if (!membership) redirect('/club/home')
@@ -51,13 +51,13 @@ export default async function ResultPage({
   return (
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-4">
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-[1088px] mx-auto">
           <h1 className="text-base font-bold text-[#111]">경기 결과</h1>
           <p className="text-xs text-[#999] mt-0.5">코트별 점수를 입력하세요</p>
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto px-4 py-5">
+      <main className="max-w-[1088px] mx-auto px-4 py-5">
         <ResultInputClient
           sessionId={sessionId}
           clubId={clubId}

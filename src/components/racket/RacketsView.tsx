@@ -144,13 +144,13 @@ export function RacketsView({ rackets }: { rackets: Racket[] }) {
     <div className="min-h-screen bg-background pb-24">
       {/* 헤딩 */}
       <div className="border-b border-border">
-        <div className="max-w-[90rem] mx-auto px-4 py-14 sm:py-20 text-center">
+        <div className="max-w-[1088px] mx-auto px-4 py-14 sm:py-20 text-center">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">라켓 도감</h1>
           <p className="text-base sm:text-lg text-muted-foreground">내게 맞는 라켓을 찾아보세요</p>
         </div>
       </div>
 
-      <div className="max-w-[90rem] mx-auto px-4 py-8">
+      <div className="max-w-[1088px] mx-auto px-4 py-8">
         {/* 모바일 검색 + 필터 토글 */}
         <div className="flex gap-2 mb-4 md:hidden">
           <input

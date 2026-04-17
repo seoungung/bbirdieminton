@@ -51,3 +51,21 @@ export async function logout() {
   await supabase.auth.signOut()
   redirect('/')
 }
+
+/**
+ * 익명 로그인 직후 클라이언트에서 호출.
+ * 서버에서 쿠키 세션을 읽어 users 테이블에 닉네임을 upsert 한다.
+ * 클라이언트 측 PostgREST 타이밍 버그를 우회하기 위해 Server Action 사용.
+ */
+export async function saveGuestName(name: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await supabase.from('users').upsert(
+    { birdieminton_user_id: user.id, name },
+    { onConflict: 'birdieminton_user_id', ignoreDuplicates: false }
+  )
+  if (error) return { error: error.message }
+  return {}
+}

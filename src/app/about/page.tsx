@@ -15,7 +15,7 @@ export default function AboutPage() {
     <main className="min-h-screen bg-white text-[#111]">
 
       {/* ── 히어로 ── */}
-      <section className="max-w-2xl mx-auto px-5 pt-16 pb-12">
+      <section className="max-w-[1088px] mx-auto px-5 pt-16 pb-12">
         <p className="text-xs font-bold text-[#beff00] uppercase tracking-widest mb-4">
           About Birdieminton
         </p>
@@ -30,12 +30,12 @@ export default function AboutPage() {
       </section>
 
       {/* ── 구분선 ── */}
-      <div className="max-w-2xl mx-auto px-5">
+      <div className="max-w-[1088px] mx-auto px-5">
         <hr className="border-[#e5e5e5]" />
       </div>
 
       {/* ── 브랜드 스토리 ── */}
-      <section className="max-w-2xl mx-auto px-5 py-12 space-y-7 text-[0.97rem] text-[#333] leading-[1.95]">
+      <section className="max-w-[1088px] mx-auto px-5 py-12 space-y-7 text-[0.97rem] text-[#333] leading-[1.95]">
 
         <p>
           서울로 이사 오면서 아는 사람이 한 명도 없었어요.<br />
@@ -132,7 +132,7 @@ export default function AboutPage() {
 
       {/* ── 우리가 해결하는 것 ── */}
       <section className="bg-[#f8f8f8] border-t border-[#e5e5e5] py-14">
-        <div className="max-w-2xl mx-auto px-5">
+        <div className="max-w-[1088px] mx-auto px-5">
           <p className="text-xs font-bold text-[#999] uppercase tracking-wider mb-8">
             Birdieminton이 해결하는 것
           </p>
@@ -167,7 +167,7 @@ export default function AboutPage() {
       </section>
 
       {/* ── 지금의 버디민턴 ── */}
-      <section className="max-w-2xl mx-auto px-5 py-14">
+      <section className="max-w-[1088px] mx-auto px-5 py-14">
         <p className="text-xs font-bold text-[#999] uppercase tracking-wider mb-6">
           지금의 Birdieminton
         </p>
@@ -183,7 +183,7 @@ export default function AboutPage() {
 
       {/* ── CTA ── */}
       <section className="bg-[#111] py-14">
-        <div className="max-w-2xl mx-auto px-5 text-center">
+        <div className="max-w-[1088px] mx-auto px-5 text-center">
           <p className="text-white font-extrabold text-[1.3rem] mb-2">
             내 레벨부터 확인해보세요.
           </p>

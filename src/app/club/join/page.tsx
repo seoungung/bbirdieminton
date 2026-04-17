@@ -1,10 +1,10 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { ClubJoinForm } from '@/components/club/ClubJoinForm'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: '초대코드 입력 | 버디민턴' }
+export const metadata: Metadata = { title: '초대코드 입력 | 버디민턴', description: '초대코드를 입력해 모임에 참여하세요' }
 
 export default async function ClubJoinPage() {
   const supabase = await createClient()
@@ -19,11 +19,11 @@ export default async function ClubJoinPage() {
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-4">
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-[1088px] mx-auto">
           <h1 className="text-lg font-bold text-[#111]">초대코드 입력</h1>
         </div>
       </header>
-      <main className="max-w-lg mx-auto px-4 py-10">
+      <main className="max-w-[1088px] mx-auto px-4 py-10">
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🔑</div>
           <p className="font-bold text-[#111] text-lg">초대코드를 입력해주세요</p>

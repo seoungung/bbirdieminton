@@ -35,7 +35,7 @@ export default async function GuidePage() {
   }
 
   return (
-    <div className="px-4 md:px-8 py-12 max-w-4xl mx-auto">
+    <div className="px-4 md:px-8 py-12 max-w-[1088px] mx-auto">
       {/* Header */}
       <div className="mb-10">
         <h1 className="text-3xl font-extrabold text-[#111111]">가이드북</h1>

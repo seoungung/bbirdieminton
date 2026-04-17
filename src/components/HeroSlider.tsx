@@ -86,7 +86,7 @@ export default function HeroSlider() {
         style={{ background: slide.pattern }}
       />
 
-      <div className="relative z-10 max-w-[90rem] mx-auto px-4 sm:px-8">
+      <div className="relative z-10 max-w-[1088px] mx-auto px-4 sm:px-8">
         <div className="min-h-[520px] sm:min-h-[600px] flex flex-col justify-center py-20">
 
           {/* \uBC30\uC9C0 */}
@@ -127,7 +127,7 @@ export default function HeroSlider() {
 
       {/* \uC2AC\uB77C\uC774\uB4DC \uBC88\uD638 + \uB3C4\uD2B8 + \uD654\uC0B4\uD45C */}
       <div className="absolute bottom-8 left-0 right-0 z-20">
-        <div className="max-w-[90rem] mx-auto px-4 sm:px-8 flex items-center justify-between">
+        <div className="max-w-[1088px] mx-auto px-4 sm:px-8 flex items-center justify-between">
 
           {/* \uC9C4\uD589 \uB3C4\uD2B8 */}
           <div className="flex items-center gap-2">
