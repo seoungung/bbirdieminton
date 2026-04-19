@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getAuthUser } from '@/lib/supabase/server'
 import { getClubMembers } from '@/lib/club/client'
 import { getClubUserId } from '@/lib/club/auth'
 import {
@@ -57,8 +57,7 @@ async function loadDemo(clubId: string): Promise<LoadResult> {
   const demo = DEMO_CLUBS.find(c => c.id === clubId)
   if (!demo) return null
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
 
   return {
     club: demo,
@@ -90,9 +89,10 @@ async function loadReal(clubId: string): Promise<LoadResult> {
   const today = new Date().toISOString().split('T')[0]
 
   // ── Phase 1: 완전 독립 쿼리 병렬 실행 ────────────────────
+  // getAuthUser() 는 React.cache — 같은 요청에서 layout이 이미 호출했으면 캐시 반환
   const [
     clubResult,
-    userResult,
+    user,
     membersResult,
     sessionsResult,
     eventsResult,
@@ -102,7 +102,7 @@ async function loadReal(clubId: string): Promise<LoadResult> {
       .select('id, name, description, court_count, created_at, location, activity_place, category, thumbnail_color')
       .eq('id', clubId)
       .single(),
-    supabase.auth.getUser(),
+    getAuthUser(),
     getClubMembers(supabase, clubId),
     supabase
       .from('sessions')
@@ -122,7 +122,6 @@ async function loadReal(clubId: string): Promise<LoadResult> {
   const club = clubResult.data
   if (!club) return null
 
-  const user = userResult.data.user
   const allMembers = membersResult
   const events = eventsResult.data ?? []
   const eventIds = events.map(e => e.id)

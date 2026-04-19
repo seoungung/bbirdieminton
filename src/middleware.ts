@@ -51,5 +51,16 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  /*
+   * 미들웨어 실행 범위를 최소화:
+   * - /club/* (auth·redirect·x-pathname 주입 필요)
+   * - /mypage, /admin (auth 필요)
+   * 제외: /, /rackets, /quiz, /api 등 공개 페이지
+   * → 라켓 도감·퀴즈 등에서 불필요한 Supabase auth 호출 제거
+   */
+  matcher: [
+    '/club/(.*)',
+    '/mypage/:path*',
+    '/admin/:path*',
+  ],
 }

@@ -1,5 +1,5 @@
 import { redirect, notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getAuthUser } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership, getClubMembers } from '@/lib/club/client'
 import { GameBoardClient } from '@/components/club/GameBoardClient'
@@ -65,15 +65,16 @@ export default async function GameBoardPage({
   const supabase = await createClient()
 
   // ── Phase 1: 독립 쿼리 병렬 실행 ─────────────────────────
+  // getAuthUser() 는 React.cache — layout에서 이미 호출됐다면 캐시 반환 (추가 네트워크 없음)
   const [
-    userResult,
+    user,
     clubResult,
     membersResult,
     statsResult,
     closedSessionsResult,
     ipSessionResult,
   ] = await Promise.all([
-    supabase.auth.getUser(),
+    getAuthUser(),
     supabase.from('clubs').select('id, court_count').eq('id', clubId).single(),
     getClubMembers(supabase, clubId),
     supabase
@@ -97,7 +98,6 @@ export default async function GameBoardPage({
       .maybeSingle(),
   ])
 
-  const user = userResult.data.user
   if (!user) redirect('/login')
 
   const club = clubResult.data
