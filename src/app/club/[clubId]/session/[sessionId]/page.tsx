@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { BackButton } from '@/components/club/BackButton'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership, getClubMembers } from '@/lib/club/client'
 import { AttendanceClient } from '@/components/club/AttendanceClient'
@@ -50,13 +50,7 @@ export default async function SessionAttendancePage({
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
         <div className="max-w-[1088px] mx-auto flex items-center justify-between">
-          <Link
-            href={`/club/${clubId}`}
-            className="flex items-center gap-1.5 text-[#555] hover:text-[#111] transition-colors"
-          >
-            <ArrowLeft size={18} />
-            <span className="text-sm">뒤로</span>
-          </Link>
+          <BackButton fallback={`/club/${clubId}/view`} label="뒤로" />
           <div className="text-center">
             <h1 className="font-bold text-[#111] text-base">
               {new Date(session.session_date).toLocaleDateString('ko-KR', {

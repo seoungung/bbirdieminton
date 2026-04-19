@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
-import { ArrowLeft, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+import { BackButton } from '@/components/club/BackButton'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: '모임 관리 | 버디민턴' }
@@ -60,9 +61,7 @@ export default async function ManagePage({
       <div>
         <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
           <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-            <Link href={`/club/${clubId}/view`} className="flex items-center gap-1.5 text-[#555] hover:text-[#111] transition-colors">
-              <ArrowLeft size={18} />
-            </Link>
+            <BackButton fallback={`/club/${clubId}/view`} />
             <h1 className="font-bold text-[#111] text-base">모임 관리 (체험)</h1>
           </div>
         </header>
@@ -117,15 +116,9 @@ export default async function ManagePage({
 
   return (
     <div>
-      {/* Header */}
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
         <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-          <Link
-            href={`/club/${clubId}`}
-            className="flex items-center gap-1.5 text-[#555] hover:text-[#111] transition-colors"
-          >
-            <ArrowLeft size={18} />
-          </Link>
+          <BackButton fallback={`/club/${clubId}/view`} />
           <h1 className="font-bold text-[#111] text-base">모임 관리</h1>
         </div>
       </header>

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership, getClubMembers } from '@/lib/club/client'
 import { MembersClient } from '@/components/club/MembersClient'
+import { BackButton } from '@/components/club/BackButton'
 import { DEMO_CLUBS } from '@/lib/club/demoData'
 import type { Metadata } from 'next'
 
@@ -44,8 +45,9 @@ export default async function MembersPage({ params }: { params: Promise<{ clubId
 
   return (
     <div>
-      <header className="bg-white border-b border-[#e5e5e5] px-4 py-4">
-        <div className="max-w-[1088px] mx-auto flex items-center justify-between">
+      <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
+        <div className="max-w-[1088px] mx-auto flex items-center gap-3">
+          <BackButton fallback={`/club/${clubId}/manage`} />
           <div>
             <h1 className="text-base font-bold text-[#111]">👥 회원 관리</h1>
             <p className="text-xs text-[#999] mt-0.5">총 {members.length}명</p>

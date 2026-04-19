@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
 import { createClient, getAuthUser } from '@/lib/supabase/server'
+import { BackButton } from '@/components/club/BackButton'
 import { getClubUserId } from '@/lib/club/auth'
 import { DEMO_CLUBS } from '@/lib/club/demoData'
 import { ImportClient } from './ImportClient'
@@ -23,9 +22,7 @@ export default async function ImportPage({
       <div>
         <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
           <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-            <Link href={`/club/${clubId}/manage`} className="flex items-center gap-1.5 text-[#555] hover:text-[#111] transition-colors">
-              <ArrowLeft size={18} />
-            </Link>
+            <BackButton fallback={`/club/${clubId}/manage`} />
             <h1 className="font-bold text-[#111] text-base">엑셀 임포트 (체험)</h1>
           </div>
         </header>
@@ -76,12 +73,7 @@ export default async function ImportPage({
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
         <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-          <Link
-            href={`/club/${clubId}/manage`}
-            className="flex items-center gap-1.5 text-[#555] hover:text-[#111] transition-colors"
-          >
-            <ArrowLeft size={18} />
-          </Link>
+          <BackButton fallback={`/club/${clubId}/manage`} />
           <h1 className="font-bold text-[#111] text-base">엑셀 임포트</h1>
         </div>
       </header>

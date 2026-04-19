@@ -91,13 +91,25 @@ export function ClubViewClient({
       <div className="sticky top-0 z-30 bg-white">
         <div className="border-b border-[#e5e5e5]">
           <div className="max-w-[1088px] mx-auto flex items-center justify-between px-5 h-14">
-            <Link
-              href={(userStatus === 'guest' || userStatus === 'demo') ? '/login?next=%2Fclub%2Fhome' : '/club/home'}
+            <button
+              onClick={() => {
+                if (userStatus === 'guest' || userStatus === 'non-member') {
+                  window.location.href = '/login?next=%2Fclub%2Fhome'
+                } else if (
+                  typeof document !== 'undefined' &&
+                  document.referrer &&
+                  document.referrer.startsWith(window.location.origin)
+                ) {
+                  window.history.back()
+                } else {
+                  window.location.href = '/club/home'
+                }
+              }}
               className="text-[#555] hover:text-[#111] transition-colors"
               aria-label="뒤로 가기"
             >
               <span className="text-2xl leading-none">←</span>
-            </Link>
+            </button>
             <span className="text-base font-bold text-[#111] truncate max-w-[180px]">{club.name}</span>
             <div className="flex items-center gap-2">
               {/* 알림 벨 — 공지 이동 + 푸시 구독 상태 표시 */}

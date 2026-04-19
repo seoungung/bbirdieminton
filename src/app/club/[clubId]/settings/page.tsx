@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership, getClubMembers } from '@/lib/club/client'
 import { SettingsClient } from '@/components/club/SettingsClient'
+import { BackButton } from '@/components/club/BackButton'
 import { DEMO_CLUBS } from '@/lib/club/demoData'
 import type { Metadata } from 'next'
 
@@ -49,8 +50,9 @@ export default async function SettingsPage({
   return (
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
-        <div className="max-w-[1088px] mx-auto">
-          <h1 className="text-base font-bold text-[#111]">설정</h1>
+        <div className="max-w-[1088px] mx-auto flex items-center gap-3">
+          <BackButton fallback={`/club/${clubId}/manage`} />
+          <h1 className="text-base font-bold text-[#111]">모임 설정</h1>
         </div>
       </header>
 

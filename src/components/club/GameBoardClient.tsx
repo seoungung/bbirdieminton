@@ -727,7 +727,17 @@ export function GameBoardClient({
         inProgressData={inProgressData}
         isPending={isPending}
         error={error}
-        onBack={() => router.push(`/club/${clubId}/view`)}
+        onBack={() => {
+          if (
+            typeof document !== 'undefined' &&
+            document.referrer &&
+            document.referrer.startsWith(window.location.origin)
+          ) {
+            router.back()
+          } else {
+            router.push(`/club/${clubId}/view`)
+          }
+        }}
         onSourceChange={handleSourceChange}
         onSessionSelect={handleSessionSelect}
         onTogglePlayer={togglePlayer}

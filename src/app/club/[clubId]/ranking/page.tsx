@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getClubRanking } from '@/lib/club/client'
 import { RankingTable } from '@/components/club/RankingTable'
+import { BackButton } from '@/components/club/BackButton'
 import { DEMO_CLUBS } from '@/lib/club/demoData'
 import type { Metadata } from 'next'
 
@@ -37,9 +38,12 @@ export default async function RankingPage({
   return (
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
-        <div className="max-w-[1088px] mx-auto">
-          <h1 className="text-base font-bold text-[#111]">🏆 랭킹</h1>
-          <p className="text-xs text-[#999] mt-0.5">승률 기준 · 최다 승 우선</p>
+        <div className="max-w-[1088px] mx-auto flex items-center gap-3">
+          <BackButton fallback={`/club/${clubId}/manage`} />
+          <div>
+            <h1 className="text-base font-bold text-[#111]">🏆 랭킹</h1>
+            <p className="text-xs text-[#999] mt-0.5">승률 기준 · 최다 승 우선</p>
+          </div>
         </div>
       </header>
 
