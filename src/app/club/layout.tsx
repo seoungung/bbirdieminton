@@ -1,4 +1,10 @@
 import { Toaster } from 'sonner'
+import type { Metadata } from 'next'
+import { SwRegistration } from '@/components/club/SwRegistration'
+
+export const metadata: Metadata = {
+  manifest: '/manifest.json',
+}
 
 export default function ClubLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +17,7 @@ export default function ClubLayout({ children }: { children: React.ReactNode }) 
       </a>
       {children}
       <Toaster richColors position="bottom-center" />
+      <SwRegistration />
     </>
   )
 }

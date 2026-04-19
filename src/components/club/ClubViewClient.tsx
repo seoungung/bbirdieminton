@@ -12,6 +12,7 @@ import { ManageTab } from './clubview/ManageTab'
 import { SettingsTab } from './clubview/SettingsTab'
 import { NoticesTab } from './clubview/NoticesTab'
 import { getUnreadCountAction } from '@/app/club/[clubId]/notices/actions'
+import { usePushNotification } from '@/hooks/usePushNotification'
 
 // 하위 호환을 위해 타입 재익스포트
 export type { UserStatus, ClubViewData, MemberViewItem, RegularSessionItem, GameSessionItem }
@@ -45,6 +46,10 @@ export function ClubViewClient({
   const [isFav, setIsFav] = useState(false)
   const [toast, setToast] = useState('')
   const [unreadCount, setUnreadCount] = useState(0)
+
+  // Web Push — 멤버에게만 활성화
+  const { state: pushState, subscribe: subscribePush, unsubscribe: unsubscribePush } =
+    usePushNotification(userStatus === 'member' ? clubId : '')
 
   const isNew = isNewClub(club.created_at)
   const rankings = [...members].sort((a, b) => (b.skill ?? 0) - (a.skill ?? 0))
@@ -95,17 +100,40 @@ export function ClubViewClient({
             </Link>
             <span className="text-base font-bold text-[#111] truncate max-w-[180px]">{club.name}</span>
             <div className="flex items-center gap-2">
-              {/* 알림 벨 */}
+              {/* 알림 벨 — 공지 이동 + 푸시 구독 상태 표시 */}
               <button
-                onClick={goToNotices}
-                className="relative w-9 h-9 flex items-center justify-center text-[#555] hover:text-[#111] transition-colors"
+                onClick={() => {
+                  if (userStatus === 'member' && pushState === 'unsubscribed') {
+                    subscribePush().then(() => showToast('알림을 허용했어요 🔔'))
+                  } else if (userStatus === 'member' && pushState === 'subscribed') {
+                    // 구독 상태에서는 공지 탭으로 이동, 길게 누르면 취소 (별도 설정 탭에서 처리)
+                    goToNotices()
+                  } else {
+                    goToNotices()
+                  }
+                }}
+                className={`relative w-9 h-9 flex items-center justify-center transition-colors ${
+                  pushState === 'subscribed' ? 'text-[#111]' : 'text-[#555] hover:text-[#111]'
+                }`}
                 aria-label="공지/알림"
+                title={
+                  pushState === 'subscribed'
+                    ? '알림 켜짐 (탭하면 공지 이동)'
+                    : pushState === 'unsubscribed'
+                    ? '탭하면 알림 켜기'
+                    : '알림'
+                }
               >
                 <Bell size={20} />
+                {/* 읽지 않은 공지 뱃지 */}
                 {unreadCount > 0 && (
                   <span className="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center bg-red-500 text-white text-[9px] font-extrabold rounded-full px-0.5 leading-none">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
+                )}
+                {/* 푸시 구독 상태 표시 (뱃지 없을 때만) */}
+                {unreadCount === 0 && pushState === 'subscribed' && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-[#beff00] rounded-full border border-white" />
                 )}
               </button>
               {/* 즐겨찾기 */}
@@ -223,6 +251,7 @@ export function ClubViewClient({
             clubId={clubId}
             onShowToast={showToast}
             myMemberId={myMemberId}
+            isManager={isManager}
           />
         )}
         {activeTab === '게임보드' && (

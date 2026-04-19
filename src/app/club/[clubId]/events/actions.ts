@@ -51,6 +51,86 @@ export async function createClubEventAction(
   return { success: true }
 }
 
+// ── 일정 수정 ───────────────────────────────────────
+export async function updateClubEventAction(
+  clubId: string,
+  eventId: string,
+  data: {
+    title: string
+    event_date: string
+    start_time: string
+    end_time?: string
+    place: string
+    fee?: string
+    max_attend: number
+  }
+) {
+  if (clubId.startsWith('demo-')) return { success: true }
+
+  const supabase = await createClient()
+  const clubUserId = await getClubUserId(supabase)
+  if (!clubUserId) return { error: '권한이 없습니다.' }
+
+  const { data: membership } = await supabase
+    .from('club_members').select('role').eq('club_id', clubId).eq('user_id', clubUserId).single()
+  if (!membership || !['owner', 'manager'].includes(membership.role))
+    return { error: '운영진만 일정을 수정할 수 있습니다.' }
+
+  if (!data.title.trim()) return { error: '제목을 입력해주세요.' }
+  if (!data.event_date) return { error: '날짜를 입력해주세요.' }
+  if (!data.place.trim()) return { error: '장소를 입력해주세요.' }
+
+  const { error } = await supabase
+    .from('club_events')
+    .update({
+      title: data.title.trim(),
+      event_date: data.event_date,
+      start_time: data.start_time,
+      end_time: data.end_time || null,
+      place: data.place.trim(),
+      fee: data.fee?.trim() || null,
+      max_attend: data.max_attend,
+    })
+    .eq('id', eventId)
+    .eq('club_id', clubId)   // club 소속 검증
+
+  if (error) return { error: '일정 수정에 실패했습니다.' }
+
+  revalidatePath(`/club/${clubId}/view`)
+  return { success: true }
+}
+
+// ── 일정 삭제 ───────────────────────────────────────
+export async function deleteClubEventAction(
+  clubId: string,
+  eventId: string
+) {
+  if (clubId.startsWith('demo-')) return { success: true }
+
+  const supabase = await createClient()
+  const clubUserId = await getClubUserId(supabase)
+  if (!clubUserId) return { error: '권한이 없습니다.' }
+
+  const { data: membership } = await supabase
+    .from('club_members').select('role').eq('club_id', clubId).eq('user_id', clubUserId).single()
+  if (!membership || !['owner', 'manager'].includes(membership.role))
+    return { error: '운영진만 일정을 삭제할 수 있습니다.' }
+
+  // 참석 기록 먼저 삭제 (FK 제약 대비)
+  await supabase.from('club_event_attendances').delete().eq('event_id', eventId)
+
+  const { error } = await supabase
+    .from('club_events')
+    .delete()
+    .eq('id', eventId)
+    .eq('club_id', clubId)
+
+  if (error) return { error: '일정 삭제에 실패했습니다.' }
+
+  revalidatePath(`/club/${clubId}/view`)
+  return { success: true }
+}
+
 // ── 참석 토글 ───────────────────────────────────────
 export async function toggleEventAttendanceAction(
   eventId: string,

@@ -1,0 +1,26 @@
+{
+  "name": "버디민턴 클럽",
+  "short_name": "버디민턴",
+  "description": "배드민턴 동호회 올인원 운영 플랫폼",
+  "start_url": "/club/home",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#beff00",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/symbol_birdieminton-color.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/symbol_birdieminton-color.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "social"],
+  "lang": "ko"
+}
