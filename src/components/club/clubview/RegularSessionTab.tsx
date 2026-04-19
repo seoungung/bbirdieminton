@@ -18,6 +18,7 @@ import {
   shareClubSession,
 } from './types'
 import { DDayBadge, AvatarRow } from './SharedUI'
+import { CalendarView } from './CalendarView'
 
 // ── 공통 폼 상수 ────────────────────────────────────
 
@@ -207,6 +208,7 @@ export function RegularSessionTab({
   myMemberId,
   isManager = false,
 }: Props) {
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [editTarget, setEditTarget] = useState<RegularSessionItem | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<RegularSessionItem | null>(null)
@@ -301,20 +303,47 @@ export function RegularSessionTab({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-4">
+      {/* 헤더: 카운트 + 뷰 토글 + 생성 버튼 */}
+      <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
         <p className="text-base font-bold text-[#555]">정기모임 {regularSessions.length}개</p>
-        {canManage && (
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-1.5 bg-[#111] text-white text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-[#333] transition-colors"
-          >
-            <span className="text-base leading-none">+</span>
-            정기모임 만들기
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {/* 리스트 / 달력 토글 */}
+          <div className="flex rounded-xl border border-[#e5e5e5] overflow-hidden text-xs font-bold">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`px-3 py-1.5 transition-colors ${
+                viewMode === 'list' ? 'bg-[#0a0a0a] text-white' : 'bg-white text-[#888] hover:bg-[#f8f8f8]'
+              }`}
+            >
+              리스트
+            </button>
+            <button
+              onClick={() => setViewMode('calendar')}
+              className={`px-3 py-1.5 transition-colors ${
+                viewMode === 'calendar' ? 'bg-[#0a0a0a] text-white' : 'bg-white text-[#888] hover:bg-[#f8f8f8]'
+              }`}
+            >
+              달력
+            </button>
+          </div>
+          {canManage && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-1.5 bg-[#111] text-white text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-[#333] transition-colors"
+            >
+              <span className="text-base leading-none">+</span>
+              정기모임 만들기
+            </button>
+          )}
+        </div>
       </div>
 
-      {regularSessions.length === 0 ? (
+      {/* 달력 뷰 */}
+      {viewMode === 'calendar' && (
+        <CalendarView sessions={regularSessions} />
+      )}
+
+      {viewMode === 'list' && regularSessions.length === 0 && (
         <div className="bg-white border border-[#e5e5e5] rounded-2xl p-10 text-center">
           <p className="text-4xl mb-3">📅</p>
           <p className="text-base font-semibold text-[#555]">등록된 정기모임이 없어요</p>
@@ -322,7 +351,8 @@ export function RegularSessionTab({
             <p className="text-sm text-[#bbb] mt-1">위의 버튼으로 첫 정기모임을 만들어보세요</p>
           )}
         </div>
-      ) : (
+      )}
+      {viewMode === 'list' && regularSessions.length > 0 && (
         <div className="space-y-4">
           {regularSessions.map((s, si) => {
             const dDay = calcDDay(s.nextDate)

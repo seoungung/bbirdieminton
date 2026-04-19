@@ -41,10 +41,10 @@ const FEATURES = [
     href: (id: string) => `/club/${id}/import`,
   },
   {
-    icon: '📢',
-    label: '공지',
-    description: '준비 중',
-    href: null,
+    icon: '📩',
+    label: '가입 신청',
+    description: '가입 신청 승인 · 거절',
+    href: (id: string) => `/club/${id}/join-requests`,
   },
 ] as const
 

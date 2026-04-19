@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useTransition } from 'react'
 import Link from 'next/link'
 import { Bell } from 'lucide-react'
 import { TABS, Tab, UserStatus, ClubViewData, MemberViewItem, RegularSessionItem, GameSessionItem, isNewClub } from './clubview/types'
@@ -11,8 +11,11 @@ import { GameBoardTab } from './clubview/GameBoardTab'
 import { ManageTab } from './clubview/ManageTab'
 import { SettingsTab } from './clubview/SettingsTab'
 import { NoticesTab } from './clubview/NoticesTab'
+import { BoardTab } from './clubview/BoardTab'
+import { AlbumTab } from './clubview/AlbumTab'
 import { getUnreadCountAction } from '@/app/club/[clubId]/notices/actions'
 import { usePushNotification } from '@/hooks/usePushNotification'
+import { submitJoinRequestAction, getMyJoinRequestAction } from '@/app/club/[clubId]/join-requests/actions'
 
 // 하위 호환을 위해 타입 재익스포트
 export type { UserStatus, ClubViewData, MemberViewItem, RegularSessionItem, GameSessionItem }
@@ -46,6 +49,8 @@ export function ClubViewClient({
   const [isFav, setIsFav] = useState(false)
   const [toast, setToast] = useState('')
   const [unreadCount, setUnreadCount] = useState(0)
+  const [joinRequestStatus, setJoinRequestStatus] = useState<'none' | 'pending' | 'approved' | 'rejected'>('none')
+  const [, startJoinTransition] = useTransition()
 
   // Web Push — 멤버에게만 활성화
   const { state: pushState, subscribe: subscribePush, unsubscribe: unsubscribePush } =
@@ -66,6 +71,26 @@ export function ClubViewClient({
       getUnreadCountAction(clubId).then(setUnreadCount)
     }
   }, [clubId, userStatus])
+
+  // 비멤버: 기존 가입 신청 상태 로드
+  useEffect(() => {
+    if (userStatus === 'non-member' && isAuthenticated) {
+      getMyJoinRequestAction(clubId).then(req => {
+        if (req) setJoinRequestStatus(req.status as 'pending' | 'approved' | 'rejected')
+      })
+    }
+  }, [clubId, userStatus, isAuthenticated])
+
+  const handleJoinRequest = () => {
+    if (joinRequestStatus === 'pending') return
+    startJoinTransition(async () => {
+      const result = await submitJoinRequestAction(clubId)
+      if (result.alreadyMember) { showToast('이미 모임의 멤버예요!'); return }
+      if (result.error) { showToast(result.error); return }
+      setJoinRequestStatus('pending')
+      showToast('가입 신청을 보냈어요 📩')
+    })
+  }
 
   const toggleFav = () => {
     const favs = JSON.parse(localStorage.getItem('favoriteClubs') || '[]') as string[]
@@ -186,7 +211,7 @@ export function ClubViewClient({
       </div>
 
       {/* ── 썸네일 히어로 ── */}
-      {activeTab !== '게임보드' && activeTab !== '운영' && activeTab !== '설정' && (
+      {activeTab !== '게임보드' && activeTab !== '운영' && activeTab !== '설정' && activeTab !== '게시판' && activeTab !== '앨범' && (
         <div
           className="w-full h-[200px] flex items-center justify-center relative"
           style={{ background: club.thumbnailColor }}
@@ -231,6 +256,26 @@ export function ClubViewClient({
                 🎮 게임보드 만들기
               </Link>
             )}
+            {/* 비멤버 가입 신청 버튼 */}
+            {userStatus === 'non-member' && isAuthenticated && (
+              <button
+                onClick={handleJoinRequest}
+                disabled={joinRequestStatus === 'pending'}
+                className={`shrink-0 text-sm font-bold px-4 py-2.5 rounded-xl transition-all whitespace-nowrap mt-0.5 ${
+                  joinRequestStatus === 'pending'
+                    ? 'bg-[#f0f0f0] text-[#999] cursor-not-allowed'
+                    : joinRequestStatus === 'approved'
+                    ? 'bg-green-100 text-green-600 cursor-not-allowed'
+                    : 'bg-[#beff00] text-[#111] hover:brightness-95 active:scale-95'
+                }`}
+              >
+                {joinRequestStatus === 'pending'
+                  ? '📩 신청 완료'
+                  : joinRequestStatus === 'approved'
+                  ? '✅ 승인됨'
+                  : '+ 가입 신청'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -253,6 +298,22 @@ export function ClubViewClient({
             isManager={isManager}
             myMemberId={myMemberId}
             onUnreadCleared={handleUnreadCleared}
+          />
+        )}
+        {activeTab === '게시판' && (
+          <BoardTab
+            clubId={clubId}
+            userStatus={userStatus}
+            isManager={isManager}
+            myMemberId={myMemberId}
+          />
+        )}
+        {activeTab === '앨범' && (
+          <AlbumTab
+            clubId={clubId}
+            userStatus={userStatus}
+            isManager={isManager}
+            myMemberId={myMemberId}
           />
         )}
         {activeTab === '정기모임' && (
