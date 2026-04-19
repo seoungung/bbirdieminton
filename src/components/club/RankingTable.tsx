@@ -77,10 +77,10 @@ export function RankingTable({
               </p>
             </div>
 
-            {/* 승점 */}
+            {/* 승 */}
             <div className="text-right shrink-0">
-              <p className="text-lg font-black text-[#111]">{winRate}<span className="text-xs font-normal">%</span></p>
-              <p className="text-[10px] text-[#999]">승률</p>
+              <p className="text-lg font-black text-[#111]">{row.wins}<span className="text-xs font-normal ml-0.5">승</span></p>
+              <p className="text-[10px] text-[#999]">{winRate}% 승률</p>
             </div>
           </div>
         )

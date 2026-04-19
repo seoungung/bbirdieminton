@@ -79,7 +79,7 @@ export default async function GameBoardPage({
     getClubMembers(supabase, clubId),
     supabase
       .from('player_stats')
-      .select('id, club_id, member_id, wins, losses, draws, win_rate, total_games, games_played, current_streak, max_streak, updated_at')
+      .select('id, club_id, member_id, wins, losses, draws, games_played, win_rate, updated_at')
       .eq('club_id', clubId),
     supabase
       .from('sessions')
@@ -120,7 +120,7 @@ export default async function GameBoardPage({
           .from('attendances')
           .select('member_id')
           .eq('session_id', session.id)
-          .eq('attended', true)
+          .eq('status', 'present')
         return {
           session,
           memberIds: (attendances ?? []).map((a: { member_id: string }) => a.member_id),

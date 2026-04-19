@@ -647,6 +647,9 @@ export function GameBoardClient({
               .from('matches')
               .update({ team_a_score: court.scoreA, team_b_score: court.scoreB })
               .eq('id', court.matchDbId)
+            // 스탯 업데이트 (코트별, fire-and-forget)
+            updatePlayerStatsForMatch(court.matchDbId, clubId, null, null, court.scoreA, court.scoreB)
+              .catch(console.error)
           }
         }
         await supabase.from('sessions').update({ status: 'closed' }).eq('id', capturedSessionId)

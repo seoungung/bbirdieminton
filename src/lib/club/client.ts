@@ -102,7 +102,7 @@ export async function getClubRanking(
 ): Promise<RankingRow[]> {
   const { data, error } = await supabase
     .from('player_stats')
-    .select('id, club_id, member_id, wins, losses, win_rate, total_games, current_streak, max_streak, member:club_members(id, user_id, role, skill_score, user:users(id, name, profile_img))')
+    .select('id, club_id, member_id, wins, losses, draws, games_played, win_rate, member:club_members(id, user_id, role, skill_score, user:users(id, name, profile_img))')
     .eq('club_id', clubId)
     .order('wins', { ascending: false })
     .order('win_rate', { ascending: false })
