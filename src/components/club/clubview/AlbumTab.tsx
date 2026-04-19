@@ -18,8 +18,85 @@ interface Props {
   myMemberId?: string | null
 }
 
+// ── 데모용 샘플 사진 ────────────────────────────────────────
+const DEMO_ALBUM_PHOTOS: AlbumPhotoRow[] = [
+  {
+    id: 'demo-p1',
+    club_id: 'demo-1',
+    uploader_member_id: 'm1',
+    storage_path: '',
+    caption: '토요일 오전민턴 단체샷',
+    taken_at: null,
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    public_url: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=600&auto=format&fit=crop&q=70',
+    uploader_name: '김민준',
+    uploader_member_db_id: 'm1',
+  },
+  {
+    id: 'demo-p2',
+    club_id: 'demo-1',
+    uploader_member_id: 'm2',
+    storage_path: '',
+    caption: '신규회원 환영 경기',
+    taken_at: null,
+    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    public_url: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=600&auto=format&fit=crop&q=70',
+    uploader_name: '이서연',
+    uploader_member_db_id: 'm2',
+  },
+  {
+    id: 'demo-p3',
+    club_id: 'demo-1',
+    uploader_member_id: 'm3',
+    storage_path: '',
+    caption: '결승전 승자의 트로피 🏆',
+    taken_at: null,
+    created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+    public_url: 'https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?w=600&auto=format&fit=crop&q=70',
+    uploader_name: '박지호',
+    uploader_member_db_id: 'm3',
+  },
+  {
+    id: 'demo-p4',
+    club_id: 'demo-1',
+    uploader_member_id: 'm1',
+    storage_path: '',
+    caption: '뒷풀이 저녁식사',
+    taken_at: null,
+    created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+    public_url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop&q=70',
+    uploader_name: '김민준',
+    uploader_member_db_id: 'm1',
+  },
+  {
+    id: 'demo-p5',
+    club_id: 'demo-1',
+    uploader_member_id: 'm4',
+    storage_path: '',
+    caption: '셔틀콕 마크로 샷 🪶',
+    taken_at: null,
+    created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    public_url: 'https://images.unsplash.com/photo-1613918431703-aa50889e3be8?w=600&auto=format&fit=crop&q=70',
+    uploader_name: '최유나',
+    uploader_member_db_id: 'm4',
+  },
+  {
+    id: 'demo-p6',
+    club_id: 'demo-1',
+    uploader_member_id: 'm5',
+    storage_path: '',
+    caption: '국사봉체육관 전경',
+    taken_at: null,
+    created_at: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(),
+    public_url: 'https://images.unsplash.com/photo-1620155108048-9bb58cbf35fe?w=600&auto=format&fit=crop&q=70',
+    uploader_name: '정태양',
+    uploader_member_db_id: 'm5',
+  },
+]
+
 export function AlbumTab({ clubId, userStatus, isManager, myMemberId }: Props) {
-  const canUpload = userStatus === 'member'
+  const isDemo = clubId.startsWith('demo-')
+  const canUpload = userStatus === 'member' || userStatus === 'demo'
   const [photos, setPhotos] = useState<AlbumPhotoRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -28,31 +105,49 @@ export function AlbumTab({ clubId, userStatus, isManager, myMemberId }: Props) {
 
   const load = useCallback(async () => {
     setIsLoading(true)
+    if (isDemo) {
+      setPhotos(DEMO_ALBUM_PHOTOS)
+      setIsLoading(false)
+      return
+    }
     const data = await getAlbumPhotosAction(clubId)
     setPhotos(data)
     setIsLoading(false)
-  }, [clubId])
+  }, [clubId, isDemo])
 
   useEffect(() => { load() }, [load])
 
   const handleDelete = useCallback(async (photo: AlbumPhotoRow) => {
     if (!window.confirm('이 사진을 삭제할까요?')) return
+    if (isDemo) {
+      setPhotos(prev => prev.filter(p => p.id !== photo.id))
+      if (lightboxIdx !== null) setLightboxIdx(null)
+      return
+    }
     const result = await deleteAlbumPhotoAction(clubId, photo.id, photo.storage_path)
     if (result.error) { setError(result.error); return }
     setPhotos(prev => prev.filter(p => p.id !== photo.id))
     if (lightboxIdx !== null) setLightboxIdx(null)
-  }, [clubId, lightboxIdx])
+  }, [clubId, lightboxIdx, isDemo])
 
   const canDeletePhoto = (photo: AlbumPhotoRow) =>
     isManager || photo.uploader_member_db_id === myMemberId
+
+  // 데모 전용: 업로드된 사진을 로컬 상태에 추가
+  const handleDemoUploaded = (photo: AlbumPhotoRow) => {
+    setPhotos(prev => [photo, ...prev])
+    setShowUpload(false)
+  }
 
   if (showUpload) {
     return (
       <UploadForm
         clubId={clubId}
         myMemberId={myMemberId}
+        isDemo={isDemo}
         onClose={() => setShowUpload(false)}
         onUploaded={() => { setShowUpload(false); load() }}
+        onDemoUploaded={handleDemoUploaded}
       />
     )
   }
@@ -234,13 +329,17 @@ function Lightbox({
 function UploadForm({
   clubId,
   myMemberId,
+  isDemo = false,
   onClose,
   onUploaded,
+  onDemoUploaded,
 }: {
   clubId: string
   myMemberId?: string | null
+  isDemo?: boolean
   onClose: () => void
   onUploaded: () => void
+  onDemoUploaded?: (photo: AlbumPhotoRow) => void
 }) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -263,7 +362,29 @@ function UploadForm({
   }
 
   const handleUpload = async () => {
-    if (!selectedFile || !myMemberId) return
+    if (!selectedFile) return
+    // 데모 모드: DB/Storage 저장 없이 로컬 preview URL로 추가
+    if (isDemo) {
+      setUploading(true)
+      const demoPhoto: AlbumPhotoRow = {
+        id: `demo-local-${Date.now()}`,
+        club_id: clubId,
+        uploader_member_id: myMemberId ?? 'm1',
+        storage_path: '',
+        caption: caption.trim() || null,
+        taken_at: null,
+        created_at: new Date().toISOString(),
+        public_url: preview ?? '',
+        uploader_name: '나 (체험)',
+        uploader_member_db_id: myMemberId ?? 'm1',
+      }
+      setTimeout(() => {
+        onDemoUploaded?.(demoPhoto)
+        setUploading(false)
+      }, 300)
+      return
+    }
+    if (!myMemberId) return
     setUploading(true)
     setError(null)
 

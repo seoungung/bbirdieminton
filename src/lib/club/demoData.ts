@@ -34,6 +34,7 @@ export interface DemoRegularSession {
   maxAttend: number
   currentAttend: number
   thumbnailColor: string
+  imageUrls?: string[]
 }
 
 export interface DemoSession {
@@ -82,10 +83,11 @@ export const DEMO_REGULAR_SESSIONS: DemoRegularSession[] = [
     time: '11:00 ~ 15:00',
     place: '국사봉체육관',
     fee: '국사봉 입장비용',
-    nextDate: '2026-04-18',
+    nextDate: '2026-04-25',
     maxAttend: 24,
     currentAttend: 4,
     thumbnailColor: '#beff00',
+    imageUrls: ['https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&auto=format&fit=crop&q=70'],
   },
   {
     id: 'rs2',
@@ -94,10 +96,11 @@ export const DEMO_REGULAR_SESSIONS: DemoRegularSession[] = [
     time: '11:00 ~ 15:00',
     place: '국사봉체육관',
     fee: '국사봉 입장비용',
-    nextDate: '2026-04-19',
+    nextDate: '2026-04-26',
     maxAttend: 24,
     currentAttend: 8,
     thumbnailColor: '#c8f5ff',
+    imageUrls: ['https://images.unsplash.com/photo-1620155108048-9bb58cbf35fe?w=800&auto=format&fit=crop&q=70'],
   },
 ]
 

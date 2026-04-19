@@ -195,6 +195,7 @@ export async function createPostAction(
     title: string
     body: string
     is_pinned?: boolean
+    image_urls?: string[]
   },
 ): Promise<{ success?: true; postId?: string; error?: string }> {
   const supabase = await createClient()
@@ -226,6 +227,7 @@ export async function createPostAction(
       category: data.category,
       title: data.title.trim(),
       body: data.body.trim(),
+      image_urls: data.image_urls ?? [],
       is_pinned: data.is_pinned ?? false,
     })
     .select('id')
@@ -246,6 +248,7 @@ export async function updatePostAction(
     title: string
     body: string
     is_pinned?: boolean
+    image_urls?: string[]
   },
 ): Promise<{ success?: true; error?: string }> {
   const supabase = await createClient()
@@ -285,6 +288,7 @@ export async function updatePostAction(
       category: data.category,
       title: data.title.trim(),
       body: data.body.trim(),
+      image_urls: data.image_urls ?? [],
       is_pinned: isManager ? (data.is_pinned ?? false) : undefined,
     })
     .eq('id', postId)

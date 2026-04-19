@@ -14,6 +14,7 @@ export interface NoticeRow {
   body: string
   type: NoticeType
   is_pinned: boolean
+  image_urls: string[]
   created_at: string
   updated_at: string
   author_name?: string | null
@@ -27,7 +28,7 @@ export async function getNoticesAction(clubId: string): Promise<NoticeRow[]> {
     .from('notices')
     .select(`
       id, club_id, author_member_id, title, body,
-      type, is_pinned, created_at, updated_at,
+      type, is_pinned, image_urls, created_at, updated_at,
       author:author_member_id (
         user:user_id ( name )
       )
@@ -48,6 +49,7 @@ export async function getNoticesAction(clubId: string): Promise<NoticeRow[]> {
     body: row.body,
     type: row.type as NoticeType,
     is_pinned: row.is_pinned,
+    image_urls: row.image_urls ?? [],
     created_at: row.created_at,
     updated_at: row.updated_at,
     author_name: row.author?.user?.name ?? null,
@@ -63,6 +65,7 @@ export async function createNoticeAction(
     body: string
     type: NoticeType
     is_pinned: boolean
+    image_urls?: string[]
   }
 ): Promise<{ success?: true; error?: string }> {
   const supabase = await createClient()
@@ -90,6 +93,7 @@ export async function createNoticeAction(
     body: data.body.trim(),
     type: data.type,
     is_pinned: data.is_pinned,
+    image_urls: data.image_urls ?? [],
   })
 
   if (error) return { error: '공지 등록에 실패했습니다.' }
@@ -107,6 +111,7 @@ export async function updateNoticeAction(
     body: string
     type: NoticeType
     is_pinned: boolean
+    image_urls?: string[]
   }
 ): Promise<{ success?: true; error?: string }> {
   const supabase = await createClient()
@@ -134,6 +139,7 @@ export async function updateNoticeAction(
       body: data.body.trim(),
       type: data.type,
       is_pinned: data.is_pinned,
+      image_urls: data.image_urls ?? [],
     })
     .eq('id', noticeId)
     .eq('club_id', clubId)

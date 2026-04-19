@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef } from 'react'
+import { ImagePlus, X } from 'lucide-react'
 import {
   createClubEventAction,
   updateClubEventAction,
   deleteClubEventAction,
   toggleEventAttendanceAction,
 } from '@/app/club/[clubId]/events/actions'
+import { createClient } from '@/lib/supabase/client'
 import {
   RegularSessionItem,
   MemberViewItem,
@@ -22,7 +24,7 @@ import { CalendarView } from './CalendarView'
 
 // ── 공통 폼 상수 ────────────────────────────────────
 
-const EMPTY_FORM = { title: '', date: '', startTime: '', endTime: '', place: '', fee: '', maxAttend: '' }
+const EMPTY_FORM = { title: '', date: '', startTime: '', endTime: '', place: '', fee: '', maxAttend: '', imageUrls: [] as string[] }
 
 type EventForm = typeof EMPTY_FORM
 
@@ -54,18 +56,60 @@ const inputClass =
 
 function EventFormModal({
   mode,
+  clubId,
+  myMemberId,
+  isDemo,
   initial,
   onClose,
   onSubmit,
 }: {
   mode: 'create' | 'edit'
+  clubId: string
+  myMemberId?: string | null
+  isDemo: boolean
   initial?: Partial<EventForm>
   onClose: () => void
   onSubmit: (data: EventForm) => void
 }) {
-  const [form, setForm] = useState<EventForm>({ ...EMPTY_FORM, ...initial })
+  const [form, setForm] = useState<EventForm>({ ...EMPTY_FORM, ...initial, imageUrls: initial?.imageUrls ?? [] })
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
   const set = (k: keyof EventForm) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [k]: e.target.value }))
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    if (file.size > 10 * 1024 * 1024) { setUploadError('10MB 이하 파일만 업로드할 수 있어요.'); return }
+    if (form.imageUrls.length >= 4) { setUploadError('최대 4장까지 업로드할 수 있어요.'); return }
+    setUploadError(null)
+    setUploading(true)
+    // 데모 모드: 로컬 preview
+    if (isDemo) {
+      const url = URL.createObjectURL(file)
+      setForm(f => ({ ...f, imageUrls: [...f.imageUrls, url] }))
+      setUploading(false)
+      return
+    }
+    if (!myMemberId) { setUploadError('로그인이 필요합니다.'); setUploading(false); return }
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const storagePath = `${clubId}/events/${myMemberId}/${fileName}`
+      const { error: upErr } = await supabase.storage
+        .from('club-albums')
+        .upload(storagePath, file, { cacheControl: '3600', upsert: false })
+      if (upErr) { setUploadError('이미지 업로드 실패'); setUploading(false); return }
+      const { data: urlData } = supabase.storage.from('club-albums').getPublicUrl(storagePath)
+      setForm(f => ({ ...f, imageUrls: [...f.imageUrls, urlData.publicUrl] }))
+    } catch {
+      setUploadError('이미지 업로드 중 오류가 발생했어요.')
+    }
+    setUploading(false)
+  }
 
   const isValid = form.title.trim() && form.date && form.startTime && form.place.trim() && form.maxAttend
 
@@ -121,6 +165,51 @@ function EventFormModal({
               onChange={set('maxAttend')}
               className={inputClass}
             />
+          </FormField>
+
+          {/* 이미지 업로드 */}
+          <FormField label={`이미지 (${form.imageUrls.length}/4) · 첫 번째가 썸네일`}>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading || form.imageUrls.length >= 4}
+                className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-[#e5e5e5] rounded-xl text-sm font-semibold text-[#aaa] hover:border-[#beff00] hover:text-[#555] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <ImagePlus size={15} />
+                {uploading ? '업로드 중...' : '사진 추가'}
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+              {uploadError && (
+                <p className="text-xs text-red-500">{uploadError}</p>
+              )}
+              {form.imageUrls.length > 0 && (
+                <div className="grid grid-cols-4 gap-2">
+                  {form.imageUrls.map((url, i) => (
+                    <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-[#f0f0f0] border border-[#e5e5e5]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt={`이미지 ${i + 1}`} className="w-full h-full object-cover" />
+                      {i === 0 && (
+                        <span className="absolute top-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#beff00] text-[#111]">썸네일</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, imageUrls: f.imageUrls.filter((_, idx) => idx !== i) }))}
+                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
+                      >
+                        <X size={11} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </FormField>
         </div>
 
@@ -239,6 +328,7 @@ export function RegularSessionTab({
         place: data.place,
         fee: data.fee || undefined,
         max_attend: parseInt(data.maxAttend) || 20,
+        image_urls: data.imageUrls,
       })
       if ('error' in result && result.error) {
         onShowToast(result.error)
@@ -263,6 +353,7 @@ export function RegularSessionTab({
         place: data.place,
         fee: data.fee || undefined,
         max_attend: parseInt(data.maxAttend) || 20,
+        image_urls: data.imageUrls,
       })
       if ('error' in result && result.error) {
         onShowToast(result.error)
@@ -298,6 +389,7 @@ export function RegularSessionTab({
         place: editTarget.place,
         fee: editTarget.fee ?? '',
         maxAttend: String(editTarget.maxAttend),
+        imageUrls: editTarget.imageUrls ?? [],
       }
     : undefined
 
@@ -410,10 +502,22 @@ export function RegularSessionTab({
                     </div>
 
                     <div
-                      className="w-[200px] h-[200px] rounded-2xl flex items-center justify-center shrink-0"
+                      className="w-[200px] h-[200px] rounded-2xl overflow-hidden flex items-center justify-center shrink-0 relative"
                       style={{ background: s.thumbnailColor }}
                     >
-                      <span className="text-8xl select-none">🏸</span>
+                      {s.imageUrls && s.imageUrls.length > 0 ? (
+                        <>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={s.imageUrls[0]} alt={s.title} className="w-full h-full object-cover" />
+                          {s.imageUrls.length > 1 && (
+                            <span className="absolute bottom-2 right-2 text-[10px] font-bold px-2 py-1 rounded-full bg-black/60 text-white">
+                              +{s.imageUrls.length - 1}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-8xl select-none">🏸</span>
+                      )}
                     </div>
                   </div>
 
@@ -469,10 +573,25 @@ export function RegularSessionTab({
 
       {/* 모달들 */}
       {showCreateModal && (
-        <EventFormModal mode="create" onClose={() => setShowCreateModal(false)} onSubmit={handleCreate} />
+        <EventFormModal
+          mode="create"
+          clubId={clubId}
+          myMemberId={myMemberId}
+          isDemo={clubId.startsWith('demo-')}
+          onClose={() => setShowCreateModal(false)}
+          onSubmit={handleCreate}
+        />
       )}
       {editTarget && editInitial && (
-        <EventFormModal mode="edit" initial={editInitial} onClose={() => setEditTarget(null)} onSubmit={handleEdit} />
+        <EventFormModal
+          mode="edit"
+          clubId={clubId}
+          myMemberId={myMemberId}
+          isDemo={clubId.startsWith('demo-')}
+          initial={editInitial}
+          onClose={() => setEditTarget(null)}
+          onSubmit={handleEdit}
+        />
       )}
       {deleteTarget && (
         <DeleteConfirmModal

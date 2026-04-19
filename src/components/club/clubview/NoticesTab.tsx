@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useTransition, useCallback } from 'react'
-import { AlertCircle, Pin, Plus, Trash2, X, ChevronDown, ChevronUp, Pencil } from 'lucide-react'
+import { useState, useEffect, useTransition, useCallback, useRef } from 'react'
+import { AlertCircle, Pin, Plus, Trash2, X, ChevronDown, ChevronUp, Pencil, ImagePlus } from 'lucide-react'
 import type { NoticeRow, NoticeType } from '@/app/club/[clubId]/notices/actions'
 import {
   getNoticesAction,
@@ -10,6 +10,7 @@ import {
   deleteNoticeAction,
   markNotificationsReadAction,
 } from '@/app/club/[clubId]/notices/actions'
+import { createClient } from '@/lib/supabase/client'
 import type { UserStatus } from './types'
 
 const TYPE_LABEL: Record<NoticeType, string> = {
@@ -43,7 +44,25 @@ interface Props {
   onUnreadCleared: () => void
 }
 
+// ── 데모용 샘플 공지 ────────────────────────────────────────
+const DEMO_NOTICES: NoticeRow[] = [
+  {
+    id: 'demo-n1',
+    club_id: 'demo-1',
+    author_member_id: 'm1',
+    title: '🎉 4월 신규회원 환영 이벤트 안내',
+    body: '안녕하세요, 버디민턴 동호회 회원 여러분!\n\n4월 한 달 동안 신규 가입하신 분들을 위해 환영 이벤트를 진행합니다.\n• 첫 달 코트비 무료\n• 기본 셔틀콕 1박스 제공\n• 기존 회원과 매칭된 맞춤 레슨 (1회)\n\n궁금한 점은 운영진에게 편하게 문의해주세요! 😊',
+    type: 'event',
+    is_pinned: true,
+    image_urls: ['https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=800&auto=format&fit=crop&q=70'],
+    created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    author_name: '김민준',
+  },
+]
+
 export function NoticesTab({ clubId, userStatus, isManager, myMemberId, onUnreadCleared }: Props) {
+  const isDemo = clubId.startsWith('demo-')
   const [notices, setNotices] = useState<NoticeRow[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -58,8 +77,11 @@ export function NoticesTab({ clubId, userStatus, isManager, myMemberId, onUnread
     body: '',
     type: 'announcement' as NoticeType,
     is_pinned: false,
+    image_urls: [] as string[],
   })
   const [formError, setFormError] = useState<string | null>(null)
+  const [uploadingCreate, setUploadingCreate] = useState(false)
+  const createFileRef = useRef<HTMLInputElement>(null)
 
   // 공지 수정 폼 상태
   const [editForm, setEditForm] = useState({
@@ -67,41 +89,125 @@ export function NoticesTab({ clubId, userStatus, isManager, myMemberId, onUnread
     body: '',
     type: 'announcement' as NoticeType,
     is_pinned: false,
+    image_urls: [] as string[],
   })
   const [editError, setEditError] = useState<string | null>(null)
+  const [uploadingEdit, setUploadingEdit] = useState(false)
+  const editFileRef = useRef<HTMLInputElement>(null)
+
+  // 이미지 업로드 공통 핸들러
+  const uploadImage = async (file: File): Promise<string | null> => {
+    if (file.size > 10 * 1024 * 1024) {
+      return null
+    }
+    if (isDemo) {
+      return URL.createObjectURL(file)
+    }
+    if (!myMemberId) return null
+    const supabase = createClient()
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const storagePath = `${clubId}/notices/${myMemberId}/${fileName}`
+    const { error: upErr } = await supabase.storage
+      .from('club-albums')
+      .upload(storagePath, file, { cacheControl: '3600', upsert: false })
+    if (upErr) return null
+    const { data: urlData } = supabase.storage.from('club-albums').getPublicUrl(storagePath)
+    return urlData.publicUrl
+  }
+
+  const handleCreateImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    if (form.image_urls.length >= 4) { setFormError('최대 4장까지 업로드할 수 있어요.'); return }
+    setFormError(null)
+    setUploadingCreate(true)
+    const url = await uploadImage(file)
+    if (!url) { setFormError('이미지 업로드에 실패했어요.'); setUploadingCreate(false); return }
+    setForm(f => ({ ...f, image_urls: [...f.image_urls, url] }))
+    setUploadingCreate(false)
+  }
+
+  const handleEditImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+    if (editForm.image_urls.length >= 4) { setEditError('최대 4장까지 업로드할 수 있어요.'); return }
+    setEditError(null)
+    setUploadingEdit(true)
+    const url = await uploadImage(file)
+    if (!url) { setEditError('이미지 업로드에 실패했어요.'); setUploadingEdit(false); return }
+    setEditForm(f => ({ ...f, image_urls: [...f.image_urls, url] }))
+    setUploadingEdit(false)
+  }
 
   const load = useCallback(async () => {
     setIsLoading(true)
+    if (isDemo) {
+      setNotices(DEMO_NOTICES)
+      setIsLoading(false)
+      return
+    }
     const rows = await getNoticesAction(clubId)
     setNotices(rows)
     setIsLoading(false)
     if (userStatus === 'member') {
       markNotificationsReadAction(clubId).then(onUnreadCleared)
     }
-  }, [clubId, userStatus, onUnreadCleared])
+  }, [clubId, userStatus, onUnreadCleared, isDemo])
 
   useEffect(() => { load() }, [load])
 
   const handleCreate = () => {
-    if (!myMemberId) return
     setFormError(null)
+    // 데모 모드: DB 저장 없이 로컬 상태에 추가
+    if (isDemo) {
+      const newNotice: NoticeRow = {
+        id: `demo-n-${Date.now()}`,
+        club_id: clubId,
+        author_member_id: 'm1',
+        title: form.title.trim(),
+        body: form.body.trim(),
+        type: form.type,
+        is_pinned: form.is_pinned,
+        image_urls: form.image_urls,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        author_name: '나 (체험)',
+      }
+      setNotices(prev => form.is_pinned ? [newNotice, ...prev] : [...prev, newNotice])
+      setShowCreate(false)
+      setForm({ title: '', body: '', type: 'announcement', is_pinned: false, image_urls: [] })
+      return
+    }
+    if (!myMemberId) return
     startTransition(async () => {
       const result = await createNoticeAction(clubId, myMemberId, form)
       if (result.error) { setFormError(result.error); return }
       setShowCreate(false)
-      setForm({ title: '', body: '', type: 'announcement', is_pinned: false })
+      setForm({ title: '', body: '', type: 'announcement', is_pinned: false, image_urls: [] })
       await load()
     })
   }
 
   const startEdit = (notice: NoticeRow) => {
     setEditingId(notice.id)
-    setEditForm({ title: notice.title, body: notice.body, type: notice.type, is_pinned: notice.is_pinned })
+    setEditForm({ title: notice.title, body: notice.body, type: notice.type, is_pinned: notice.is_pinned, image_urls: notice.image_urls ?? [] })
     setEditError(null)
   }
 
   const handleUpdate = (noticeId: string) => {
     setEditError(null)
+    // 데모 모드: 로컬 상태만 수정
+    if (isDemo) {
+      setNotices(prev => prev.map(n => n.id === noticeId
+        ? { ...n, title: editForm.title.trim(), body: editForm.body.trim(), type: editForm.type, is_pinned: editForm.is_pinned, image_urls: editForm.image_urls, updated_at: new Date().toISOString() }
+        : n
+      ))
+      setEditingId(null)
+      return
+    }
     startTransition(async () => {
       const result = await updateNoticeAction(clubId, noticeId, editForm)
       if (result.error) { setEditError(result.error); return }
@@ -111,6 +217,10 @@ export function NoticesTab({ clubId, userStatus, isManager, myMemberId, onUnread
   }
 
   const handleDelete = (noticeId: string) => {
+    if (isDemo) {
+      setNotices(prev => prev.filter(n => n.id !== noticeId))
+      return
+    }
     startTransition(async () => {
       const result = await deleteNoticeAction(clubId, noticeId)
       if (result.error) { setError(result.error); return }
@@ -180,6 +290,38 @@ export function NoticesTab({ clubId, userStatus, isManager, myMemberId, onUnread
           <textarea value={form.body} onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
             placeholder="내용을 입력하세요" maxLength={1000} rows={4}
             className="w-full border border-[#e5e5e5] rounded-xl px-3 py-2.5 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#beff00] transition-colors resize-none" />
+
+          {/* 이미지 업로드 */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-[#555]">
+                이미지 <span className="text-[#bbb] font-normal">({form.image_urls.length}/4) · 첫 번째가 썸네일</span>
+              </label>
+              <button type="button" onClick={() => createFileRef.current?.click()} disabled={uploadingCreate || form.image_urls.length >= 4}
+                className="flex items-center gap-1 text-xs font-semibold text-[#555] hover:text-[#111] disabled:opacity-40 transition-colors">
+                <ImagePlus size={13} />{uploadingCreate ? '업로드 중...' : '사진 추가'}
+              </button>
+              <input ref={createFileRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp" onChange={handleCreateImage} className="hidden" />
+            </div>
+            {form.image_urls.length > 0 && (
+              <div className="grid grid-cols-4 gap-2">
+                {form.image_urls.map((url, i) => (
+                  <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-[#f0f0f0] border border-[#e5e5e5]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt={`이미지 ${i + 1}`} className="w-full h-full object-cover" />
+                    {i === 0 && (
+                      <span className="absolute top-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#beff00] text-[#111]">썸네일</span>
+                    )}
+                    <button type="button" onClick={() => setForm(f => ({ ...f, image_urls: f.image_urls.filter((_, idx) => idx !== i) }))}
+                      className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition-colors">
+                      <X size={11} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input type="checkbox" checked={form.is_pinned} onChange={e => setForm(f => ({ ...f, is_pinned: e.target.checked }))} className="w-4 h-4 accent-[#beff00]" />
             <span className="text-xs font-semibold text-[#555]"><Pin size={12} className="inline mr-1 text-[#999]" />상단 고정</span>
@@ -218,7 +360,7 @@ export function NoticesTab({ clubId, userStatus, isManager, myMemberId, onUnread
               {/* 헤더 */}
               <button onClick={() => { setExpandedId(isExpanded ? null : notice.id); if (isEditing) setEditingId(null) }}
                 className="w-full text-left px-4 py-3.5">
-                <div className="flex items-start gap-2">
+                <div className="flex items-start gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-1">
                       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${TYPE_COLOR[notice.type]}`}>
@@ -230,6 +372,16 @@ export function NoticesTab({ clubId, userStatus, isManager, myMemberId, onUnread
                     <p className="text-sm font-bold text-[#111] leading-snug line-clamp-2">{notice.title}</p>
                     {!isExpanded && <p className="text-xs text-[#888] mt-0.5 line-clamp-1">{notice.body}</p>}
                   </div>
+                  {/* 썸네일 (첫 번째 이미지) */}
+                  {!isExpanded && notice.image_urls && notice.image_urls.length > 0 && (
+                    <div className="w-14 h-14 shrink-0 rounded-xl overflow-hidden bg-[#f0f0f0] relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={notice.image_urls[0]} alt="" className="w-full h-full object-cover" />
+                      {notice.image_urls.length > 1 && (
+                        <span className="absolute bottom-0.5 right-0.5 text-[8px] font-bold px-1 py-0.5 rounded-full bg-black/60 text-white">+{notice.image_urls.length - 1}</span>
+                      )}
+                    </div>
+                  )}
                   <span className="text-[#ccc] mt-0.5 shrink-0">
                     {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </span>
@@ -240,6 +392,16 @@ export function NoticesTab({ clubId, userStatus, isManager, myMemberId, onUnread
               {isExpanded && !isEditing && (
                 <div className="px-4 pb-4">
                   <p className="text-sm text-[#555] leading-relaxed whitespace-pre-line">{notice.body}</p>
+                  {notice.image_urls && notice.image_urls.length > 0 && (
+                    <div className={`mt-3 grid gap-2 ${notice.image_urls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                      {notice.image_urls.map((url, i) => (
+                        <div key={i} className="rounded-xl overflow-hidden bg-[#f0f0f0]">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={url} alt={`첨부 이미지 ${i + 1}`} className="w-full h-auto object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {isManager && (
                     <div className="mt-3 flex justify-end gap-3">
                       <button onClick={() => startEdit(notice)} disabled={isPending}
@@ -277,6 +439,38 @@ export function NoticesTab({ clubId, userStatus, isManager, myMemberId, onUnread
                   <textarea value={editForm.body} onChange={e => setEditForm(f => ({ ...f, body: e.target.value }))}
                     placeholder="내용" maxLength={1000} rows={4}
                     className="w-full border border-[#e5e5e5] rounded-xl px-3 py-2.5 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#beff00] transition-colors resize-none" />
+
+                  {/* 이미지 업로드 (수정) */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-[#555]">
+                        이미지 <span className="text-[#bbb] font-normal">({editForm.image_urls.length}/4) · 첫 번째가 썸네일</span>
+                      </label>
+                      <button type="button" onClick={() => editFileRef.current?.click()} disabled={uploadingEdit || editForm.image_urls.length >= 4}
+                        className="flex items-center gap-1 text-xs font-semibold text-[#555] hover:text-[#111] disabled:opacity-40 transition-colors">
+                        <ImagePlus size={13} />{uploadingEdit ? '업로드 중...' : '사진 추가'}
+                      </button>
+                      <input ref={editFileRef} type="file" accept="image/jpeg,image/jpg,image/png,image/webp" onChange={handleEditImage} className="hidden" />
+                    </div>
+                    {editForm.image_urls.length > 0 && (
+                      <div className="grid grid-cols-4 gap-2">
+                        {editForm.image_urls.map((url, i) => (
+                          <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-[#f0f0f0] border border-[#e5e5e5]">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={url} alt={`이미지 ${i + 1}`} className="w-full h-full object-cover" />
+                            {i === 0 && (
+                              <span className="absolute top-1 left-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#beff00] text-[#111]">썸네일</span>
+                            )}
+                            <button type="button" onClick={() => setEditForm(f => ({ ...f, image_urls: f.image_urls.filter((_, idx) => idx !== i) }))}
+                              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-red-500 transition-colors">
+                              <X size={11} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input type="checkbox" checked={editForm.is_pinned} onChange={e => setEditForm(f => ({ ...f, is_pinned: e.target.checked }))} className="w-4 h-4 accent-[#beff00]" />
                     <span className="text-xs font-semibold text-[#555]"><Pin size={12} className="inline mr-1 text-[#999]" />상단 고정</span>

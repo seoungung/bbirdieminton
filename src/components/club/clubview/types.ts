@@ -39,6 +39,7 @@ export interface RegularSessionItem {
   currentAttend: number
   thumbnailColor: string
   isAttending?: boolean
+  imageUrls?: string[]
 }
 
 export interface GameSessionItem {

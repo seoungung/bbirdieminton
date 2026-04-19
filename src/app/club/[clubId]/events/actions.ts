@@ -15,6 +15,7 @@ export async function createClubEventAction(
     place: string
     fee?: string
     max_attend: number
+    image_urls?: string[]
   }
 ) {
   // 데모 모임: DB 쓰기 없이 성공 반환
@@ -42,6 +43,7 @@ export async function createClubEventAction(
     place: data.place.trim(),
     fee: data.fee?.trim() || null,
     max_attend: data.max_attend,
+    image_urls: data.image_urls ?? [],
     created_by: memberId,
   })
 
@@ -63,6 +65,7 @@ export async function updateClubEventAction(
     place: string
     fee?: string
     max_attend: number
+    image_urls?: string[]
   }
 ) {
   if (clubId.startsWith('demo-')) return { success: true }
@@ -90,6 +93,7 @@ export async function updateClubEventAction(
       place: data.place.trim(),
       fee: data.fee?.trim() || null,
       max_attend: data.max_attend,
+      image_urls: data.image_urls ?? [],
     })
     .eq('id', eventId)
     .eq('club_id', clubId)   // club 소속 검증

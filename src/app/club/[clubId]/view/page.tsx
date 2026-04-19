@@ -112,7 +112,7 @@ async function loadReal(clubId: string): Promise<LoadResult> {
       .limit(5),
     supabase
       .from('club_events')
-      .select('id, title, event_date, start_time, end_time, place, fee, max_attend')
+      .select('id, title, event_date, start_time, end_time, place, fee, max_attend, image_urls')
       .eq('club_id', clubId)
       .gte('event_date', today)
       .order('event_date', { ascending: true })
@@ -197,7 +197,7 @@ async function loadReal(clubId: string): Promise<LoadResult> {
   }))
 
   const DAY_KO = ['일', '월', '화', '수', '목', '금', '토']
-  const regularSessionsMapped: RegularSessionItem[] = events.map(e => {
+  const regularSessionsMapped: RegularSessionItem[] = events.map((e: { id: string; title: string; event_date: string; start_time: string; end_time: string | null; place: string | null; fee: string | null; max_attend: number | null; image_urls?: string[] | null }) => {
     const d = new Date(e.event_date)
     return {
       id: e.id,
@@ -211,6 +211,7 @@ async function loadReal(clubId: string): Promise<LoadResult> {
       currentAttend: countMap.get(e.id) ?? 0,
       thumbnailColor: club.thumbnail_color ?? '#f0f0f0',
       isAttending: myAttendingSet.has(e.id),
+      imageUrls: e.image_urls ?? [],
     }
   })
 
