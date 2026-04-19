@@ -6,6 +6,19 @@ export function getActiveCount(courtCount: number): number {
 }
 
 /**
+ * Fisher-Yates 셔플 (통계적으로 균등한 무작위 순열)
+ * Array.sort(() => Math.random() - 0.5) 는 편향이 있어 사용 금지.
+ */
+function fisherYatesShuffle<T>(arr: T[]): T[] {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
+/**
  * 실력 균등 배정 (skill_balance)
  * skill_score 기준 정렬 후 스네이크 방향으로 팀 배분.
  * 예) [1위, 4위] vs [2위, 3위] (팀별 실력 균등)
@@ -38,9 +51,10 @@ export function gameCountMatch(
 
 /**
  * 랜덤 배정 (random)
+ * Fisher-Yates 알고리즘으로 통계적 편향 없이 셔플.
  */
 export function randomMatch(players: ClubMember[], courtCount: number): CourtAssignment[] {
-  const shuffled = [...players].sort(() => Math.random() - 0.5)
+  const shuffled = fisherYatesShuffle(players)
   const active = shuffled.slice(0, getActiveCount(courtCount))
   return buildCourts(active, courtCount)
 }

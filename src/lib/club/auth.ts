@@ -39,17 +39,22 @@ export async function ensureClubUser(supabase: SupabaseClient, authUser: User) {
 /**
  * auth.uid() 로 버디모아 users.id (uuid) 조회.
  * RLS 정책상 본인 row만 반환됨.
+ *
+ * @param user  이미 auth.getUser()를 호출한 경우 전달 — 중복 호출 방지.
+ *              undefined/null 이면 내부에서 auth.getUser() 를 호출.
  */
-export async function getClubUserId(supabase: SupabaseClient): Promise<string | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return null
+export async function getClubUserId(
+  supabase: SupabaseClient,
+  user?: User | null
+): Promise<string | null> {
+  const authUser =
+    user !== undefined ? user : (await supabase.auth.getUser()).data.user
+  if (!authUser) return null
 
   const { data } = await supabase
     .from('users')
     .select('id')
-    .eq('birdieminton_user_id', user.id)
+    .eq('birdieminton_user_id', authUser.id)
     .single()
 
   return data?.id ?? null

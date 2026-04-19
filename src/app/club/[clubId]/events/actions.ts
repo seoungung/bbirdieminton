@@ -17,6 +17,9 @@ export async function createClubEventAction(
     max_attend: number
   }
 ) {
+  // 데모 모임: DB 쓰기 없이 성공 반환
+  if (clubId.startsWith('demo-')) return { success: true }
+
   const supabase = await createClient()
   const clubUserId = await getClubUserId(supabase)
   if (!clubUserId) return { error: '권한이 없습니다.' }

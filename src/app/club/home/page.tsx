@@ -1,30 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { ensureClubUser, getClubUserId } from '@/lib/club/auth'
-import { getMyClubs, fillMemberCounts } from '@/lib/club/client'
+import { getMyClubs, buildMemberCountMap } from '@/lib/club/client'
 import { ClubListClient } from '@/components/club/ClubListClient'
 import { DEMO_CLUBS } from '@/lib/club/demoData'
 import type { Metadata } from 'next'
 import type { Club } from '@/types/club'
 
 export const metadata: Metadata = { title: '모임 리스트 | 버디민턴', description: '내가 속한 배드민턴 모임 목록을 확인하세요' }
-
-interface ClubWithCount extends Club {
-  memberCount: number
-}
-
-async function fillAllClubMemberCounts(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  clubs: Club[]
-): Promise<ClubWithCount[]> {
-  if (clubs.length === 0) return []
-  const ids = clubs.map((c) => c.id)
-  const { data } = await supabase.from('club_members').select('club_id').in('club_id', ids)
-  const countMap: Record<string, number> = {}
-  for (const row of data ?? []) {
-    countMap[row.club_id] = (countMap[row.club_id] ?? 0) + 1
-  }
-  return clubs.map((c) => ({ ...c, memberCount: countMap[c.id] ?? 0 }))
-}
 
 export default async function ClubHomePage() {
   const supabase = await createClient()
@@ -39,8 +21,9 @@ export default async function ClubHomePage() {
     )
   }
 
+  // user를 전달해 auth.getUser() 이중 호출 방지
   await ensureClubUser(supabase, user).catch(() => {})
-  const clubUserId = await getClubUserId(supabase)
+  const clubUserId = await getClubUserId(supabase, user)
 
   // clubUserId 없어도 빈 리스트로 보여줌 (로그인은 됐지만 club user 미생성)
   if (!clubUserId) {
@@ -51,34 +34,46 @@ export default async function ClubHomePage() {
     )
   }
 
-  const clubs = await getMyClubs(supabase, clubUserId)
-  const clubsWithCount = await fillMemberCounts(supabase, clubs)
+  // ── 병렬 조회: 내 모임 목록 + 전체 모임 목록 ──────────────
+  const [clubs, rawAllClubsResult] = await Promise.all([
+    getMyClubs(supabase, clubUserId),
+    supabase
+      .from('clubs')
+      .select('id, name, description, court_count, created_at, owner_id, invite_code, max_members, plan, location, activity_place, thumbnail_color, thumbnail_url, category')
+      .order('created_at', { ascending: false })
+      .limit(50),
+  ])
 
-  // location, activity_place, thumbnail_color 포함해서 조회
-  const { data: rawAllClubs } = await supabase
-    .from('clubs')
-    .select('id, name, description, court_count, created_at, owner_id, invite_code, max_members, plan, location, activity_place, thumbnail_color, thumbnail_url, category')
-    .order('created_at', { ascending: false })
-    .limit(50)
+  const realClubs = rawAllClubsResult.data ?? []
 
-  // leaderName: owner 멤버의 이름을 별도 조회
-  const realClubs = rawAllClubs ?? []
+  // ── 병렬 조회: owner 이름 + 멤버 수 (단 1회 쿼리로 통합) ──
   const ownerIds = [...new Set(realClubs.map((c: Record<string, unknown>) => c.owner_id as string).filter(Boolean))]
-  const { data: ownerUsers } = ownerIds.length > 0
-    ? await supabase.from('users').select('id, name').in('id', ownerIds)
-    : { data: [] }
-  const ownerMap: Record<string, string> = {}
-  for (const u of ownerUsers ?? []) ownerMap[u.id] = u.name
+  const allClubIds = [...new Set([
+    ...clubs.map(c => c.id),
+    ...realClubs.map((c: Record<string, unknown>) => c.id as string),
+  ])]
 
-  const mappedClubs = realClubs.map((c: Record<string, unknown>) => ({
+  const [ownerUsersResult, countMap] = await Promise.all([
+    ownerIds.length > 0
+      ? supabase.from('users').select('id, name').in('id', ownerIds)
+      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+    buildMemberCountMap(supabase, allClubIds),
+  ])
+
+  const ownerMap: Record<string, string> = {}
+  for (const u of ownerUsersResult.data ?? []) ownerMap[u.id] = u.name
+
+  // 내 모임에 카운트 적용 (별도 쿼리 불필요 — countMap 재사용)
+  const clubsWithCount = clubs.map(c => ({ ...c, memberCount: countMap[c.id] ?? 0 }))
+
+  const allClubsWithCount = realClubs.map((c: Record<string, unknown>) => ({
     ...c,
     location: c.location ?? '',
     thumbnailColor: c.thumbnail_color ?? '#f0f0f0',
     thumbnail_url: c.thumbnail_url ?? null,
     leaderName: ownerMap[c.owner_id as string] ?? '',
+    memberCount: countMap[c.id as string] ?? 0,
   }))
-
-  const allClubsWithCount = await fillAllClubMemberCounts(supabase, mappedClubs as unknown as Club[])
 
   // 전체 모임에 데모 클럽도 포함 (체험용으로 항상 표시)
   const demoAsClubs = DEMO_CLUBS.map(d => ({
@@ -98,7 +93,7 @@ export default async function ClubHomePage() {
     <div className="min-h-screen bg-[#f8f8f8]">
       <ClubListClient
         myClubs={clubsWithCount as never}
-        allClubs={[...allClubsWithCount, ...demoAsClubs] as never}
+        allClubs={[...allClubsWithCount as unknown as Club[], ...demoAsClubs] as never}
       />
     </div>
   )

@@ -73,7 +73,7 @@ export function RankingTable({
                 )}
               </div>
               <p className="text-xs text-[#999]">
-                {row.games_played}전 {row.wins}승 {row.losses}패 · {winRate}%
+                {row.games_played}전 {row.wins}승 {row.losses}패{row.draws > 0 ? ` ${row.draws}무` : ''} · {winRate}%
               </p>
             </div>
 

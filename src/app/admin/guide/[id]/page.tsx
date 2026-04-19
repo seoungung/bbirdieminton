@@ -4,7 +4,17 @@ import { useState, useEffect, use, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import GuideEditor from '@/components/guide/GuideEditor'
+import dynamic from 'next/dynamic'
+
+// TipTap 패키지 (~11개) 코드스플리팅 — 에디터 진입 전까지 번들 제외
+const GuideEditor = dynamic(() => import('@/components/guide/GuideEditor'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-64 border border-[#e5e5e5] rounded-xl bg-[#f8f8f8] flex items-center justify-center text-sm text-[#999]">
+      에디터 로딩 중...
+    </div>
+  ),
+})
 import SeoPanel from '@/components/guide/SeoPanel'
 import { getGuideById, updateGuide, deleteGuide, uploadGuideImage } from '../actions'
 

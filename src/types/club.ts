@@ -92,6 +92,7 @@ export interface PlayerStats {
   member_id: string
   wins: number
   losses: number
+  draws: number
   games_played: number
   win_rate: number
   updated_at: string
@@ -157,4 +158,30 @@ export interface CourtAssignment {
   courtNumber: number
   teamA: ClubMember[]
   teamB: ClubMember[]
+}
+
+export type NoticeType = 'announcement' | 'event' | 'general'
+export type NotificationType = 'new_notice' | 'attendance_reminder' | 'game_result' | 'system'
+
+export interface Notice {
+  id: string
+  club_id: string
+  author_member_id: string | null
+  title: string
+  body: string
+  type: NoticeType
+  is_pinned: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface Notification {
+  id: string
+  club_id: string
+  member_id: string
+  notice_id: string | null
+  type: NotificationType
+  message: string
+  read_at: string | null
+  created_at: string
 }

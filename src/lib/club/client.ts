@@ -18,7 +18,7 @@ export async function getMyClubs(
 ): Promise<ClubWithRole[]> {
   const { data, error } = await supabase
     .from('club_members')
-    .select('role, clubs(*)')
+    .select('role, clubs(id, name, description, court_count, created_at, owner_id, invite_code, max_members, plan, location, activity_place, thumbnail_color, thumbnail_url, category)')
     .eq('user_id', clubUserId)
 
   if (error) throw error
@@ -53,7 +53,7 @@ export async function getClubMembers(
 ): Promise<ClubMemberWithUser[]> {
   const { data, error } = await supabase
     .from('club_members')
-    .select('*, user:users(*)')
+    .select('id, club_id, user_id, role, joined_at, skill_score, user:users(id, name, profile_img)')
     .eq('club_id', clubId)
     .order('joined_at', { ascending: true })
 
@@ -102,7 +102,7 @@ export async function getClubRanking(
 ): Promise<RankingRow[]> {
   const { data, error } = await supabase
     .from('player_stats')
-    .select('*, member:club_members(*, user:users(*))')
+    .select('id, club_id, member_id, wins, losses, win_rate, total_games, current_streak, max_streak, member:club_members(id, user_id, role, skill_score, user:users(id, name, profile_img))')
     .eq('club_id', clubId)
     .order('wins', { ascending: false })
     .order('win_rate', { ascending: false })
@@ -136,4 +136,24 @@ export async function fillMemberCounts(
   }
 
   return clubs.map((c) => ({ ...c, memberCount: countMap[c.id] ?? 0 }))
+}
+
+/**
+ * 여러 club id 배열에 대해 memberCount를 한 번의 쿼리로 채우기.
+ * home/page.tsx 에서 myClubs + allClubs 카운트를 한 번에 처리하는 데 사용.
+ */
+export async function buildMemberCountMap(
+  supabase: SupabaseClient,
+  clubIds: string[]
+): Promise<Record<string, number>> {
+  if (clubIds.length === 0) return {}
+  const { data } = await supabase
+    .from('club_members')
+    .select('club_id')
+    .in('club_id', clubIds)
+  const countMap: Record<string, number> = {}
+  for (const row of data ?? []) {
+    countMap[row.club_id] = (countMap[row.club_id] ?? 0) + 1
+  }
+  return countMap
 }

@@ -27,7 +27,8 @@ export default async function ClubDetailLayout({
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const clubUserId = await getClubUserId(supabase)
+  // user를 전달해 내부에서 auth.getUser() 를 다시 호출하지 않도록 함
+  const clubUserId = await getClubUserId(supabase, user)
   if (!clubUserId) redirect('/login')
 
   const membership = await getMyMembership(supabase, clubId, clubUserId)

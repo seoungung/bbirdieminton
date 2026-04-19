@@ -1,8 +1,6 @@
-import { DemoClient } from '@/components/demo/DemoClient'
-import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 
-export const metadata: Metadata = { title: '게임보드 체험 | 버디민턴' }
-
+// 구 체험 페이지 → 실제 서비스와 동일한 데모 클럽 뷰로 일원화
 export default function ClubDemoPage() {
-  return <DemoClient />
+  redirect('/club/demo-1/view')
 }

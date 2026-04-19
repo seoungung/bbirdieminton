@@ -3,9 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership, getClubMembers } from '@/lib/club/client'
 import { GameBoardClient } from '@/components/club/GameBoardClient'
-import { DEMO_CLUBS } from '@/lib/club/demoData'
+import { DEMO_CLUBS, DEMO_MEMBERS } from '@/lib/club/demoData'
 import type { Metadata } from 'next'
-import type { Session } from '@/types/club'
+import type { ClubMemberWithUser, MemberRole } from '@/types/club'
 
 interface GameBoardMetadataProps { params: Promise<{ clubId: string }> }
 
@@ -24,59 +24,122 @@ export default async function GameBoardPage({
   params: Promise<{ clubId: string }>
 }) {
   const { clubId } = await params
+
+  // ── 데모 모임: 인증 없이 목 데이터로 GameBoardClient 렌더 ──
+  if (clubId.startsWith('demo-')) {
+    const demoClub = DEMO_CLUBS.find(c => c.id === clubId)
+    const courtCount = demoClub?.court_count ?? 3
+
+    const demoMembers: ClubMemberWithUser[] = DEMO_MEMBERS.map(m => ({
+      id: m.id,
+      club_id: clubId,
+      user_id: m.id,
+      role: m.role as MemberRole,
+      skill_score: m.skill,
+      joined_at: '2026-01-01T00:00:00Z',
+      removed_at: null,
+      user: {
+        id: m.id,
+        birdieminton_user_id: m.id,
+        name: m.name,
+        phone: null,
+        profile_img: null,
+        created_at: '2026-01-01T00:00:00Z',
+      },
+    }))
+
+    return (
+      <GameBoardClient
+        clubId={clubId}
+        courtCount={courtCount}
+        members={demoMembers}
+        stats={[]}
+        recentSessions={[]}
+        membership={{ id: 'demo-owner', role: 'owner' }}
+        inProgressData={null}
+        isDemo
+      />
+    )
+  }
+
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // ── Phase 1: 독립 쿼리 병렬 실행 ─────────────────────────
+  const [
+    userResult,
+    clubResult,
+    membersResult,
+    statsResult,
+    closedSessionsResult,
+    ipSessionResult,
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.from('clubs').select('id, court_count').eq('id', clubId).single(),
+    getClubMembers(supabase, clubId),
+    supabase
+      .from('player_stats')
+      .select('id, club_id, member_id, wins, losses, draws, win_rate, total_games, games_played, current_streak, max_streak, updated_at')
+      .eq('club_id', clubId),
+    supabase
+      .from('sessions')
+      .select('id, session_date, status, notes, match_mode, club_id, created_by, created_at')
+      .eq('club_id', clubId)
+      .eq('status', 'closed')
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase
+      .from('sessions')
+      .select('id, session_date')
+      .eq('club_id', clubId)
+      .eq('status', 'in_progress')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ])
+
+  const user = userResult.data.user
   if (!user) redirect('/login')
 
-  const clubUserId = await getClubUserId(supabase)
-  if (!clubUserId) redirect('/login')
-
-  const membership = await getMyMembership(supabase, clubId, clubUserId)
-  if (!membership) redirect('/club/home')
-
-  const { data: club } = await supabase.from('clubs').select('*').eq('id', clubId).single()
+  const club = clubResult.data
   if (!club) notFound()
 
-  // 모임 멤버 전체
-  const members = await getClubMembers(supabase, clubId)
+  // ── Phase 2: user 결과에 의존하는 쿼리 ───────────────────
+  const clubUserId = await getClubUserId(supabase, user)
+  if (!clubUserId) redirect('/login')
 
-  // 플레이어 스탯 (game_count 배정 방식 + 기본 정보용)
-  const { data: statsData } = await supabase
-    .from('player_stats')
-    .select('*')
-    .eq('club_id', clubId)
+  // ── Phase 3: clubUserId에 의존하는 멤버십 + 세션 데이터 병렬 ──
+  const ipSession = ipSessionResult.data
+  const closedSessions = closedSessionsResult.data ?? []
 
-  // 최근 종료된 세션 (정기모임 인원 불러오기용) — 최대 5개
-  const { data: closedSessions } = await supabase
-    .from('sessions')
-    .select('*')
-    .eq('club_id', clubId)
-    .eq('status', 'closed')
-    .order('created_at', { ascending: false })
-    .limit(5)
+  const [membershipResult, closedSessionAttendances, ipMatchesResult] = await Promise.all([
+    getMyMembership(supabase, clubId, clubUserId),
+    // 종료된 세션 출석자 일괄 조회 (Promise.all 내부 중첩)
+    Promise.all(
+      closedSessions.map(async (session) => {
+        const { data: attendances } = await supabase
+          .from('attendances')
+          .select('member_id')
+          .eq('session_id', session.id)
+          .eq('attended', true)
+        return {
+          session,
+          memberIds: (attendances ?? []).map((a: { member_id: string }) => a.member_id),
+          attendeeCount: attendances?.length ?? 0,
+        }
+      })
+    ),
+    // 진행 중 세션 매치 조회 (있을 때만)
+    ipSession
+      ? supabase
+          .from('matches')
+          .select('id, court_number, team_a_score, team_b_score')
+          .eq('session_id', ipSession.id)
+      : Promise.resolve({ data: [] as { id: string; court_number: number; team_a_score: number | null; team_b_score: number | null }[] }),
+  ])
 
-  // 각 세션의 출석자 목록도 함께 조회
-  const recentSessions = await Promise.all(
-    (closedSessions ?? []).map(async (session: Session) => {
-      const { data: attendances } = await supabase
-        .from('attendances')
-        .select('member_id')
-        .eq('session_id', session.id)
-        .eq('attended', true)
-      return {
-        session,
-        memberIds: (attendances ?? []).map(
-          (a: { member_id: string }) => a.member_id
-        ),
-        attendeeCount: attendances?.length ?? 0,
-      }
-    })
-  )
+  if (!membershipResult) redirect('/club/home')
 
-  // 진행 중인 세션 복원 데이터
+  // ── Phase 4: 매치 플레이어 + 출석자 조회 (ipSession 있을 때) ──
   let inProgressData: {
     sessionId: string
     sessionDate: string
@@ -90,45 +153,33 @@ export default async function GameBoardPage({
     attendeeMemberIds: string[]
   } | null = null
 
-  const { data: ipSession } = await supabase
-    .from('sessions')
-    .select('id, session_date')
-    .eq('club_id', clubId)
-    .eq('status', 'in_progress')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  if (ipSession && ipMatchesResult.data) {
+    const ipMatches = ipMatchesResult.data
+    const matchIds = ipMatches.map(m => m.id)
 
-  if (ipSession) {
-    const { data: ipMatches } = await supabase
-      .from('matches')
-      .select('id, court_number, team_a_score, team_b_score')
-      .eq('session_id', ipSession.id)
-
-    const matchIds = (ipMatches ?? []).map((m: { id: string }) => m.id)
-
-    const { data: ipMatchPlayers } = matchIds.length > 0
-      ? await supabase
-          .from('match_players')
-          .select('match_id, member_id, team')
-          .in('match_id', matchIds)
-      : { data: [] }
-
-    const { data: ipAttendances } = await supabase
-      .from('attendances')
-      .select('member_id')
-      .eq('session_id', ipSession.id)
+    const [ipMatchPlayersResult, ipAttendancesResult] = await Promise.all([
+      matchIds.length > 0
+        ? supabase
+            .from('match_players')
+            .select('match_id, member_id, team')
+            .in('match_id', matchIds)
+        : Promise.resolve({ data: [] as { match_id: string; member_id: string; team: string }[] }),
+      supabase
+        .from('attendances')
+        .select('member_id')
+        .eq('session_id', ipSession.id),
+    ])
 
     inProgressData = {
       sessionId: ipSession.id,
       sessionDate: ipSession.session_date,
-      matches: (ipMatches ?? []).map((m: { id: string; court_number: number; team_a_score: number | null; team_b_score: number | null }) => ({
+      matches: ipMatches.map(m => ({
         ...m,
-        players: (ipMatchPlayers ?? [])
-          .filter((p: { match_id: string }) => p.match_id === m.id)
-          .map((p: { member_id: string; team: string }) => ({ member_id: p.member_id, team: p.team })),
+        players: (ipMatchPlayersResult.data ?? [])
+          .filter(p => p.match_id === m.id)
+          .map(p => ({ member_id: p.member_id, team: p.team })),
       })),
-      attendeeMemberIds: (ipAttendances ?? []).map((a: { member_id: string }) => a.member_id),
+      attendeeMemberIds: (ipAttendancesResult.data ?? []).map(a => a.member_id),
     }
   }
 
@@ -136,10 +187,10 @@ export default async function GameBoardPage({
     <GameBoardClient
       clubId={clubId}
       courtCount={club.court_count ?? 2}
-      members={members}
-      stats={statsData ?? []}
-      recentSessions={recentSessions}
-      membership={{ id: membership.id, role: membership.role }}
+      members={membersResult}
+      stats={statsResult.data ?? []}
+      recentSessions={closedSessionAttendances}
+      membership={{ id: membershipResult.id, role: membershipResult.role }}
       inProgressData={inProgressData}
     />
   )

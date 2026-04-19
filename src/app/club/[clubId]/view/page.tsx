@@ -72,8 +72,9 @@ async function loadDemo(clubId: string): Promise<LoadResult> {
     regularSessions: DEMO_REGULAR_SESSIONS.map(s => ({ ...s })),
     userStatus: 'demo',
     isAuthenticated: !!user,
-    isOwner: false,
-    isManager: false,
+    // 체험 유저도 운영진 권한 부여 — 첫 방문자가 실제 기능을 모두 경험할 수 있도록
+    isOwner: true,
+    isManager: true,
     gameSessions: DEMO_SESSIONS.map(s => ({
       id: s.id,
       sessionDate: s.sessionDate,
@@ -86,29 +87,71 @@ async function loadDemo(clubId: string): Promise<LoadResult> {
 
 async function loadReal(clubId: string): Promise<LoadResult> {
   const supabase = await createClient()
+  const today = new Date().toISOString().split('T')[0]
 
-  const { data: club } = await supabase
-    .from('clubs')
-    .select('*')
-    .eq('id', clubId)
-    .single()
+  // ── Phase 1: 완전 독립 쿼리 병렬 실행 ────────────────────
+  const [
+    clubResult,
+    userResult,
+    membersResult,
+    sessionsResult,
+    eventsResult,
+  ] = await Promise.all([
+    supabase
+      .from('clubs')
+      .select('id, name, description, court_count, created_at, location, activity_place, category, thumbnail_color')
+      .eq('id', clubId)
+      .single(),
+    supabase.auth.getUser(),
+    getClubMembers(supabase, clubId),
+    supabase
+      .from('sessions')
+      .select('id, session_date, status, notes')
+      .eq('club_id', clubId)
+      .order('created_at', { ascending: false })
+      .limit(5),
+    supabase
+      .from('club_events')
+      .select('id, title, event_date, start_time, end_time, place, fee, max_attend')
+      .eq('club_id', clubId)
+      .gte('event_date', today)
+      .order('event_date', { ascending: true })
+      .limit(5),
+  ])
+
+  const club = clubResult.data
   if (!club) return null
 
-  const allMembers = await getClubMembers(supabase, clubId)
+  const user = userResult.data.user
+  const allMembers = membersResult
+  const events = eventsResult.data ?? []
+  const eventIds = events.map(e => e.id)
 
-  const members: MemberViewItem[] = allMembers.slice(0, 7).map(m => ({
-    id: m.id,
-    name: m.user?.name ?? '멤버',
-    role: m.role,
-  }))
+  // ── Phase 2: Phase 1 결과에 의존하는 쿼리 병렬 실행 ───────
+  const [clubUserIdResult, attendanceCountsResult] = await Promise.all([
+    // user가 있을 때만 users 테이블 조회 (auth.getUser 재호출 없음)
+    user ? getClubUserId(supabase, user) : Promise.resolve(null),
+    // eventIds가 있을 때만 참석자 수 조회
+    eventIds.length > 0
+      ? supabase
+          .from('club_event_attendances')
+          .select('event_id')
+          .in('event_id', eventIds)
+          .eq('status', 'going')
+      : Promise.resolve({ data: [] as { event_id: string }[] }),
+  ])
 
-  const leaderName =
-    allMembers.find(m => m.role === 'owner')?.user?.name ?? '모임장'
+  const clubUserId = clubUserIdResult
 
-  // 현재 유저 상태
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // ── Phase 3: clubUserId에 의존하는 멤버십 조회 ────────────
+  const membershipResult = clubUserId
+    ? await supabase
+        .from('club_members')
+        .select('id, role')
+        .eq('club_id', clubId)
+        .eq('user_id', clubUserId)
+        .maybeSingle()
+    : { data: null }
 
   let userStatus: UserStatus = 'guest'
   let isOwner = false
@@ -116,62 +159,17 @@ async function loadReal(clubId: string): Promise<LoadResult> {
   let myMemberId: string | null = null
 
   if (user) {
-    // auth.uid → users.id(club user id) 변환 필수 (직접 비교 금지)
-    const clubUserId = await getClubUserId(supabase)
-    if (clubUserId) {
-      const { data: myMembership } = await supabase
-        .from('club_members')
-        .select('id, role')
-        .eq('club_id', clubId)
-        .eq('user_id', clubUserId)
-        .maybeSingle()
-      if (myMembership) {
-        userStatus = 'member'
-        isOwner = myMembership.role === 'owner'
-        isManager = myMembership.role === 'owner' || myMembership.role === 'manager'
-        myMemberId = myMembership.id
-      } else {
-        userStatus = 'non-member'
-      }
+    if (membershipResult.data) {
+      userStatus = 'member'
+      isOwner = membershipResult.data.role === 'owner'
+      isManager = membershipResult.data.role === 'owner' || membershipResult.data.role === 'manager'
+      myMemberId = membershipResult.data.id
     } else {
       userStatus = 'non-member'
     }
   }
 
-  // 최근 게임 세션 (최대 5개)
-  const { data: recentSessions } = await supabase
-    .from('sessions')
-    .select('id, session_date, status, notes')
-    .eq('club_id', clubId)
-    .order('created_at', { ascending: false })
-    .limit(5)
-
-  // club_events 조회 (최근 5개, 오늘 이후)
-  const today = new Date().toISOString().split('T')[0]
-  const { data: events } = await supabase
-    .from('club_events')
-    .select('*')
-    .eq('club_id', clubId)
-    .gte('event_date', today)
-    .order('event_date', { ascending: true })
-    .limit(5)
-
-  // 각 이벤트의 참석자 수 조회
-  const eventIds = (events ?? []).map(e => e.id)
-  const { data: attendanceCounts } = eventIds.length > 0
-    ? await supabase
-        .from('club_event_attendances')
-        .select('event_id')
-        .in('event_id', eventIds)
-        .eq('status', 'going')
-    : { data: [] }
-
-  const countMap = new Map<string, number>()
-  for (const row of attendanceCounts ?? []) {
-    countMap.set(row.event_id, (countMap.get(row.event_id) ?? 0) + 1)
-  }
-
-  // 내 참석 여부 조회
+  // ── Phase 4: myMemberId에 의존하는 내 참석 여부 조회 ──────
   const myAttendingSet = new Set<string>()
   if (myMemberId && eventIds.length > 0) {
     const { data: myAttendances } = await supabase
@@ -185,8 +183,22 @@ async function loadReal(clubId: string): Promise<LoadResult> {
     }
   }
 
+  // 이벤트별 참석자 수 집계
+  const countMap = new Map<string, number>()
+  for (const row of attendanceCountsResult.data ?? []) {
+    countMap.set(row.event_id, (countMap.get(row.event_id) ?? 0) + 1)
+  }
+
+  const leaderName = allMembers.find(m => m.role === 'owner')?.user?.name ?? '모임장'
+
+  const members: MemberViewItem[] = allMembers.slice(0, 7).map(m => ({
+    id: m.id,
+    name: m.user?.name ?? '멤버',
+    role: m.role,
+  }))
+
   const DAY_KO = ['일', '월', '화', '수', '목', '금', '토']
-  const regularSessionsMapped: RegularSessionItem[] = (events ?? []).map(e => {
+  const regularSessionsMapped: RegularSessionItem[] = events.map(e => {
     const d = new Date(e.event_date)
     return {
       id: e.id,
@@ -223,7 +235,7 @@ async function loadReal(clubId: string): Promise<LoadResult> {
     isAuthenticated: !!user,
     isOwner,
     isManager,
-    gameSessions: (recentSessions ?? []).map(s => ({
+    gameSessions: (sessionsResult.data ?? []).map(s => ({
       id: s.id,
       sessionDate: s.session_date,
       status: s.status as 'open' | 'in_progress' | 'closed',

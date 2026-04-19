@@ -106,7 +106,9 @@ export function MembersClient({ clubId, members, statsData, isManager, isOwner, 
                     </span>
                     <span className="text-sm text-[#999]">점수 {member.skill_score}</span>
                     {stats && (
-                      <span className="text-sm text-[#999]">{stats.games_played}경기 · {stats.wins}승</span>
+                      <span className="text-sm text-[#999]">
+                        {stats.games_played}경기 · {stats.wins}승 {stats.losses}패{stats.draws > 0 ? ` ${stats.draws}무` : ''}
+                      </span>
                     )}
                   </div>
                 </div>
