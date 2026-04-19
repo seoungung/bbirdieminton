@@ -34,6 +34,12 @@ const FEATURES = [
     href: (id: string) => `/club/${id}/ranking`,
   },
   {
+    icon: '📥',
+    label: '엑셀 임포트',
+    description: '기존 회원·회비 데이터 가져오기',
+    href: (id: string) => `/club/${id}/import`,
+  },
+  {
     icon: '📢',
     label: '공지',
     description: '준비 중',
