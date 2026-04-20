@@ -647,7 +647,7 @@ export function PlayingPhase({
         </div>
       </div>
 
-      <div className="max-w-[1088px] mx-auto px-4 py-4 space-y-3">
+      <div className="max-w-[1088px] lg:max-w-[1280px] mx-auto px-4 py-4 space-y-3">
         {error && (
           <div className="flex items-center gap-2 px-3 py-2.5 bg-red-50 text-red-500 text-xs rounded-xl">
             <AlertCircle size={14} className="shrink-0" />
@@ -689,6 +689,11 @@ export function PlayingPhase({
           </div>
         )}
 
+        {/* 🖥️ 데스크톱(lg+): 좌측 코트 / 우측 sticky 사이드바 (다음 경기 + 대기열)
+            📱 모바일: 단순 세로 스택 */}
+        <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-4 lg:items-start space-y-3 lg:space-y-0">
+          {/* ── 왼쪽: 코트들 ── */}
+          <div className="space-y-3 min-w-0">
         {/* 코트 카드 */}
         {courts.map((court) => {
           const isEmpty = court.teamA.length === 0
@@ -937,7 +942,11 @@ export function PlayingPhase({
             </div>
           )
         })}
+          </div>
+          {/* ── 왼쪽 컬럼 끝 ── */}
 
+          {/* ── 오른쪽 사이드바: 데스크톱에서 sticky ── */}
+          <div className="space-y-3 lg:sticky lg:top-[72px] lg:self-start">
         {/* ── 다음 경기 미리보기 (2v2 카드) ── */}
         {nextMatchPreview && (
           <NextMatchPreview
@@ -991,6 +1000,10 @@ export function PlayingPhase({
             </div>
           )}
         </div>
+          </div>
+          {/* ── 오른쪽 사이드바 끝 ── */}
+        </div>
+        {/* ── 2단 그리드 끝 ── */}
       </div>
 
       {dialog && (
