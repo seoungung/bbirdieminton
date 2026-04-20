@@ -6,6 +6,7 @@ import { Racket } from '@/types/racket'
 import { useCompare } from '@/context/CompareContext'
 import { cn } from '@/lib/utils'
 import { BRAND_LOGOS } from '@/lib/brandLogos'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 
 function isValidSrc(s: string): boolean {
   return s.startsWith('/') || s.startsWith('http://') || s.startsWith('https://')
@@ -53,7 +54,7 @@ export function RacketCard({ racket }: { racket: Racket }) {
               />
             ) : (
               <div className="flex items-center justify-center h-full">
-                <span className="text-3xl">🏸</span>
+                <ShuttlecockIcon size={28} className="text-[#ccc]" />
               </div>
             )}
             {racket.editor_pick && (

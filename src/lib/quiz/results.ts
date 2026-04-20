@@ -2,7 +2,6 @@ import type { QuizLevel } from './questions'
 
 export interface LevelResult {
   level: QuizLevel
-  emoji: string
   tagline: string
   description: string
   radarLabels: string[]
@@ -25,7 +24,6 @@ export interface LevelResult {
 export const LEVEL_RESULTS: Record<QuizLevel, LevelResult> = {
   왕초보: {
     level: '왕초보',
-    emoji: '🐣',
     tagline: '아직 셔틀이 어디로 갈지 모르죠. 저도 그랬어요.',
     description: '저 처음 체육관 가던 날, 형광 셔틀콕 챙겨 갔어요. 당연히 되는 줄 알았거든요. "그건 안 돼요. 깃털콕만 됩니다." 그게 첫 번째 당황이었어요. 라켓은 쿠팡에서 후기 제일 많은 걸로 샀고, 기준이 뭔지도 몰랐어요. 서브 하나도 어색하고, 셔틀이 어디로 튈지 몰라 당황스러운 지금 — 그게 정상이에요. 이 시기가 가장 빠르게 느는 단계니까요.',
     radarLabels: ['파워', '컨트롤', '스피드', '체력', '전술', '네트'],
@@ -65,7 +63,6 @@ export const LEVEL_RESULTS: Record<QuizLevel, LevelResult> = {
   },
   초심자: {
     level: '초심자',
-    emoji: '🌱',
     tagline: '기본기가 잡히고 있어요. 백핸드만 빼고요.',
     description: '이 시기가 솔직히 가장 애매해요. 뭔가 되는 것 같기도 하고, 아직 멀었다는 느낌도 들고. 백핸드 오면 자동으로 돌아서 포핸드로 치고 있고, 스매시는 치는데 왜인지 힘이 없어요. 발도 항상 셔틀보다 조금 늦게 도착하죠. 이 느낌 아는 사람만 알아요. 근데 이 시기에 폼 제대로 잡아두면 평생 가요. 지금이 황금 타이밍이에요.',
     radarLabels: ['파워', '컨트롤', '스피드', '체력', '전술', '네트'],
@@ -105,7 +102,6 @@ export const LEVEL_RESULTS: Record<QuizLevel, LevelResult> = {
   },
   D조: {
     level: 'D조',
-    emoji: '⚡',
     tagline: '라켓이 뭔가 안 맞는 느낌. 저도 지금 여기 있어요.',
     description: '이 레벨에서 가장 많이 나오는 질문이 있어요. "라켓 쿠팡에서 샀는데 괜찮은 건가요?" 저도 물어봤어요. 그리고 항상 같은 답이 돌아왔죠. "써봐야 알아요." 저 지금도 D조고, 지금 쓰는 라켓이 뭔가 안 맞는 것 같아요. 무겁고 딱딱한 느낌. 근데 뭘 바꿔야 할지 기준이 없었어요. 버디민턴 만든 이유가 그거예요. 적어도 기준은 드릴 수 있어야 한다고.',
     radarLabels: ['파워', '컨트롤', '스피드', '체력', '전술', '네트'],
@@ -145,7 +141,6 @@ export const LEVEL_RESULTS: Record<QuizLevel, LevelResult> = {
   },
   C조: {
     level: 'C조',
-    emoji: '🏆',
     tagline: '오랜만에 온 동호인이 "많이 늘었다"고 말해줄 레벨이에요.',
     description: '저한테 가장 인상 깊었던 피드백이 있어요. 레슨 6개월 지나고, 오랜만에 온 동호인이 그랬어요. "많이 늘었다." 그게 그냥 지나치는 말인데 그날 유독 크게 들렸어요. C조가 그 느낌이에요. 상대방 움직임이 보이고, 빈 공간이 눈에 들어오기 시작해요. 스매시 각도, 네트 전술, 복식 로테이션을 의식하며 게임하고 있어요. 스트링 텐션이랑 세팅도 슬슬 궁금해지기 시작했다면 딱 맞아요.',
     radarLabels: ['파워', '컨트롤', '스피드', '체력', '전술', '네트'],

@@ -10,6 +10,7 @@ import { TextAlign } from '@tiptap/extension-text-align'
 import { Youtube } from '@tiptap/extension-youtube'
 import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
 import { useCallback, useRef } from 'react'
+import { Link2, Image as ImageLucide } from 'lucide-react'
 import { uploadGuideImage } from '@/app/admin/guide/actions'
 import './guide-editor.css'
 
@@ -167,12 +168,12 @@ export default function GuideEditor({ content, onChange }: GuideEditorProps) {
         <Btn onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')} title="인용구">❝</Btn>
         <Btn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive('codeBlock')} title="코드 블록">{'</>'}</Btn>
         <Btn onClick={() => editor.chain().focus().setHorizontalRule().run()} active={false} title="구분선">—</Btn>
-        <Btn onClick={setLink} active={editor.isActive('link')} title="링크">🔗 링크</Btn>
+        <Btn onClick={setLink} active={editor.isActive('link')} title="링크"><><Link2 size={12} className="inline mr-1" />링크</></Btn>
 
         <Divider />
 
         <Btn onClick={() => imageInputRef.current?.click()} active={false} title="이미지 업로드">
-          🖼 이미지
+          <><ImageLucide size={12} className="inline mr-1" />이미지</>
         </Btn>
         <Btn onClick={insertYoutube} active={false} title="유튜브 삽입">
           ▶ 유튜브

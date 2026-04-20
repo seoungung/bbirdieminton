@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useState, useEffect, useRef, useTransition } from 'react'
 import { usePathname } from 'next/navigation'
 import { Menu, X, User, ChevronDown, LayoutDashboard, LogOut } from 'lucide-react'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/app/login/actions'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
@@ -120,7 +121,7 @@ export default function Header() {
               href={getDemoHref(!!user)}
               className="flex items-center gap-1.5 text-[#beff00] font-semibold hover:text-[#beff00]/80 transition-colors"
             >
-              🏸 데모 체험
+              <ShuttlecockIcon size={15} /> 데모 체험
             </Link>
             <Link href="/survey" className="text-white/70 hover:text-white transition-colors">
               설문 참여
@@ -205,7 +206,7 @@ export default function Header() {
               onClick={() => setOpen(false)}
               className="flex items-center gap-1.5 text-[#beff00] font-semibold py-1"
             >
-              🏸 데모 체험
+              <ShuttlecockIcon size={15} /> 데모 체험
             </Link>
             <Link
               href="/survey"

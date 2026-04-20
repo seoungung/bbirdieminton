@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Share2, Check } from 'lucide-react'
+import { Share2, Check, Users, Wallet, Target, Gamepad2 } from 'lucide-react'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 
 // ── 목 데이터 ─────────────────────────────────────
 
@@ -125,19 +126,20 @@ export function DemoClient() {
       <div className="bg-white border-b border-[#e5e5e5]">
         <div className="max-w-[1088px] mx-auto px-4 flex gap-0">
           {([
-            { key: 'game',    label: '🏸 게임보드' },
-            { key: 'members', label: '👥 회원 관리' },
-            { key: 'finance', label: '💰 회비 관리' },
-          ] as const).map(({ key, label }) => (
+            { key: 'game' as const,    Icon: ShuttlecockIcon, label: '게임보드' },
+            { key: 'members' as const, Icon: Users,           label: '회원 관리' },
+            { key: 'finance' as const, Icon: Wallet,          label: '회비 관리' },
+          ]).map(({ key, Icon, label }) => (
             <button
               key={key}
               onClick={() => setTab(key)}
-              className={`px-5 py-3.5 text-sm font-semibold border-b-2 transition-colors ${
+              className={`flex items-center gap-1.5 px-5 py-3.5 text-sm font-semibold border-b-2 transition-colors ${
                 tab === key
                   ? 'border-[#111] text-[#111]'
                   : 'border-transparent text-[#999] hover:text-[#555]'
               }`}
             >
+              <Icon size={14} />
               {label}
             </button>
           ))}
@@ -179,8 +181,8 @@ export function DemoClient() {
                       </div>
                     ) : (
                       <button onClick={() => handleAssign(court.id)}
-                        className="w-full text-sm py-3 bg-[#beff00] text-[#111] rounded-xl font-bold hover:brightness-95 transition-all">
-                        🎯 자동 배정
+                        className="w-full flex items-center justify-center gap-1.5 text-sm py-3 bg-[#beff00] text-[#111] rounded-xl font-bold hover:brightness-95 transition-all">
+                        <Target size={14} /> 자동 배정
                       </button>
                     )}
                   </div>
@@ -318,8 +320,12 @@ export function DemoClient() {
       {/* 하단 고정 띠 */}
       <div className="fixed bottom-0 inset-x-0 bg-white border-t border-[#e5e5e5] px-4 py-3 z-50">
         <div className="max-w-[1088px] mx-auto flex items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-[#111] truncate">
-            {guestName ? `👋 ${guestName}님, 체험 중입니다` : '🎮 데모 체험 중입니다'}
+          <p className="text-sm font-semibold text-[#111] truncate flex items-center gap-1.5">
+            {guestName ? (
+              <>{guestName}님, 체험 중입니다</>
+            ) : (
+              <><Gamepad2 size={14} /> 데모 체험 중입니다</>
+            )}
           </p>
           <div className="flex gap-2 shrink-0">
             <Link

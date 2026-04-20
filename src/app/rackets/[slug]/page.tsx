@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { ChevronRight, ExternalLink, ShoppingCart } from 'lucide-react'
+import { ChevronRight, ExternalLink, ShoppingCart, Target, CheckCircle2, XCircle, MessageSquare, FileText } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { RacketRadarChart } from '@/components/racket/RacketRadarChart'
 import { RacketSpec } from '@/components/racket/RacketSpec'
@@ -302,7 +302,7 @@ export default async function RacketDetailPage({ params }: Props) {
             {/* 섹션 5: 이런 분께 추천 */}
             {racket.recommended_for && (
               <div className="rounded-2xl bg-green-50 border border-green-100 p-5">
-                <h3 className="text-[17px] font-semibold text-green-800 mb-2.5 tracking-[-0.01em]">🎯 이런 분께 추천해요</h3>
+                <h3 className="text-[17px] font-semibold text-green-800 mb-2.5 tracking-[-0.01em] flex items-center gap-2"><Target size={16} /> 이런 분께 추천해요</h3>
                 <p className="text-[15px] text-green-700 leading-[1.8]">{racket.recommended_for}</p>
               </div>
             )}
@@ -314,7 +314,7 @@ export default async function RacketDetailPage({ params }: Props) {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs font-semibold text-green-600 mb-2 flex items-center gap-1">
-                      <span>✅</span> 장점
+                      <CheckCircle2 size={12} /> 장점
                     </p>
                     <ul className="space-y-1.5">
                       {pros.map((pro, i) => (
@@ -326,7 +326,7 @@ export default async function RacketDetailPage({ params }: Props) {
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-red-500 mb-2 flex items-center gap-1">
-                      <span>❌</span> 단점
+                      <XCircle size={12} /> 단점
                     </p>
                     <ul className="space-y-1.5">
                       {cons.map((con, i) => (
@@ -343,7 +343,7 @@ export default async function RacketDetailPage({ params }: Props) {
             {/* 섹션 7: 에디터 한마디 */}
             {racket.editor_comment && (
               <div className="rounded-2xl border border-border p-5">
-                <h3 className="text-[17px] font-semibold mb-3 tracking-[-0.01em]">💬 에디터 한마디</h3>
+                <h3 className="text-[17px] font-semibold mb-3 tracking-[-0.01em] flex items-center gap-2"><MessageSquare size={16} /> 에디터 한마디</h3>
                 <blockquote className="text-[15px] text-muted-foreground leading-[1.8] italic border-l-2 border-foreground/20 pl-4">
                   &ldquo;{racket.editor_comment}&rdquo;
                 </blockquote>
@@ -353,7 +353,7 @@ export default async function RacketDetailPage({ params }: Props) {
             {/* 섹션 8: 실제 후기 종합 */}
             {racket.review_summary && (
               <div className="rounded-2xl border border-border p-5">
-                <h3 className="text-[17px] font-semibold mb-3 tracking-[-0.01em]">📝 실제 후기 종합</h3>
+                <h3 className="text-[17px] font-semibold mb-3 tracking-[-0.01em] flex items-center gap-2"><FileText size={16} /> 실제 후기 종합</h3>
                 <p className="text-[15px] text-muted-foreground leading-[1.8] whitespace-pre-wrap mb-4">
                   {racket.review_summary}
                 </p>

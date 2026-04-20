@@ -1,35 +1,30 @@
 export type QuizLevel = '왕초보' | '초심자' | 'D조' | 'C조'
 
 const levelData: Record<QuizLevel, {
-  emoji: string
   tagline: string
   tip: string
   racketSpec: string
   ctaText: string
 }> = {
   '왕초보': {
-    emoji: '🐣',
     tagline: '이제 막 시작하는 당신을 응원해요',
     tip: '무게 5U~6U, 헤드라이트 또는 이븐밸런스, Flexible 샤프트 라켓을 추천드려요. 가볍고 다루기 쉬운 라켓으로 시작하면 기본기가 훨씬 빠르게 잡혀요.',
     racketSpec: '무게 5~6U · 헤드라이트 · Flexible',
     ctaText: '내 레벨 전체 결과 보기',
   },
   '초심자': {
-    emoji: '🌱',
     tagline: '기초를 다지는 중요한 단계예요',
     tip: '무게 4U~5U, 이븐밸런스, Medium 샤프트 라켓으로 넘어갈 시점이에요. 스윙 감각이 생겼다면 조금 더 안정적인 라켓이 컨트롤을 높여줘요.',
     racketSpec: '무게 4~5U · 이븐밸런스 · Medium',
     ctaText: '내 레벨 전체 결과 보기',
   },
   'D조': {
-    emoji: '⚡',
     tagline: '실력이 빠르게 오르고 있어요',
     tip: '무게 3U~4U, 플레이 스타일에 따라 헤드헤비(공격형) 또는 이븐밸런스(올라운드)를 선택하세요. 샤프트는 Medium~Stiff가 정확한 임팩트를 만들어줘요.',
     racketSpec: '무게 3~4U · 이븐밸런스~헤드헤비 · Medium~Stiff',
     ctaText: '내 레벨 전체 결과 보기',
   },
   'C조': {
-    emoji: '🏆',
     tagline: '이미 탄탄한 실력의 소유자예요',
     tip: '무게 3U, 플레이 스타일에 맞는 스펙을 정밀하게 선택하세요. Stiff 샤프트로 스윙 파워를 정확하게 전달하고, 스트링 장력도 26~28lbs로 높여보세요.',
     racketSpec: '무게 3U · 스타일 맞춤 · Stiff',
@@ -40,7 +35,7 @@ const levelData: Record<QuizLevel, {
 export function buildWelcomeEmail(level: QuizLevel, resultUrl: string): { subject: string; html: string } {
   const d = levelData[level]
 
-  const subject = `[버디민턴] ${d.emoji} ${level} 레벨 확인 완료 — 맞춤 라켓 가이드 도착!`
+  const subject = `[버디민턴] ${level} 레벨 확인 완료 — 맞춤 라켓 가이드 도착!`
 
   const html = `<!DOCTYPE html>
 <html lang="ko">
@@ -70,7 +65,7 @@ export function buildWelcomeEmail(level: QuizLevel, resultUrl: string): { subjec
               <div style="display:inline-block;background:#f0f0f0;border-radius:100px;padding:8px 20px;font-size:13px;font-weight:700;color:#555555;margin-bottom:16px;">
                 레벨 진단 결과
               </div>
-              <div style="font-size:48px;margin-bottom:12px;">${d.emoji}</div>
+              <div style="display:inline-block;background:#beff00;color:#111111;font-size:22px;font-weight:800;padding:8px 24px;border-radius:12px;margin-bottom:12px;">${level}</div>
               <h1 style="font-size:28px;font-weight:800;color:#111111;margin:0 0 8px;">${level}</h1>
               <p style="font-size:15px;color:#555555;margin:0;">${d.tagline}</p>
             </td>

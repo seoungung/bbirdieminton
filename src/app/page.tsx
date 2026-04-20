@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
+import { MessageSquare, BarChart3, Frown, CheckCircle2, Target, Wallet, Trophy, Users, CalendarDays, Settings, Award, ClipboardList } from 'lucide-react'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
+import type { ComponentType } from 'react'
 
 export const metadata: Metadata = {
   title: 'Birdieminton | 배드민턴 동호회 운영 플랫폼',
@@ -11,47 +14,47 @@ export const metadata: Metadata = {
   },
 }
 
-const PAIN_POINTS = [
+const PAIN_POINTS: { Icon: ComponentType<{ size?: number; className?: string; strokeWidth?: number }>; title: string; desc: string }[] = [
   {
-    emoji: '📱',
+    Icon: MessageSquare,
     title: '카톡 단체방이 난리',
     desc: '"나 나가요" "저 못 가요" — 출석 취합만 30분. 코트 수 계산은 머릿속으로.',
   },
   {
-    emoji: '📊',
+    Icon: BarChart3,
     title: '회비는 엑셀로',
     desc: '누가 냈는지 안 냈는지 버전 꼬인 엑셀 파일. 독촉은 매번 민망하고.',
   },
   {
-    emoji: '😤',
+    Icon: Frown,
     title: '팀 배정은 눈치 게임',
     desc: '항상 같은 사람끼리, 실력 차이 심한 팀. 불만은 쌓이고 총무만 난처해.',
   },
 ]
 
-const FEATURES = [
-  { icon: '✅', title: '원터치 출석 체크', desc: '버튼 하나로 출석 완료. 월별 출석률 자동 집계.' },
-  { icon: '🎯', title: '자동 팀 배정', desc: '실력 등급 기반 균등 매칭. 매번 공정한 경기.' },
-  { icon: '💰', title: '회비 정산', desc: '출석 횟수 연동 자동 계산. 납부 현황 한눈에.' },
-  { icon: '🏆', title: '경기 기록 & 랭킹', desc: '전적·승률·포인트 자동 누적. 동기부여 UP.' },
-  { icon: '👥', title: '회원 관리', desc: '역할·실력·상태 한 곳에서. 신입 초대도 링크 하나로.' },
-  { icon: '📅', title: '일정 & 공지', desc: '참석 여부 확인까지. 카톡에 묻힐 걱정 없이.' },
+const FEATURES: { Icon: ComponentType<{ size?: number; className?: string; strokeWidth?: number }>; title: string; desc: string }[] = [
+  { Icon: CheckCircle2, title: '원터치 출석 체크', desc: '버튼 하나로 출석 완료. 월별 출석률 자동 집계.' },
+  { Icon: Target,       title: '자동 팀 배정',    desc: '실력 등급 기반 균등 매칭. 매번 공정한 경기.' },
+  { Icon: Wallet,       title: '회비 정산',       desc: '출석 횟수 연동 자동 계산. 납부 현황 한눈에.' },
+  { Icon: Trophy,       title: '경기 기록 & 랭킹', desc: '전적·승률·포인트 자동 누적. 동기부여 UP.' },
+  { Icon: Users,        title: '회원 관리',       desc: '역할·실력·상태 한 곳에서. 신입 초대도 링크 하나로.' },
+  { Icon: CalendarDays, title: '일정 & 공지',     desc: '참석 여부 확인까지. 카톡에 묻힐 걱정 없이.' },
 ]
 
-const TARGETS = [
+const TARGETS: { role: string; Icon: ComponentType<{ size?: number; className?: string; strokeWidth?: number }>; pains: string[] }[] = [
   {
     role: '총무 · 인사',
-    emoji: '📋',
+    Icon: ClipboardList,
     pains: ['출석 취합 30분', '회비 독촉 민망함', '엑셀 버전 꼬임'],
   },
   {
     role: '모임장 · 운영진',
-    emoji: '🎖️',
+    Icon: Award,
     pains: ['팀 배정 눈치 게임', '공지 못 보는 회원', '신입 온보딩 반복'],
   },
   {
     role: '코치',
-    emoji: '🏸',
+    Icon: ShuttlecockIcon,
     pains: ['레슨비 수납 추적', '스케줄 조율 복잡', '회원 성장 기록 없음'],
   },
 ]
@@ -67,8 +70,8 @@ export default async function HomePage() {
       {/* ── HERO ──────────────────────────────────────── */}
       <section className="bg-[#0a0a0a] overflow-hidden">
         <div className="max-w-[1088px] mx-auto px-4 sm:px-8 py-20 sm:py-28 text-center">
-          <span className="inline-block text-[11px] font-bold uppercase tracking-widest text-[#beff00] bg-[#beff00]/10 px-3 py-1.5 rounded-full mb-6">
-            🏸 배드민턴 동호회 운영 플랫폼
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[#beff00] bg-[#beff00]/10 px-3 py-1.5 rounded-full mb-6">
+            <ShuttlecockIcon size={13} /> 배드민턴 동호회 운영 플랫폼
           </span>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
             동호회 운영,<br />
@@ -83,7 +86,7 @@ export default async function HomePage() {
               href={demoHref}
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#beff00] text-[#0a0a0a] font-extrabold text-[16px] rounded-xl hover:brightness-95 transition-all"
             >
-              🏸 데모 직접 체험하기
+              <ShuttlecockIcon size={18} /> 데모 직접 체험하기
             </Link>
             <Link
               href="/survey"
@@ -105,9 +108,9 @@ export default async function HomePage() {
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {PAIN_POINTS.map(({ emoji, title, desc }) => (
+            {PAIN_POINTS.map(({ Icon, title, desc }) => (
               <div key={title} className="bg-white rounded-2xl p-6 border border-[#ebebeb]">
-                <div className="text-3xl mb-4">{emoji}</div>
+                <div className="mb-4 text-[#555]"><Icon size={32} strokeWidth={1.5} /></div>
                 <h3 className="text-[17px] font-bold text-[#0a0a0a] mb-2">{title}</h3>
                 <p className="text-sm text-[#666] leading-relaxed">{desc}</p>
               </div>
@@ -130,7 +133,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* 현장 게임보드 */}
             <div className="bg-[#0a0a0a] rounded-2xl p-8 text-white">
-              <div className="text-3xl mb-4">🏸</div>
+              <div className="mb-4"><ShuttlecockIcon size={32} /></div>
               <h3 className="text-xl font-extrabold mb-3">현장 게임보드</h3>
               <p className="text-white/50 text-sm mb-6 leading-relaxed">
                 코트 현장에서 폰으로. 출석 체크부터 팀 배정, 경기 결과까지 실시간으로.
@@ -145,7 +148,7 @@ export default async function HomePage() {
             </div>
             {/* 클럽 운영 관리 */}
             <div className="bg-[#f7f7f7] rounded-2xl p-8 border border-[#ebebeb]">
-              <div className="text-3xl mb-4">⚙️</div>
+              <div className="mb-4 text-[#555]"><Settings size={32} strokeWidth={1.5} /></div>
               <h3 className="text-xl font-extrabold mb-3">클럽 운영 관리</h3>
               <p className="text-[#666] text-sm mb-6 leading-relaxed">
                 총무·모임장을 위한 운영 도구. 회원 DB, 회비 정산, 통계까지 한 곳에서.
@@ -172,9 +175,9 @@ export default async function HomePage() {
       <section className="bg-[#f7f7f7] border-b border-[#ebebeb]">
         <div className="max-w-[1088px] mx-auto px-4 sm:px-8 py-16 sm:py-20">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map(({ icon, title, desc }) => (
+            {FEATURES.map(({ Icon, title, desc }) => (
               <div key={title} className="bg-white rounded-2xl p-6 border border-[#ebebeb] hover:border-[#beff00] hover:shadow-sm transition-all">
-                <div className="text-2xl mb-3">{icon}</div>
+                <div className="mb-3 text-[#333]"><Icon size={24} strokeWidth={1.5} /></div>
                 <h3 className="text-[15px] font-bold text-[#0a0a0a] mb-1.5">{title}</h3>
                 <p className="text-sm text-[#666] leading-relaxed">{desc}</p>
               </div>
@@ -192,9 +195,9 @@ export default async function HomePage() {
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {TARGETS.map(({ role, emoji, pains }) => (
+            {TARGETS.map(({ role, Icon, pains }) => (
               <div key={role} className="rounded-2xl border border-[#ebebeb] p-6">
-                <div className="text-3xl mb-3">{emoji}</div>
+                <div className="mb-3 text-[#333]"><Icon size={32} strokeWidth={1.5} /></div>
                 <h3 className="text-[17px] font-bold text-[#0a0a0a] mb-4">{role}</h3>
                 <ul className="space-y-2">
                   {pains.map(pain => (
@@ -224,7 +227,7 @@ export default async function HomePage() {
               href={demoHref}
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#beff00] text-[#0a0a0a] font-extrabold text-[16px] rounded-xl hover:brightness-95 transition-all"
             >
-              🏸 데모 체험하기
+              <ShuttlecockIcon size={18} /> 데모 체험하기
             </Link>
             <Link
               href="/survey"

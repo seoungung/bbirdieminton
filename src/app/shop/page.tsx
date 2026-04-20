@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { HelpCircle, TrendingUp, Target } from 'lucide-react'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 
 export const metadata: Metadata = {
   title: '배린이 라켓 완전정복 가이드 | 버디민턴',
@@ -51,29 +53,17 @@ export default function ShopPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
-              {
-                emoji: '🏸',
-                text: '라켓을 쿠팡에서 골랐는데 맞는 건지 모르겠는 분',
-              },
-              {
-                emoji: '🤔',
-                text: '체육관에서 추천받은 라켓이 내 실력에 맞는지 궁금한 분',
-              },
-              {
-                emoji: '📈',
-                text: '배드민턴 시작한 지 6개월 — 이제 라켓 업그레이드하고 싶은 분',
-              },
-              {
-                emoji: '🎯',
-                text: 'D조 진입을 목표로 장비부터 제대로 갖추고 싶은 분',
-              },
-            ].map((item) => (
+              { iconEl: <ShuttlecockIcon size={24} className="text-[#111] flex-shrink-0 mt-0.5" />, text: '라켓을 쿠팡에서 골랐는데 맞는 건지 모르겠는 분' },
+              { iconEl: <HelpCircle size={24} className="text-[#111] flex-shrink-0 mt-0.5" />, text: '체육관에서 추천받은 라켓이 내 실력에 맞는지 궁금한 분' },
+              { iconEl: <TrendingUp size={24} className="text-[#111] flex-shrink-0 mt-0.5" />, text: '배드민턴 시작한 지 6개월 — 이제 라켓 업그레이드하고 싶은 분' },
+              { iconEl: <Target size={24} className="text-[#111] flex-shrink-0 mt-0.5" />, text: 'D조 진입을 목표로 장비부터 제대로 갖추고 싶은 분' },
+            ].map(({ iconEl, text }) => (
               <div
-                key={item.emoji}
+                key={text}
                 className="border border-[#e5e5e5] rounded-2xl p-5 bg-white flex flex-row items-start gap-4"
               >
-                <span className="text-2xl flex-shrink-0">{item.emoji}</span>
-                <p className="text-[#111111] text-sm sm:text-base leading-relaxed">{item.text}</p>
+                {iconEl}
+                <p className="text-[#111111] text-sm sm:text-base leading-relaxed">{text}</p>
               </div>
             ))}
           </div>

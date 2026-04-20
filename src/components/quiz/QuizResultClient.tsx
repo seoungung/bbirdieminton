@@ -3,7 +3,8 @@
 import { use, useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Copy, Check, RotateCcw, ChevronRight } from 'lucide-react'
+import { Copy, Check, RotateCcw, ChevronRight, Sprout, Leaf, Zap, Trophy, AlertTriangle, Lock, Quote, Info, Feather, Building2 } from 'lucide-react'
+import type { ComponentType } from 'react'
 import { LEVEL_RESULTS } from '@/lib/quiz/results'
 import { calcRadar } from '@/lib/quiz/questions'
 import { QuizRadarChart } from '@/components/quiz/QuizRadarChart'
@@ -12,6 +13,13 @@ import { createClient } from '@/lib/supabase/client'
 import type { QuizLevel } from '@/lib/quiz/questions'
 
 const VALID_LEVELS: QuizLevel[] = ['왕초보', '초심자', 'D조', 'C조']
+
+const LEVEL_ICONS: Record<string, ComponentType<{ size?: number; className?: string }>> = {
+  '왕초보': Sprout,
+  '초심자': Leaf,
+  'D조': Zap,
+  'C조': Trophy,
+}
 
 function parseFirstUrl(raw: string | null): string | null {
   if (!raw) return null
@@ -26,17 +34,17 @@ function parseFirstUrl(raw: string | null): string | null {
 
 const BEGINNER_CHECKLIST = [
   {
-    icon: '👟',
+    Icon: Info,
     title: '배드민턴화',
     desc: '운동화는 안 돼요. 실내 배드민턴화가 따로 있어요. 미끄러지지 않으려면 필수예요.',
   },
   {
-    icon: '🪶',
+    Icon: Feather,
     title: '깃털 셔틀콕',
     desc: '형광 셔틀콕은 대부분 체육관에서 안 받아줘요. 첫날 2~3만원 셔틀콕 비용 각오하세요.',
   },
   {
-    icon: '🏢',
+    Icon: Building2,
     title: '일반 코트 vs 클럽 코트',
     desc: '처음엔 일반 코트로 예약해서 쓰는 게 편해요. 클럽 코트는 소속 회원 전용이에요.',
   },
@@ -182,12 +190,12 @@ export function QuizResultClient({ params }: { params: Promise<{ level: string }
           <p className="text-base font-bold text-white mb-1">첫 체육관 체크리스트</p>
           <p className="text-xs text-white/40 mb-4">아무도 미리 알려주지 않는 것들이에요</p>
           <div className="space-y-4">
-            {BEGINNER_CHECKLIST.map((item) => (
-              <div key={item.title} className="flex items-start gap-3">
-                <span className="text-2xl shrink-0">{item.icon}</span>
+            {BEGINNER_CHECKLIST.map(({ Icon, title, desc }) => (
+              <div key={title} className="flex items-start gap-3">
+                <Icon size={22} className="shrink-0 text-[#beff00] mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-white mb-0.5">{item.title}</p>
-                  <p className="text-xs text-white/80 leading-relaxed">{item.desc}</p>
+                  <p className="text-sm font-semibold text-white mb-0.5">{title}</p>
+                  <p className="text-xs text-white/80 leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}
@@ -232,7 +240,7 @@ export function QuizResultClient({ params }: { params: Promise<{ level: string }
 
       {/* 실수 경보 */}
       <div className="bg-red-500/5 border border-red-500/15 rounded-2xl p-5 sm:p-6 mb-5">
-        <p className="text-base font-bold text-white mb-4">⚠️ 이 레벨에서 자주 하는 실수</p>
+        <p className="text-base font-bold text-white mb-4 flex items-center gap-2"><AlertTriangle size={16} className="text-red-400" /> 이 레벨에서 자주 하는 실수</p>
         <div className="space-y-2.5">
           {result.commonMistakes.map((mistake, i) => (
             <div key={i} className="flex items-start gap-2.5">
@@ -282,7 +290,9 @@ export function QuizResultClient({ params }: { params: Promise<{ level: string }
           <div className="inline-flex items-center gap-2 bg-[#beff00]/10 border border-[#beff00]/20 text-[#beff00] text-xs font-bold px-4 py-1.5 rounded-full mb-4 tracking-widest uppercase">
             내 레벨
           </div>
-          <div className="text-6xl mb-3">{result.emoji}</div>
+          <div className="mb-3 flex justify-center text-white/80">
+            {(() => { const LevelIcon = LEVEL_ICONS[level]; return LevelIcon ? <LevelIcon size={64} /> : null })()}
+          </div>
           <h1 className="text-[42px] sm:text-[56px] font-extrabold text-white tracking-[-0.04em] mb-2">
             {result.level}
           </h1>
@@ -327,7 +337,7 @@ export function QuizResultClient({ params }: { params: Promise<{ level: string }
           <div className="space-y-3">
             {result.empathyPoints.map((point, i) => (
               <div key={i} className="flex items-start gap-3">
-                <span className="text-base shrink-0">😅</span>
+                <Quote size={16} className="shrink-0 text-white/40 mt-0.5" />
                 <p className="text-sm text-white/85 leading-relaxed">&ldquo;{point}&rdquo;</p>
               </div>
             ))}
@@ -360,7 +370,7 @@ export function QuizResultClient({ params }: { params: Promise<{ level: string }
           {!unlocked && (
             <div className="bg-[#beff00]/5 border border-[#beff00]/15 rounded-2xl p-5 mb-4">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">🔒</span>
+                <Lock size={18} className="text-[#beff00]" />
                 <p className="text-sm font-bold text-white">딱 이것만 확인하면 라켓 선택 끝</p>
               </div>
               <ul className="space-y-1.5">
