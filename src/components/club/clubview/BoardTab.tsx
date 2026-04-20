@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition, useCallback, useRef } from 'react'
 import {
   Plus, X, Trash2, Heart, MessageCircle, Eye, Pin,
-  ChevronLeft, AlertCircle, CornerDownRight, Pencil, Send, ImagePlus,
+  ChevronLeft, AlertCircle, CornerDownRight, Pencil, Send, ImagePlus, MessageSquareText,
 } from 'lucide-react'
 import type { PostCategory, PostRow, CommentRow } from '@/app/club/[clubId]/board/actions'
 import {
@@ -69,8 +69,8 @@ const DEMO_POSTS: PostRow[] = [
     club_id: 'demo-1',
     author_member_id: 'm1',
     category: 'free',
-    title: '이번 주말 번개 치실 분! ⚡',
-    body: '토요일 오전 체육관 코트 2개 미리 예약해뒀어요.\n오전 10시부터 1시까지 총 3시간.\n\n참석 가능한 분 댓글로 남겨주세요~ 🙋‍♂️',
+    title: '이번 주말 번개 치실 분!',
+    body: '토요일 오전 체육관 코트 2개 미리 예약해뒀어요.\n오전 10시부터 1시까지 총 3시간.\n\n참석 가능한 분 댓글로 남겨주세요~',
     image_urls: ['https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&auto=format&fit=crop&q=70'],
     is_pinned: true,
     view_count: 47,
@@ -88,7 +88,7 @@ const DEMO_POSTS: PostRow[] = [
     author_member_id: 'm4',
     category: 'question',
     title: '4U vs 5U 어떤 라켓이 좋을까요?',
-    body: '배린이 6개월 차입니다 🏸\n\n지금 4U 이븐밸런스 쓰고 있는데 스매시할 때 손목이 자꾸 뻐근해요.\n5U로 바꾸면 좀 덜할까요? 추천해주실 만한 라켓 있으신가요?',
+    body: '배린이 6개월 차입니다.\n\n지금 4U 이븐밸런스 쓰고 있는데 스매시할 때 손목이 자꾸 뻐근해요.\n5U로 바꾸면 좀 덜할까요? 추천해주실 만한 라켓 있으신가요?',
     image_urls: [],
     is_pinned: false,
     view_count: 28,
@@ -105,8 +105,8 @@ const DEMO_POSTS: PostRow[] = [
     club_id: 'demo-1',
     author_member_id: 'm3',
     category: 'review',
-    title: 'NANOFLARE 800 한 달 사용 후기 ✨',
-    body: 'C조 경기 들어가면서 스피드형 라켓으로 바꿔봤습니다.\n\n👍 장점\n- 스매시 궤적이 낮고 빠름\n- 드라이브 랠리가 훨씬 수월해요\n- 무게감이 가벼워서 피로도 낮음\n\n👎 단점\n- 초심자에게는 어려울 수 있음\n- 타구감이 약간 타이트함\n\n총평: 스피드 중시하는 분들에게 강추!',
+    title: 'NANOFLARE 800 한 달 사용 후기',
+    body: 'C조 경기 들어가면서 스피드형 라켓으로 바꿔봤습니다.\n\n[장점]\n- 스매시 궤적이 낮고 빠름\n- 드라이브 랠리가 훨씬 수월해요\n- 무게감이 가벼워서 피로도 낮음\n\n[단점]\n- 초심자에게는 어려울 수 있음\n- 타구감이 약간 타이트함\n\n총평: 스피드 중시하는 분들에게 강추!',
     image_urls: ['https://images.unsplash.com/photo-1613918431703-aa50889e3be8?w=800&auto=format&fit=crop&q=70'],
     is_pinned: false,
     view_count: 91,
@@ -124,7 +124,7 @@ const DEMO_POSTS: PostRow[] = [
     author_member_id: 'm2',
     category: 'marketplace',
     title: '[판매] ASTROX 100ZZ 9만원에 팝니다',
-    body: '✨ 상품: YONEX ASTROX 100ZZ (4U/G5)\n💰 가격: 90,000원 (정가 30만원대)\n📅 사용 기간: 3개월\n📍 직거래: 관악구 / 택배 가능 (별도)\n\n새 라켓 들여서 정리합니다.\n스트링은 신품(BG80, 25lb)으로 새로 메어 드려요.\n구매 희망자 댓글/쪽지 주세요~',
+    body: '· 상품: YONEX ASTROX 100ZZ (4U/G5)\n· 가격: 90,000원 (정가 30만원대)\n· 사용 기간: 3개월\n· 직거래: 관악구 / 택배 가능 (별도)\n\n새 라켓 들여서 정리합니다.\n스트링은 신품(BG80, 25lb)으로 새로 메어 드려요.\n구매 희망자 댓글/쪽지 주세요~',
     image_urls: ['https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?w=800&auto=format&fit=crop&q=70'],
     is_pinned: false,
     view_count: 63,
@@ -140,7 +140,7 @@ const DEMO_POSTS: PostRow[] = [
 
 const DEMO_COMMENTS: Record<string, CommentRow[]> = {
   'demo-post-free': [
-    { id: 'demo-c1', post_id: 'demo-post-free', author_member_id: 'm2', parent_id: null, body: '저요!! 10시부터 갈게요 🙋‍♀️', created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), author_name: '이서연', author_id: 'm2', replies: [] },
+    { id: 'demo-c1', post_id: 'demo-post-free', author_member_id: 'm2', parent_id: null, body: '저요!! 10시부터 갈게요', created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), author_name: '이서연', author_id: 'm2', replies: [] },
     { id: 'demo-c2', post_id: 'demo-post-free', author_member_id: 'm4', parent_id: null, body: '12시부터 합류 가능할 것 같아요', created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(), author_name: '최유나', author_id: 'm4', replies: [] },
   ],
   'demo-post-question': [
@@ -370,7 +370,7 @@ export function BoardTab({ clubId, userStatus, isManager, myMemberId }: Props) {
         </div>
       ) : posts.length === 0 ? (
         <div className="text-center py-14 text-[#ccc]">
-          <p className="text-4xl mb-3">📝</p>
+          <MessageSquareText size={40} className="mx-auto mb-3" strokeWidth={1.5} />
           <p className="text-sm font-semibold">아직 게시글이 없어요</p>
           {canWrite && <p className="text-xs mt-1.5">첫 번째 글을 작성해보세요!</p>}
         </div>

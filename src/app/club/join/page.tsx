@@ -1,4 +1,5 @@
 ﻿import { redirect } from 'next/navigation'
+import { KeyRound } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { ClubJoinForm } from '@/components/club/ClubJoinForm'
@@ -25,7 +26,7 @@ export default async function ClubJoinPage() {
       </header>
       <main className="max-w-[1088px] mx-auto px-4 py-10">
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🔑</div>
+          <KeyRound size={48} className="text-[#111] mx-auto mb-3" strokeWidth={1.6} />
           <p className="font-bold text-[#111] text-lg">초대코드를 입력해주세요</p>
           <p className="text-sm text-[#999] mt-1">운영자에게 받은 8자리 코드를 입력하세요</p>
         </div>

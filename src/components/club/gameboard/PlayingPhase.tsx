@@ -1,6 +1,7 @@
 'use client'
 
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, Flame, Trophy, Crown } from 'lucide-react'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import type { CourtEntry, PlayerEntry, DialogState, GameMode, KingStreaks } from './types'
 import { formatDuration } from './types'
@@ -64,7 +65,7 @@ export function PlayingPhase({
       <div className="sticky top-0 z-10 bg-[#0a0a0a]">
         <div className="max-w-[1088px] mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-[#beff00]">🏸</span>
+            <ShuttlecockIcon size={16} className="text-[#beff00]" strokeWidth={2} aria-label="게임" />
             <span className="text-white font-bold text-sm">게임 진행 중</span>
             <span className="text-white/40 text-xs font-mono tabular-nums">
               {formatDuration(elapsed)}
@@ -188,12 +189,14 @@ export function PlayingPhase({
                   <div className="flex items-center gap-3 my-3">
                     <div className="flex-1 h-px bg-[#f0f0f0]" />
                     {winState === 'deuce' ? (
-                      <span className="text-[11px] font-extrabold text-orange-500 px-2 py-0.5 bg-orange-50 rounded-full whitespace-nowrap">
-                        듀스 🔥
+                      <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-orange-500 px-2 py-0.5 bg-orange-50 rounded-full whitespace-nowrap">
+                        <Flame size={11} strokeWidth={2.2} />
+                        듀스
                       </span>
                     ) : winState === 'A' || winState === 'B' ? (
-                      <span className="text-[11px] font-extrabold text-[#111] px-2.5 py-0.5 bg-[#beff00] rounded-full whitespace-nowrap">
-                        🏆 {winState}팀 승리!
+                      <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-[#111] px-2.5 py-0.5 bg-[#beff00] rounded-full whitespace-nowrap">
+                        <Trophy size={11} strokeWidth={2.2} />
+                        {winState}팀 승리!
                       </span>
                     ) : (
                       <span className="text-[11px] font-extrabold text-[#ccc]">VS</span>
@@ -260,11 +263,16 @@ export function PlayingPhase({
                           : 'border border-[#e5e5e5] text-[#555] hover:bg-[#f8f8f8] active:bg-[#f0f0f0]'
                       }`}
                     >
-                      {court.isSaving
-                        ? '저장 중...'
-                        : hasWinner
-                        ? `🏆 ${winState}팀 승리 저장`
-                        : '완료 →'}
+                      {court.isSaving ? (
+                        '저장 중...'
+                      ) : hasWinner ? (
+                        <span className="inline-flex items-center gap-1.5">
+                          <Trophy size={14} strokeWidth={2.2} />
+                          {winState}팀 승리 저장
+                        </span>
+                      ) : (
+                        '완료 →'
+                      )}
                     </button>
                   </div>
 
@@ -283,8 +291,9 @@ export function PlayingPhase({
         {/* 대기열 */}
         <div className="bg-white rounded-2xl border border-[#e5e5e5] p-4">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-sm font-bold text-[#111]">
-              {gameMode === 'king_of_court' ? '👑 도전자 대기' : '대기 중'}
+            <span className="text-sm font-bold text-[#111] inline-flex items-center gap-1.5">
+              {gameMode === 'king_of_court' && <Crown size={14} strokeWidth={2.2} />}
+              {gameMode === 'king_of_court' ? '도전자 대기' : '대기 중'}
             </span>
             <span className="text-[11px] font-bold text-white bg-[#0a0a0a] px-1.5 py-0.5 rounded-full leading-none">
               {waitingPlayers.length}
@@ -306,7 +315,7 @@ export function PlayingPhase({
                         : 'bg-[#f8f8f8] border-[#e5e5e5]'
                     }`}
                   >
-                    {streak >= 3 && <span className="text-[11px]">👑</span>}
+                    {streak >= 3 && <Crown size={11} className="text-amber-500" strokeWidth={2.2} />}
                     <span className="text-xs font-semibold text-[#111]">{p.name}</span>
                     {gameMode === 'king_of_court' && streak > 0 ? (
                       <span className="text-[10px] font-bold text-[#b8860b] bg-[#fff8e1] border border-[#ffe082] rounded-full px-1.5 py-0.5">

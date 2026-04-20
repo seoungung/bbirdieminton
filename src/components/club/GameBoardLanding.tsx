@@ -2,8 +2,10 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, X, ChevronRight, Users, Shield } from 'lucide-react'
+import { Plus, X, ChevronRight, Users, Shield, Gamepad2, Clipboard, Zap, Trophy } from 'lucide-react'
 import { createClubAction } from '@/app/club/create/actions'
+
+type IconComp = React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
 
 interface Props {
   isLoggedIn: boolean
@@ -49,7 +51,10 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
       <div className="bg-[#0a0a0a] pt-10 pb-6 px-4 text-center">
         <div className="max-w-[1088px] mx-auto">
           <p className="text-[#beff00] text-[10px] font-bold tracking-[0.2em] mb-3 uppercase">Birdieminton</p>
-          <h1 className="text-[32px] font-extrabold text-white mb-2 tracking-tight">🎮 게임보드</h1>
+          <h1 className="text-[32px] font-extrabold text-white mb-2 tracking-tight inline-flex items-center gap-2.5 justify-center">
+            <Gamepad2 size={30} strokeWidth={2.2} className="text-[#beff00]" />
+            게임보드
+          </h1>
           <p className="text-sm text-white/50 mb-6">함께하는 배드민턴, 더 스마트하게</p>
 
           {/* Search */}
@@ -86,13 +91,15 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
       {/* ── Info cards ── */}
       <div className="max-w-[1088px] mx-auto px-4 py-8 space-y-3">
         <p className="text-xs text-[#999] font-semibold px-1 mb-4">게임보드란?</p>
-        {[
-          { icon: '📋', title: '출석 · 코트 배정', desc: '오늘 참석자를 확인하고 코트별로 자동 배정합니다' },
-          { icon: '⚡', title: '실력 균등 매칭', desc: '실력 점수 기반으로 공정한 팀을 구성합니다' },
-          { icon: '🏆', title: '자동 랭킹', desc: '경기 결과가 자동으로 누적되어 랭킹을 산출합니다' },
-        ].map(({ icon, title, desc }) => (
+        {([
+          { Icon: Clipboard, title: '출석 · 코트 배정', desc: '오늘 참석자를 확인하고 코트별로 자동 배정합니다' },
+          { Icon: Zap,       title: '실력 균등 매칭', desc: '실력 점수 기반으로 공정한 팀을 구성합니다' },
+          { Icon: Trophy,    title: '자동 랭킹',      desc: '경기 결과가 자동으로 누적되어 랭킹을 산출합니다' },
+        ] as { Icon: IconComp; title: string; desc: string }[]).map(({ Icon, title, desc }) => (
           <div key={title} className="bg-white border border-[#e5e5e5] rounded-2xl p-4 flex items-center gap-4">
-            <div className="w-11 h-11 bg-[#beff00]/15 rounded-xl flex items-center justify-center text-xl shrink-0">{icon}</div>
+            <div className="w-11 h-11 bg-[#beff00]/15 rounded-xl flex items-center justify-center shrink-0">
+              <Icon size={20} strokeWidth={2} className="text-[#111]" />
+            </div>
             <div className="flex-1">
               <p className="font-bold text-[#111] text-sm">{title}</p>
               <p className="text-xs text-[#999] mt-0.5">{desc}</p>

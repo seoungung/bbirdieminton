@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Settings, X, Plus, AlertCircle } from 'lucide-react'
+import { Settings, X, Plus, AlertCircle, Brain, Zap } from 'lucide-react'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import type { InProgressData, RecentSessionData, AssignMode } from './types'
 
 interface Props {
@@ -15,11 +16,17 @@ interface Props {
   onResume: () => void
 }
 
-const ASSIGN_OPTIONS: { value: AssignMode; label: string; desc: string }[] = [
+interface AssignOption {
+  value: AssignMode
+  label: string
+  desc: string
+  Icon?: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
+}
+const ASSIGN_OPTIONS: AssignOption[] = [
   { value: 'random', label: '랜덤', desc: '완전 무작위로 팀을 구성해요' },
   { value: 'skill_balance', label: '실력 균형', desc: '실력 점수 기반 스네이크 분배' },
   { value: 'game_count', label: '게임수 균등', desc: '게임 적게 한 플레이어 우선 배정' },
-  { value: 'smart', label: '🧠 스마트', desc: '게임수 균등 + 파트너 중복 회피' },
+  { value: 'smart', label: '스마트', desc: '게임수 균등 + 파트너 중복 회피', Icon: Brain },
 ]
 
 export function IdlePhase({
@@ -65,7 +72,10 @@ export function IdlePhase({
           className="w-full bg-[#0a0a0a] text-white rounded-2xl p-6 flex items-center justify-between hover:bg-[#1a1a1a] active:scale-[0.99] transition-all mb-5"
         >
           <div className="text-left">
-            <p className="text-lg font-extrabold mb-1">🏸 새 게임 만들기</p>
+            <p className="text-lg font-extrabold mb-1 inline-flex items-center gap-2">
+              <ShuttlecockIcon size={20} strokeWidth={1.6} aria-label="셔틀콕" />
+              새 게임 만들기
+            </p>
             <p className="text-sm text-white/50">참가자를 선택하고 바로 시작</p>
           </div>
           <div className="w-10 h-10 rounded-full bg-[#beff00] flex items-center justify-center shrink-0">
@@ -77,7 +87,10 @@ export function IdlePhase({
         {inProgressData && (
           <div className="mb-5 bg-[#fff8e1] border border-[#ffe082] rounded-2xl p-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-[#b8860b]">⚡ 진행 중인 게임 있음</p>
+              <p className="text-sm font-bold text-[#b8860b] inline-flex items-center gap-1.5">
+                <Zap size={14} strokeWidth={2.2} />
+                진행 중인 게임 있음
+              </p>
               <p className="text-xs text-[#b8860b]/80 mt-0.5">
                 {new Date(inProgressData.sessionDate).toLocaleDateString('ko-KR', {
                   month: 'long', day: 'numeric', weekday: 'short',
@@ -120,7 +133,7 @@ export function IdlePhase({
           </div>
         ) : (
           <div className="text-center py-14 text-[#ccc]">
-            <p className="text-5xl mb-3">🏸</p>
+            <ShuttlecockIcon size={44} className="mx-auto mb-3" strokeWidth={1.5} aria-label="셔틀콕" />
             <p className="text-sm font-semibold">아직 게임 기록이 없어요</p>
             <p className="text-xs mt-1.5">새 게임을 만들어 시작해보세요!</p>
           </div>
@@ -153,7 +166,8 @@ export function IdlePhase({
                         }`}
                       >
                         <div className="text-left">
-                          <p className={`text-sm font-semibold ${defaultAssignMode === opt.value ? 'text-[#111]' : 'text-[#555]'}`}>
+                          <p className={`text-sm font-semibold inline-flex items-center gap-1.5 ${defaultAssignMode === opt.value ? 'text-[#111]' : 'text-[#555]'}`}>
+                            {opt.Icon && <opt.Icon size={14} strokeWidth={2} />}
                             {opt.label}
                           </p>
                           <p className="text-xs text-[#999] mt-0.5">{opt.desc}</p>

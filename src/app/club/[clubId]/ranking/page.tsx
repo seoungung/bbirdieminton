@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getClubRanking } from '@/lib/club/client'
+import { Trophy } from 'lucide-react'
 import { RankingTable } from '@/components/club/RankingTable'
 import { BackButton } from '@/components/club/BackButton'
 import { DEMO_CLUBS } from '@/lib/club/demoData'
@@ -41,7 +42,10 @@ export default async function RankingPage({
         <div className="max-w-[1088px] mx-auto flex items-center gap-3">
           <BackButton fallback={`/club/${clubId}/manage`} />
           <div>
-            <h1 className="text-base font-bold text-[#111]">🏆 랭킹</h1>
+            <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
+              <Trophy size={16} strokeWidth={2} />
+              랭킹
+            </h1>
             <p className="text-xs text-[#999] mt-0.5">승률 기준 · 최다 승 우선</p>
           </div>
         </div>

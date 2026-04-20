@@ -2,11 +2,12 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Brain, Flag, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { updateClubProfileAction } from '@/app/club/[clubId]/settings/actions'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import type { ClubViewData, UserStatus } from './types'
 import { THUMB_COLORS } from './types'
 
@@ -60,11 +61,17 @@ const NOTIF_OPTIONS: { value: 'push' | 'silent' | 'off'; label: string; desc: st
 ]
 
 type AssignMode = 'random' | 'skill_balance' | 'game_count' | 'smart'
-const ASSIGN_OPTIONS: { value: AssignMode; label: string; desc: string }[] = [
+interface AssignOption {
+  value: AssignMode
+  label: string
+  desc: string
+  Icon?: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
+}
+const ASSIGN_OPTIONS: AssignOption[] = [
   { value: 'random',        label: '랜덤',        desc: '완전 무작위로 팀을 구성해요' },
   { value: 'skill_balance', label: '실력 균형',   desc: '실력 점수 기반 스네이크 분배' },
   { value: 'game_count',    label: '게임수 균등', desc: '게임 적게 한 플레이어 우선 배정' },
-  { value: 'smart',         label: '🧠 스마트',   desc: '게임수 균등 + 파트너 중복 회피' },
+  { value: 'smart',         label: '스마트',       desc: '게임수 균등 + 파트너 중복 회피', Icon: Brain },
 ]
 
 export function SettingsTab({ club, userStatus, clubId, isOwner, isManager }: Props) {
@@ -180,8 +187,8 @@ export function SettingsTab({ club, userStatus, clubId, isOwner, isManager }: Pr
                   />
                 ))}
               </div>
-              <div className="w-full h-12 rounded-xl flex items-center justify-center text-2xl transition-colors" style={{ background: editColor }}>
-                🏸
+              <div className="w-full h-12 rounded-xl flex items-center justify-center transition-colors" style={{ background: editColor }}>
+                <ShuttlecockIcon size={28} className="text-[#111]/80" strokeWidth={1.5} aria-label="셔틀콕" />
               </div>
             </div>
             <div>
@@ -252,7 +259,8 @@ export function SettingsTab({ club, userStatus, clubId, isOwner, isManager }: Pr
                   }`}
                 >
                   <div className="text-left">
-                    <p className={`text-sm font-semibold ${defaultAssignMode === opt.value ? 'text-[#111]' : 'text-[#555]'}`}>
+                    <p className={`text-sm font-semibold flex items-center gap-1.5 ${defaultAssignMode === opt.value ? 'text-[#111]' : 'text-[#555]'}`}>
+                      {opt.Icon && <opt.Icon size={14} strokeWidth={2} />}
                       {opt.label}
                     </p>
                     <p className="text-xs text-[#999] mt-0.5">{opt.desc}</p>
@@ -323,7 +331,8 @@ export function SettingsTab({ club, userStatus, clubId, isOwner, isManager }: Pr
           onClick={() => setShowReport(true)}
           className="w-full flex items-center justify-center gap-2 py-3.5 border border-[#e5e5e5] text-[#555] font-semibold text-sm rounded-xl hover:bg-[#f8f8f8] transition-colors"
         >
-          🚨 모임 신고하기
+          <Flag size={15} strokeWidth={2} />
+          모임 신고하기
         </button>
         {isOwner && (
           <button
@@ -353,7 +362,7 @@ export function SettingsTab({ club, userStatus, clubId, isOwner, isManager }: Pr
           <div className="bg-white rounded-2xl p-6 w-full max-w-xs shadow-xl">
             {reportSent ? (
               <div className="text-center py-4">
-                <p className="text-3xl mb-3">✅</p>
+                <CheckCircle2 size={32} className="text-green-500 mx-auto mb-3" strokeWidth={2} />
                 <p className="font-bold text-[#111]">신고가 접수되었습니다</p>
                 <p className="text-sm text-[#999] mt-1">검토 후 조치하겠습니다</p>
               </div>

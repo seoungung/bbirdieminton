@@ -1,13 +1,14 @@
 'use client'
 import { useEffect } from 'react'
 import Link from 'next/link'
+import { AlertTriangle } from 'lucide-react'
 
 export default function ClubError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => { console.error(error) }, [error])
   return (
     <div role="alert" className="min-h-screen bg-[#f8f8f8] flex items-center justify-center p-5">
       <div className="text-center">
-        <p className="text-5xl mb-4">⚠️</p>
+        <AlertTriangle size={48} className="text-amber-500 mx-auto mb-4" strokeWidth={1.8} />
         <p className="text-xl font-extrabold text-[#111] mb-2">문제가 발생했어요</p>
         <p className="text-sm text-[#999] mb-6">{error.message || '잠시 후 다시 시도해주세요'}</p>
         <div className="flex gap-3 justify-center">

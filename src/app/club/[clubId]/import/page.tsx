@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { Gamepad2 } from 'lucide-react'
 import { createClient, getAuthUser } from '@/lib/supabase/server'
 import { BackButton } from '@/components/club/BackButton'
 import { getClubUserId } from '@/lib/club/auth'
@@ -27,8 +28,9 @@ export default async function ImportPage({
           </div>
         </header>
         <main className="max-w-[1088px] mx-auto px-4 py-5">
-          <div className="bg-[#fff8e1] border border-[#ffe082] rounded-2xl px-4 py-3 mb-4 text-sm text-[#b8860b] font-semibold">
-            🎮 체험 모드 — 실제 저장되지 않아요
+          <div className="bg-[#fff8e1] border border-[#ffe082] rounded-2xl px-4 py-3 mb-4 text-sm text-[#b8860b] font-semibold flex items-center gap-2">
+            <Gamepad2 size={16} className="shrink-0" strokeWidth={2} />
+            체험 모드 — 실제 저장되지 않아요
           </div>
           <ImportClient clubId={clubId} clubName={demo?.name ?? '체험 모임'} isDemo />
         </main>

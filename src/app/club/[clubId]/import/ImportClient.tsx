@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Download, Upload, FileSpreadsheet, CheckCircle2, XCircle, AlertTriangle, Loader2 } from 'lucide-react'
+import { Download, Upload, FileSpreadsheet, CheckCircle2, XCircle, AlertTriangle, Loader2, FileDown } from 'lucide-react'
 import ExcelJS from 'exceljs'
 import { validateMemberRow, validateDuesRow } from '@/lib/club/import/validate'
 import { MEMBER_COLUMNS, DUES_COLUMNS, type ImportType, type ValidatedRow, type MemberRow, type DuesRow } from '@/lib/club/import/types'
@@ -133,7 +133,10 @@ export function ImportClient({ clubId, clubName, isDemo = false, recentLogs = []
     <div className="space-y-5">
       {/* 안내 */}
       <div className="bg-white border border-[#e5e5e5] rounded-2xl p-5">
-        <h2 className="text-base font-bold text-[#111] mb-1.5">📥 기존 데이터 옮겨오기</h2>
+        <h2 className="text-base font-bold text-[#111] mb-1.5 inline-flex items-center gap-1.5">
+          <FileDown size={16} strokeWidth={2} />
+          기존 데이터 옮겨오기
+        </h2>
         <p className="text-sm text-[#666] leading-relaxed">
           지금 엑셀로 관리 중인 <strong>{clubName}</strong>의 회원·회비 데이터를 버디민턴으로 가져올 수 있어요.
           템플릿을 다운받아 형식에 맞게 입력한 뒤 업로드하세요.

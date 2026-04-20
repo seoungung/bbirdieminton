@@ -8,6 +8,7 @@ import {
   DEMO_SESSIONS,
 } from '@/lib/club/demoData'
 import { ClubViewClient } from '@/components/club/ClubViewClient'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import type { ClubViewData, MemberViewItem, RegularSessionItem, UserStatus, GameSessionItem } from '@/components/club/ClubViewClient'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -260,7 +261,7 @@ export default async function ClubViewPage({ params }: ViewPageProps) {
     return (
       <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center">
         <div className="text-center px-5">
-          <p className="text-6xl mb-4">🏸</p>
+          <ShuttlecockIcon size={56} className="text-[#ccc] mx-auto mb-4" strokeWidth={1.5} aria-label="셔틀콕" />
           <p className="text-xl font-extrabold text-[#111] mb-2">모임을 찾을 수 없어요</p>
           <p className="text-base text-[#999] mb-6">존재하지 않거나 삭제된 모임이에요</p>
           <Link

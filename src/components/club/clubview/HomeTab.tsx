@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { CalendarDays, Trophy } from 'lucide-react'
 import {
   ClubViewData,
   MemberViewItem,
@@ -89,7 +90,10 @@ export function HomeTab({ club, members, rankings, regularSessions, onGoToSessio
       {regularSessions.length > 0 && (
         <section className="bg-white border border-[#e5e5e5] rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-[#111]">📅 정기 모임</h2>
+            <h2 className="text-lg font-bold text-[#111] flex items-center gap-2">
+              <CalendarDays size={18} strokeWidth={2} />
+              정기 모임
+            </h2>
             <button
               onClick={onGoToSessions}
               className="text-sm font-semibold text-[#888] hover:text-[#111] transition-colors"
@@ -126,7 +130,10 @@ export function HomeTab({ club, members, rankings, regularSessions, onGoToSessio
       {/* ── 랭킹 ── */}
       {rankings.length > 0 && (
         <section className="bg-white border border-[#e5e5e5] rounded-2xl p-5">
-          <h2 className="text-lg font-bold text-[#111] mb-4">🏆 랭킹</h2>
+          <h2 className="text-lg font-bold text-[#111] mb-4 flex items-center gap-2">
+            <Trophy size={18} strokeWidth={2} />
+            랭킹
+          </h2>
           <div className="flex flex-col gap-2">
             {rankings.slice(0, 5).map((m, i) => (
               <div key={m.id} className="flex items-center gap-3 py-2.5 px-3 bg-[#f8f8f8] rounded-xl">

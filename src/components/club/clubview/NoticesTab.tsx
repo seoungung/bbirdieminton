@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useTransition, useCallback, useRef } from 'react'
-import { AlertCircle, Pin, Plus, Trash2, X, ChevronDown, ChevronUp, Pencil, ImagePlus } from 'lucide-react'
+import { AlertCircle, Pin, Plus, Trash2, X, ChevronDown, ChevronUp, Pencil, ImagePlus, Megaphone } from 'lucide-react'
 import type { NoticeRow, NoticeType } from '@/app/club/[clubId]/notices/actions'
 import {
   getNoticesAction,
@@ -50,8 +50,8 @@ const DEMO_NOTICES: NoticeRow[] = [
     id: 'demo-n1',
     club_id: 'demo-1',
     author_member_id: 'm1',
-    title: '🎉 4월 신규회원 환영 이벤트 안내',
-    body: '안녕하세요, 버디민턴 동호회 회원 여러분!\n\n4월 한 달 동안 신규 가입하신 분들을 위해 환영 이벤트를 진행합니다.\n• 첫 달 코트비 무료\n• 기본 셔틀콕 1박스 제공\n• 기존 회원과 매칭된 맞춤 레슨 (1회)\n\n궁금한 점은 운영진에게 편하게 문의해주세요! 😊',
+    title: '4월 신규회원 환영 이벤트 안내',
+    body: '안녕하세요, 버디민턴 동호회 회원 여러분!\n\n4월 한 달 동안 신규 가입하신 분들을 위해 환영 이벤트를 진행합니다.\n• 첫 달 코트비 무료\n• 기본 셔틀콕 1박스 제공\n• 기존 회원과 매칭된 맞춤 레슨 (1회)\n\n궁금한 점은 운영진에게 편하게 문의해주세요.',
     type: 'event',
     is_pinned: true,
     image_urls: ['https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=800&auto=format&fit=crop&q=70'],
@@ -336,7 +336,7 @@ export function NoticesTab({ clubId, userStatus, isManager, myMemberId, onUnread
       {/* 공지 목록 */}
       {notices.length === 0 ? (
         <div className="text-center py-14 text-[#ccc]">
-          <p className="text-4xl mb-3">📢</p>
+          <Megaphone size={40} className="mx-auto mb-3" strokeWidth={1.5} />
           <p className="text-sm font-semibold">아직 공지가 없어요</p>
           {isManager && <p className="text-xs mt-1.5">운영진은 위 버튼으로 공지를 작성할 수 있어요</p>}
         </div>

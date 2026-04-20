@@ -1,3 +1,4 @@
+import { BarChart3, Medal } from 'lucide-react'
 import type { RankingRow } from '@/types/club'
 
 const RANK_COLORS = ['text-yellow-500', 'text-gray-400', 'text-amber-600']
@@ -12,7 +13,7 @@ export function RankingTable({
   if (ranking.length === 0) {
     return (
       <div className="text-center py-20">
-        <p className="text-4xl mb-3">📊</p>
+        <BarChart3 size={44} className="text-[#ccc] mx-auto mb-3" strokeWidth={1.5} />
         <p className="font-bold text-[#111]">아직 경기 기록이 없어요</p>
         <p className="text-sm text-[#999] mt-1">경기 결과를 입력하면 랭킹이 쌓여요</p>
       </div>
@@ -42,8 +43,8 @@ export function RankingTable({
             }
           >
             {/* 순위 */}
-            <div className={`w-7 text-center font-black text-lg shrink-0 ${rankColor}`}>
-              {row.rank <= 3 ? ['🥇', '🥈', '🥉'][row.rank - 1] : row.rank}
+            <div className={`w-7 flex items-center justify-center font-black text-lg shrink-0 ${rankColor}`}>
+              {row.rank <= 3 ? <Medal size={22} fill="currentColor" strokeWidth={1.5} /> : row.rank}
             </div>
 
             {/* 아바타 */}

@@ -49,7 +49,7 @@ const DEMO_ALBUM_PHOTOS: AlbumPhotoRow[] = [
     club_id: 'demo-1',
     uploader_member_id: 'm3',
     storage_path: '',
-    caption: '결승전 승자의 트로피 🏆',
+    caption: '결승전 승자의 트로피',
     taken_at: null,
     created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
     public_url: 'https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?w=600&auto=format&fit=crop&q=70',
@@ -73,7 +73,7 @@ const DEMO_ALBUM_PHOTOS: AlbumPhotoRow[] = [
     club_id: 'demo-1',
     uploader_member_id: 'm4',
     storage_path: '',
-    caption: '셔틀콕 마크로 샷 🪶',
+    caption: '셔틀콕 마크로 샷',
     taken_at: null,
     created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
     public_url: 'https://images.unsplash.com/photo-1613918431703-aa50889e3be8?w=600&auto=format&fit=crop&q=70',
@@ -180,7 +180,7 @@ export function AlbumTab({ clubId, userStatus, isManager, myMemberId }: Props) {
         </div>
       ) : photos.length === 0 ? (
         <div className="text-center py-14 text-[#ccc]">
-          <p className="text-5xl mb-3">📷</p>
+          <Camera size={44} className="mx-auto mb-3" strokeWidth={1.5} />
           <p className="text-sm font-semibold">아직 업로드된 사진이 없어요</p>
           {canUpload && <p className="text-xs mt-1.5">첫 번째 사진을 올려보세요!</p>}
         </div>

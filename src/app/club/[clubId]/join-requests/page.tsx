@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
+import { UserPlus } from 'lucide-react'
 import { JoinRequestsClient } from './JoinRequestsClient'
 import { BackButton } from '@/components/club/BackButton'
 import { getJoinRequestsAction } from './actions'
@@ -43,7 +44,10 @@ export default async function JoinRequestsPage({ params }: Props) {
         <div className="max-w-[1088px] mx-auto flex items-center gap-3">
           <BackButton fallback={`/club/${clubId}/manage`} />
           <div>
-            <h1 className="text-base font-bold text-[#111]">📩 가입 신청 관리</h1>
+            <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
+              <UserPlus size={16} strokeWidth={2} />
+              가입 신청 관리
+            </h1>
             <p className="text-xs text-[#999] mt-0.5">대기 중 {requests.length}건</p>
           </div>
         </div>

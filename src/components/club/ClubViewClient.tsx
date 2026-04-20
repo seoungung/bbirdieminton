@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useCallback, useTransition } from 'react'
 import Link from 'next/link'
-import { Bell } from 'lucide-react'
+import {
+  Bell, Heart, Home, Megaphone, MessageSquareText, Camera,
+  CalendarDays, Gamepad2, Settings as SettingsIcon, Shield, UserPlus,
+} from 'lucide-react'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { TABS, Tab, UserStatus, ClubViewData, MemberViewItem, RegularSessionItem, GameSessionItem, isNewClub } from './clubview/types'
 import { Toast } from './clubview/SharedUI'
 import { HomeTab } from './clubview/HomeTab'
@@ -19,6 +23,18 @@ import { submitJoinRequestAction, getMyJoinRequestAction } from '@/app/club/[clu
 
 // 하위 호환을 위해 타입 재익스포트
 export type { UserStatus, ClubViewData, MemberViewItem, RegularSessionItem, GameSessionItem }
+
+// 탭별 아이콘 매핑
+const TAB_ICONS: Record<Tab, typeof Home> = {
+  '홈': Home,
+  '공지': Megaphone,
+  '게시판': MessageSquareText,
+  '앨범': Camera,
+  '정기모임': CalendarDays,
+  '게임보드': Gamepad2,
+  '운영&관리': Shield,
+  '설정': SettingsIcon,
+}
 
 interface Props {
   club: ClubViewData
@@ -88,7 +104,7 @@ export function ClubViewClient({
       if (result.alreadyMember) { showToast('이미 모임의 멤버예요!'); return }
       if (result.error) { showToast(result.error); return }
       setJoinRequestStatus('pending')
-      showToast('가입 신청을 보냈어요 📩')
+      showToast('가입 신청을 보냈어요')
     })
   }
 
@@ -141,7 +157,7 @@ export function ClubViewClient({
               <button
                 onClick={() => {
                   if (userStatus === 'member' && pushState === 'unsubscribed') {
-                    subscribePush().then(() => showToast('알림을 허용했어요 🔔'))
+                    subscribePush().then(() => showToast('알림을 허용했어요'))
                   } else if (userStatus === 'member' && pushState === 'subscribed') {
                     // 구독 상태에서는 공지 탭으로 이동, 길게 누르면 취소 (별도 설정 탭에서 처리)
                     goToNotices()
@@ -179,7 +195,12 @@ export function ClubViewClient({
                 className="text-xl transition-transform active:scale-90 select-none"
                 aria-label={isFav ? '찜 취소' : '찜하기'}
               >
-                {isFav ? '❤️' : '🤍'}
+                <Heart
+                  size={20}
+                  className={isFav ? 'text-red-500' : 'text-[#bbb]'}
+                  fill={isFav ? 'currentColor' : 'none'}
+                  strokeWidth={2}
+                />
               </button>
             </div>
           </div>
@@ -188,35 +209,39 @@ export function ClubViewClient({
         {/* 탭바 — 스크롤 가능 */}
         <div className="border-b border-[#e5e5e5] overflow-x-auto scrollbar-hide">
           <div className="max-w-[1088px] mx-auto flex min-w-max">
-            {TABS.map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`flex-none px-4 py-3.5 text-sm font-bold transition-colors relative whitespace-nowrap ${
-                  activeTab === tab ? 'text-[#111]' : 'text-[#bbb]'
-                }`}
-              >
-                {tab}
-                {/* 공지 탭 — 읽지 않은 수 뱃지 */}
-                {tab === '공지' && unreadCount > 0 && (
-                  <span className="absolute top-2 right-1 w-1.5 h-1.5 bg-red-500 rounded-full" />
-                )}
-                {activeTab === tab && (
-                  <span className="absolute bottom-0 left-3 right-3 h-[2.5px] bg-[#111] rounded-t-full" />
-                )}
-              </button>
-            ))}
+            {TABS.map(tab => {
+              const TabIcon = TAB_ICONS[tab]
+              return (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`flex-none px-4 py-3.5 text-sm font-bold transition-colors relative whitespace-nowrap flex items-center gap-1.5 ${
+                    activeTab === tab ? 'text-[#111]' : 'text-[#bbb]'
+                  }`}
+                >
+                  <TabIcon size={15} strokeWidth={2} />
+                  {tab}
+                  {/* 공지 탭 — 읽지 않은 수 뱃지 */}
+                  {tab === '공지' && unreadCount > 0 && (
+                    <span className="absolute top-2 right-1 w-1.5 h-1.5 bg-red-500 rounded-full" />
+                  )}
+                  {activeTab === tab && (
+                    <span className="absolute bottom-0 left-3 right-3 h-[2.5px] bg-[#111] rounded-t-full" />
+                  )}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
 
       {/* ── 썸네일 히어로 ── */}
-      {activeTab !== '게임보드' && activeTab !== '운영' && activeTab !== '설정' && activeTab !== '게시판' && activeTab !== '앨범' && (
+      {activeTab !== '게임보드' && activeTab !== '운영&관리' && activeTab !== '설정' && activeTab !== '게시판' && activeTab !== '앨범' && (
         <div
           className="w-full h-[200px] flex items-center justify-center relative"
           style={{ background: club.thumbnailColor }}
         >
-          <span className="text-8xl select-none">🏸</span>
+          <ShuttlecockIcon size={104} className="text-[#111]/85 select-none" strokeWidth={1.4} aria-label="버디민턴" />
           {isNew && (
             <span className="absolute top-4 right-4 text-xs font-extrabold px-2.5 py-1 bg-[#111] text-[#beff00] rounded-lg tracking-wide">
               NEW
@@ -253,7 +278,8 @@ export function ClubViewClient({
                 href={`/club/${clubId}/gameboard`}
                 className="shrink-0 flex items-center gap-1.5 bg-[#0a0a0a] text-[#beff00] text-sm font-bold px-4 py-2.5 rounded-xl hover:brightness-110 active:scale-95 transition-all whitespace-nowrap mt-0.5"
               >
-                🎮 게임보드 만들기
+                <Gamepad2 size={15} strokeWidth={2.2} />
+                게임보드 만들기
               </Link>
             )}
             {/* 비멤버 가입 신청 버튼 */}
@@ -261,7 +287,7 @@ export function ClubViewClient({
               <button
                 onClick={handleJoinRequest}
                 disabled={joinRequestStatus === 'pending'}
-                className={`shrink-0 text-sm font-bold px-4 py-2.5 rounded-xl transition-all whitespace-nowrap mt-0.5 ${
+                className={`shrink-0 text-sm font-bold px-4 py-2.5 rounded-xl transition-all whitespace-nowrap mt-0.5 inline-flex items-center gap-1.5 ${
                   joinRequestStatus === 'pending'
                     ? 'bg-[#f0f0f0] text-[#999] cursor-not-allowed'
                     : joinRequestStatus === 'approved'
@@ -269,11 +295,12 @@ export function ClubViewClient({
                     : 'bg-[#beff00] text-[#111] hover:brightness-95 active:scale-95'
                 }`}
               >
+                <UserPlus size={15} strokeWidth={2.2} />
                 {joinRequestStatus === 'pending'
-                  ? '📩 신청 완료'
+                  ? '신청 완료'
                   : joinRequestStatus === 'approved'
-                  ? '✅ 승인됨'
-                  : '+ 가입 신청'}
+                  ? '승인됨'
+                  : '가입 신청'}
               </button>
             )}
           </div>
@@ -330,7 +357,7 @@ export function ClubViewClient({
         {activeTab === '게임보드' && (
           <GameBoardTab userStatus={userStatus} clubId={clubId} gameSessions={gameSessions} />
         )}
-        {activeTab === '운영' && (
+        {activeTab === '운영&관리' && (
           <ManageTab userStatus={userStatus} clubId={clubId} />
         )}
         {activeTab === '설정' && (
@@ -346,7 +373,7 @@ export function ClubViewClient({
         <div className="fixed bottom-0 inset-x-0 z-50 bg-white border-t border-[#e5e5e5] shadow-lg">
           <div className="max-w-[1088px] mx-auto px-4 py-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-base shrink-0">🎮</span>
+              <Gamepad2 size={16} className="text-[#555] shrink-0" strokeWidth={2} />
               <span className="text-sm font-semibold text-[#555] truncate">데모 체험 중입니다</span>
             </div>
             <div className="flex items-center gap-2 shrink-0">

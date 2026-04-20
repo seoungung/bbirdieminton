@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Check, X, AlertCircle } from 'lucide-react'
+import { Check, X, AlertCircle, UserPlus } from 'lucide-react'
 import type { JoinRequestRow } from './actions'
 import { approveJoinRequestAction, rejectJoinRequestAction } from './actions'
 
@@ -47,7 +47,7 @@ export function JoinRequestsClient({ clubId, initialRequests }: Props) {
 
       {requests.length === 0 ? (
         <div className="bg-white rounded-2xl border border-[#e5e5e5] p-12 text-center">
-          <p className="text-4xl mb-3">📩</p>
+          <UserPlus size={40} className="text-[#ccc] mx-auto mb-3" strokeWidth={1.5} />
           <p className="text-sm font-semibold text-[#555]">대기 중인 가입 신청이 없어요</p>
           <p className="text-xs text-[#bbb] mt-1">새로운 가입 신청이 들어오면 여기에 표시돼요</p>
         </div>

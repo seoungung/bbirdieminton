@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useTransition, useRef } from 'react'
-import { ImagePlus, X } from 'lucide-react'
+import { ImagePlus, X, Pencil, Trash2, CalendarDays } from 'lucide-react'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import {
   createClubEventAction,
   updateClubEventAction,
@@ -123,9 +124,9 @@ function EventFormModal({
           </h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f0f0f0] text-[#888] transition-colors text-xl"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#f0f0f0] text-[#888] transition-colors"
           >
-            ✕
+            <X size={18} strokeWidth={2} />
           </button>
         </div>
 
@@ -437,7 +438,7 @@ export function RegularSessionTab({
 
       {viewMode === 'list' && regularSessions.length === 0 && (
         <div className="bg-white border border-[#e5e5e5] rounded-2xl p-10 text-center">
-          <p className="text-4xl mb-3">📅</p>
+          <CalendarDays size={40} className="text-[#ccc] mx-auto mb-3" strokeWidth={1.5} />
           <p className="text-base font-semibold text-[#555]">등록된 정기모임이 없어요</p>
           {canManage && (
             <p className="text-sm text-[#bbb] mt-1">위의 버튼으로 첫 정기모임을 만들어보세요</p>
@@ -462,17 +463,17 @@ export function RegularSessionTab({
                       <div className="flex items-center gap-1 shrink-0">
                         <button
                           onClick={() => setEditTarget(s)}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg text-[#888] hover:text-[#111] hover:bg-[#f0f0f0] transition-colors text-xs font-bold"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-[#888] hover:text-[#111] hover:bg-[#f0f0f0] transition-colors"
                           title="수정"
                         >
-                          ✏️
+                          <Pencil size={14} />
                         </button>
                         <button
                           onClick={() => setDeleteTarget(s)}
-                          className="w-8 h-8 flex items-center justify-center rounded-lg text-[#888] hover:text-red-500 hover:bg-red-50 transition-colors text-xs font-bold"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg text-[#888] hover:text-red-500 hover:bg-red-50 transition-colors"
                           title="삭제"
                         >
-                          🗑️
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     )}
@@ -516,7 +517,7 @@ export function RegularSessionTab({
                           )}
                         </>
                       ) : (
-                        <span className="text-8xl select-none">🏸</span>
+                        <ShuttlecockIcon size={96} className="text-[#111]/80 select-none" strokeWidth={1.4} aria-label="셔틀콕" />
                       )}
                     </div>
                   </div>

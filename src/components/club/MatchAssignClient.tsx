@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { RotateCcw, Play } from 'lucide-react'
+import { RotateCcw, Play, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
   skillBalanceMatch,
@@ -75,7 +75,7 @@ export function MatchAssignClient({
   if (attendedMembers.length < 4) {
     return (
       <div className="text-center py-16">
-        <p className="text-4xl mb-3">😅</p>
+        <Users size={40} className="text-[#ccc] mx-auto mb-3" strokeWidth={1.5} />
         <p className="font-bold text-[#111]">출석 인원이 부족해요</p>
         <p className="text-sm text-[#999] mt-1">경기 배정에는 최소 4명이 필요합니다</p>
         <button

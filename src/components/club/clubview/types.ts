@@ -1,7 +1,7 @@
 /** ClubViewClient 공유 타입 / 상수 / 유틸 */
 
-export type Tab = '홈' | '공지' | '게시판' | '앨범' | '정기모임' | '게임보드' | '운영' | '설정'
-export const TABS: Tab[] = ['홈', '공지', '게시판', '앨범', '정기모임', '게임보드', '운영', '설정']
+export type Tab = '홈' | '공지' | '게시판' | '앨범' | '정기모임' | '게임보드' | '운영&관리' | '설정'
+export const TABS: Tab[] = ['홈', '공지', '게시판', '앨범', '정기모임', '게임보드', '운영&관리', '설정']
 
 export type UserStatus = 'demo' | 'guest' | 'non-member' | 'member'
 

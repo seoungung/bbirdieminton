@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight, MapPin, Clock, Users } from 'lucide-react'
+import { ChevronLeft, ChevronRight, MapPin, Clock, Users, Wallet } from 'lucide-react'
 import type { RegularSessionItem } from './types'
 import { startTime } from './types'
 
@@ -201,7 +201,7 @@ export function CalendarView({ sessions }: Props) {
                   </div>
                   {s.fee && (
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[#bbb] shrink-0">💰</span>
+                      <Wallet size={13} className="text-[#bbb] shrink-0" strokeWidth={2} />
                       <span>{s.fee}</span>
                     </div>
                   )}

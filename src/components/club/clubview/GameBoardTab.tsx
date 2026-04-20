@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+import { BarChart3, Trophy, Users, Gamepad2 } from 'lucide-react'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import type { UserStatus, GameSessionItem } from './types'
 
 interface Props {
@@ -9,11 +11,11 @@ interface Props {
   gameSessions: GameSessionItem[]
 }
 
-const FEATURES = [
-  { icon: '🏸', label: '대진표 자동 생성' },
-  { icon: '📊', label: '실시간 점수 기록' },
-  { icon: '🏆', label: '랭킹 자동 집계' },
-  { icon: '👥', label: '팀 매칭 최적화' },
+const FEATURES: { Icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>; label: string }[] = [
+  { Icon: ShuttlecockIcon, label: '대진표 자동 생성' },
+  { Icon: BarChart3, label: '실시간 점수 기록' },
+  { Icon: Trophy, label: '랭킹 자동 집계' },
+  { Icon: Users, label: '팀 매칭 최적화' },
 ]
 
 function statusLabel(status: GameSessionItem['status']) {
@@ -66,14 +68,14 @@ export function GameBoardTab({ userStatus, clubId, gameSessions }: Props) {
   return (
     <section className="bg-white border border-[#e5e5e5] rounded-2xl p-6">
       <div className="text-center mb-6">
-        <p className="text-5xl mb-3">🎮</p>
+        <Gamepad2 size={44} className="text-[#111] mx-auto mb-3" strokeWidth={1.6} />
         <h2 className="text-xl font-bold text-[#111] mb-2">게임보드</h2>
         <p className="text-base text-[#666]">실시간 대진, 점수, 랭킹을 한 곳에서 관리해요</p>
       </div>
       <div className="grid grid-cols-2 gap-3 mb-6">
         {FEATURES.map(f => (
           <div key={f.label} className="bg-[#f8f8f8] rounded-xl p-3.5 flex items-center gap-2.5">
-            <span className="text-xl">{f.icon}</span>
+            <f.Icon size={20} className="text-[#111] shrink-0" strokeWidth={1.8} />
             <span className="text-sm font-semibold text-[#555]">{f.label}</span>
           </div>
         ))}

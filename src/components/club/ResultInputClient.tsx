@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { updatePlayerStatsForMatch } from '@/app/club/[clubId]/ranking/actions'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 
 interface MatchPlayer {
   id: string
@@ -97,7 +98,7 @@ export function ResultInputClient({ sessionId, clubId, matches, isManager }: Pro
   if (matches.length === 0) {
     return (
       <div className="text-center py-16">
-        <p className="text-4xl mb-3">🏸</p>
+        <ShuttlecockIcon size={44} className="text-[#ccc] mx-auto mb-3" strokeWidth={1.5} aria-label="셔틀콕" />
         <p className="font-bold text-[#111]">배정된 경기가 없어요</p>
         <button
           onClick={() => router.back()}

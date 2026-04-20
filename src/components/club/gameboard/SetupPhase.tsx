@@ -1,10 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, ChevronDown, AlertCircle, Check, Minus, Plus } from 'lucide-react'
+import {
+  ArrowLeft, ChevronDown, AlertCircle, Check, Minus, Plus,
+  Dice5, Scale, Hash, Brain, RotateCw, Crown, AlertTriangle, Zap,
+} from 'lucide-react'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { cn } from '@/lib/utils'
 import type { ClubMemberWithUser } from '@/types/club'
 import type { SetupSource, AssignMode, GameMode, RecentSessionData, InProgressData } from './types'
+
+type IconComp = React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
 
 interface Props {
   members: ClubMemberWithUser[]
@@ -36,11 +42,11 @@ interface Props {
   onResume?: () => void
 }
 
-const ASSIGN_OPTS: { value: AssignMode; label: string; emoji: string; desc: string }[] = [
-  { value: 'random',        label: '랜덤',      emoji: '🎲', desc: '무작위 배정' },
-  { value: 'skill_balance', label: '실력 균등', emoji: '⚖️', desc: '실력 점수 기반' },
-  { value: 'game_count',    label: '게임수 균등', emoji: '🔢', desc: '최소 게임수 우선' },
-  { value: 'smart',         label: '스마트',    emoji: '🧠', desc: '파트너 중복 회피' },
+const ASSIGN_OPTS: { value: AssignMode; label: string; Icon: IconComp; desc: string }[] = [
+  { value: 'random',        label: '랜덤',        Icon: Dice5, desc: '무작위 배정' },
+  { value: 'skill_balance', label: '실력 균등',   Icon: Scale, desc: '실력 점수 기반' },
+  { value: 'game_count',    label: '게임수 균등', Icon: Hash,  desc: '최소 게임수 우선' },
+  { value: 'smart',         label: '스마트',      Icon: Brain, desc: '파트너 중복 회피' },
 ]
 
 export function SetupPhase({
@@ -105,7 +111,10 @@ export function SetupPhase({
         {inProgressData && onResume && (
           <div className="bg-[#fff8e1] border border-[#ffe082] rounded-2xl p-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-[#b8860b]">⚡ 진행 중인 게임 있음</p>
+              <p className="text-sm font-bold text-[#b8860b] inline-flex items-center gap-1.5">
+                <Zap size={14} strokeWidth={2.2} />
+                진행 중인 게임 있음
+              </p>
               <p className="text-xs text-[#b8860b]/80 mt-0.5">
                 {new Date(inProgressData.sessionDate).toLocaleDateString('ko-KR', {
                   month: 'long', day: 'numeric', weekday: 'short',
@@ -330,9 +339,9 @@ export function SetupPhase({
           <p className="text-xs font-semibold text-[#999] mb-2">게임 모드</p>
           <div className="grid grid-cols-2 gap-2">
             {([
-              { value: 'normal',        emoji: '🔄', label: '일반 로테이션', desc: '모든 플레이어 순환 참여' },
-              { value: 'king_of_court', emoji: '👑', label: '킹 오브 코트',  desc: '승자 유지, 도전자 교체' },
-            ] as { value: GameMode; emoji: string; label: string; desc: string }[]).map(opt => (
+              { value: 'normal',        Icon: RotateCw, label: '일반 로테이션', desc: '모든 플레이어 순환 참여' },
+              { value: 'king_of_court', Icon: Crown,    label: '킹 오브 코트',  desc: '승자 유지, 도전자 교체' },
+            ] as { value: GameMode; Icon: IconComp; label: string; desc: string }[]).map(opt => (
               <button
                 key={opt.value}
                 onClick={() => onGameModeChange(opt.value)}
@@ -343,15 +352,16 @@ export function SetupPhase({
                     : 'bg-white border-[#e5e5e5] text-[#555] hover:border-[#beff00]'
                 )}
               >
-                <span className="text-xl">{opt.emoji}</span>
+                <opt.Icon size={20} strokeWidth={1.9} />
                 <span className="text-[11px] font-bold leading-none">{opt.label}</span>
                 <span className="text-[10px] text-[#999] leading-tight">{opt.desc}</span>
               </button>
             ))}
           </div>
           {gameMode === 'king_of_court' && (
-            <p className="text-xs text-[#999] mt-2 pl-1">
-              ⚠️ 킹 오브 코트 모드에서는 승리 팀이 코트를 지키고, 패배 팀과 대기 중인 도전자가 교체됩니다.
+            <p className="text-xs text-[#999] mt-2 pl-1 flex items-start gap-1.5">
+              <AlertTriangle size={12} className="text-amber-500 mt-0.5 shrink-0" strokeWidth={2} />
+              킹 오브 코트 모드에서는 승리 팀이 코트를 지키고, 패배 팀과 대기 중인 도전자가 교체됩니다.
             </p>
           )}
         </div>
@@ -360,7 +370,7 @@ export function SetupPhase({
         <div>
           <p className="text-xs font-semibold text-[#999] mb-2">팀 배정 방식</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {ASSIGN_OPTS.map(({ value, label, emoji, desc }) => (
+            {ASSIGN_OPTS.map(({ value, label, Icon, desc }) => (
               <button
                 key={value}
                 onClick={() => onAssignModeChange(value)}
@@ -371,7 +381,7 @@ export function SetupPhase({
                     : 'bg-white border-[#e5e5e5] text-[#555] hover:border-[#beff00]'
                 )}
               >
-                <span className="text-xl">{emoji}</span>
+                <Icon size={20} strokeWidth={1.9} />
                 <span className="text-[11px] font-bold leading-none">{label}</span>
                 <span className="text-[10px] text-[#999] leading-tight">{desc}</span>
               </button>
@@ -393,7 +403,10 @@ export function SetupPhase({
           ) : !canStart ? (
             `4명 이상 선택 필요 (현재 ${selectedCount}명)`
           ) : (
-            `🏸 ${selectedCount}명으로 게임 시작`
+            <span className="inline-flex items-center gap-2">
+              <ShuttlecockIcon size={18} strokeWidth={1.8} aria-label="게임 시작" />
+              {selectedCount}명으로 게임 시작
+            </span>
           )}
         </button>
       </div>

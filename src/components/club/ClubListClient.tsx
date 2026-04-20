@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Search, Plus, Lock, Heart, Clock } from 'lucide-react'
+import { Search, Plus, Lock, Heart, Clock, Users, Crown, Gamepad2 } from 'lucide-react'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import type { MemberRole } from '@/types/club'
 
 interface Club {
@@ -65,7 +66,7 @@ function ClubThumbnail({ club, isNew }: { club: Club; isNew: boolean }) {
           className="object-cover"
         />
       ) : (
-        <span className="text-5xl sm:text-6xl select-none">🏸</span>
+        <ShuttlecockIcon size={64} className="text-[#111]/80 select-none" strokeWidth={1.4} aria-label="셔틀콕" />
       )}
       {isNew && (
         <span className="absolute top-2.5 right-2.5 text-[11px] font-extrabold px-2 py-0.5 bg-[#111] text-[#beff00] rounded-md tracking-wide z-10">
@@ -125,9 +126,17 @@ function AllClubCard({
 
           {/* 메타 정보 */}
           <div className="flex flex-wrap gap-x-3 gap-y-1">
-            <span className="text-sm text-[#888]">👥 {club.memberCount ?? 0}명</span>
-            {club.location  && <span className="text-sm text-[#888]">📍 {club.location}</span>}
-            {club.leaderName && <span className="text-sm text-[#888]">👑 {club.leaderName}</span>}
+            <span className="text-sm text-[#888] inline-flex items-center gap-1">
+              <Users size={13} strokeWidth={2} />
+              {club.memberCount ?? 0}명
+            </span>
+            {club.location && <span className="text-sm text-[#888]">· {club.location}</span>}
+            {club.leaderName && (
+              <span className="text-sm text-[#888] inline-flex items-center gap-1">
+                <Crown size={13} strokeWidth={2} />
+                {club.leaderName}
+              </span>
+            )}
           </div>
 
           {/* 버튼 */}
@@ -180,8 +189,14 @@ function MyClubCard({ club }: { club: Club }) {
             <p className="text-sm text-[#666] line-clamp-2 leading-snug">{club.description}</p>
           )}
           <div className="flex flex-wrap gap-x-3 gap-y-1">
-            <span className="text-sm text-[#888]">👥 {club.memberCount ?? 0}명</span>
-            <span className="text-sm text-[#888]">🏸 코트 {club.court_count}면</span>
+            <span className="text-sm text-[#888] inline-flex items-center gap-1">
+              <Users size={13} strokeWidth={2} />
+              {club.memberCount ?? 0}명
+            </span>
+            <span className="text-sm text-[#888] inline-flex items-center gap-1">
+              <ShuttlecockIcon size={13} strokeWidth={1.8} />
+              코트 {club.court_count}면
+            </span>
           </div>
           <div className="mt-auto pt-1">
             <Link
@@ -350,7 +365,10 @@ export function ClubListClient({ myClubs, allClubs, isGuest }: ClubListClientPro
       {isGuest && (
         <div className="mb-5 bg-[#0a0a0a] rounded-2xl px-5 py-4 flex items-center justify-between gap-4">
           <div>
-            <p className="text-base font-bold text-white">🎮 게스트로 체험 중</p>
+            <p className="text-base font-bold text-white inline-flex items-center gap-2">
+              <Gamepad2 size={18} strokeWidth={2.2} />
+              게스트로 체험 중
+            </p>
             <p className="text-sm text-white/50 mt-0.5">체험용 모임을 클릭해서 게임보드를 경험해보세요</p>
           </div>
           <Link
@@ -421,7 +439,7 @@ export function ClubListClient({ myClubs, allClubs, isGuest }: ClubListClientPro
       {tab === 'my' && (
         filteredMy.length === 0 && query === '' ? (
           <EmptyState
-            icon="🏸"
+            icon={<ShuttlecockIcon size={40} className="text-[#ccc]" strokeWidth={1.5} />}
             title="참여한 모임이 없어요"
             desc="새 모임을 만들거나 초대코드로 참여해보세요"
             onCreateClick={handleCreateClick}
