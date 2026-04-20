@@ -33,8 +33,44 @@ export interface Club {
   max_members: number
   court_count: number
   plan: ClubPlan
+  /** 셔틀콕 1개당 기본 가격 (원) */
+  shuttle_default_price: number
+  /** 입금 계좌 안내 문구 (예: "신한 110-xxx-xxx (홍길동)") */
+  settlement_account: string | null
   created_at: string
   updated_at: string
+}
+
+// ── 셔틀콕비 정산 ───────────────────────────────
+
+/** 세션별 정산 기록 */
+export interface SessionSettlement {
+  id: string
+  session_id: string
+  club_id: string
+  shuttle_count: number
+  shuttle_unit_price: number
+  extra_cost: number
+  attendee_count: number
+  per_person_amount: number
+  memo: string | null
+  created_at: string
+}
+
+/** 정산별 멤버 납부 상태 */
+export interface SettlementMember {
+  id: string
+  settlement_id: string
+  member_id: string
+  amount: number
+  paid: boolean
+  paid_at: string | null
+}
+
+/** 정산 + 멤버 납부 상태 조합 (리스트 화면용) */
+export interface SettlementWithMembers extends SessionSettlement {
+  members: Array<SettlementMember & { memberName: string }>
+  paidCount: number
 }
 
 export interface ClubMember {

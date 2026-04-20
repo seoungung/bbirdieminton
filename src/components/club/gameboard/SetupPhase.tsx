@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
   ArrowLeft, ChevronDown, AlertCircle, Check, Minus, Plus,
-  Dice5, Scale, Hash, Brain, RotateCw, Crown, AlertTriangle, Zap,
+  Dice5, Scale, Repeat2, PenLine, RotateCw, Crown, AlertTriangle, Zap,
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { cn } from '@/lib/utils'
+import { GradeBadge } from '@/components/club/GradeBadge'
+import { buildRankMap } from '@/lib/club/grade'
 import type { ClubMemberWithUser } from '@/types/club'
 import type { SetupSource, AssignMode, GameMode, RecentSessionData, InProgressData } from './types'
 
@@ -43,10 +45,10 @@ interface Props {
 }
 
 const ASSIGN_OPTS: { value: AssignMode; label: string; Icon: IconComp; desc: string }[] = [
-  { value: 'random',        label: '랜덤',        Icon: Dice5, desc: '무작위 배정' },
-  { value: 'skill_balance', label: '실력 균등',   Icon: Scale, desc: '실력 점수 기반' },
-  { value: 'game_count',    label: '게임수 균등', Icon: Hash,  desc: '최소 게임수 우선' },
-  { value: 'smart',         label: '스마트',      Icon: Brain, desc: '파트너 중복 회피' },
+  { value: 'random',        label: '랜덤',      Icon: Dice5,   desc: '무작위 배정' },
+  { value: 'skill_balance', label: '실력 균등', Icon: Scale,   desc: '실력 점수 기반' },
+  { value: 'freshness',     label: '중복 방지', Icon: Repeat2, desc: '파트너 중복 최소화' },
+  { value: 'custom',        label: '직접 배정', Icon: PenLine, desc: '내가 직접 팀 선택' },
 ]
 
 export function SetupPhase({
@@ -78,6 +80,7 @@ export function SetupPhase({
   onResume,
 }: Props) {
   const [tempInput, setTempInput] = useState('')
+  const rankMap = useMemo(() => buildRankMap(members), [members])
 
   const selectedCount = selectedPlayers.size
   const canStart = selectedCount >= 4
@@ -254,12 +257,13 @@ export function SetupPhase({
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {members.map((member) => {
                 const isOn = selectedPlayers.has(member.id)
+                const rank = rankMap.get(member.id)
                 return (
                   <button
                     key={member.id}
                     onClick={() => onTogglePlayer(member.id)}
                     className={cn(
-                      'flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-colors',
+                      'flex items-center gap-2 px-2.5 py-2 rounded-xl border text-left transition-colors',
                       isOn
                         ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white'
                         : 'bg-white border-[#e5e5e5] text-[#111] hover:border-[#beff00]'
@@ -273,9 +277,22 @@ export function SetupPhase({
                     >
                       {isOn && <Check size={9} className="text-[#111]" strokeWidth={3} />}
                     </div>
-                    <span className="text-sm font-semibold truncate">
-                      {member.user?.name ?? '?'}
-                    </span>
+                    <GradeBadge score={member.skill_score} size="sm" />
+                    <div className="flex-1 min-w-0 flex items-center gap-1">
+                      <span className="text-sm font-semibold truncate">
+                        {member.user?.name ?? '?'}
+                      </span>
+                      {rank && (
+                        <span
+                          className={cn(
+                            'text-[10px] font-bold tabular-nums shrink-0',
+                            isOn ? 'text-white/50' : 'text-[#aaa]'
+                          )}
+                        >
+                          {rank}위
+                        </span>
+                      )}
+                    </div>
                   </button>
                 )
               })}

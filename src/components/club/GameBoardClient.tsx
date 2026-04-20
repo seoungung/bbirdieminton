@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useTransition, useEffect, useRef, useCallback } from 'react'
+import { useState, useTransition, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { ClubMemberWithUser, PlayerStats } from '@/types/club'
 import { updatePlayerStatsForMatch } from '@/app/club/[clubId]/ranking/actions'
+import { buildRankMap } from '@/lib/club/grade'
 import {
   type Phase,
   type SetupSource,
@@ -23,12 +24,18 @@ import {
 } from './gameboard/types'
 import { SetupPhase } from './gameboard/SetupPhase'
 import { PlayingPhase } from './gameboard/PlayingPhase'
+import { ShuttlecockSettlementDialog } from './ShuttlecockSettlementDialog'
 
 // 하위 호환을 위해 재익스포트
 export type { RecentSessionData, InProgressData }
 
 interface Props {
   clubId: string
+  clubName: string
+  /** 셔틀콕 1개당 기본 가격 (정산 다이얼로그 기본값) */
+  shuttleDefaultPrice: number
+  /** 입금 계좌 안내 (정산 다이얼로그 표시) */
+  settlementAccount: string | null
   courtCount: number
   members: ClubMemberWithUser[]
   stats: PlayerStats[]
@@ -41,6 +48,9 @@ interface Props {
 
 export function GameBoardClient({
   clubId,
+  clubName,
+  shuttleDefaultPrice,
+  settlementAccount,
   courtCount,
   members,
   recentSessions,
@@ -52,6 +62,9 @@ export function GameBoardClient({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
+  /* ── 클럽 내 랭킹 맵 (skill_score 기준, 1 = 최상위) ── */
+  const rankMap = useMemo(() => buildRankMap(members), [members])
+
   /* ── 페이즈: idle 제거, setup 이 초기 화면 ── */
   const [phase, setPhase] = useState<Phase>('setup')
 
@@ -60,11 +73,24 @@ export function GameBoardClient({
   const [setupSource, setSetupSource] = useState<SetupSource>('manual')
   const [selectedSessionIdx, setSelectedSessionIdx] = useState(0)
   const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(new Set())
-  // localStorage 에서 마지막 배정 방식 복원
+  // localStorage 에서 마지막 배정 방식 복원 (구 game_count/smart → freshness 마이그레이션)
   const [assignMode, setAssignMode] = useState<AssignMode>(() => {
     if (typeof window === 'undefined') return 'random'
-    return (localStorage.getItem(`gameboard-assign-${clubId}`) as AssignMode) || 'random'
+    const stored = localStorage.getItem(`gameboard-assign-${clubId}`)
+    if (stored === 'game_count' || stored === 'smart') return 'freshness'
+    if (stored === 'random' || stored === 'skill_balance' || stored === 'freshness' || stored === 'custom') {
+      return stored as AssignMode
+    }
+    return 'random'
   })
+  /* ── 직접 배정 모드: 열린 코트 인덱스 ── */
+  const [customPickCourt, setCustomPickCourt] = useState<number | null>(null)
+
+  /* ── 셔틀콕비 정산 다이얼로그 (게임 마감 플로우) ── */
+  const [settlementDialog, setSettlementDialog] = useState<{
+    sessionId: string
+    attendeeCount: number
+  } | null>(null)
   const [tempPlayers, setTempPlayers] = useState<Array<{ id: string; name: string }>>([])
   // 날짜 및 코트 수 (SetupPhase 에서 조정 가능)
   const [sessionDate, setSessionDate] = useState<string>(() => new Date().toISOString().split('T')[0])
@@ -147,6 +173,7 @@ export function GameBoardClient({
         memberId,
         name: member.user?.name ?? '?',
         skillScore: member.skill_score,
+        rank: rankMap.get(memberId),
         todayGames: 0,
         waitingSince: now,
         status: 'waiting',
@@ -207,6 +234,7 @@ export function GameBoardClient({
             memberId,
             name: member.user?.name ?? '?',
             skillScore: member.skill_score,
+            rank: rankMap.get(memberId),
             todayGames: 0,
             waitingSince: now,
             status: 'waiting',
@@ -219,6 +247,7 @@ export function GameBoardClient({
             memberId: t.id,
             name: t.name,
             skillScore: 50,
+            // 임시 참가자는 rank 없음 (클럽 멤버 아님)
             todayGames: 0,
             waitingSince: now,
             status: 'waiting',
@@ -335,9 +364,81 @@ export function GameBoardClient({
     })
   }
 
+  /* ── 직접 배정 오버라이드 (기본 모드와 관계없이 피커 열기) ── */
+  const handleOpenCustomPick = (courtIndex: number) => {
+    if (!sessionDbId) return
+    setError(null)
+    setCustomPickCourt(courtIndex)
+  }
+
+  /* ── 직접 배정 확정 핸들러 ── */
+  const handleCustomAssign = (teamAIds: string[], teamBIds: string[]) => {
+    if (customPickCourt === null || !sessionDbId) return
+    const courtIndex = customPickCourt
+    const capturedSessionId = sessionDbId
+    setCustomPickCourt(null)
+    setError(null)
+
+    startTransition(async () => {
+      let matchId: string
+      if (!isDemo) {
+        const supabase = createClient()
+        const hasTempPlayer = [...teamAIds, ...teamBIds].some(id => id.startsWith('temp-'))
+        const { data: match, error: matchErr } = await supabase
+          .from('matches')
+          .insert({ session_id: capturedSessionId, court_number: courtIndex + 1, excluded_from_ranking: hasTempPlayer })
+          .select()
+          .single()
+        if (matchErr || !match) { setError('경기 배정에 실패했습니다'); return }
+
+        const realPlayers = [...teamAIds, ...teamBIds].filter(id => !id.startsWith('temp-'))
+        if (realPlayers.length > 0) {
+          await supabase.from('match_players').insert(
+            realPlayers.map(id => ({
+              match_id: match.id,
+              member_id: id,
+              team: teamAIds.includes(id) ? 'A' : 'B',
+            }))
+          )
+        }
+        matchId = match.id
+      } else {
+        matchId = `demo-match-custom-${courtIndex}-${Date.now()}`
+      }
+
+      setCourts(prev => prev.map((c, i) =>
+        i !== courtIndex ? c : {
+          ...c,
+          matchDbId: matchId,
+          teamA: teamAIds,
+          teamB: teamBIds,
+          scoreA: 0,
+          scoreB: 0,
+          startedAt: Date.now(),
+        }
+      ))
+      setPlayerMap(prev => {
+        const next = new Map(prev)
+        for (const id of [...teamAIds, ...teamBIds]) {
+          const p = next.get(id)
+          if (p) next.set(id, { ...p, status: 'playing' })
+        }
+        return next
+      })
+      setPartnerHistory(prev => updatePartnerHistory(prev, teamAIds, teamBIds))
+    })
+  }
+
   /* ── 코트 배정 ── */
   const handleAssignCourt = (courtIndex: number) => {
     if (!sessionDbId) return
+
+    // 직접 배정 모드: 피커 오버레이 열기
+    if (assignMode === 'custom') {
+      setCustomPickCourt(courtIndex)
+      return
+    }
+
     setError(null)
 
     const capturedMap = playerMap
@@ -632,11 +733,38 @@ export function GameBoardClient({
     })
   }
 
+  /* ── 마감 내부 로직: 세션 closed + 상태 리셋 (정산 다이얼로그 이후 호출) ── */
+  const finalizeEndGameInternal = useCallback(
+    async (sessionId: string | null) => {
+      if (!isDemo && sessionId) {
+        const supabase = createClient()
+        await supabase.from('sessions').update({ status: 'closed' }).eq('id', sessionId)
+      }
+      setPhase('setup')
+      setSessionDbId(null)
+      setPlayerMap(new Map())
+      setCourts([])
+      setPartnerHistory(new Map())
+      setKingStreaks(new Map())
+      setSessionDate(new Date().toISOString().split('T')[0])
+      setActiveCourts(courtCount)
+      setSelectedPlayers(new Set())
+      setTempPlayers([])
+      setSettlementDialog(null)
+      if (!isDemo) router.refresh()
+    },
+    [isDemo, courtCount, router]
+  )
+
   /* ── 게임 전체 종료 ── */
   const handleEndGame = () => {
     if (!sessionDbId) return
     const capturedCourts = courts
     const capturedSessionId = sessionDbId
+    /* 실제 클럽 멤버(temp- 제외)만 카운트 — 임시 참가자는 정산 대상 아님 */
+    const attendeeCount = Array.from(playerMap.keys()).filter(
+      (id) => !id.startsWith('temp-')
+    ).length
 
     startTransition(async () => {
       if (!isDemo) {
@@ -652,23 +780,29 @@ export function GameBoardClient({
               .catch(console.error)
           }
         }
-        await supabase.from('sessions').update({ status: 'closed' }).eq('id', capturedSessionId)
       }
 
-      setPhase('setup')
-      setSessionDbId(null)
-      setPlayerMap(new Map())
-      setCourts([])
-      setPartnerHistory(new Map())
-      setKingStreaks(new Map())
-      // 날짜/코트 초기화
-      setSessionDate(new Date().toISOString().split('T')[0])
-      setActiveCourts(courtCount)
-      setSelectedPlayers(new Set())
-      setTempPlayers([])
-      if (!isDemo) router.refresh()
+      /* 권한 있고 출석자 있으면 정산 다이얼로그 표시 — 없으면 즉시 마감 */
+      const canSettle =
+        !isDemo &&
+        ['owner', 'manager'].includes(membership.role) &&
+        attendeeCount >= 1
+      if (canSettle) {
+        setSettlementDialog({ sessionId: capturedSessionId, attendeeCount })
+      } else {
+        await finalizeEndGameInternal(capturedSessionId)
+      }
     })
   }
+
+  /* ── 정산 다이얼로그 결과 핸들러 ── */
+  const handleSettlementDone = useCallback(() => {
+    if (!settlementDialog) return
+    const sid = settlementDialog.sessionId
+    startTransition(async () => {
+      await finalizeEndGameInternal(sid)
+    })
+  }, [settlementDialog, finalizeEndGameInternal, startTransition])
 
   /* ── 게임 전체 삭제 ── */
   const handleDeleteGame = () => {
@@ -758,22 +892,47 @@ export function GameBoardClient({
 
   // phase === 'playing'
   return (
-    <PlayingPhase
-      courts={courts}
-      playerMap={playerMap}
-      elapsed={elapsed}
-      isPending={isPending}
-      error={error}
-      dialog={dialog}
-      gameMode={gameMode}
-      kingStreaks={kingStreaks}
-      onDialogCancel={() => setDialog(null)}
-      onEndGame={handleEndGame}
-      onDeleteGame={handleDeleteGame}
-      onAssignCourt={handleAssignCourt}
-      onScoreChange={handleScoreChange}
-      onEndCourt={handleEndCourt}
-      onCancelCourt={handleCancelCourt}
-    />
+    <>
+      <PlayingPhase
+        courts={courts}
+        playerMap={playerMap}
+        elapsed={elapsed}
+        isPending={isPending}
+        error={error}
+        dialog={dialog}
+        gameMode={gameMode}
+        kingStreaks={kingStreaks}
+        membershipId={membership.id}
+        assignMode={assignMode}
+        onAssignModeChange={handleAssignModeChange}
+        onOpenCustomPick={handleOpenCustomPick}
+        customPickCourt={customPickCourt}
+        onCustomAssign={handleCustomAssign}
+        onCancelCustomPick={() => setCustomPickCourt(null)}
+        onDialogCancel={() => setDialog(null)}
+        onEndGame={handleEndGame}
+        onDeleteGame={handleDeleteGame}
+        onAssignCourt={handleAssignCourt}
+        onScoreChange={handleScoreChange}
+        onEndCourt={handleEndCourt}
+        onCancelCourt={handleCancelCourt}
+      />
+
+      {/* 셔틀콕비 정산 다이얼로그 (게임 마감 플로우) */}
+      {settlementDialog && (
+        <ShuttlecockSettlementDialog
+          open
+          clubId={clubId}
+          sessionId={settlementDialog.sessionId}
+          clubName={clubName}
+          sessionDate={sessionDate}
+          attendeeCount={settlementDialog.attendeeCount}
+          defaultShuttlePrice={shuttleDefaultPrice}
+          settlementAccount={settlementAccount}
+          onSaved={handleSettlementDone}
+          onSkip={handleSettlementDone}
+        />
+      )}
+    </>
   )
 }

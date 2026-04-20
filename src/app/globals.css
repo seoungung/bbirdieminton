@@ -46,17 +46,66 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* ── 버디민턴 브랜드 토큰 ── */
-  --color-brand-bg: #ffffff;
-  --color-brand-bg-sub: #f8f8f8;
-  --color-brand-bg-muted: #f0f0f0;
+  /* ══════════════════════════════════════════════════
+     버디민턴 브랜드 토큰 v2
+     ══════════════════════════════════════════════════ */
+
+  /* ─── Primary (hero 컬러 — CTA 전용, 5~10%만 사용) ─── */
+  --color-brand-lime: #beff00;
+  --color-brand-lime-dim: #a8e600;
+
+  /* ─── Ink & Canvas ─── */
+  --color-brand-ink: #0a0a0a;
   --color-brand-text: #111111;
   --color-brand-text-sub: #555555;
   --color-brand-text-muted: #999999;
-  --color-brand-lime: #beff00;
-  --color-brand-lime-dim: #a8e600;
+  --color-brand-bg: #ffffff;
+  --color-brand-bg-sub: #f8f8f8;
+  --color-brand-bg-muted: #f0f0f0;
   --color-brand-border: #e5e5e5;
   --color-brand-border-sub: #ebebeb;
+
+  /* ─── Semantic Accents (v2 신규) ─── */
+  /* Court: 배드민턴 코트 녹색 — 경기 진행중, 성공, 활성 상태 */
+  --color-brand-court: #10b981;        /* emerald-500 */
+  --color-brand-court-deep: #059669;   /* emerald-600 */
+  --color-brand-court-soft: #d1fae5;   /* emerald-100 */
+  --color-brand-court-bg: #ecfdf5;     /* emerald-50 */
+
+  /* Team A — 팀 구분 파랑 (국제 배드민턴 표준) */
+  --color-brand-team-a: #2563eb;       /* blue-600 */
+  --color-brand-team-a-soft: #dbeafe;  /* blue-100 */
+  --color-brand-team-a-bg: #eff6ff;    /* blue-50 */
+
+  /* Team B — 팀 구분 빨강 */
+  --color-brand-team-b: #dc2626;       /* red-600 */
+  --color-brand-team-b-soft: #fee2e2;  /* red-100 */
+  --color-brand-team-b-bg: #fef2f2;    /* red-50 */
+
+  /* Streak — 연승/성취/골드 하이라이트 */
+  --color-brand-streak: #f59e0b;       /* amber-500 */
+  --color-brand-streak-soft: #fef3c7;  /* amber-100 */
+  --color-brand-streak-bg: #fffbeb;    /* amber-50 */
+
+  /* Elite — S급/프리미엄/특별 */
+  --color-brand-elite: #8b5cf6;        /* violet-500 */
+  --color-brand-elite-soft: #ede9fe;   /* violet-100 */
+  --color-brand-elite-bg: #f5f3ff;     /* violet-50 */
+
+  /* Deuce — 듀스/긴장/경고 (빨강보다 부드럽게) */
+  --color-brand-deuce: #fb923c;        /* orange-400 */
+  --color-brand-deuce-soft: #ffedd5;   /* orange-100 */
+
+  /* ══════════════════════════════════════════════════
+     사용 규칙:
+     - Lime: CTA, 긍정 액션, 로고에만 — 전체 면적 5~10%
+     - Ink: 헤더/어두운 surface (예: 상단 nav, dark CTA)
+     - Court green: 경기 진행중 코트, "활성" 상태 배지
+     - Team A/B: 오직 팀 구분에만 사용 (Team A는 파랑, Team B는 빨강)
+     - Streak: 3연승 이상, 성취 뱃지
+     - Elite: S급, 자강조, 프리미엄 기능
+     - Deuce: 20-20 이상 긴장 상태
+     ══════════════════════════════════════════════════ */
 }
 
 :root {

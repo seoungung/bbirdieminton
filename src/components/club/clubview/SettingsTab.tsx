@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronDown, Brain, Flag, CheckCircle2 } from 'lucide-react'
+import { ChevronDown, Dice5, Scale, Repeat2, PenLine, Flag, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { updateClubProfileAction } from '@/app/club/[clubId]/settings/actions'
@@ -60,18 +60,18 @@ const NOTIF_OPTIONS: { value: 'push' | 'silent' | 'off'; label: string; desc: st
   { value: 'off', label: '알림 없음', desc: '어떠한 알림도 받지 않아요' },
 ]
 
-type AssignMode = 'random' | 'skill_balance' | 'game_count' | 'smart'
+type AssignMode = 'random' | 'skill_balance' | 'freshness' | 'custom'
 interface AssignOption {
   value: AssignMode
   label: string
   desc: string
-  Icon?: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
+  Icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
 }
 const ASSIGN_OPTIONS: AssignOption[] = [
-  { value: 'random',        label: '랜덤',        desc: '완전 무작위로 팀을 구성해요' },
-  { value: 'skill_balance', label: '실력 균형',   desc: '실력 점수 기반 스네이크 분배' },
-  { value: 'game_count',    label: '게임수 균등', desc: '게임 적게 한 플레이어 우선 배정' },
-  { value: 'smart',         label: '스마트',       desc: '게임수 균등 + 파트너 중복 회피', Icon: Brain },
+  { value: 'random',        label: '랜덤',      desc: '완전 무작위로 팀을 구성해요',      Icon: Dice5   },
+  { value: 'skill_balance', label: '실력 균등', desc: '실력 점수 기반 스네이크 분배',    Icon: Scale   },
+  { value: 'freshness',     label: '중복 방지', desc: '파트너 중복을 최소화해요',         Icon: Repeat2 },
+  { value: 'custom',        label: '직접 배정', desc: '경기마다 직접 팀을 선택해요',      Icon: PenLine },
 ]
 
 export function SettingsTab({ club, userStatus, clubId, isOwner, isManager }: Props) {
@@ -95,7 +95,12 @@ export function SettingsTab({ club, userStatus, clubId, isOwner, isManager }: Pr
 
   const [defaultAssignMode, setDefaultAssignMode] = useState<AssignMode>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem(`gameboard-assign-${clubId}`) as AssignMode) || 'random'
+      const stored = localStorage.getItem(`gameboard-assign-${clubId}`)
+      /* 구 모드(game_count/smart) → freshness 마이그레이션 */
+      if (stored === 'game_count' || stored === 'smart') return 'freshness'
+      if (stored === 'random' || stored === 'skill_balance' || stored === 'freshness' || stored === 'custom') {
+        return stored as AssignMode
+      }
     }
     return 'random'
   })

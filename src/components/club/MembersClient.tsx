@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useMemo } from 'react'
 import { updateMemberRoleAction, updateSkillScoreAction, removeMemberAction } from '@/app/club/[clubId]/members/actions'
 import type { ClubMemberWithUser, PlayerStats, MemberRole } from '@/types/club'
-import { getSkillLabel, getSkillColor } from '@/lib/club/skillLevels'
+import { buildRankMap } from '@/lib/club/grade'
+import { GradeBadge } from '@/components/club/GradeBadge'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 const ROLE_LABEL: Record<MemberRole, string> = { owner: '회장', manager: '운영진', member: '회원' }
@@ -37,6 +38,7 @@ export function MembersClient({ clubId, members, statsData, isManager, isOwner, 
   } | null>(null)
 
   const statsMap = Object.fromEntries(statsData.map(s => [s.member_id, s]))
+  const rankMap = useMemo(() => buildRankMap(members), [members])
 
   const filtered = filter === 'all' ? members : members.filter(m => m.role === filter)
 
@@ -91,22 +93,26 @@ export function MembersClient({ clubId, members, statsData, isManager, isOwner, 
                 {/* 이름 + 역할 */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-[#111] text-base">{member.user?.name ?? '이름없음'}</span>
-                    {isMe && <span className="text-xs text-[#beff00] font-bold">나</span>}
+                    <GradeBadge score={member.skill_score} size="md" />
+                    <span className="font-bold text-[#111] text-base truncate">{member.user?.name ?? '이름없음'}</span>
+                    {isMe && (
+                      <span className="text-[10px] font-extrabold text-[#111] bg-[#beff00] px-1.5 py-0.5 rounded">나</span>
+                    )}
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ROLE_COLOR[member.role]}`}>
                       {ROLE_LABEL[member.role]}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span
-                      className="text-xs font-bold px-2 py-0.5 rounded-full"
-                      style={{ background: getSkillColor(member.skill_score), color: '#111' }}
-                    >
-                      {getSkillLabel(member.skill_score)}
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    {rankMap.get(member.id) && (
+                      <span className="text-xs font-bold text-[#555] bg-[#f0f0f0] rounded-full px-2 py-0.5 tabular-nums">
+                        {rankMap.get(member.id)}위
+                      </span>
+                    )}
+                    <span className="text-xs text-[#999] tabular-nums">
+                      점수 <span className="font-semibold text-[#555]">{member.skill_score}</span>
                     </span>
-                    <span className="text-sm text-[#999]">점수 {member.skill_score}</span>
                     {stats && (
-                      <span className="text-sm text-[#999]">
+                      <span className="text-xs text-[#999] tabular-nums">
                         {stats.games_played}경기 · {stats.wins}승 {stats.losses}패{stats.draws > 0 ? ` ${stats.draws}무` : ''}
                       </span>
                     )}

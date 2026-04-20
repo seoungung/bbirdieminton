@@ -51,6 +51,9 @@ export default async function GameBoardPage({
     return (
       <GameBoardClient
         clubId={clubId}
+        clubName={demoClub?.name ?? '데모 모임'}
+        shuttleDefaultPrice={2500}
+        settlementAccount={null}
         courtCount={courtCount}
         members={demoMembers}
         stats={[]}
@@ -75,7 +78,7 @@ export default async function GameBoardPage({
     ipSessionResult,
   ] = await Promise.all([
     getAuthUser(),
-    supabase.from('clubs').select('id, court_count').eq('id', clubId).single(),
+    supabase.from('clubs').select('id, name, court_count, shuttle_default_price, settlement_account').eq('id', clubId).single(),
     getClubMembers(supabase, clubId),
     supabase
       .from('player_stats')
@@ -186,6 +189,9 @@ export default async function GameBoardPage({
   return (
     <GameBoardClient
       clubId={clubId}
+      clubName={club.name}
+      shuttleDefaultPrice={club.shuttle_default_price ?? 2500}
+      settlementAccount={club.settlement_account ?? null}
       courtCount={club.court_count ?? 2}
       members={membersResult}
       stats={statsResult.data ?? []}

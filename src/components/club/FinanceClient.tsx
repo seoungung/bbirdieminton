@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
+import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { toggleDuePaidAction, setMonthlyAmountAction } from '@/app/club/[clubId]/finance/actions'
 import type { ClubMemberWithUser } from '@/types/club'
 
@@ -66,6 +69,23 @@ export function FinanceClient({ clubId, members, duesData, isManager, year, mont
 
   return (
     <div className="space-y-4">
+      {/* 셔틀콕비 정산 링크 배너 */}
+      <Link
+        href={`/club/${clubId}/settlements`}
+        className="block bg-emerald-50 border border-emerald-200 rounded-2xl p-4 hover:bg-emerald-100/70 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-white border border-emerald-200 flex items-center justify-center shrink-0">
+            <ShuttlecockIcon size={20} className="text-emerald-600" strokeWidth={1.8} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-emerald-800">셔틀콕비 정산</p>
+            <p className="text-xs text-emerald-700/70 mt-0.5">세션별 셔틀콕 사용량과 납부 관리</p>
+          </div>
+          <ArrowRight size={16} className="text-emerald-600 shrink-0" />
+        </div>
+      </Link>
+
       {/* 월간 요약 카드 */}
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-white rounded-2xl border border-[#e5e5e5] p-4 text-center">

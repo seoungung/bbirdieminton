@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Settings, X, Plus, AlertCircle, Brain, Zap } from 'lucide-react'
+import { Settings, X, Plus, AlertCircle, Dice5, Scale, Repeat2, PenLine, Zap } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import type { InProgressData, RecentSessionData, AssignMode } from './types'
 
@@ -23,10 +23,10 @@ interface AssignOption {
   Icon?: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
 }
 const ASSIGN_OPTIONS: AssignOption[] = [
-  { value: 'random', label: '랜덤', desc: '완전 무작위로 팀을 구성해요' },
-  { value: 'skill_balance', label: '실력 균형', desc: '실력 점수 기반 스네이크 분배' },
-  { value: 'game_count', label: '게임수 균등', desc: '게임 적게 한 플레이어 우선 배정' },
-  { value: 'smart', label: '스마트', desc: '게임수 균등 + 파트너 중복 회피', Icon: Brain },
+  { value: 'random',        label: '랜덤',      desc: '완전 무작위로 팀을 구성해요',   Icon: Dice5   },
+  { value: 'skill_balance', label: '실력 균등', desc: '실력 점수 기반 스네이크 분배', Icon: Scale   },
+  { value: 'freshness',     label: '중복 방지', desc: '파트너 중복 최소화',            Icon: Repeat2 },
+  { value: 'custom',        label: '직접 배정', desc: '내가 직접 팀을 선택해요',       Icon: PenLine },
 ]
 
 export function IdlePhase({

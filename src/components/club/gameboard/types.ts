@@ -2,7 +2,7 @@ import type { Session, MatchMode } from '@/types/club'
 
 export type Phase = 'idle' | 'setup' | 'playing'
 export type SetupSource = 'manual' | 'session'
-export type AssignMode = 'random' | 'skill_balance' | 'game_count' | 'smart'
+export type AssignMode = 'random' | 'skill_balance' | 'freshness' | 'custom'
 export type GameMode = 'normal' | 'king_of_court'
 
 /** 킹 오브 코트: 플레이어별 연속 승리 수 */
@@ -16,6 +16,7 @@ export interface PlayerEntry {
   memberId: string
   name: string
   skillScore: number
+  rank?: number        // 클럽 내 랭킹 (1 = 최상위, skill_score 기준)
   todayGames: number   // 오늘 세션에서 뛴 경기 수
   waitingSince: number // 대기 시작 시각 (Date.now())
   status: 'waiting' | 'playing'
@@ -60,12 +61,12 @@ export interface DialogState {
   onConfirm: () => void
 }
 
-// 'smart' 모드는 DB에서 'game_count' 로 저장 (순수 프론트 기능)
+// freshness/custom 은 DB에서 'game_count'/'random' 으로 저장 (순수 프론트 기능)
 export const ASSIGN_MODE_MAP: Record<AssignMode, MatchMode> = {
   random: 'random',
   skill_balance: 'skill_balance',
-  game_count: 'game_count',
-  smart: 'game_count',
+  freshness: 'game_count',  // 파트너 중복 방지 — DB에는 game_count 로 저장
+  custom: 'random',         // 직접 배정 — DB에는 random 으로 저장
 }
 
 export function formatDuration(ms: number): string {
@@ -174,9 +175,9 @@ export function updatePartnerHistory(
  * 대기 중인 플레이어 4명을 선발해 팀 A / B 로 나눕니다.
  *
  * - skill_balance: [1위,4위] vs [2위,3위] (스네이크 분배)
- * - game_count:    게임수 적은 순 → 대기시간 긴 순
+ * - freshness:     게임수/대기시간 우선순위 + 파트너 중복 최소화
  * - random:        Fisher-Yates 무작위
- * - smart:         game_count 우선순위 + 파트너 중복 최소화 (partnerHistory 필요)
+ * - custom:        직접 배정 모드 — 이 함수는 호출되지 않음 (GameBoardClient 에서 별도 처리)
  */
 export function pickTeams(
   waiting: PlayerEntry[],
@@ -185,20 +186,17 @@ export function pickTeams(
 ): [PlayerEntry[], PlayerEntry[]] | null {
   if (waiting.length < 4) return null
 
-  if (mode === 'smart') {
+  if (mode === 'freshness') {
     return smartPickTeams(waiting, partnerHistory ?? new Map())
   }
 
   let sorted: PlayerEntry[]
-  if (mode === 'random') {
+  if (mode === 'random' || mode === 'custom') {
+    // custom 이 여기까지 왔다면 랜덤으로 폴백
     sorted = fisherYatesShuffle(waiting)
-  } else if (mode === 'skill_balance') {
-    sorted = [...waiting].sort((a, b) => b.skillScore - a.skillScore)
   } else {
-    // game_count
-    sorted = [...waiting].sort(
-      (a, b) => a.todayGames - b.todayGames || a.waitingSince - b.waitingSince
-    )
+    // skill_balance
+    sorted = [...waiting].sort((a, b) => b.skillScore - a.skillScore)
   }
 
   const top4 = sorted.slice(0, 4)
