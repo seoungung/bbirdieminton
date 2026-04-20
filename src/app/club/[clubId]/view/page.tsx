@@ -8,6 +8,7 @@ import {
   DEMO_SESSIONS,
 } from '@/lib/club/demoData'
 import { ClubViewClient } from '@/components/club/ClubViewClient'
+import { DemoDashboardClient } from '@/components/club/DemoDashboardClient'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import type { ClubViewData, MemberViewItem, RegularSessionItem, UserStatus, GameSessionItem } from '@/components/club/ClubViewClient'
 import Link from 'next/link'
@@ -272,6 +273,20 @@ export default async function ClubViewPage({ params }: ViewPageProps) {
           </Link>
         </div>
       </div>
+    )
+  }
+
+  /* 🎯 데모 체험 — 대시보드 UI로 렌더링 (탭 기반 view 대신) */
+  if (isDemo) {
+    return (
+      <DemoDashboardClient
+        club={result.club}
+        members={result.members}
+        regularSessions={result.regularSessions}
+        gameSessions={result.gameSessions}
+        clubId={clubId}
+        isAuthenticated={result.isAuthenticated}
+      />
     )
   }
 

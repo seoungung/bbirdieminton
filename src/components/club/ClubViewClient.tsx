@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback, useTransition } from 'react'
+import { useState, useEffect, useCallback, useTransition, useRef } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import {
   Bell, Heart, Home, Megaphone, MessageSquareText, Camera,
   CalendarDays, Gamepad2, Settings as SettingsIcon, Shield, UserPlus,
@@ -61,7 +62,44 @@ export function ClubViewClient({
   gameSessions,
   myMemberId,
 }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>('홈')
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  /* ── 활성 탭: URL `?tab=` 쿼리로 동기화 (뒤로가기 시 탭 상태 보존) ── */
+  const rawTab = searchParams.get('tab')
+  const initialTab: Tab = (TABS as readonly string[]).includes(rawTab ?? '')
+    ? (rawTab as Tab)
+    : '홈'
+  const [activeTab, setActiveTabState] = useState<Tab>(initialTab)
+
+  /* URL 쿼리 → state 동기화 (브라우저 뒤로/앞으로 갈 때 반영) */
+  useEffect(() => {
+    const t = searchParams.get('tab')
+    const valid: Tab = (TABS as readonly string[]).includes(t ?? '')
+      ? (t as Tab)
+      : '홈'
+    setActiveTabState(prev => (prev === valid ? prev : valid))
+  }, [searchParams])
+
+  /* 탭 변경 시 URL 업데이트 (history 오염 방지 위해 replace 사용) */
+  const suppressSyncRef = useRef(false)
+  const setActiveTab = useCallback(
+    (tab: Tab) => {
+      setActiveTabState(tab)
+      if (suppressSyncRef.current) return
+      const params = new URLSearchParams(searchParams.toString())
+      if (tab === '홈') {
+        params.delete('tab')
+      } else {
+        params.set('tab', tab)
+      }
+      const qs = params.toString()
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+    },
+    [pathname, router, searchParams]
+  )
+
   const [isFav, setIsFav] = useState(false)
   const [toast, setToast] = useState('')
   const [unreadCount, setUnreadCount] = useState(0)

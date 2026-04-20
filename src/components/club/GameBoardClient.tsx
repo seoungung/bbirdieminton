@@ -733,13 +733,14 @@ export function GameBoardClient({
     })
   }
 
-  /* ── 마감 내부 로직: 세션 closed + 상태 리셋 (정산 다이얼로그 이후 호출) ── */
+  /* ── 마감 내부 로직: 세션 closed 후 /view?tab=게임보드 로 이동 ── */
   const finalizeEndGameInternal = useCallback(
     async (sessionId: string | null) => {
       if (!isDemo && sessionId) {
         const supabase = createClient()
         await supabase.from('sessions').update({ status: 'closed' }).eq('id', sessionId)
       }
+      /* 모든 로컬 상태 리셋 */
       setPhase('setup')
       setSessionDbId(null)
       setPlayerMap(new Map())
@@ -751,9 +752,13 @@ export function GameBoardClient({
       setSelectedPlayers(new Set())
       setTempPlayers([])
       setSettlementDialog(null)
-      if (!isDemo) router.refresh()
+
+      /* 데모는 게임보드 페이지 내에서 머물고 (세션 DB 없음), 실제는 모임 뷰의 게임보드 탭으로 이동해 히스토리 확인 */
+      if (!isDemo) {
+        router.push(`/club/${clubId}/view?tab=${encodeURIComponent('게임보드')}`)
+      }
     },
-    [isDemo, courtCount, router]
+    [isDemo, courtCount, router, clubId]
   )
 
   /* ── 게임 전체 종료 ── */
