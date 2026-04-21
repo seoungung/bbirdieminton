@@ -36,12 +36,15 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // 비로그인 허용 경로 — 공개 view 페이지만 허용 (나머지는 로그인 필요)
+  // 비로그인 허용 경로
+  // - /club/[id]/view : 공개 모임 소개 (구 탭뷰)
+  // - /club/demo-*    : 데모 체험은 인증 없이 전체 경로 허용 (대시보드/게임보드 등)
   const isClubPath = pathname.startsWith('/club')
   const isClubRoot = pathname === '/club' || pathname === '/club/'
   const isGuestAllowed = /^\/club\/[^/]+\/view$/.test(pathname)
+  const isDemoPath = /^\/club\/demo-/.test(pathname)
 
-  if (isClubPath && !isClubRoot && !isGuestAllowed && !user) {
+  if (isClubPath && !isClubRoot && !isGuestAllowed && !isDemoPath && !user) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('next', pathname)
     return NextResponse.redirect(loginUrl)

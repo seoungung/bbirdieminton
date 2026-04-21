@@ -1,11 +1,178 @@
-import { redirect } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { getClubUserId } from '@/lib/club/auth'
+import { getMyMembership, getClubMembers } from '@/lib/club/client'
+import { DEMO_CLUBS, DEMO_MEMBERS, DEMO_REGULAR_SESSIONS, DEMO_SESSIONS } from '@/lib/club/demoData'
+import { ClubDashboardClient } from '@/components/club/ClubDashboardClient'
+import type { Metadata } from 'next'
+import type { MemberViewItem, RegularSessionItem, GameSessionItem } from '@/components/club/clubview/types'
 
-export default async function ClubHubPage({
-  params,
-}: {
-  params: Promise<{ clubId: string }>
-}) {
+interface PageProps { params: Promise<{ clubId: string }> }
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { clubId } = await params
-  // 과거 허브 URL — 공개 뷰로 통일
-  redirect(`/club/${clubId}/view`)
+  const demo = DEMO_CLUBS.find(c => c.id === clubId)
+  if (demo) return { title: `${demo.name} | 버디민턴`, description: `${demo.name} 대시보드` }
+  const supabase = await createClient()
+  const { data: club } = await supabase.from('clubs').select('name').eq('id', clubId).single()
+  return {
+    title: club ? `${club.name} | 버디민턴` : '모임 | 버디민턴',
+    description: '모임 대시보드',
+  }
+}
+
+export default async function ClubHomePage({ params }: PageProps) {
+  const { clubId } = await params
+
+  /* ── 데모 모임 ── */
+  if (clubId.startsWith('demo-')) {
+    const demo = DEMO_CLUBS.find(c => c.id === clubId)
+    if (!demo) notFound()
+
+    const members: MemberViewItem[] = DEMO_MEMBERS.map(m => ({
+      id: m.id,
+      name: m.name,
+      role: m.role as 'owner' | 'manager' | 'member',
+      skill: m.skill,
+      level: m.level,
+    }))
+
+    const regularSessions: RegularSessionItem[] = DEMO_REGULAR_SESSIONS.map(r => ({
+      id: r.id,
+      title: r.title,
+      dayOfWeek: r.dayOfWeek,
+      time: r.time,
+      place: r.place,
+      fee: r.fee,
+      nextDate: r.nextDate,
+      maxAttend: r.maxAttend,
+      currentAttend: r.currentAttend,
+      thumbnailColor: r.thumbnailColor,
+      imageUrls: r.imageUrls,
+    }))
+
+    const gameSessions: GameSessionItem[] = DEMO_SESSIONS.map(s => ({
+      id: s.id,
+      sessionDate: s.sessionDate,
+      status: s.status,
+      notes: s.notes,
+    }))
+
+    return (
+      <ClubDashboardClient
+        clubId={clubId}
+        clubName={demo.name}
+        clubDescription={demo.description}
+        clubLocation={demo.location}
+        activityPlace={demo.activityPlace}
+        category={demo.category}
+        leaderName={demo.leaderName}
+        memberCount={demo.memberCount}
+        courtCount={demo.court_count}
+        members={members}
+        regularSessions={regularSessions}
+        gameSessions={gameSessions}
+        isDemo
+      />
+    )
+  }
+
+  /* ── 실제 모임 ── */
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const clubUserId = await getClubUserId(supabase)
+  if (!clubUserId) redirect('/login')
+
+  const membership = await getMyMembership(supabase, clubId, clubUserId)
+  if (!membership) redirect('/club/home')
+
+  const [
+    clubResult,
+    membersResult,
+    eventsResult,
+    sessionsResult,
+  ] = await Promise.all([
+    supabase
+      .from('clubs')
+      .select('id, name, description, location, activity_place, category, thumbnail_color, court_count, owner_id')
+      .eq('id', clubId)
+      .single(),
+    getClubMembers(supabase, clubId),
+    supabase
+      .from('club_events')
+      .select('id, title, event_date, start_time, end_time, place, fee, max_attend')
+      .eq('club_id', clubId)
+      .gte('event_date', new Date().toISOString().split('T')[0])
+      .order('event_date', { ascending: true })
+      .limit(3),
+    supabase
+      .from('sessions')
+      .select('id, session_date, status, notes')
+      .eq('club_id', clubId)
+      .order('session_date', { ascending: false })
+      .limit(5),
+  ])
+
+  const club = clubResult.data
+  if (!club) notFound()
+
+  /* 운영자 이름 조회 */
+  let leaderName = '-'
+  if (club.owner_id) {
+    const { data: owner } = await supabase.from('users').select('name').eq('id', club.owner_id).single()
+    leaderName = owner?.name ?? '-'
+  }
+
+  const members: MemberViewItem[] = (membersResult ?? []).map(m => ({
+    id: m.id,
+    name: m.user?.name ?? '이름없음',
+    role: m.role,
+    skill: m.skill_score,
+    level: '',
+  }))
+
+  const DAY_KO = ['일', '월', '화', '수', '목', '금', '토']
+  const regularSessions: RegularSessionItem[] = (eventsResult.data ?? []).map(e => {
+    const d = new Date(e.event_date)
+    return {
+      id: e.id,
+      title: e.title,
+      dayOfWeek: DAY_KO[d.getDay()],
+      time: e.start_time + (e.end_time ? `~${e.end_time}` : ''),
+      place: e.place ?? '',
+      fee: e.fee ?? undefined,
+      nextDate: e.event_date,
+      maxAttend: e.max_attend ?? 20,
+      currentAttend: 0,
+      thumbnailColor: club.thumbnail_color ?? '#f0f0f0',
+    }
+  })
+
+  const gameSessions: GameSessionItem[] = (sessionsResult.data ?? []).map(s => ({
+    id: s.id,
+    sessionDate: s.session_date,
+    status: s.status as 'open' | 'in_progress' | 'closed',
+    notes: s.notes ?? null,
+  }))
+
+  return (
+    <ClubDashboardClient
+      clubId={clubId}
+      clubName={club.name}
+      clubDescription={club.description ?? ''}
+      clubLocation={club.location ?? ''}
+      activityPlace={club.activity_place ?? ''}
+      category={club.category ?? '동호회'}
+      leaderName={leaderName}
+      memberCount={members.length}
+      courtCount={club.court_count ?? 2}
+      members={members}
+      regularSessions={regularSessions}
+      gameSessions={gameSessions}
+    />
+  )
 }

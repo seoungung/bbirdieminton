@@ -253,6 +253,15 @@
   animation: fadeInUp 0.2s ease-out forwards;
 }
 
+@keyframes slideInFromLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+.animate-slide-in {
+  animation: slideInFromLeft 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 /* ── 스크롤바 숨김 유틸리티 ── */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE/Edge */
