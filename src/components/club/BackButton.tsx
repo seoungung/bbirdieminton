@@ -37,8 +37,12 @@ export function BackButton({ fallback, label, className }: BackButtonProps) {
     <button
       onClick={handleBack}
       className={
+        /**
+         * `/club/[id]/*` 경로는 데스크톱(lg+)에서 AppShell 사이드바가 네비를 제공하므로
+         * BackButton은 모바일에서만 표시. className을 명시적으로 넘기면 해당 값 사용.
+         */
         className ??
-        'flex items-center gap-1.5 text-[#555] hover:text-[#111] transition-colors'
+        'lg:hidden flex items-center gap-1.5 text-[#555] hover:text-[#111] transition-colors'
       }
       aria-label="뒤로 가기"
     >

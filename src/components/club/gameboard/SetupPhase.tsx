@@ -99,13 +99,13 @@ export function SetupPhase({
         <div className="max-w-[1088px] mx-auto px-4 py-3 flex items-center justify-between">
           <button
             onClick={onBack}
-            className="flex items-center gap-1.5 text-[#555] hover:text-[#111] transition-colors"
+            className="lg:hidden flex items-center gap-1.5 text-[#555] hover:text-[#111] transition-colors"
           >
             <ArrowLeft size={18} />
             <span className="text-sm">모임으로</span>
           </button>
           <span className="text-base font-bold text-[#111]">게임 설정</span>
-          <div className="w-20" />
+          <div className="lg:hidden w-20" />
         </div>
       </div>
 
