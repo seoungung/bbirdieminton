@@ -46,6 +46,18 @@ export async function loginWithGoogle(next?: string) {
   redirect(data.url)
 }
 
+export async function loginWithKakao(next?: string) {
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'kakao',
+    options: {
+      redirectTo: `${SITE_URL}/auth/callback?next=${encodeURIComponent(next ?? '/club/home')}`,
+    },
+  })
+  if (error || !data.url) return { error: '카카오 로그인에 실패했습니다.' }
+  redirect(data.url)
+}
+
 export async function logout() {
   const supabase = await createClient()
   await supabase.auth.signOut()

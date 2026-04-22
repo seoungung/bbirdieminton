@@ -83,19 +83,19 @@ export default async function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={demoHref}
+              href="/login"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#beff00] text-[#0a0a0a] font-extrabold text-[16px] rounded-xl hover:brightness-95 transition-all"
             >
-              <ShuttlecockIcon size={18} /> 데모 직접 체험하기
+              무료로 시작하기
             </Link>
             <Link
-              href="/survey"
+              href={demoHref}
               className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 text-white/70 font-semibold text-[16px] rounded-xl hover:border-white/50 hover:text-white transition-all"
             >
-              설문 참여하기
+              데모 체험하기
             </Link>
           </div>
-          <p className="text-sm text-white/25 mt-5">닉네임만으로 바로 시작 · 베타 무료</p>
+          <p className="text-sm text-white/25 mt-5">카카오 1초 가입 · v2.0 무료</p>
         </div>
       </section>
 
@@ -186,6 +186,70 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── 요금제 ─────────────────────────────────── */}
+      <section className="bg-white border-b border-[#ebebeb]">
+        <div className="max-w-[1088px] mx-auto px-4 sm:px-8 py-16 sm:py-20">
+          <div className="text-center mb-12">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-[#beff00] bg-[#beff00]/10 px-3 py-1 rounded-full">
+              요금제
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0a0a0a] mt-4">
+              v2.0은 무료입니다
+            </h2>
+            <p className="text-[#666] mt-3 text-[15px]">
+              베타 기간 동안 Pro 기능을 무료로 사용하세요
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-4xl mx-auto">
+            {/* Free */}
+            <div className="bg-[#f7f7f7] rounded-2xl p-6 border border-[#ebebeb]">
+              <p className="text-[13px] font-bold text-[#999] uppercase tracking-wider mb-2">Free</p>
+              <p className="text-3xl font-extrabold text-[#0a0a0a] mb-1">무료</p>
+              <p className="text-[13px] text-[#999] mb-6">최대 30명</p>
+              <ul className="space-y-2.5 text-sm text-[#555]">
+                {['게임보드 & 자동 팀배정', '경기 기록 & 랭킹', '공지 게시판', '기본 회원 관리'].map(f => (
+                  <li key={f} className="flex items-center gap-2">
+                    <span className="text-[#0a0a0a] font-bold text-[12px]">✓</span> {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Pro — 강조 */}
+            <div className="bg-[#0a0a0a] rounded-2xl p-6 border border-[#0a0a0a] relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-extrabold bg-[#beff00] text-[#0a0a0a] px-3 py-1 rounded-full">
+                추천
+              </span>
+              <p className="text-[13px] font-bold text-[#beff00] uppercase tracking-wider mb-2">Pro</p>
+              <p className="text-3xl font-extrabold text-white mb-1">9,900원<span className="text-lg font-semibold text-white/40">/월</span></p>
+              <p className="text-[13px] text-white/40 mb-6">회원 무제한</p>
+              <ul className="space-y-2.5 text-sm text-white/70">
+                {['Free 모든 기능', '회비 정산 자동화', '엑셀 내보내기', '카카오 공지 공유', '회원 무제한'].map(f => (
+                  <li key={f} className="flex items-center gap-2">
+                    <span className="text-[#beff00] font-bold text-[12px]">✓</span> {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Team */}
+            <div className="bg-[#f7f7f7] rounded-2xl p-6 border border-[#ebebeb]">
+              <p className="text-[13px] font-bold text-[#999] uppercase tracking-wider mb-2">Team</p>
+              <p className="text-3xl font-extrabold text-[#0a0a0a] mb-1">29,900원<span className="text-lg font-semibold text-[#999]">/월</span></p>
+              <p className="text-[13px] text-[#999] mb-6">다중 클럽 관리</p>
+              <ul className="space-y-2.5 text-sm text-[#555]">
+                {['Pro 모든 기능', '클럽 5개까지', '맞춤 통계 대시보드', '우선 고객 지원'].map(f => (
+                  <li key={f} className="flex items-center gap-2">
+                    <span className="text-[#0a0a0a] font-bold text-[12px]">✓</span> {f}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <p className="text-center mt-8 text-[13px] text-[#999]">
+            베타 기간(v2.0) 동안 Pro 기능을 무료로 제공합니다. 요금제는 v2.1 출시 시 적용됩니다.
+          </p>
+        </div>
+      </section>
+
       {/* ── 타겟 페르소나 ─────────────────────────────── */}
       <section className="bg-white border-b border-[#ebebeb]">
         <div className="max-w-[1088px] mx-auto px-4 sm:px-8 py-16 sm:py-20">
@@ -217,23 +281,23 @@ export default async function HomePage() {
       <section className="bg-[#0a0a0a]">
         <div className="max-w-[1088px] mx-auto px-4 sm:px-8 py-20 sm:py-24 text-center">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
-            지금 바로 체험해보세요
+            지금 바로 시작하세요
           </h2>
           <p className="text-white/40 mb-10 text-lg">
-            로그인 없이 · 설치 없이 · 무료로
+            카카오 1초 가입 · v2.0 무료 · 설치 없이 바로
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={demoHref}
+              href="/login"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#beff00] text-[#0a0a0a] font-extrabold text-[16px] rounded-xl hover:brightness-95 transition-all"
             >
-              <ShuttlecockIcon size={18} /> 데모 체험하기
+              무료로 시작하기
             </Link>
             <Link
-              href="/survey"
+              href={demoHref}
               className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 text-white/60 font-semibold text-[16px] rounded-xl hover:border-white/40 hover:text-white transition-all"
             >
-              설문으로 의견 남기기
+              데모 먼저 체험하기
             </Link>
           </div>
         </div>
