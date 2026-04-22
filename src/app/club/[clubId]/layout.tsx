@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 import { createClient, getAuthUser } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
@@ -15,15 +14,6 @@ export default async function ClubDetailLayout({
   params: Promise<{ clubId: string }>
 }) {
   const { clubId } = await params
-
-  const headersList = await headers()
-  const pathname = headersList.get('x-pathname') ?? ''
-
-  /* /view 경로는 기존 탭 뷰 유지 (sidebar 우회 — 탭뷰와 사이드바가 중복되므로) */
-  const isViewPage = pathname.endsWith('/view')
-  if (isViewPage) {
-    return <div className="min-h-screen bg-[#f8f8f8]">{children}</div>
-  }
 
   /* ── 데모 모임: 인증 없이 데모 데이터로 AppShell 렌더 ── */
   if (clubId.startsWith('demo-')) {
@@ -64,7 +54,6 @@ export default async function ClubDetailLayout({
   const club = clubResult.data
   const userProfile = userProfileResult.data
   const isOwner = club?.owner_id === clubUserId
-  const isManager = ['owner', 'manager'].includes(membership.role)
 
   return (
     <AppShell
