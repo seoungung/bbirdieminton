@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home, Gamepad2, Trophy, Users, Wallet, Settings as SettingsIcon,
-  Megaphone, MessageSquareText, Camera, CalendarDays, Shield,
+  Megaphone,
   Menu, X, LogOut, ChevronRight,
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
@@ -17,7 +17,7 @@ interface NavItem {
   Icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
   /** URL 매칭 — 시작 경로로 일치하면 activate */
   match?: string
-  managerOnly?: boolean
+  ownerOnly?: boolean
 }
 
 interface Props {
@@ -27,7 +27,6 @@ interface Props {
   leaderName?: string | null
   thumbnailColor?: string
   isOwner: boolean
-  isManager: boolean
   isDemo?: boolean
   userName?: string
   unreadNoticeCount?: number
@@ -35,10 +34,10 @@ interface Props {
 }
 
 /**
- * 🖥️ SaaS 스타일 앱 쉘
+ * SaaS 스타일 앱 쉘
  *
  * 데스크톱: 좌측 240px 고정 사이드바 + 우측 메인
- * 태블릿/모바일: 햄버거 → 드로어 슬라이드인
+ * 태블릿/모바일: 햄버거 드로어 + 하단 탭바
  *
  * 모든 `/club/[clubId]/*` 라우트를 감쌉니다 (`/view` 제외).
  */
@@ -49,7 +48,6 @@ export function AppShell({
   leaderName,
   thumbnailColor,
   isOwner,
-  isManager,
   isDemo,
   userName,
   unreadNoticeCount = 0,
@@ -77,24 +75,27 @@ export function AppShell({
 
   /* 네비게이션 아이템 정의 */
   const mainNav: NavItem[] = [
-    { href: `/club/${clubId}`,              label: '대시보드',   Icon: Home,            match: `/club/${clubId}` },
-    { href: `/club/${clubId}/gameboard`,    label: '게임보드',   Icon: Gamepad2 },
-    { href: `/club/${clubId}/ranking`,      label: '랭킹',       Icon: Trophy },
-    { href: `/club/${clubId}/members`,      label: '멤버',       Icon: Users },
-    { href: `/club/${clubId}/settlements`,  label: '셔틀콕비',   Icon: ShuttlecockIcon },
+    { href: `/club/${clubId}`,           label: '대시보드', Icon: Home,     match: `/club/${clubId}` },
+    { href: `/club/${clubId}/gameboard`, label: '게임보드', Icon: Gamepad2 },
   ]
 
   const communityNav: NavItem[] = [
-    { href: `/club/${clubId}/notices`,      label: '공지',       Icon: Megaphone },
-    { href: `/club/${clubId}/board`,        label: '게시판',     Icon: MessageSquareText },
-    { href: `/club/${clubId}/album`,        label: '앨범',       Icon: Camera },
-    { href: `/club/${clubId}/events`,       label: '정기모임',   Icon: CalendarDays },
+    { href: `/club/${clubId}/ranking`,   label: '랭킹', Icon: Trophy },
+    { href: `/club/${clubId}/notices`,   label: '공지', Icon: Megaphone },
   ]
 
   const adminNav: NavItem[] = [
-    { href: `/club/${clubId}/finance`,      label: '회비 관리',  Icon: Wallet,          managerOnly: true },
-    { href: `/club/${clubId}/manage`,       label: '운영·관리',  Icon: Shield,          managerOnly: true },
-    { href: `/club/${clubId}/settings`,     label: '모임 설정',  Icon: SettingsIcon },
+    { href: `/club/${clubId}/members`,  label: '회원', Icon: Users,          ownerOnly: true },
+    { href: `/club/${clubId}/finance`,  label: '정산', Icon: Wallet,         ownerOnly: true },
+    { href: `/club/${clubId}/settings`, label: '설정', Icon: SettingsIcon,   ownerOnly: true },
+  ]
+
+  /* 하단 탭바 (모바일 전용) */
+  const bottomTabs = [
+    { href: `/club/${clubId}`,           label: '홈',     Icon: Home,     match: `/club/${clubId}` },
+    { href: `/club/${clubId}/gameboard`, label: '게임보드', Icon: Gamepad2, match: `/club/${clubId}/gameboard` },
+    { href: `/club/${clubId}/ranking`,   label: '랭킹',   Icon: Trophy,   match: `/club/${clubId}/ranking` },
+    { href: `/club/${clubId}/members`,   label: '내정보', Icon: Users,    match: `/club/${clubId}/members` },
   ]
 
   /* 활성 경로 판정 — 현재 pathname이 href로 시작하면 active */
@@ -157,7 +158,7 @@ export function AppShell({
         />
         <NavSection
           title="관리"
-          items={adminNav.filter(item => !item.managerOnly || isManager)}
+          items={adminNav.filter(item => !item.ownerOnly || isOwner)}
           isActive={isActive}
           unreadNoticeCount={0}
         />
@@ -172,7 +173,7 @@ export function AppShell({
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-[#111] truncate">{userName ?? '게스트'}</p>
             <p className="text-[10px] text-[#999]">
-              {isOwner ? '모임장' : isManager ? '운영진' : '멤버'}
+              {isOwner ? '모임장' : '멤버'}
             </p>
           </div>
           <Link
@@ -190,6 +191,21 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
+      {/* ── 데모 배너 ── */}
+      {isDemo && (
+        <div className="sticky top-0 z-50 bg-[#beff00] text-[#0a0a0a] flex items-center justify-between px-4 py-2.5">
+          <p className="text-[13px] font-semibold">
+            데모 체험 중입니다. 모든 데이터는 가상 데이터입니다.
+          </p>
+          <Link
+            href="/club/new"
+            className="text-[12px] font-bold bg-[#0a0a0a] text-[#beff00] px-3 py-1.5 rounded-full hover:bg-[#1a1a1a] transition-colors whitespace-nowrap"
+          >
+            우리 클럽 만들기 →
+          </Link>
+        </div>
+      )}
+
       {/* ── 데스크톱 고정 사이드바 ── */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 z-30 w-[240px] bg-white border-r border-[#e5e5e5] flex-col">
         {sidebarContent}
@@ -248,8 +264,32 @@ export function AppShell({
           </div>
         </header>
 
-        <main id="main-content">{children}</main>
+        <main id="main-content" className="pb-16 lg:pb-0">{children}</main>
       </div>
+
+      {/* ── 모바일 하단 탭바 ── */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-20 bg-white border-t border-[#e5e5e5] flex items-center justify-around h-16">
+        {bottomTabs.map(({ href, label, Icon, match }) => {
+          const active = match === `/club/${clubId}`
+            ? pathname === match
+            : pathname === match || pathname.startsWith(match + '/')
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`relative flex flex-col items-center gap-0.5 py-2 px-3 transition-colors ${
+                active ? 'text-[#111]' : 'text-[#999]'
+              }`}
+            >
+              {active && (
+                <span className="absolute top-0 w-8 h-[2px] bg-[#beff00] rounded-b-full" />
+              )}
+              <Icon size={20} strokeWidth={active ? 2.2 : 1.7} />
+              <span className="text-[10px] font-semibold">{label}</span>
+            </Link>
+          )
+        })}
+      </nav>
     </div>
   )
 }

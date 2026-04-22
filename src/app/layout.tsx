@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { CompareProvider } from '@/context/CompareContext'
 import { MainShell } from '@/components/layout/MainShell'
 import { Analytics } from '@vercel/analytics/next'
 
@@ -11,23 +10,23 @@ export const metadata: Metadata = {
     shortcut: '/favicon_birdieminton-color.png',
   },
   title: {
-    default: 'birdieminton | 배드민턴, 제대로 시작하는 법',
-    template: '%s | birdieminton',
+    default: '버디모아 | 배드민턴 동호회 관리 플랫폼',
+    template: '%s | 버디모아',
   },
-  description: '배린이를 위한 라켓 도감. 레벨 테스트로 내 실력을 진단하고 딱 맞는 라켓을 찾아보세요.',
+  description: '배드민턴 동호회 운영의 모든 것. 게임보드, 랭킹, 정산, 공지를 한 곳에서.',
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
     url: 'https://birdieminton.com',
-    siteName: 'birdieminton',
-    title: 'birdieminton | 배드민턴, 제대로 시작하는 법',
-    description: '배린이를 위한 라켓 도감. 레벨 테스트로 내 실력을 진단하고 딱 맞는 라켓을 찾아보세요.',
-    images: [{ url: '/api/og', width: 1200, height: 630, alt: 'birdieminton' }],
+    siteName: '버디모아',
+    title: '버디모아 | 배드민턴 동호회 관리 플랫폼',
+    description: '배드민턴 동호회 운영의 모든 것. 게임보드, 랭킹, 정산, 공지를 한 곳에서.',
+    images: [{ url: '/api/og', width: 1200, height: 630, alt: '버디모아' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'birdieminton | 배드민턴, 제대로 시작하는 법',
-    description: '배린이를 위한 라켓 도감. 레벨 테스트로 내 실력을 진단하고 딱 맞는 라켓을 찾아보세요.',
+    title: '버디모아 | 배드민턴 동호회 관리 플랫폼',
+    description: '배드민턴 동호회 운영의 모든 것. 게임보드, 랭킹, 정산, 공지를 한 곳에서.',
   },
   alternates: {
     canonical: 'https://birdieminton.com',
@@ -38,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <head>
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
           crossOrigin="anonymous"
@@ -45,9 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="antialiased min-h-screen flex flex-col">
-        <CompareProvider>
-          <MainShell>{children}</MainShell>
-        </CompareProvider>
+        <MainShell>{children}</MainShell>
         <Analytics />
       </body>
     </html>

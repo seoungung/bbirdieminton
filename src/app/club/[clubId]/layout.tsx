@@ -36,7 +36,6 @@ export default async function ClubDetailLayout({
         leaderName={demo?.leaderName ?? null}
         thumbnailColor={demo?.thumbnailColor}
         isOwner={false}
-        isManager={true /* 데모는 모든 메뉴 보여줌 */}
         isDemo
         userName="데모 체험자"
       >
@@ -74,7 +73,6 @@ export default async function ClubDetailLayout({
       clubLocation={club?.location ?? null}
       thumbnailColor={club?.thumbnail_color}
       isOwner={isOwner}
-      isManager={isManager}
       userName={userProfile?.name ?? undefined}
       unreadNoticeCount={unreadCount}
     >
