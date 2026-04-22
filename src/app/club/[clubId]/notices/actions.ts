@@ -98,7 +98,7 @@ export async function createNoticeAction(
 
   if (error) return { error: '공지 등록에 실패했습니다.' }
 
-  revalidatePath(`/club/${clubId}/view`)
+  revalidatePath(`/club/${clubId}/notices`)
   return { success: true }
 }
 
@@ -146,7 +146,7 @@ export async function updateNoticeAction(
 
   if (error) return { error: '공지 수정에 실패했습니다.' }
 
-  revalidatePath(`/club/${clubId}/view`)
+  revalidatePath(`/club/${clubId}/notices`)
   return { success: true }
 }
 
@@ -178,7 +178,7 @@ export async function deleteNoticeAction(
 
   if (error) return { error: '공지 삭제에 실패했습니다.' }
 
-  revalidatePath(`/club/${clubId}/view`)
+  revalidatePath(`/club/${clubId}/notices`)
   return { success: true }
 }
 
