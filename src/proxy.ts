@@ -1,0 +1,50 @@
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+
+export async function proxy(request: NextRequest) {
+  let supabaseResponse = NextResponse.next()
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next()
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const { pathname } = request.nextUrl
+
+  // 데모 클럽 경로는 비로그인 허용
+  const isDemoPath = /^\/club\/demo-/.test(pathname)
+  // /club 루트는 인증 없이 허용 (내부에서 분기)
+  const isClubRoot = pathname === '/club' || pathname === '/club/'
+
+  if (!isClubRoot && !isDemoPath && !user) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  return supabaseResponse
+}
+
+export const config = {
+  /*
+   * 클럽 앱 경로에만 인증 미들웨어 적용.
+   * 마케팅(/), /features, /pricing, /demo, /pdf 등 공개 페이지는 제외.
+   */
+  matcher: ['/club/(.*)'],
+}
