@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import { CheckCircle2 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: '요금제 | 버디모아',
-  description: '배드민턴 동호회 운영 플랫폼 버디모아의 요금제를 확인하세요. 기본 무료, 언제든 업그레이드.',
+  title: '요금제 | 버디민턴',
+  description: '배드민턴 동호회 운영 플랫폼 버디민턴의 요금제를 확인하세요. 기본 무료, 언제든 업그레이드.',
 }
 
 interface Plan {

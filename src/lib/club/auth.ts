@@ -1,7 +1,7 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 
 /**
- * 로그인한 auth.user를 버디모아 users 테이블에 upsert.
+ * 로그인한 auth.user를 버디민턴 users 테이블에 upsert.
  * - 소셜 로그인: 이름/프로필을 OAuth 메타데이터로 항상 최신화
  * - 익명 로그인: onboard 페이지에서 이미 닉네임을 저장했으므로 덮어쓰지 않음
  */
@@ -37,7 +37,7 @@ export async function ensureClubUser(supabase: SupabaseClient, authUser: User) {
 }
 
 /**
- * auth.uid() 로 버디모아 users.id (uuid) 조회.
+ * auth.uid() 로 버디민턴 users.id (uuid) 조회.
  * RLS 정책상 본인 row만 반환됨.
  *
  * @param user  이미 auth.getUser()를 호출한 경우 전달 — 중복 호출 방지.

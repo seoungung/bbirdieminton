@@ -12,7 +12,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { code } = await params
   return {
-    title: `모임 초대 | 버디모아`,
+    title: `모임 초대 | 버디민턴`,
     description: `초대코드 ${code}로 배드민턴 모임에 참여하세요.`,
   }
 }
@@ -35,7 +35,7 @@ export default async function JoinPage({ params }: Props) {
     <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center px-4 py-16 bg-[#f8f8f8]">
       <div className="w-full max-w-sm">
 
-        {/* 버디모아 로고 */}
+        {/* 버디민턴 로고 */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-3">
             <div className="w-10 h-10 rounded-xl bg-[#0a0a0a] flex items-center justify-center">

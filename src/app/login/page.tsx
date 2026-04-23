@@ -5,7 +5,7 @@ import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: '로그인 | 버디모아',
+  title: '로그인 | 버디민턴',
 }
 
 export default async function LoginPage({
@@ -31,7 +31,7 @@ export default async function LoginPage({
               <ShuttlecockIcon size={20} className="text-[#beff00]" strokeWidth={2} />
             </div>
           </div>
-          <h1 className="text-[22px] font-extrabold text-[#111] tracking-tight">버디모아</h1>
+          <h1 className="text-[22px] font-extrabold text-[#111] tracking-tight">버디민턴</h1>
           <p className="text-sm text-[#999] mt-1">배드민턴 동호회 관리 플랫폼</p>
         </div>
 
@@ -58,7 +58,7 @@ export default async function LoginPage({
         {/* 데모 체험 링크 */}
         <p className="text-center mt-5 text-[13px] text-[#999]">
           로그인 없이 체험하고 싶다면?{' '}
-          <a href="/club/demo-birdies" className="text-[#555] font-semibold hover:text-[#111] transition-colors">
+          <a href="/club/demo-1" className="text-[#555] font-semibold hover:text-[#111] transition-colors">
             데모 체험하기
           </a>
         </p>

@@ -8,6 +8,7 @@ import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 const navLinks = [
   { href: '/features', label: '기능소개' },
   { href: '/pricing',  label: '요금제' },
+  { href: '/shop',     label: 'SHOP' },
   { href: '/demo',     label: '데모 체험' },
 ]
 
@@ -23,7 +24,7 @@ export function MarketingHeader() {
           <div className="w-7 h-7 rounded-lg bg-[#0a0a0a] flex items-center justify-center">
             <ShuttlecockIcon size={14} className="text-[#beff00]" strokeWidth={2} />
           </div>
-          <span className="text-[17px] font-extrabold tracking-tight text-[#111]">버디모아</span>
+          <span className="text-[17px] font-extrabold tracking-tight text-[#111]">버디민턴</span>
         </Link>
 
         {/* 데스크톱 nav */}

@@ -11,9 +11,9 @@ import {
 import type { ComponentType } from 'react'
 
 export const metadata: Metadata = {
-  title: '기능 소개 | 버디모아',
+  title: '기능 소개 | 버디민턴',
   description:
-    '게임보드, 회비 정산, 랭킹, 공지사항까지. 배드민턴 동호회 운영에 필요한 모든 기능을 버디모아에서.',
+    '게임보드, 회비 정산, 랭킹, 공지사항까지. 배드민턴 동호회 운영에 필요한 모든 기능을 버디민턴에서.',
 }
 
 interface Feature {
@@ -121,7 +121,7 @@ export default function FeaturesPage() {
             배드민턴 동호회 운영의 모든 것
           </h1>
           <p className="text-lg sm:text-xl text-white/50 leading-relaxed max-w-2xl mx-auto">
-            게임보드부터 회비 정산까지. 총무 혼자 감당하던 모든 운영 업무를 버디모아가 해결합니다.
+            게임보드부터 회비 정산까지. 총무 혼자 감당하던 모든 운영 업무를 버디민턴가 해결합니다.
           </p>
         </div>
       </section>

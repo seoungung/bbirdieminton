@@ -1,5 +1,5 @@
 // =============================================
-// 버디모아 (birdieminton.com/club) 타입 정의
+// 버디민턴 클럽 (birdieminton.com/club) 타입 정의
 // =============================================
 
 export type ClubPlan = 'free' | 'pro' | 'club_plus'

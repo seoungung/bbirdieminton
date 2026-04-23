@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
-import { MessageSquare, BarChart3, Frown, CheckCircle2, Target, Wallet, Trophy, Users, CalendarDays, Settings, Award, ClipboardList } from 'lucide-react'
+import { MessageSquare, BarChart3, Frown, CheckCircle2, Target, Wallet, Trophy, Users, CalendarDays, Settings, Award, ClipboardList, BookOpen, ArrowRight } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import type { ComponentType } from 'react'
 
@@ -247,6 +247,56 @@ export default async function HomePage() {
           <p className="text-center mt-8 text-[13px] text-[#999]">
             베타 기간(v2.0) 동안 Pro 기능을 무료로 제공합니다. 요금제는 v2.1 출시 시 적용됩니다.
           </p>
+        </div>
+      </section>
+
+      {/* ── 디지털 상품 (PDF) ──────────────────────────── */}
+      <section className="bg-white border-b border-[#ebebeb]">
+        <div className="max-w-[1088px] mx-auto px-4 sm:px-8 py-16 sm:py-20">
+          <div className="text-center mb-10">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-[#beff00] bg-[#beff00]/10 px-3 py-1 rounded-full">
+              SHOP
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0a0a0a] mt-4">
+              배린이를 위한 디지털 가이드
+            </h2>
+            <p className="text-[#666] mt-3 text-[15px]">
+              라켓 고르다 지친 당신에게, 한 권으로 끝내는 PDF 가이드
+            </p>
+          </div>
+
+          <div className="max-w-[720px] mx-auto">
+            <Link
+              href="/shop/starter-guide"
+              className="group flex flex-col sm:flex-row items-stretch rounded-2xl border border-[#ebebeb] overflow-hidden hover:border-[#0a0a0a] hover:shadow-sm transition-all"
+            >
+              {/* 커버 */}
+              <div className="bg-[#0a0a0a] flex flex-col items-center justify-center p-8 sm:w-[220px] sm:shrink-0">
+                <BookOpen size={40} className="text-[#beff00]" strokeWidth={1.5} />
+                <p className="mt-3 text-[11px] font-bold uppercase tracking-widest text-[#beff00]">
+                  PDF · 즉시 다운로드
+                </p>
+              </div>
+              {/* 정보 */}
+              <div className="flex-1 p-6 sm:p-7 flex flex-col justify-center">
+                <h3 className="text-xl font-extrabold text-[#111] mb-2">
+                  배린이 라켓 완전정복 가이드
+                </h3>
+                <p className="text-[14px] text-[#666] leading-relaxed mb-4">
+                  왕초보·초심자·D조·C조, 레벨별 최적 라켓 조건과 브랜드 비교표까지.
+                  약 30~40페이지 분량으로 한 번에 정리했습니다.
+                </p>
+                <div className="flex items-baseline gap-2 mb-4">
+                  <span className="text-2xl font-extrabold text-[#111]">3,900원</span>
+                  <span className="text-[13px] text-[#bbb] line-through">9,900원</span>
+                  <span className="ml-1 text-[11px] font-bold text-[#beff00] bg-[#0a0a0a] px-2 py-0.5 rounded">얼리버드</span>
+                </div>
+                <span className="inline-flex items-center gap-1 text-[13px] font-bold text-[#0a0a0a] group-hover:gap-2 transition-all">
+                  상품 보기 <ArrowRight size={14} />
+                </span>
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 
