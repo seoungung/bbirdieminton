@@ -198,7 +198,7 @@ export function AppShell({
             데모 체험 중입니다. 모든 데이터는 가상 데이터입니다.
           </p>
           <Link
-            href="/club/new"
+            href="/club/create"
             className="text-[12px] font-bold bg-[#0a0a0a] text-[#beff00] px-3 py-1.5 rounded-full hover:bg-[#1a1a1a] transition-colors whitespace-nowrap"
           >
             우리 클럽 만들기 →

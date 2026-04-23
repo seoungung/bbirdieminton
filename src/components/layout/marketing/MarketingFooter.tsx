@@ -33,6 +33,7 @@ export function MarketingFooter() {
               <Link href="/terms"          className="text-[#555] hover:text-[#111] transition-colors">이용약관</Link>
               <Link href="/privacy"        className="text-[#555] hover:text-[#111] transition-colors">개인정보처리방침</Link>
               <Link href="/policy/refund"  className="text-[#555] hover:text-[#111] transition-colors">환불정책</Link>
+              <Link href="/business"       className="text-[#555] hover:text-[#111] transition-colors">사업자정보 확인</Link>
             </div>
           </div>
         </div>
