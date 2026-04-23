@@ -21,12 +21,18 @@ export function MarketingFooter() {
           </div>
 
           {/* 링크 */}
-          <div className="flex gap-8 text-[13px]">
+          <div className="flex flex-wrap gap-8 text-[13px]">
             <div className="flex flex-col gap-2">
               <p className="font-semibold text-[#111] mb-1">서비스</p>
               <Link href="/product" className="text-[#555] hover:text-[#111] transition-colors">제품 소개</Link>
               <Link href="/demo"    className="text-[#555] hover:text-[#111] transition-colors">데모 체험</Link>
               <Link href="/shop"    className="text-[#555] hover:text-[#111] transition-colors">SHOP</Link>
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="font-semibold text-[#111] mb-1">지원</p>
+              <Link href="/faq"     className="text-[#555] hover:text-[#111] transition-colors">자주 묻는 질문</Link>
+              <Link href="/contact" className="text-[#555] hover:text-[#111] transition-colors">문의하기</Link>
+              <Link href="/blog"    className="text-[#555] hover:text-[#111] transition-colors">블로그</Link>
             </div>
             <div className="flex flex-col gap-2">
               <p className="font-semibold text-[#111] mb-1">법적고지</p>
