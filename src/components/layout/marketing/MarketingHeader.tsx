@@ -1,19 +1,43 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
-import { Menu, X } from 'lucide-react'
+import { useEffect, useState, useTransition } from 'react'
+import { Menu, X, LogOut } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
+import { createClient } from '@/lib/supabase/client'
+import { logout } from '@/app/login/actions'
 
 const navLinks = [
-  { href: '/features', label: '기능소개' },
-  { href: '/pricing',  label: '요금제' },
-  { href: '/shop',     label: 'SHOP' },
-  { href: '/demo',     label: '데모 체험' },
+  { href: '/product', label: '제품 소개' },
+  { href: '/demo',    label: '데모 체험' },
 ]
 
 export function MarketingHeader() {
   const [open, setOpen] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
+  const [userName, setUserName] = useState<string | null>(null)
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser()
+      const loggedIn = !!user && !user.is_anonymous
+      setIsLoggedIn(loggedIn)
+      setUserName(
+        (user?.user_metadata?.name as string | undefined) ??
+        (user?.user_metadata?.full_name as string | undefined) ??
+        null
+      )
+    }
+    checkAuth()
+
+    const { data: sub } = supabase.auth.onAuthStateChange(() => {
+      checkAuth()
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [])
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#e5e5e5]">
@@ -40,20 +64,48 @@ export function MarketingHeader() {
           ))}
         </nav>
 
-        {/* 데스크톱 CTA */}
-        <div className="hidden md:flex items-center gap-3 shrink-0">
-          <Link
-            href="/login"
-            className="text-[13px] font-medium text-[#555] hover:text-[#111] transition-colors"
-          >
-            로그인
-          </Link>
-          <Link
-            href="/club/new"
-            className="text-[13px] font-semibold px-4 py-2 rounded-full bg-[#beff00] text-[#0a0a0a] hover:bg-[#a8e600] transition-colors"
-          >
-            무료로 시작하기
-          </Link>
+        {/* 데스크톱 CTA — 로그인 상태 분기 */}
+        <div className="hidden md:flex items-center gap-3 shrink-0 min-w-[180px] justify-end">
+          {isLoggedIn === null ? (
+            // 초기 로딩 (세션 확인 중) — 깜빡임 방지용 placeholder
+            <div className="h-8 w-32 rounded-full bg-[#f0f0f0] animate-pulse" />
+          ) : isLoggedIn ? (
+            <>
+              {userName && (
+                <span className="text-[13px] text-[#999]">{userName} 님</span>
+              )}
+              <Link
+                href="/club/home"
+                className="text-[13px] font-semibold px-4 py-2 rounded-full bg-[#0a0a0a] text-white hover:bg-[#222] transition-colors"
+              >
+                내 모임
+              </Link>
+              <button
+                onClick={() => startTransition(() => logout())}
+                disabled={isPending}
+                className="flex items-center gap-1.5 text-[13px] font-medium text-[#999] hover:text-[#111] transition-colors disabled:opacity-50"
+                aria-label="로그아웃"
+              >
+                <LogOut size={14} />
+                {isPending ? '...' : '로그아웃'}
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-[13px] font-medium text-[#555] hover:text-[#111] transition-colors"
+              >
+                로그인
+              </Link>
+              <Link
+                href="/login?next=%2Fclub%2Fhome"
+                className="text-[13px] font-semibold px-4 py-2 rounded-full bg-[#beff00] text-[#0a0a0a] hover:bg-[#a8e600] transition-colors"
+              >
+                무료로 시작하기
+              </Link>
+            </>
+          )}
         </div>
 
         {/* 모바일 햄버거 */}
@@ -80,20 +132,52 @@ export function MarketingHeader() {
             </Link>
           ))}
           <div className="pt-3 border-t border-[#f0f0f0] flex flex-col gap-2">
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="text-center py-2.5 rounded-full border border-[#e5e5e5] text-[13px] text-[#555]"
-            >
-              로그인
-            </Link>
-            <Link
-              href="/club/new"
-              onClick={() => setOpen(false)}
-              className="text-center py-2.5 rounded-full bg-[#beff00] text-[13px] font-semibold text-[#0a0a0a]"
-            >
-              무료로 시작하기
-            </Link>
+            {isLoggedIn === null ? (
+              <div className="h-10 rounded-full bg-[#f0f0f0] animate-pulse" />
+            ) : isLoggedIn ? (
+              <>
+                {userName && (
+                  <p className="text-center text-[12px] text-[#999] py-1">
+                    {userName} 님
+                  </p>
+                )}
+                <Link
+                  href="/club/home"
+                  onClick={() => setOpen(false)}
+                  className="text-center py-2.5 rounded-full bg-[#0a0a0a] text-[13px] font-semibold text-white"
+                >
+                  내 모임
+                </Link>
+                <button
+                  onClick={() => {
+                    setOpen(false)
+                    startTransition(() => logout())
+                  }}
+                  disabled={isPending}
+                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-full border border-[#e5e5e5] text-[13px] text-[#999] hover:text-[#111] disabled:opacity-50"
+                >
+                  <LogOut size={13} />
+                  {isPending ? '로그아웃 중...' : '로그아웃'}
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="text-center py-2.5 rounded-full border border-[#e5e5e5] text-[13px] text-[#555]"
+                >
+                  로그인
+                </Link>
+                <Link
+                  href="/login?next=%2Fclub%2Fhome"
+                  onClick={() => setOpen(false)}
+                  className="text-center py-2.5 rounded-full bg-[#beff00] text-[13px] font-semibold text-[#0a0a0a]"
+                >
+                  무료로 시작하기
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

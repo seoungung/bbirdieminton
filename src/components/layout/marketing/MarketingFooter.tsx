@@ -24,10 +24,9 @@ export function MarketingFooter() {
           <div className="flex gap-8 text-[13px]">
             <div className="flex flex-col gap-2">
               <p className="font-semibold text-[#111] mb-1">서비스</p>
-              <Link href="/features" className="text-[#555] hover:text-[#111] transition-colors">기능소개</Link>
-              <Link href="/pricing"  className="text-[#555] hover:text-[#111] transition-colors">요금제</Link>
-              <Link href="/shop"     className="text-[#555] hover:text-[#111] transition-colors">SHOP</Link>
-              <Link href="/demo"     className="text-[#555] hover:text-[#111] transition-colors">데모 체험</Link>
+              <Link href="/product" className="text-[#555] hover:text-[#111] transition-colors">제품 소개</Link>
+              <Link href="/demo"    className="text-[#555] hover:text-[#111] transition-colors">데모 체험</Link>
+              <Link href="/shop"    className="text-[#555] hover:text-[#111] transition-colors">SHOP</Link>
             </div>
             <div className="flex flex-col gap-2">
               <p className="font-semibold text-[#111] mb-1">법적고지</p>
