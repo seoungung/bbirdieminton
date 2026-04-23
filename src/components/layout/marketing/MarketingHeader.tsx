@@ -2,34 +2,48 @@
 
 import Link from 'next/link'
 import { useEffect, useState, useTransition } from 'react'
-import { Menu, X, LogOut } from 'lucide-react'
+import { Menu, X, LogOut, User as UserIcon } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/app/login/actions'
+import { UserMenu } from './UserMenu'
 
 const navLinks = [
   { href: '/product', label: '제품 소개' },
   { href: '/demo',    label: '데모 체험' },
 ]
 
+interface UserState {
+  isLoggedIn: boolean
+  name: string
+  email: string
+  avatarUrl: string | null
+}
+
 export function MarketingHeader() {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
-  const [userName, setUserName] = useState<string | null>(null)
+  const [user, setUser] = useState<UserState | null>(null) // null = 로딩 중
 
   useEffect(() => {
     const supabase = createClient()
 
     async function checkAuth() {
       const { data: { user } } = await supabase.auth.getUser()
-      const loggedIn = !!user && !user.is_anonymous
-      setIsLoggedIn(loggedIn)
-      setUserName(
-        (user?.user_metadata?.name as string | undefined) ??
-        (user?.user_metadata?.full_name as string | undefined) ??
-        null
-      )
+      if (!user || user.is_anonymous) {
+        setUser({ isLoggedIn: false, name: '', email: '', avatarUrl: null })
+        return
+      }
+      setUser({
+        isLoggedIn: true,
+        name:
+          (user.user_metadata?.name as string | undefined) ??
+          (user.user_metadata?.full_name as string | undefined) ??
+          user.email?.split('@')[0] ??
+          '이름없음',
+        email: user.email ?? '',
+        avatarUrl: (user.user_metadata?.avatar_url as string | undefined) ?? null,
+      })
     }
     checkAuth()
 
@@ -64,32 +78,17 @@ export function MarketingHeader() {
           ))}
         </nav>
 
-        {/* 데스크톱 CTA — 로그인 상태 분기 */}
-        <div className="hidden md:flex items-center gap-3 shrink-0 min-w-[180px] justify-end">
-          {isLoggedIn === null ? (
-            // 초기 로딩 (세션 확인 중) — 깜빡임 방지용 placeholder
-            <div className="h-8 w-32 rounded-full bg-[#f0f0f0] animate-pulse" />
-          ) : isLoggedIn ? (
-            <>
-              {userName && (
-                <span className="text-[13px] text-[#999]">{userName} 님</span>
-              )}
-              <Link
-                href="/club/home"
-                className="text-[13px] font-semibold px-4 py-2 rounded-full bg-[#0a0a0a] text-white hover:bg-[#222] transition-colors"
-              >
-                내 모임
-              </Link>
-              <button
-                onClick={() => startTransition(() => logout())}
-                disabled={isPending}
-                className="flex items-center gap-1.5 text-[13px] font-medium text-[#999] hover:text-[#111] transition-colors disabled:opacity-50"
-                aria-label="로그아웃"
-              >
-                <LogOut size={14} />
-                {isPending ? '...' : '로그아웃'}
-              </button>
-            </>
+        {/* 데스크톱 우측 — 로그인 상태 분기 */}
+        <div className="hidden md:flex items-center gap-3 shrink-0 min-w-[120px] justify-end">
+          {user === null ? (
+            // 로딩 중 — 아바타 자리 placeholder
+            <div className="w-10 h-8 rounded-full bg-[#f5f5f5] animate-pulse" />
+          ) : user.isLoggedIn ? (
+            <UserMenu
+              userName={user.name}
+              userEmail={user.email}
+              avatarUrl={user.avatarUrl}
+            />
           ) : (
             <>
               <Link
@@ -121,6 +120,31 @@ export function MarketingHeader() {
       {/* 모바일 드로어 */}
       {open && (
         <div className="md:hidden border-t border-[#e5e5e5] px-4 pt-4 pb-5 flex flex-col gap-3 bg-white">
+          {/* 유저 정보 카드 (로그인 시) */}
+          {user?.isLoggedIn && (
+            <div className="bg-[#f8f8f8] rounded-2xl p-4 mb-2 flex items-center gap-3">
+              {user.avatarUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={user.avatarUrl}
+                  alt={user.name}
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full object-cover border border-[#f0f0f0]"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-[#0a0a0a] text-white flex items-center justify-center font-bold">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-[14px] text-[#111] truncate">{user.name}</p>
+                <p className="text-[12px] text-[#999] truncate">{user.email}</p>
+              </div>
+            </div>
+          )}
+
+          {/* 네비 링크 */}
           {navLinks.map(({ href, label }) => (
             <Link
               key={href}
@@ -131,16 +155,13 @@ export function MarketingHeader() {
               {label}
             </Link>
           ))}
+
+          {/* 로그인 상태별 버튼 */}
           <div className="pt-3 border-t border-[#f0f0f0] flex flex-col gap-2">
-            {isLoggedIn === null ? (
+            {user === null ? (
               <div className="h-10 rounded-full bg-[#f0f0f0] animate-pulse" />
-            ) : isLoggedIn ? (
+            ) : user.isLoggedIn ? (
               <>
-                {userName && (
-                  <p className="text-center text-[12px] text-[#999] py-1">
-                    {userName} 님
-                  </p>
-                )}
                 <Link
                   href="/club/home"
                   onClick={() => setOpen(false)}
@@ -148,13 +169,21 @@ export function MarketingHeader() {
                 >
                   내 모임
                 </Link>
+                <Link
+                  href="/my/profile"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-full border border-[#e5e5e5] text-[13px] text-[#555]"
+                >
+                  <UserIcon size={13} />
+                  내 프로필
+                </Link>
                 <button
                   onClick={() => {
                     setOpen(false)
                     startTransition(() => logout())
                   }}
                   disabled={isPending}
-                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-full border border-[#e5e5e5] text-[13px] text-[#999] hover:text-[#111] disabled:opacity-50"
+                  className="flex items-center justify-center gap-1.5 py-2.5 rounded-full text-[13px] text-red-500 hover:bg-red-50 disabled:opacity-50 transition-colors"
                 >
                   <LogOut size={13} />
                   {isPending ? '로그아웃 중...' : '로그아웃'}
