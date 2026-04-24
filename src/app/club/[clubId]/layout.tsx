@@ -3,6 +3,7 @@ import { createClient, getAuthUser } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
 import { AppShell } from '@/components/club/AppShell'
+import type { ClubOption } from '@/components/club/ClubSwitcher'
 import { DEMO_CLUBS } from '@/lib/club/demoData'
 import { getUnreadCountAction } from '@/app/club/[clubId]/notices/actions'
 
@@ -28,6 +29,8 @@ export default async function ClubDetailLayout({
         isOwner={false}
         isDemo
         userName="데모 체험자"
+        userEmail="demo@birdieminton.com"
+        avatarUrl={null}
       >
         {children}
       </AppShell>
@@ -44,16 +47,40 @@ export default async function ClubDetailLayout({
   const membership = await getMyMembership(supabase, clubId, clubUserId)
   if (!membership) redirect('/club/home')
 
-  /* 클럽 정보 + 유저 이름 + 읽지 않은 공지 수 병렬 조회 */
-  const [clubResult, userProfileResult, unreadCount] = await Promise.all([
+  /* 클럽 정보 + 유저 프로필 + 읽지 않은 공지 수 + 소속 클럽 목록 병렬 조회 */
+  const [clubResult, userProfileResult, unreadCount, clubsResult] = await Promise.all([
     supabase.from('clubs').select('name, location, thumbnail_color, owner_id').eq('id', clubId).single(),
     supabase.from('users').select('name').eq('id', clubUserId).single(),
     getUnreadCountAction(clubId).catch(() => 0),
+    // 내가 소속된 다른 클럽 목록 (현재 클럽 제외)
+    supabase
+      .from('club_members')
+      .select('club:clubs(id, name, location, thumbnail_color)')
+      .eq('user_id', clubUserId)
+      .neq('club_id', clubId),
   ])
 
   const club = clubResult.data
   const userProfile = userProfileResult.data
   const isOwner = club?.owner_id === clubUserId
+
+  /* 다른 클럽 목록 정리 */
+  const availableClubs: ClubOption[] = (clubsResult.data ?? [])
+    .map((row: { club: unknown }) => row.club)
+    .filter((c): c is { id: string; name: string; location: string | null; thumbnail_color: string | null } =>
+      c !== null && typeof c === 'object' && 'id' in c
+    )
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      location: c.location,
+      thumbnailColor: c.thumbnail_color ?? undefined,
+    }))
+
+  /* 유저 메타데이터 (이메일·아바타) */
+  const userEmail = user.email ?? ''
+  const avatarUrl =
+    (user.user_metadata?.avatar_url as string | undefined) ?? null
 
   return (
     <AppShell
@@ -62,8 +89,11 @@ export default async function ClubDetailLayout({
       clubLocation={club?.location ?? null}
       thumbnailColor={club?.thumbnail_color}
       isOwner={isOwner}
-      userName={userProfile?.name ?? undefined}
+      userName={userProfile?.name ?? user.email?.split('@')[0] ?? '이름없음'}
+      userEmail={userEmail}
+      avatarUrl={avatarUrl}
       unreadNoticeCount={unreadCount}
+      availableClubs={availableClubs}
     >
       {children}
     </AppShell>

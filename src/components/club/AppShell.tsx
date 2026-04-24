@@ -5,19 +5,28 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home, Gamepad2, Trophy, Users, Wallet, Settings as SettingsIcon,
-  Megaphone,
-  Menu, X, LogOut, ChevronRight,
+  Megaphone, BarChart3,
+  Menu, X,
+  Bell, Search, User as UserIcon,
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
+import { ClubSwitcher, type ClubOption } from './ClubSwitcher'
+import { AppHeader } from './AppHeader'
+import { HelpCard } from './HelpCard'
+import { AppSearchBar } from './AppSearchBar'
+import { NotificationBell } from './NotificationBell'
+import { QuickCreate } from './QuickCreate'
+import { UserMenu } from '@/components/layout/marketing/UserMenu'
 
 /* ── 사이드바 메뉴 아이템 타입 ── */
 interface NavItem {
   href: string
   label: string
   Icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
-  /** URL 매칭 — 시작 경로로 일치하면 activate */
   match?: string
   ownerOnly?: boolean
+  /** Pro 플랜 전용 (Phase 2) */
+  proOnly?: boolean
 }
 
 interface Props {
@@ -29,28 +38,32 @@ interface Props {
   isOwner: boolean
   isDemo?: boolean
   userName?: string
+  userEmail?: string
+  avatarUrl?: string | null
   unreadNoticeCount?: number
+  /** 유저가 소속된 다른 클럽들 (현재 클럽 제외) */
+  availableClubs?: ClubOption[]
   children: React.ReactNode
 }
 
 /**
- * SaaS 스타일 앱 쉘
+ * SaaS 스타일 앱 쉘 (v2 — Apple 미니멀리즘)
  *
- * 데스크톱: 좌측 240px 고정 사이드바 + 우측 메인
- * 태블릿/모바일: 햄버거 드로어 + 하단 탭바
- *
- * 모든 `/club/[clubId]/*` 라우트를 감쌉니다 (`/view` 제외).
+ * 데스크톱: 260px 고정 사이드바 + 상단 헤더 + 메인
+ * 모바일: 햄버거 드로어 + 상단 헤더 + 하단 탭바
  */
 export function AppShell({
   clubId,
   clubName,
   clubLocation,
-  leaderName,
   thumbnailColor,
   isOwner,
   isDemo,
   userName,
+  userEmail,
+  avatarUrl,
   unreadNoticeCount = 0,
+  availableClubs = [],
   children,
 }: Props) {
   const pathname = usePathname()
@@ -85,9 +98,10 @@ export function AppShell({
   ]
 
   const adminNav: NavItem[] = [
-    { href: `/club/${clubId}/members`,  label: '회원', Icon: Users,          ownerOnly: true },
-    { href: `/club/${clubId}/finance`,  label: '정산', Icon: Wallet,         ownerOnly: true },
-    { href: `/club/${clubId}/settings`, label: '설정', Icon: SettingsIcon,   ownerOnly: true },
+    { href: `/club/${clubId}/members`,   label: '회원',   Icon: Users,        ownerOnly: true },
+    { href: `/club/${clubId}/finance`,   label: '정산',   Icon: Wallet,       ownerOnly: true },
+    { href: `#`,                         label: '분석',   Icon: BarChart3,    ownerOnly: true, proOnly: true },
+    { href: `/club/${clubId}/settings`,  label: '설정',   Icon: SettingsIcon, ownerOnly: true },
   ]
 
   /* 하단 탭바 (모바일 전용) */
@@ -95,61 +109,48 @@ export function AppShell({
     { href: `/club/${clubId}`,           label: '홈',     Icon: Home,     match: `/club/${clubId}` },
     { href: `/club/${clubId}/gameboard`, label: '게임보드', Icon: Gamepad2, match: `/club/${clubId}/gameboard` },
     { href: `/club/${clubId}/ranking`,   label: '랭킹',   Icon: Trophy,   match: `/club/${clubId}/ranking` },
-    { href: `/club/${clubId}/members`,   label: '내정보', Icon: Users,    match: `/club/${clubId}/members` },
+    { href: `/my/profile`,               label: '내정보', Icon: UserIcon, match: `/my/profile` },
   ]
 
-  /* 활성 경로 판정 — 현재 pathname이 href로 시작하면 active */
+  /* 활성 경로 판정 */
   const isActive = (item: NavItem) => {
     const matchPath = item.match ?? item.href
-    /* 정확히 match 경로거나, 하위 경로 (단, 대시보드는 정확히 일치만) */
     if (matchPath === `/club/${clubId}`) {
       return pathname === matchPath
     }
     return pathname === matchPath || pathname.startsWith(matchPath + '/')
   }
 
-  /* 사이드바 내용 렌더 (데스크톱 / 모바일 드로어 공통) */
+  const currentClub: ClubOption = {
+    id: clubId,
+    name: clubName,
+    location: clubLocation,
+    thumbnailColor,
+    isDemo,
+  }
+
+  /* 사이드바 내용 렌더 */
   const sidebarContent = (
     <>
-      {/* 상단: 로고 + 클럽 */}
+      {/* 상단: 로고 */}
       <div className="px-4 pt-5 pb-4">
         <Link
           href="/club/home"
           className="flex items-center gap-2 text-[#111] mb-4 group"
         >
-          <div className="w-7 h-7 rounded-lg bg-[#0a0a0a] flex items-center justify-center group-hover:bg-[#beff00] transition-colors">
-            <ShuttlecockIcon size={14} className="text-[#beff00] group-hover:text-[#111] transition-colors" strokeWidth={2} />
+          <div className="w-7 h-7 rounded-lg bg-[#0a0a0a] flex items-center justify-center">
+            <ShuttlecockIcon size={14} className="text-[#beff00]" strokeWidth={2} />
           </div>
-          <span className="text-sm font-extrabold tracking-tight">버디민턴</span>
+          <span className="text-[16px] font-extrabold tracking-tight">버디민턴</span>
         </Link>
 
-        {/* 클럽 아이덴티티 카드 */}
-        <div className="bg-[#fafafa] border border-[#f0f0f0] rounded-xl p-3">
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-              style={{ background: thumbnailColor ?? '#beff00' }}
-            >
-              <ShuttlecockIcon size={16} className="text-[#111]/70" strokeWidth={1.7} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-extrabold text-[#111] truncate">{clubName}</p>
-              <p className="text-[10px] text-[#999] truncate">
-                {isDemo ? '데모 체험 중' : clubLocation || leaderName || '모임'}
-              </p>
-            </div>
-          </div>
-          {isDemo && (
-            <span className="mt-2 inline-block text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded tracking-wider">
-              DEMO
-            </span>
-          )}
-        </div>
+        {/* 클럽 스위처 */}
+        <ClubSwitcher current={currentClub} available={availableClubs} />
       </div>
 
       {/* 메인 네비게이션 */}
-      <nav className="flex-1 overflow-y-auto px-3 pb-4 space-y-5">
-        <NavSection title="운영" items={mainNav} isActive={isActive} unreadNoticeCount={unreadNoticeCount} />
+      <nav className="flex-1 overflow-y-auto px-3 pb-4 space-y-6">
+        <NavSection title="운영" items={mainNav} isActive={isActive} unreadNoticeCount={0} />
         <NavSection
           title="커뮤니티"
           items={communityNav}
@@ -164,67 +165,48 @@ export function AppShell({
         />
       </nav>
 
-      {/* 하단: 유저 + 로그아웃 */}
-      <div className="border-t border-[#f0f0f0] p-3">
-        <div className="flex items-center gap-2.5 px-2 py-2">
-          <div className="w-8 h-8 rounded-full bg-[#0a0a0a] flex items-center justify-center text-[#beff00] text-xs font-extrabold shrink-0">
-            {userName?.[0] ?? '?'}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-[#111] truncate">{userName ?? '게스트'}</p>
-            <p className="text-[10px] text-[#999]">
-              {isOwner ? '모임장' : '멤버'}
-            </p>
-          </div>
-          <Link
-            href="/club/home"
-            className="w-7 h-7 rounded-lg hover:bg-[#f0f0f0] flex items-center justify-center text-[#999] hover:text-[#111] transition-colors"
-            aria-label="내 모임 목록"
-            title="다른 모임으로"
-          >
-            <LogOut size={13} strokeWidth={2} />
-          </Link>
-        </div>
+      {/* 하단: 도움말 카드 */}
+      <div className="p-3">
+        <HelpCard />
       </div>
     </>
   )
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8]">
+    <div className="min-h-screen bg-[#fafafa]">
       {/* ── 데모 배너 ── */}
       {isDemo && (
-        <div className="sticky top-0 z-50 bg-[#beff00] text-[#0a0a0a] flex items-center justify-between px-4 py-2.5">
-          <p className="text-[13px] font-semibold">
-            데모 체험 중입니다. 모든 데이터는 가상 데이터입니다.
+        <div className="sticky top-0 z-50 bg-[#0a0a0a] text-white flex items-center justify-between px-4 py-2.5">
+          <p className="text-[13px] font-medium flex items-center gap-2">
+            <span className="text-[#beff00]">●</span>
+            데모 체험 중 · 모든 데이터는 가상입니다
           </p>
           <Link
             href="/club/create"
-            className="text-[12px] font-bold bg-[#0a0a0a] text-[#beff00] px-3 py-1.5 rounded-full hover:bg-[#1a1a1a] transition-colors whitespace-nowrap"
+            className="text-[12px] font-bold bg-[#beff00] text-[#0a0a0a] px-3.5 py-1.5 rounded-full hover:bg-[#a8e600] transition-colors whitespace-nowrap"
           >
-            우리 클럽 만들기 →
+            내 모임 만들기 →
           </Link>
         </div>
       )}
 
       {/* ── 데스크톱 고정 사이드바 ── */}
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-30 w-[240px] bg-white border-r border-[#e5e5e5] flex-col">
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-30 w-[260px] bg-white border-r border-[#f0f0f0] flex-col">
         {sidebarContent}
       </aside>
 
       {/* ── 모바일 드로어 ── */}
       {drawerOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
-          {/* 백드롭 */}
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => setDrawerOpen(false)}
             aria-hidden="true"
           />
-          {/* 드로어 패널 */}
-          <aside className="relative flex flex-col w-[280px] bg-white shadow-xl animate-slide-in">
+          <aside className="relative flex flex-col w-[282px] bg-white shadow-xl animate-slide-in">
             <button
               onClick={() => setDrawerOpen(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-lg hover:bg-[#f0f0f0] flex items-center justify-center text-[#555] transition-colors"
+              className="absolute top-4 right-4 w-8 h-8 rounded-lg hover:bg-[#f0f0f0] flex items-center justify-center text-[#555] transition-colors z-10"
               aria-label="메뉴 닫기"
             >
               <X size={16} />
@@ -235,20 +217,32 @@ export function AppShell({
       )}
 
       {/* ── 메인 영역 ── */}
-      <div className="lg:pl-[240px]">
-        {/* 모바일 상단 바 */}
-        <header className="lg:hidden sticky top-0 z-20 bg-white border-b border-[#e5e5e5]">
-          <div className="flex items-center justify-between px-4 h-14">
+      <div className="lg:pl-[260px]">
+        {/* 데스크톱 전역 헤더 */}
+        {userName && userEmail !== undefined && (
+          <AppHeader
+            clubId={clubId}
+            isOwner={isOwner}
+            unreadNoticeCount={unreadNoticeCount}
+            userName={userName}
+            userEmail={userEmail ?? ''}
+            avatarUrl={avatarUrl ?? null}
+          />
+        )}
+
+        {/* 모바일 상단 바 (검색·알림·유저 포함) */}
+        <header className="lg:hidden sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-[#f0f0f0]">
+          <div className="flex items-center gap-2 px-3 h-14">
             <button
               onClick={() => setDrawerOpen(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#f8f8f8] text-[#555] transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-[#f5f5f5] text-[#555] transition-colors"
               aria-label="메뉴 열기"
             >
               <Menu size={18} />
             </button>
             <Link
               href={`/club/${clubId}`}
-              className="flex items-center gap-1.5 min-w-0"
+              className="flex items-center gap-1.5 min-w-0 flex-1"
             >
               <div
                 className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
@@ -256,11 +250,23 @@ export function AppShell({
               >
                 <ShuttlecockIcon size={12} className="text-[#111]/70" strokeWidth={1.7} />
               </div>
-              <span className="text-sm font-bold text-[#111] truncate max-w-[160px]">
+              <span className="text-sm font-bold text-[#111] truncate">
                 {clubName}
               </span>
             </Link>
-            <div className="w-9" />
+            <NotificationBell clubId={clubId} unreadNoticeCount={unreadNoticeCount} />
+            <QuickCreate clubId={clubId} isOwner={isOwner} />
+            {userName && userEmail !== undefined ? (
+              <UserMenu userName={userName} userEmail={userEmail ?? ''} avatarUrl={avatarUrl ?? null} />
+            ) : (
+              <Link
+                href="/login"
+                className="w-9 h-9 rounded-full bg-[#f5f5f5] flex items-center justify-center text-[#555]"
+                aria-label="로그인"
+              >
+                <UserIcon size={15} />
+              </Link>
+            )}
           </div>
         </header>
 
@@ -268,7 +274,7 @@ export function AppShell({
       </div>
 
       {/* ── 모바일 하단 탭바 ── */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-20 bg-white border-t border-[#e5e5e5] flex items-center justify-around h-16">
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-20 bg-white/90 backdrop-blur-md border-t border-[#f0f0f0] flex items-center justify-around h-16">
         {bottomTabs.map(({ href, label, Icon, match }) => {
           const active = match === `/club/${clubId}`
             ? pathname === match
@@ -278,11 +284,11 @@ export function AppShell({
               key={href}
               href={href}
               className={`relative flex flex-col items-center gap-0.5 py-2 px-3 transition-colors ${
-                active ? 'text-[#111]' : 'text-[#999]'
+                active ? 'text-[#0a0a0a]' : 'text-[#bbb]'
               }`}
             >
               {active && (
-                <span className="absolute top-0 w-8 h-[2px] bg-[#beff00] rounded-b-full" />
+                <span className="absolute top-0 w-8 h-[2px] bg-[#0a0a0a] rounded-b-full" />
               )}
               <Icon size={20} strokeWidth={active ? 2.2 : 1.7} />
               <span className="text-[10px] font-semibold">{label}</span>
@@ -309,36 +315,43 @@ function NavSection({
   if (items.length === 0) return null
   return (
     <div>
-      <p className="px-2.5 mb-1.5 text-[10px] font-extrabold text-[#bbb] uppercase tracking-wider">
+      <p className="px-3 mb-2 text-[11px] font-bold text-[#999] uppercase tracking-widest">
         {title}
       </p>
       <div className="space-y-0.5">
         {items.map(item => {
           const active = isActive(item)
           const showBadge = item.label === '공지' && unreadNoticeCount > 0
+
+          /* 좌측 활성 바 + 연회색 배경 스타일 */
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`group flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              className={`relative group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-medium transition-colors ${
                 active
-                  ? 'bg-[#0a0a0a] text-white'
-                  : 'text-[#555] hover:bg-[#f8f8f8] hover:text-[#111]'
+                  ? 'bg-[#f5f5f5] text-[#0a0a0a]'
+                  : 'text-[#555] hover:bg-[#fafafa] hover:text-[#111]'
               }`}
             >
+              {active && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-[2.5px] bg-[#0a0a0a] rounded-r-full" />
+              )}
               <item.Icon
                 size={15}
                 strokeWidth={active ? 2.2 : 1.9}
-                className={active ? 'text-[#beff00]' : 'text-[#999] group-hover:text-[#111]'}
+                className={active ? 'text-[#0a0a0a]' : 'text-[#bbb] group-hover:text-[#555]'}
               />
               <span className="flex-1 truncate">{item.label}</span>
-              {showBadge && (
-                <span className="text-[9px] font-extrabold text-white bg-red-500 rounded-full min-w-[16px] h-[16px] px-1 inline-flex items-center justify-center leading-none">
-                  {unreadNoticeCount > 99 ? '99+' : unreadNoticeCount}
+              {item.proOnly && (
+                <span className="text-[9px] font-extrabold text-[#f59e0b] bg-[#fef3c7] px-1.5 py-0.5 rounded tracking-wider">
+                  PRO
                 </span>
               )}
-              {active && (
-                <ChevronRight size={12} className="text-[#beff00] shrink-0" strokeWidth={2.5} />
+              {showBadge && (
+                <span className="text-[10px] font-extrabold text-white bg-[#10b981] rounded-full min-w-[18px] h-[18px] px-1.5 inline-flex items-center justify-center leading-none">
+                  {unreadNoticeCount > 99 ? '99+' : unreadNoticeCount}
+                </span>
               )}
             </Link>
           )
