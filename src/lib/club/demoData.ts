@@ -45,6 +45,26 @@ export interface DemoSession {
   notes: string | null
 }
 
+export interface DemoMatch {
+  id: string
+  sessionId: string
+  date: string
+  teamA: [string, string]
+  teamB: [string, string]
+  winner: 'A' | 'B'
+  scoreA: number
+  scoreB: number
+}
+
+export interface DemoFinanceRecord {
+  memberId: string
+  year: number
+  month: number
+  amount: number
+  paid: boolean
+  paidAt?: string
+}
+
 /* ── 데이터 ──────────────────────────────────────────── */
 
 export const DEMO_CLUBS: DemoClub[] = [
@@ -54,8 +74,8 @@ export const DEMO_CLUBS: DemoClub[] = [
     description:
       '관악구 20&30대 배드민턴 동호회입니다.\n저희와 꾸준히 함께 즐기며 운동하실 분 환영합니다! 🔥\n\n매주 토/일 정기모임을 운영 중이에요. 실력보다 성실한 출석을 중요하게 생각합니다.',
     court_count: 3,
-    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    memberCount: 24,
+    created_at: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(), // 2개월 전 생성
+    memberCount: 30,
     isDemo: true,
     location: '관악구',
     activityPlace: '국사봉체육관',
@@ -65,14 +85,43 @@ export const DEMO_CLUBS: DemoClub[] = [
   },
 ]
 
+/* ─ 30명 회원 (실력 분포 자연스럽게) ──────────────────── */
 export const DEMO_MEMBERS: DemoMember[] = [
-  { id: 'm1', name: '김민준', role: 'owner',   skill: 72, level: 'C조'   },
-  { id: 'm2', name: '이서연', role: 'manager', skill: 68, level: 'C조'   },
-  { id: 'm3', name: '박지호', role: 'member',  skill: 61, level: 'D조'   },
-  { id: 'm4', name: '최유나', role: 'member',  skill: 55, level: 'D조'   },
-  { id: 'm5', name: '정태양', role: 'member',  skill: 48, level: 'D조'   },
-  { id: 'm6', name: '한소희', role: 'member',  skill: 44, level: 'D조'   },
-  { id: 'm7', name: '오준서', role: 'member',  skill: 38, level: '초심자' },
+  // 상위 (C조 / B조 수준)
+  { id: 'm1',  name: '김민준',   role: 'owner',   skill: 88, level: 'B조'   },
+  { id: 'm2',  name: '이서연',   role: 'manager', skill: 82, level: 'B조'   },
+  { id: 'm3',  name: '박지호',   role: 'member',  skill: 78, level: 'C조'   },
+  { id: 'm4',  name: '최유나',   role: 'member',  skill: 74, level: 'C조'   },
+  { id: 'm5',  name: '정태양',   role: 'member',  skill: 72, level: 'C조'   },
+  { id: 'm6',  name: '한소희',   role: 'member',  skill: 70, level: 'C조'   },
+  // 중상위 (D조 상위)
+  { id: 'm7',  name: '오준서',   role: 'member',  skill: 66, level: 'D조'   },
+  { id: 'm8',  name: '윤채원',   role: 'member',  skill: 64, level: 'D조'   },
+  { id: 'm9',  name: '장도윤',   role: 'member',  skill: 62, level: 'D조'   },
+  { id: 'm10', name: '강예린',   role: 'member',  skill: 60, level: 'D조'   },
+  { id: 'm11', name: '임시우',   role: 'member',  skill: 58, level: 'D조'   },
+  // 중위 (D조 중위)
+  { id: 'm12', name: '송하은',   role: 'member',  skill: 56, level: 'D조'   },
+  { id: 'm13', name: '권지민',   role: 'member',  skill: 54, level: 'D조'   },
+  { id: 'm14', name: '배다인',   role: 'member',  skill: 52, level: 'D조'   },
+  { id: 'm15', name: '조현우',   role: 'member',  skill: 50, level: 'D조'   },
+  { id: 'm16', name: '신유진',   role: 'member',  skill: 48, level: 'D조'   },
+  // 중하위 (초심자)
+  { id: 'm17', name: '황지안',   role: 'member',  skill: 46, level: '초심자' },
+  { id: 'm18', name: '안재현',   role: 'member',  skill: 44, level: '초심자' },
+  { id: 'm19', name: '유서윤',   role: 'member',  skill: 42, level: '초심자' },
+  { id: 'm20', name: '홍승민',   role: 'member',  skill: 40, level: '초심자' },
+  { id: 'm21', name: '남지율',   role: 'member',  skill: 38, level: '초심자' },
+  // 하위 (초심자 / 왕초보)
+  { id: 'm22', name: '문예나',   role: 'member',  skill: 36, level: '초심자' },
+  { id: 'm23', name: '전수아',   role: 'member',  skill: 34, level: '왕초보' },
+  { id: 'm24', name: '백건우',   role: 'member',  skill: 32, level: '왕초보' },
+  { id: 'm25', name: '노하린',   role: 'member',  skill: 30, level: '왕초보' },
+  { id: 'm26', name: '구도현',   role: 'member',  skill: 28, level: '왕초보' },
+  { id: 'm27', name: '서아인',   role: 'member',  skill: 26, level: '왕초보' },
+  { id: 'm28', name: '양시현',   role: 'member',  skill: 24, level: '왕초보' },
+  { id: 'm29', name: '류민서',   role: 'member',  skill: 22, level: '왕초보' },
+  { id: 'm30', name: '김한결',   role: 'member',  skill: 20, level: '왕초보' },
 ]
 
 export const DEMO_REGULAR_SESSIONS: DemoRegularSession[] = [
@@ -85,7 +134,7 @@ export const DEMO_REGULAR_SESSIONS: DemoRegularSession[] = [
     fee: '국사봉 입장비용',
     nextDate: '2026-04-25',
     maxAttend: 24,
-    currentAttend: 4,
+    currentAttend: 18,
     thumbnailColor: '#beff00',
     imageUrls: ['https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&auto=format&fit=crop&q=70'],
   },
@@ -98,14 +147,98 @@ export const DEMO_REGULAR_SESSIONS: DemoRegularSession[] = [
     fee: '국사봉 입장비용',
     nextDate: '2026-04-26',
     maxAttend: 24,
-    currentAttend: 8,
+    currentAttend: 15,
     thumbnailColor: '#c8f5ff',
     imageUrls: ['https://images.unsplash.com/photo-1620155108048-9bb58cbf35fe?w=800&auto=format&fit=crop&q=70'],
   },
+  {
+    id: 'rs3',
+    title: '목요일 저녁민턴',
+    dayOfWeek: '목',
+    time: '19:00 ~ 22:00',
+    place: '국사봉체육관',
+    fee: '국사봉 입장비용',
+    nextDate: '2026-04-30',
+    maxAttend: 16,
+    currentAttend: 10,
+    thumbnailColor: '#fef3c7',
+  },
 ]
 
+/* ─ 지난 3개월 세션 기록 (약 25개) ──────────────────────
+ * 날짜: 2026-01-27 ~ 2026-04-21
+ * 주 2~3회 (토·일 + 목 일부) 패턴
+ * ─ */
 export const DEMO_SESSIONS: DemoSession[] = [
-  { id: 's1', sessionDate: '2026-04-13', attendCount: 10, status: 'closed', notes: '토요일 오전민턴' },
-  { id: 's2', sessionDate: '2026-04-10', attendCount: 8,  status: 'closed', notes: '목요일 저녁민턴' },
-  { id: 's3', sessionDate: '2026-04-06', attendCount: 12, status: 'closed', notes: '일요일 오전민턴' },
+  // 4월
+  { id: 's25', sessionDate: '2026-04-20', attendCount: 16, status: 'closed', notes: '일요일 오전민턴' },
+  { id: 's24', sessionDate: '2026-04-19', attendCount: 18, status: 'closed', notes: '토요일 오전민턴' },
+  { id: 's23', sessionDate: '2026-04-17', attendCount: 10, status: 'closed', notes: '목요일 저녁민턴' },
+  { id: 's22', sessionDate: '2026-04-13', attendCount: 14, status: 'closed', notes: '일요일 오전민턴' },
+  { id: 's21', sessionDate: '2026-04-12', attendCount: 20, status: 'closed', notes: '토요일 오전민턴' },
+  { id: 's20', sessionDate: '2026-04-10', attendCount: 12, status: 'closed', notes: '목요일 저녁민턴' },
+  { id: 's19', sessionDate: '2026-04-06', attendCount: 16, status: 'closed', notes: '일요일 오전민턴' },
+  { id: 's18', sessionDate: '2026-04-05', attendCount: 22, status: 'closed', notes: '토요일 오전민턴 — 신입 환영 모임' },
+  // 3월
+  { id: 's17', sessionDate: '2026-03-30', attendCount: 15, status: 'closed', notes: '일요일 오전민턴' },
+  { id: 's16', sessionDate: '2026-03-29', attendCount: 18, status: 'closed', notes: '토요일 오전민턴' },
+  { id: 's15', sessionDate: '2026-03-27', attendCount: 10, status: 'closed', notes: '목요일 저녁민턴' },
+  { id: 's14', sessionDate: '2026-03-23', attendCount: 14, status: 'closed', notes: '일요일 오전민턴' },
+  { id: 's13', sessionDate: '2026-03-22', attendCount: 16, status: 'closed', notes: '토요일 오전민턴' },
+  { id: 's12', sessionDate: '2026-03-16', attendCount: 12, status: 'closed', notes: '일요일 오전민턴' },
+  { id: 's11', sessionDate: '2026-03-15', attendCount: 19, status: 'closed', notes: '토요일 오전민턴' },
+  { id: 's10', sessionDate: '2026-03-13', attendCount: 11, status: 'closed', notes: '목요일 저녁민턴' },
+  { id: 's9',  sessionDate: '2026-03-09', attendCount: 15, status: 'closed', notes: '일요일 오전민턴' },
+  { id: 's8',  sessionDate: '2026-03-08', attendCount: 17, status: 'closed', notes: '토요일 오전민턴' },
+  { id: 's7',  sessionDate: '2026-03-02', attendCount: 14, status: 'closed', notes: '일요일 오전민턴' },
+  { id: 's6',  sessionDate: '2026-03-01', attendCount: 20, status: 'closed', notes: '토요일 오전민턴 — 3월 정기' },
+  // 2월
+  { id: 's5',  sessionDate: '2026-02-23', attendCount: 13, status: 'closed', notes: '일요일 오전민턴' },
+  { id: 's4',  sessionDate: '2026-02-22', attendCount: 16, status: 'closed', notes: '토요일 오전민턴' },
+  { id: 's3',  sessionDate: '2026-02-16', attendCount: 11, status: 'closed', notes: '일요일 오전민턴 — 명절 후 첫 모임' },
+  { id: 's2',  sessionDate: '2026-02-15', attendCount: 9,  status: 'closed', notes: '토요일 오전민턴' },
+  { id: 's1',  sessionDate: '2026-02-08', attendCount: 14, status: 'closed', notes: '2월 첫 모임' },
 ]
+
+/* ─ 최근 세션 경기 기록 (샘플) ──────────────────────
+ * 실제 매치는 ranking 페이지가 DEMO_MEMBERS 기반으로 자동 계산
+ * 여기서는 "최근 경기" 표시용 샘플
+ * ─ */
+export const DEMO_MATCHES: DemoMatch[] = [
+  { id: 'mt1', sessionId: 's25', date: '2026-04-20', teamA: ['m1', 'm3'],  teamB: ['m2', 'm4'],  winner: 'A', scoreA: 21, scoreB: 18 },
+  { id: 'mt2', sessionId: 's25', date: '2026-04-20', teamA: ['m5', 'm10'], teamB: ['m6', 'm11'], winner: 'B', scoreA: 17, scoreB: 21 },
+  { id: 'mt3', sessionId: 's25', date: '2026-04-20', teamA: ['m1', 'm9'],  teamB: ['m2', 'm8'],  winner: 'A', scoreA: 21, scoreB: 14 },
+  { id: 'mt4', sessionId: 's24', date: '2026-04-19', teamA: ['m3', 'm15'], teamB: ['m7', 'm13'], winner: 'A', scoreA: 21, scoreB: 19 },
+  { id: 'mt5', sessionId: 's24', date: '2026-04-19', teamA: ['m2', 'm6'],  teamB: ['m4', 'm8'],  winner: 'B', scoreA: 16, scoreB: 21 },
+]
+
+/* ─ 회비 납부 현황 (최근 3개월) ──────────────────────
+ * 회원 30명 × 3개월 = 90건
+ * 납부율: 4월 85% · 3월 95% · 2월 100%
+ * ─ */
+export const DEMO_FINANCE: DemoFinanceRecord[] = generateDemoFinance()
+
+function generateDemoFinance(): DemoFinanceRecord[] {
+  const records: DemoFinanceRecord[] = []
+  const months: Array<{ year: number; month: number; paidRate: number }> = [
+    { year: 2026, month: 4, paidRate: 0.85 },
+    { year: 2026, month: 3, paidRate: 0.95 },
+    { year: 2026, month: 2, paidRate: 1.0 },
+  ]
+
+  for (const { year, month, paidRate } of months) {
+    DEMO_MEMBERS.forEach((member, idx) => {
+      const paid = idx / DEMO_MEMBERS.length < paidRate
+      records.push({
+        memberId: member.id,
+        year,
+        month,
+        amount: 30000,
+        paid,
+        paidAt: paid ? `${year}-${String(month).padStart(2, '0')}-05` : undefined,
+      })
+    })
+  }
+
+  return records
+}

@@ -13,9 +13,10 @@ import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { ClubSwitcher, type ClubOption } from './ClubSwitcher'
 import { AppHeader } from './AppHeader'
 import { HelpCard } from './HelpCard'
-import { AppSearchBar } from './AppSearchBar'
 import { NotificationBell } from './NotificationBell'
 import { QuickCreate } from './QuickCreate'
+import { DemoWelcomeModal } from './DemoWelcomeModal'
+import { DemoConversionModal } from './DemoConversionModal'
 import { UserMenu } from '@/components/layout/marketing/UserMenu'
 
 /* ── 사이드바 메뉴 아이템 타입 ── */
@@ -174,6 +175,14 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
+      {/* ── 데모 모달 ── */}
+      {isDemo && (
+        <>
+          <DemoWelcomeModal />
+          <DemoConversionModal />
+        </>
+      )}
+
       {/* ── 데모 배너 ── */}
       {isDemo && (
         <div className="sticky top-0 z-50 bg-[#0a0a0a] text-white flex items-center justify-between px-4 py-2.5">
