@@ -95,7 +95,7 @@ function AllClubCard({
   onToggleFavorite: (id: string) => void
 }) {
   const isNew = isNewClub(club.created_at)
-  const href = `/club/${club.id}/view`
+  const href = `/club/${club.id}`
 
   return (
     <div className="bg-white border border-[#e5e5e5] rounded-2xl overflow-hidden hover:border-[#beff00]/70 transition-colors">
@@ -200,7 +200,7 @@ function MyClubCard({ club }: { club: Club }) {
           </div>
           <div className="mt-auto pt-1">
             <Link
-              href={`/club/${club.id}/view`}
+              href={`/club/${club.id}`}
               className="inline-flex items-center justify-center bg-[#beff00] text-[#111] font-bold text-sm py-2 px-5 rounded-xl hover:brightness-95 transition-all"
             >
               입장하기

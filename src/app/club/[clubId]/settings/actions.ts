@@ -63,7 +63,7 @@ export async function updateClubProfileAction(
 
   if (error) return { error: '저장에 실패했습니다.' }
 
-  revalidatePath(`/club/${clubId}/view`)
+  revalidatePath(`/club/${clubId}`)
   revalidatePath(`/club/${clubId}/settings`)
   return { success: true }
 }

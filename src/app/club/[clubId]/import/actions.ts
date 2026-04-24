@@ -131,7 +131,7 @@ export async function importMembersAction(
   })
 
   revalidatePath(`/club/${clubId}/members`)
-  revalidatePath(`/club/${clubId}/view`)
+  revalidatePath(`/club/${clubId}`)
   revalidatePath(`/club/${clubId}/import`)
 
   return {

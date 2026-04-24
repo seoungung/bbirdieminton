@@ -92,7 +92,7 @@ export async function shareClubSession(
   clubId: string,
   onCopied: () => void,
 ) {
-  const url = `${window.location.origin}/club/${clubId}/view`
+  const url = `${window.location.origin}/club/${clubId}`
   const text = `${s.title}\n${formatShortDate(s.nextDate, s.dayOfWeek)} ${startTime(s.time)} · ${s.place}`
 
   try {

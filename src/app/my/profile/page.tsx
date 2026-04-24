@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { ProfileForm } from '@/components/my/ProfileForm'
 import { LogoutButton } from '@/components/auth/LogoutButton'
-import { User as UserIcon, Mail } from 'lucide-react'
+import { Mail } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: '내 프로필 | 버디민턴',
@@ -51,17 +51,18 @@ export default async function ProfilePage() {
         {/* 프로필 카드 */}
         <section className="bg-white rounded-2xl border border-[#e5e5e5] p-6 mb-5">
           <div className="flex items-center gap-4 pb-5 mb-5 border-b border-[#f0f0f0]">
-            <div className="w-16 h-16 rounded-full bg-[#f0f0f0] flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="w-16 h-16 rounded-full bg-[#0a0a0a] flex items-center justify-center overflow-hidden flex-shrink-0 text-white font-extrabold text-xl">
               {avatarUrl ? (
                 <Image
-                  src={avatarUrl}
+                  src={avatarUrl.startsWith('http://') ? avatarUrl.replace(/^http:\/\//, 'https://') : avatarUrl}
                   alt={displayName}
                   width={64}
                   height={64}
-                  className="object-cover"
+                  className="object-cover w-full h-full"
+                  unoptimized
                 />
               ) : (
-                <UserIcon size={28} className="text-[#bbb]" />
+                <span>{displayName.charAt(0).toUpperCase()}</span>
               )}
             </div>
             <div className="min-w-0">

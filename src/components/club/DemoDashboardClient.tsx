@@ -166,7 +166,7 @@ export function DemoDashboardClient({
           {/* 다음 정기모임 */}
           {nextRegularSession ? (
             <Link
-              href={`/club/${clubId}/view?tab=${encodeURIComponent('정기모임')}`}
+              href={`/club/${clubId}?tab=${encodeURIComponent('정기모임')}`}
               className="group block bg-white rounded-3xl border border-[#e5e5e5] p-5 hover:border-[#beff00] hover:shadow-sm transition-all"
             >
               <div className="flex items-center justify-between mb-3">
@@ -268,7 +268,7 @@ export function DemoDashboardClient({
               accent="blue"
             />
             <ShortcutCard
-              href={`/club/${clubId}/view?tab=${encodeURIComponent('운영&관리')}`}
+              href={`/club/${clubId}?tab=${encodeURIComponent('운영&관리')}`}
               Icon={SettingsIcon}
               label="운영·관리"
               desc="회비·공지"
@@ -287,7 +287,7 @@ export function DemoDashboardClient({
               </span>
             </div>
             <Link
-              href={`/club/${clubId}/view?tab=${encodeURIComponent('게임보드')}`}
+              href={`/club/${clubId}?tab=${encodeURIComponent('게임보드')}`}
               className="text-[11px] font-bold text-[#555] hover:text-[#111] transition-colors inline-flex items-center gap-0.5"
             >
               더 보기 <ChevronRight size={11} />
@@ -363,7 +363,7 @@ export function DemoDashboardClient({
 
         {/* 7. 전체 탭 뷰로 전환 안내 */}
         <Link
-          href={`/club/${clubId}/view`}
+          href={`/club/${clubId}`}
           className="block bg-white rounded-3xl border border-dashed border-[#bbb] p-5 text-center hover:border-[#111] hover:bg-[#f8f8f8] transition-all group"
         >
           <p className="text-sm font-bold text-[#111] mb-1">

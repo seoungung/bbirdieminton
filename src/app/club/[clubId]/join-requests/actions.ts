@@ -61,7 +61,7 @@ export async function submitJoinRequestAction(
 
   if (error) return { error: '가입 신청에 실패했습니다.' }
 
-  revalidatePath(`/club/${clubId}/view`)
+  revalidatePath(`/club/${clubId}`)
   return { success: true }
 }
 
@@ -82,7 +82,7 @@ export async function cancelJoinRequestAction(
 
   if (error) return { error: '신청 취소에 실패했습니다.' }
 
-  revalidatePath(`/club/${clubId}/view`)
+  revalidatePath(`/club/${clubId}`)
   return { success: true }
 }
 
@@ -168,7 +168,7 @@ export async function approveJoinRequestAction(
     .eq('club_id', clubId)
 
   revalidatePath(`/club/${clubId}/join-requests`)
-  revalidatePath(`/club/${clubId}/view`)
+  revalidatePath(`/club/${clubId}`)
   return { success: true }
 }
 

@@ -29,7 +29,7 @@ export async function updateMemberRoleAction(
   if (error) return { error: '역할 변경에 실패했습니다.' }
 
   revalidatePath(`/club/${clubId}/members`)
-  revalidatePath(`/club/${clubId}/view`)
+  revalidatePath(`/club/${clubId}`)
   return { success: true }
 }
 
@@ -94,7 +94,7 @@ export async function removeMemberAction(memberId: string, clubId: string) {
   if (error) return { error: '멤버 내보내기에 실패했습니다.' }
 
   revalidatePath(`/club/${clubId}/members`)
-  revalidatePath(`/club/${clubId}/view`)
+  revalidatePath(`/club/${clubId}`)
   return { success: true }
 }
 
@@ -137,6 +137,6 @@ export async function regenerateInviteCodeAction(clubId: string) {
   if (error) return { error: '초대코드 재발급에 실패했습니다.' }
 
   revalidatePath(`/club/${clubId}/settings`)
-  revalidatePath(`/club/${clubId}/view`)
+  revalidatePath(`/club/${clubId}`)
   return { success: true, invite_code: newCode }
 }

@@ -33,7 +33,7 @@ export default async function JoinRequestsPage({ params }: Props) {
   if (!membership) redirect('/club/home')
 
   if (!['owner', 'manager'].includes(membership.role)) {
-    redirect(`/club/${clubId}/view`)
+    redirect(`/club/${clubId}`)
   }
 
   const requests = await getJoinRequestsAction(clubId)

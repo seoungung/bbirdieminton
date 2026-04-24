@@ -755,7 +755,7 @@ export function GameBoardClient({
 
       /* 데모는 게임보드 페이지 내에서 머물고 (세션 DB 없음), 실제는 모임 뷰의 게임보드 탭으로 이동해 히스토리 확인 */
       if (!isDemo) {
-        router.push(`/club/${clubId}/view?tab=${encodeURIComponent('게임보드')}`)
+        router.push(`/club/${clubId}?tab=${encodeURIComponent('게임보드')}`)
       }
     },
     [isDemo, courtCount, router, clubId]
@@ -877,7 +877,7 @@ export function GameBoardClient({
           ) {
             router.back()
           } else {
-            router.push(`/club/${clubId}/view`)
+            router.push(`/club/${clubId}`)
           }
         }}
         onSourceChange={handleSourceChange}

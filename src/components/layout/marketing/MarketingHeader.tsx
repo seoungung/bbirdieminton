@@ -126,11 +126,14 @@ export function MarketingHeader() {
               {user.avatarUrl ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
                 <img
-                  src={user.avatarUrl}
+                  src={user.avatarUrl.startsWith('http://') ? user.avatarUrl.replace(/^http:\/\//, 'https://') : user.avatarUrl}
                   alt={user.name}
                   width={40}
                   height={40}
                   className="w-10 h-10 rounded-full object-cover border border-[#f0f0f0]"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = 'none'
+                  }}
                 />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-[#0a0a0a] text-white flex items-center justify-center font-bold">

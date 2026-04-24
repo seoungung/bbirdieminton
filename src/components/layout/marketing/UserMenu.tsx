@@ -133,22 +133,31 @@ export function UserMenu({ userName, userEmail, avatarUrl }: Props) {
 /* ─────────────────────────────────────────────── */
 
 function Avatar({ url, name, size }: { url: string | null; name: string; size: number }) {
-  if (url) {
+  const [failed, setFailed] = useState(false)
+
+  // 카카오 CDN이 http로 주는 경우 대비 https로 치환
+  const safeUrl = url?.startsWith('http://') ? url.replace(/^http:\/\//, 'https://') : url
+  const initial = name.trim().charAt(0).toUpperCase() || '?'
+
+  if (safeUrl && !failed) {
     return (
       <Image
-        src={url}
+        src={safeUrl}
         alt={name}
         width={size}
         height={size}
         className="rounded-full object-cover shrink-0 border border-[#f0f0f0]"
+        onError={() => setFailed(true)}
+        unoptimized
       />
     )
   }
-  const initial = name.trim().charAt(0).toUpperCase() || '?'
+
   return (
     <div
       className="rounded-full bg-[#0a0a0a] text-white flex items-center justify-center shrink-0 font-bold"
       style={{ width: size, height: size, fontSize: size * 0.42 }}
+      aria-label={name}
     >
       {initial}
     </div>
