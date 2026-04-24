@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { KakaoLoginButton } from '@/components/auth/KakaoLoginButton'
-import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -26,10 +26,15 @@ export default async function LoginPage({
 
         {/* 로고 */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-[#0a0a0a] flex items-center justify-center">
-              <ShuttlecockIcon size={20} className="text-[#beff00]" strokeWidth={2} />
-            </div>
+          <div className="flex items-center justify-center mb-3">
+            <Image
+              src="/symbol_birdieminton-color.png"
+              alt="버디민턴"
+              width={48}
+              height={48}
+              priority
+              className="h-12 w-auto object-contain"
+            />
           </div>
           <h1 className="text-[22px] font-extrabold text-[#111] tracking-tight">버디민턴</h1>
           <p className="text-sm text-[#999] mt-1">배드민턴 동호회 관리 플랫폼</p>

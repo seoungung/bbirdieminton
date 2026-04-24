@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   Home, Gamepad2, Trophy, Users, Wallet, Settings as SettingsIcon,
   Megaphone, BarChart3,
   Menu, X,
-  Bell, Search, User as UserIcon,
+  User as UserIcon,
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { ClubSwitcher, type ClubOption } from './ClubSwitcher'
@@ -139,12 +140,16 @@ export function AppShell({
       <div className="px-4 pt-5 pb-4">
         <Link
           href="/club/home"
-          className="flex items-center gap-2 text-[#111] mb-4 group"
+          className="flex items-center mb-4 hover:opacity-80 transition-opacity"
         >
-          <div className="w-7 h-7 rounded-lg bg-[#0a0a0a] flex items-center justify-center">
-            <ShuttlecockIcon size={14} className="text-[#beff00]" strokeWidth={2} />
-          </div>
-          <span className="text-[16px] font-extrabold tracking-tight">버디민턴</span>
+          <Image
+            src="/textlogo_width_birdieminton-black.png"
+            alt="버디민턴"
+            width={110}
+            height={26}
+            priority
+            className="h-6 w-auto object-contain"
+          />
         </Link>
 
         {/* 클럽 스위처 */}
@@ -255,14 +260,15 @@ export function AppShell({
             </button>
             <Link
               href={`/club/${clubId}`}
-              className="flex items-center gap-1.5 min-w-0 flex-1"
+              className="flex items-center gap-2 min-w-0 flex-1"
             >
-              <div
-                className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
-                style={{ background: thumbnailColor ?? '#beff00' }}
-              >
-                <ShuttlecockIcon size={12} className="text-[#111]/70" strokeWidth={1.7} />
-              </div>
+              <Image
+                src="/symbol_birdieminton-black.png"
+                alt="버디민턴"
+                width={22}
+                height={22}
+                className="h-5 w-auto object-contain shrink-0"
+              />
               <span className="text-sm font-bold text-[#111] truncate">
                 {clubName}
               </span>

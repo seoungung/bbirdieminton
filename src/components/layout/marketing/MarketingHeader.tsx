@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useState, useTransition } from 'react'
 import { Menu, X, LogOut, User as UserIcon } from 'lucide-react'
-import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/app/login/actions'
 import { UserMenu } from './UserMenu'
@@ -58,11 +58,15 @@ export function MarketingHeader() {
       <div className="max-w-[1088px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
 
         {/* 로고 */}
-        <Link href="/" className="flex items-center gap-2 shrink-0 hover:opacity-80 transition-opacity">
-          <div className="w-7 h-7 rounded-lg bg-[#0a0a0a] flex items-center justify-center">
-            <ShuttlecockIcon size={14} className="text-[#beff00]" strokeWidth={2} />
-          </div>
-          <span className="text-[17px] font-extrabold tracking-tight text-[#111]">버디민턴</span>
+        <Link href="/" className="flex items-center shrink-0 hover:opacity-80 transition-opacity">
+          <Image
+            src="/textlogo_width_birdieminton-black.png"
+            alt="버디민턴"
+            width={120}
+            height={28}
+            priority
+            className="h-7 w-auto object-contain"
+          />
         </Link>
 
         {/* 데스크톱 nav */}
