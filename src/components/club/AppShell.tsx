@@ -17,6 +17,8 @@ import { NotificationBell } from './NotificationBell'
 import { QuickCreate } from './QuickCreate'
 import { DemoWelcomeModal } from './DemoWelcomeModal'
 import { DemoConversionModal } from './DemoConversionModal'
+import { DemoTour } from './DemoTour'
+import { DemoMissionWidget } from './DemoMissionWidget'
 import { UserMenu } from '@/components/layout/marketing/UserMenu'
 
 /* ── 사이드바 메뉴 아이템 타입 ── */
@@ -175,10 +177,12 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
-      {/* ── 데모 모달 ── */}
+      {/* ── 데모 모달·투어·미션 ── */}
       {isDemo && (
         <>
           <DemoWelcomeModal />
+          <DemoTour clubId={clubId} />
+          <DemoMissionWidget clubId={clubId} />
           <DemoConversionModal />
         </>
       )}
@@ -332,11 +336,22 @@ function NavSection({
           const active = isActive(item)
           const showBadge = item.label === '공지' && unreadNoticeCount > 0
 
+          /* 투어용 data 속성 계산 (href suffix 매칭) */
+          const tourId = item.href.endsWith('/gameboard') ? 'nav-gameboard'
+            : item.href.endsWith('/ranking') ? 'nav-ranking'
+            : item.href.endsWith('/notices') ? 'nav-notices'
+            : item.href.endsWith('/members') ? 'nav-members'
+            : item.href.endsWith('/finance') ? 'nav-finance'
+            : item.href.endsWith('/settings') ? 'nav-settings'
+            : /^\/club\/[^/]+$/.test(item.href) ? 'nav-dashboard'
+            : undefined
+
           /* 좌측 활성 바 + 연회색 배경 스타일 */
           return (
             <Link
               key={item.href}
               href={item.href}
+              data-tour={tourId}
               className={`relative group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-medium transition-colors ${
                 active
                   ? 'bg-[#f5f5f5] text-[#0a0a0a]'
