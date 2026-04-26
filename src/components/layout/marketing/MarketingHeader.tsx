@@ -60,10 +60,10 @@ export function MarketingHeader() {
         {/* 로고 */}
         <Link href="/" className="flex items-center shrink-0 hover:opacity-80 transition-opacity">
           <Image
-            src="/textlogo_width_birdieminton-black.png"
+            src="/textlogo_height_birdieminton-black.png"
             alt="버디민턴"
-            width={120}
-            height={28}
+            width={130}
+            height={30}
             priority
             className="h-7 w-auto object-contain"
           />
