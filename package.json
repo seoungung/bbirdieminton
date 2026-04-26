@@ -12,9 +12,6 @@
     "db:push": "npx supabase db push",
     "db:types": "npx supabase gen types typescript --local > src/types/database.types.ts",
     "db:backup": "mkdir -p .backup && pg_dump $DATABASE_URL > .backup/backup-$(date +%Y%m%d-%H%M%S).sql 2>&1 || echo 'pg_dump not available - use Supabase dashboard export'",
-    "racket:add": "tsx scripts/add-racket.ts",
-    "racket:validate": "tsx scripts/validate-racket.ts",
-    "racket:sync": "tsx scripts/sync-supabase.ts",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "analyze": "ANALYZE=true next build"
