@@ -22,7 +22,7 @@ export function JoinRequestsClient({ clubId, initialRequests }: Props) {
   const handleApprove = (req: JoinRequestRow) => {
     setError(null)
     startTransition(async () => {
-      const result = await approveJoinRequestAction(clubId, req.id, req.user_id)
+      const result = await approveJoinRequestAction(clubId, req.id)
       if (result.error) { setError(result.error); return }
       setRequests(prev => prev.filter(r => r.id !== req.id))
     })

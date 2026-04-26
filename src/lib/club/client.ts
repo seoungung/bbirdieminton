@@ -72,7 +72,7 @@ export async function getMyMembership(
     .select('*')
     .eq('club_id', clubId)
     .eq('user_id', clubUserId)
-    .single()
+    .maybeSingle()
   return data
 }
 

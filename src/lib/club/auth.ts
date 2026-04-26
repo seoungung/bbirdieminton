@@ -55,7 +55,7 @@ export async function getClubUserId(
     .from('users')
     .select('id')
     .eq('birdieminton_user_id', authUser.id)
-    .single()
+    .maybeSingle()
 
   return data?.id ?? null
 }

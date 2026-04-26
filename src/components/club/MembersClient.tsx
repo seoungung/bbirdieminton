@@ -43,8 +43,17 @@ export function MembersClient({ clubId, members, statsData, isManager, isOwner, 
   const filtered = filter === 'all' ? members : members.filter(m => m.role === filter)
 
   function handleSkillSave(memberId: string) {
-    const score = parseInt(skillInput)
-    if (isNaN(score) || score < 0 || score > 100) return
+    const trimmed = skillInput.trim()
+    const score = Number(trimmed)
+    if (
+      trimmed === '' ||
+      !Number.isFinite(score) ||
+      !Number.isInteger(score) ||
+      score < 0 ||
+      score > 100
+    ) {
+      return
+    }
     startTransition(async () => {
       await updateSkillScoreAction(memberId, clubId, score)
       setEditingSkill(null)

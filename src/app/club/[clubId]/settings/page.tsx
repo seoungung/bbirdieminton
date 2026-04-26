@@ -24,6 +24,8 @@ export default async function SettingsPage({
   params: Promise<{ clubId: string }>
 }) {
   const { clubId } = await params
+  // 데모 모드는 모임 설정 미제공 — 데모 대시보드로 안전 회귀
+  if (clubId.startsWith('demo-')) redirect(`/club/${clubId}`)
   const supabase = await createClient()
   const {
     data: { user },
@@ -51,7 +53,7 @@ export default async function SettingsPage({
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
         <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-          <BackButton fallback={`/club/${clubId}/manage`} />
+          <BackButton fallback={`/club/${clubId}`} />
           <h1 className="text-base font-bold text-[#111]">모임 설정</h1>
         </div>
       </header>

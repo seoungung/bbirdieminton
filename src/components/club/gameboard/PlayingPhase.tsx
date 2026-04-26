@@ -239,9 +239,10 @@ function CustomPickOverlay({
 
   function cyclePlayer(id: string) {
     if (teamA.includes(id)) {
-      // A → B (if B has room)
+      // A → B → 미선택 (cycle). B가 가득 차 있으면 한 번에 미선택으로
       setTeamA(prev => prev.filter(x => x !== id))
       if (teamB.length < 2) setTeamB(prev => [...prev, id])
+      // B가 2명이면 미선택 상태로 떨어짐 (의도적, B에 끼울 자리 없음)
     } else if (teamB.includes(id)) {
       // B → 미선택
       setTeamB(prev => prev.filter(x => x !== id))
@@ -252,6 +253,7 @@ function CustomPickOverlay({
       } else if (teamB.length < 2) {
         setTeamB(prev => [...prev, id])
       }
+      // 둘 다 가득이면 그대로 (사용자 의도 보존)
     }
   }
 

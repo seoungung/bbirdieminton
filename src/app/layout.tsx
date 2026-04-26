@@ -21,7 +21,6 @@ export const metadata: Metadata = {
     siteName: '버디민턴',
     title: '버디민턴 | 배드민턴 동호회 관리 플랫폼',
     description: '배드민턴 동호회 운영의 모든 것. 게임보드, 랭킹, 정산, 공지를 한 곳에서.',
-    images: [{ url: '/api/og', width: 1200, height: 630, alt: '버디민턴' }],
   },
   twitter: {
     card: 'summary_large_image',

@@ -103,6 +103,21 @@ export async function toggleSettlementPaidAction(
     return { error: '권한이 없습니다.' }
   }
 
+  // settlementMemberId가 정말 이 클럽 소속인지 확인 (cross-club IDOR 방어)
+  const { data: smRow } = await supabase
+    .from('settlement_members')
+    .select('id, settlement:session_settlements!inner(club_id)')
+    .eq('id', settlementMemberId)
+    .maybeSingle()
+
+  if (
+    !smRow ||
+    // @ts-expect-error supabase join 타입 추론 한계
+    smRow.settlement?.club_id !== clubId
+  ) {
+    return { error: '권한이 없습니다.' }
+  }
+
   const { error } = await supabase
     .from('settlement_members')
     .update({ paid: !currentPaid })
@@ -135,6 +150,7 @@ export async function deleteSettlementAction(clubId: string, settlementId: strin
     .from('session_settlements')
     .delete()
     .eq('id', settlementId)
+    .eq('club_id', clubId)
   if (error) return { error: '삭제 실패: ' + error.message }
 
   revalidatePath(`/club/${clubId}/settlements`)

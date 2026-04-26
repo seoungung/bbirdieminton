@@ -1,37 +1,29 @@
-import { createClient } from '@/lib/supabase/server'
 import type { MetadataRoute } from 'next'
+import { MANUAL_ENTRIES } from '@/lib/manual/entries'
 
 const BASE = 'https://birdieminton.com'
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const supabase = await createClient()
+export default function sitemap(): MetadataRoute.Sitemap {
+  const now = new Date()
 
-  const [{ data: rackets }, { data: guides }] = await Promise.all([
-    supabase.from('rackets').select('slug, updated_at').neq('status', 'discontinued'),
-    supabase.from('guides').select('slug, updated_at').eq('published', true),
-  ])
-
-  const racketUrls: MetadataRoute.Sitemap = (rackets ?? []).map(r => ({
-    url: BASE + '/rackets/' + r.slug,
-    lastModified: r.updated_at ? new Date(r.updated_at) : new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }))
-
-  const guideUrls: MetadataRoute.Sitemap = (guides ?? []).map(g => ({
-    url: BASE + '/guide/' + g.slug,
-    lastModified: g.updated_at ? new Date(g.updated_at) : new Date(),
+  const manualUrls: MetadataRoute.Sitemap = MANUAL_ENTRIES.map((m) => ({
+    url: `${BASE}/manual/${m.slug}`,
+    lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }))
 
   return [
-    { url: BASE,              lastModified: new Date(), changeFrequency: 'weekly',  priority: 1.0 },
-    { url: BASE + '/rackets', lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
-    { url: BASE + '/quiz',    lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: BASE + '/guide',   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.7 },
-    { url: BASE + '/about',   lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
-    ...racketUrls,
-    ...guideUrls,
+    { url: BASE,                  lastModified: now, changeFrequency: 'weekly',  priority: 1.0 },
+    { url: `${BASE}/pricing`,     lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${BASE}/manual`,      lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${BASE}/blog`,        lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
+    { url: `${BASE}/demo`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE}/contact`,     lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE}/faq`,         lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE}/terms`,       lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
+    { url: `${BASE}/privacy`,     lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
+    { url: `${BASE}/policy/refund`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
+    ...manualUrls,
   ]
 }

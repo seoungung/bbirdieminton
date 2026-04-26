@@ -32,7 +32,10 @@ export async function proxy(request: NextRequest) {
   // /club 루트는 인증 없이 허용 (내부에서 분기)
   const isClubRoot = pathname === '/club' || pathname === '/club/'
 
-  if (!isClubRoot && !isDemoPath && !user) {
+  // 익명 세션은 비로그인과 동일 취급 — RPC 가드 통과를 노린 우회 차단
+  const isAuthed = user && user.is_anonymous !== true
+
+  if (!isClubRoot && !isDemoPath && !isAuthed) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('next', pathname)
     return NextResponse.redirect(loginUrl)

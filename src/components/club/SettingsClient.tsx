@@ -3,9 +3,9 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Copy, LogOut, Crown, Shield, User, Trash2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import type { Club, ClubMemberWithUser, MemberRole } from '@/types/club'
 import { updateMemberRoleAction, regenerateInviteCodeAction } from '@/app/club/[clubId]/members/actions'
+import { deleteClubAction, leaveClubAction } from '@/app/club/[clubId]/settings/actions'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 interface Props {
@@ -64,9 +64,8 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager: 
       onConfirm: () => {
         setDialog(null)
         startTransition(async () => {
-          const supabase = createClient()
-          const { error } = await supabase.rpc('delete_club_cascade', { p_club_id: club.id })
-          if (error) { alert('모임 삭제에 실패했습니다'); return }
+          const result = await deleteClubAction(club.id)
+          if (result?.error) { alert(result.error); return }
           router.push('/club/home')
         })
       },
@@ -82,8 +81,8 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager: 
       onConfirm: () => {
         setDialog(null)
         startTransition(async () => {
-          const supabase = createClient()
-          await supabase.from('club_members').delete().eq('id', myMemberId)
+          const result = await leaveClubAction(club.id)
+          if (result?.error) { alert(result.error); return }
           router.push('/club/home')
         })
       },

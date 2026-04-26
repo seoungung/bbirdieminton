@@ -23,7 +23,7 @@ export default async function ImportPage({
       <div>
         <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
           <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-            <BackButton fallback={`/club/${clubId}/manage`} />
+            <BackButton fallback={`/club/${clubId}`} />
             <h1 className="font-bold text-[#111] text-base">엑셀 임포트 (체험)</h1>
           </div>
         </header>
@@ -54,7 +54,7 @@ export default async function ImportPage({
 
   if (!membership) redirect('/club/home')
   if (!['owner', 'manager'].includes(membership.role)) {
-    redirect(`/club/${clubId}/manage`)
+    redirect(`/club/${clubId}`)
   }
 
   const { data: club } = await supabase
@@ -75,7 +75,7 @@ export default async function ImportPage({
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
         <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-          <BackButton fallback={`/club/${clubId}/manage`} />
+          <BackButton fallback={`/club/${clubId}`} />
           <h1 className="font-bold text-[#111] text-base">엑셀 임포트</h1>
         </div>
       </header>

@@ -128,7 +128,7 @@ export function ClubDashboardClient({
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {nextRegularSession ? (
           <Link
-            href={`/club/${clubId}/events`}
+            href={`/club/${clubId}`}
             className="group block bg-white rounded-3xl border border-[#e5e5e5] p-5 hover:border-[#beff00] hover:shadow-sm transition-all"
           >
             <div className="flex items-center justify-between mb-3">
@@ -236,7 +236,7 @@ export function ClubDashboardClient({
             accent="blue"
           />
           <ShortcutCard
-            href={`/club/${clubId}/manage`}
+            href={`/club/${clubId}/settings`}
             Icon={SettingsIcon}
             label="운영·관리"
             desc="회비·공지"

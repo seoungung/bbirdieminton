@@ -24,6 +24,17 @@ export interface NoticeRow {
 export async function getNoticesAction(clubId: string): Promise<NoticeRow[]> {
   const supabase = await createClient()
 
+  // 멤버십 검증 (RLS 의존이 아닌 명시적 가드)
+  const clubUserId = await getClubUserId(supabase)
+  if (!clubUserId) return []
+  const { data: membership } = await supabase
+    .from('club_members')
+    .select('id')
+    .eq('club_id', clubId)
+    .eq('user_id', clubUserId)
+    .maybeSingle()
+  if (!membership) return []
+
   const { data, error } = await supabase
     .from('notices')
     .select(`

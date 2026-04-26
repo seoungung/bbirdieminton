@@ -67,3 +67,60 @@ export async function updateClubProfileAction(
   revalidatePath(`/club/${clubId}/settings`)
   return { success: true }
 }
+
+// ── 모임 삭제 (owner 전용) ─────────────────────────────────
+// SettingsClient에서 직접 RPC 호출하던 것을 Server Action으로 이전.
+// 표준 사용자 경로의 권한 검증을 추가 (RPC 자체 가드는 별도 마이그레이션에서).
+export async function deleteClubAction(clubId: string) {
+  const supabase = await createClient()
+  const clubUserId = await getClubUserId(supabase)
+  if (!clubUserId) return { error: '로그인이 필요합니다.' }
+
+  const { data: club } = await supabase
+    .from('clubs')
+    .select('owner_id')
+    .eq('id', clubId)
+    .maybeSingle()
+
+  if (!club) return { error: '모임을 찾을 수 없습니다.' }
+  if (club.owner_id !== clubUserId) {
+    return { error: '모임 삭제는 클럽장만 가능합니다.' }
+  }
+
+  const { error } = await supabase.rpc('delete_club_cascade', {
+    p_club_id: clubId,
+  })
+  if (error) return { error: '모임 삭제에 실패했습니다.' }
+
+  revalidatePath('/club/home')
+  return { success: true }
+}
+
+// ── 모임 나가기 (멤버 본인) ─────────────────────────────────
+export async function leaveClubAction(clubId: string) {
+  const supabase = await createClient()
+  const clubUserId = await getClubUserId(supabase)
+  if (!clubUserId) return { error: '로그인이 필요합니다.' }
+
+  // owner는 모임 나가기 대신 모임 삭제 또는 owner 이관 필요
+  const { data: club } = await supabase
+    .from('clubs')
+    .select('owner_id')
+    .eq('id', clubId)
+    .maybeSingle()
+  if (club?.owner_id === clubUserId) {
+    return {
+      error: '클럽장은 모임을 나갈 수 없어요. 다른 멤버에게 클럽장을 이관하거나 모임을 삭제해 주세요.',
+    }
+  }
+
+  const { error } = await supabase
+    .from('club_members')
+    .delete()
+    .eq('club_id', clubId)
+    .eq('user_id', clubUserId)
+  if (error) return { error: '모임 나가기에 실패했습니다.' }
+
+  revalidatePath('/club/home')
+  return { success: true }
+}

@@ -8,6 +8,13 @@ import { CheckCircle2, Mail, User } from 'lucide-react'
 const AMOUNT = 3900
 const ORDER_NAME = '배린이 라켓 완전정복 가이드 PDF'
 
+/**
+ * 결제 일시 비활성화 — PDF 발송·주문 저장·멱등성 미구현 상태에서
+ * 실결제가 들어오면 환불 분쟁 위험. 정식 출시 전까지 결제 버튼 disable.
+ * 활성화하려면 `LAUNCH_ENABLED = true`로 변경 + confirm 라우트의 TODO 구현.
+ */
+const LAUNCH_ENABLED = false
+
 export function OrderForm() {
   const widgetsRef = useRef<TossPaymentsWidgets | null>(null)
   const [ready, setReady] = useState(false)
@@ -39,6 +46,10 @@ export function OrderForm() {
 
   // Toss 위젯 초기화
   useEffect(() => {
+    if (!LAUNCH_ENABLED) {
+      setKeyMissing(true)
+      return
+    }
     async function init() {
       const { loadTossPayments, ANONYMOUS } = await import('@tosspayments/tosspayments-sdk')
       const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY
@@ -195,13 +206,20 @@ export function OrderForm() {
 
         {keyMissing ? (
           <div className="px-6 py-8 text-center">
-            <div className="w-12 h-12 rounded-full bg-[#f0f0f0] flex items-center justify-center mx-auto mb-4">
-              <span className="text-xl">🔑</span>
+            <div className="w-12 h-12 rounded-full bg-[#fef3c7] flex items-center justify-center mx-auto mb-4">
+              <span className="text-xl">🚧</span>
             </div>
-            <p className="text-sm font-bold text-[#111] mb-1">결제 연동 준비 중</p>
-            <p className="text-xs text-[#999]">
-              토스페이먼츠 심사 완료 후 이용 가능합니다.
+            <p className="text-sm font-bold text-[#111] mb-1">정식 출시 준비 중입니다</p>
+            <p className="text-xs text-[#999] leading-relaxed">
+              PDF 본문·발송 시스템 점검 중입니다.<br />
+              출시되면 가장 먼저 알려드릴게요.
             </p>
+            <Link
+              href="/contact"
+              className="inline-flex mt-4 items-center justify-center gap-1.5 px-4 py-2 bg-[#0a0a0a] text-white font-semibold text-[12px] rounded-full hover:bg-[#222] transition-colors"
+            >
+              출시 알림 신청
+            </Link>
           </div>
         ) : (
           <>

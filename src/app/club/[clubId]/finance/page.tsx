@@ -21,6 +21,8 @@ export async function generateMetadata({ params }: FinanceMetadataProps): Promis
 
 export default async function FinancePage({ params }: { params: Promise<{ clubId: string }> }) {
   const { clubId } = await params
+  // 데모 모드는 회비 관리 미제공 — 데모 대시보드로 안전 회귀
+  if (clubId.startsWith('demo-')) redirect(`/club/${clubId}`)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -52,7 +54,7 @@ export default async function FinancePage({ params }: { params: Promise<{ clubId
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
         <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-          <BackButton fallback={`/club/${clubId}/manage`} />
+          <BackButton fallback={`/club/${clubId}`} />
           <div>
             <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
               <Wallet size={16} strokeWidth={2} />

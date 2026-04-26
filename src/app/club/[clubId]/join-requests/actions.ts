@@ -129,7 +129,6 @@ export async function getJoinRequestsAction(
 export async function approveJoinRequestAction(
   clubId: string,
   requestId: string,
-  requestUserId: string,
 ): Promise<{ success?: true; error?: string }> {
   const supabase = await createClient()
   const clubUserId = await getClubUserId(supabase)
@@ -141,10 +140,23 @@ export async function approveJoinRequestAction(
     .select('role')
     .eq('club_id', clubId)
     .eq('user_id', clubUserId)
-    .single()
+    .maybeSingle()
 
   if (!membership || !['owner', 'manager'].includes(membership.role)) {
     return { error: '운영진만 가입을 승인할 수 있습니다.' }
+  }
+
+  // user_id를 클라가 아닌 DB의 신청 row에서 직접 조회 (IDOR 방어)
+  const { data: requestRow } = await supabase
+    .from('join_requests')
+    .select('user_id, status')
+    .eq('id', requestId)
+    .eq('club_id', clubId)
+    .maybeSingle()
+
+  if (!requestRow) return { error: '유효하지 않은 신청입니다.' }
+  if (requestRow.status !== 'pending') {
+    return { error: '이미 처리된 신청입니다.' }
   }
 
   // 트랜잭션처럼: 멤버 추가 + 신청 상태 업데이트
@@ -152,7 +164,7 @@ export async function approveJoinRequestAction(
     .from('club_members')
     .insert({
       club_id: clubId,
-      user_id: requestUserId,
+      user_id: requestRow.user_id,
       role: 'member',
     })
 

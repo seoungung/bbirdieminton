@@ -100,7 +100,7 @@ export default async function RankingPage({
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
         <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-          <BackButton fallback={`/club/${clubId}/manage`} />
+          <BackButton fallback={`/club/${clubId}`} />
           <div>
             <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
               <Trophy size={16} strokeWidth={2} />
