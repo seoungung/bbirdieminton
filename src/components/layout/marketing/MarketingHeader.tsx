@@ -9,8 +9,10 @@ import { logout } from '@/app/login/actions'
 import { UserMenu } from './UserMenu'
 
 const navLinks = [
-  { href: '/product', label: '제품 소개' },
   { href: '/demo',    label: '체험하기' },
+  { href: '/blog',    label: '블로그' },
+  { href: '/manual',  label: '사용설명서' },
+  { href: '/pricing', label: '가격' },
 ]
 
 interface UserState {

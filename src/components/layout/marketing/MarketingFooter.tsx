@@ -29,8 +29,8 @@ export function MarketingFooter() {
           <div>
             <p className="text-[12px] font-semibold text-[#111] mb-3">서비스</p>
             <ul className="space-y-2 text-[12px] text-[#666]">
-              <li><Link href="/product" className="hover:text-[#111] transition-colors">제품 소개</Link></li>
               <li><Link href="/demo"    className="hover:text-[#111] transition-colors">체험하기</Link></li>
+              <li><Link href="/pricing" className="hover:text-[#111] transition-colors">가격</Link></li>
               <li><Link href="/shop"    className="hover:text-[#111] transition-colors">SHOP</Link></li>
             </ul>
           </div>
@@ -39,9 +39,10 @@ export function MarketingFooter() {
           <div>
             <p className="text-[12px] font-semibold text-[#111] mb-3">지원</p>
             <ul className="space-y-2 text-[12px] text-[#666]">
+              <li><Link href="/manual"  className="hover:text-[#111] transition-colors">사용설명서</Link></li>
               <li><Link href="/faq"     className="hover:text-[#111] transition-colors">자주 묻는 질문</Link></li>
-              <li><Link href="/contact" className="hover:text-[#111] transition-colors">문의하기</Link></li>
               <li><Link href="/blog"    className="hover:text-[#111] transition-colors">블로그</Link></li>
+              <li><Link href="/contact" className="hover:text-[#111] transition-colors">문의하기</Link></li>
             </ul>
           </div>
 
