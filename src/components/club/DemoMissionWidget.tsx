@@ -163,7 +163,7 @@ export function DemoMissionWidget({ clubId }: Props) {
               <div className="flex items-center gap-2">
                 <Target size={14} className="text-[#beff00]" strokeWidth={2.2} />
                 <span className="text-[12px] font-bold uppercase tracking-widest">
-                  데모 미션
+                  체험 미션
                 </span>
               </div>
               <div className="flex items-center gap-1">

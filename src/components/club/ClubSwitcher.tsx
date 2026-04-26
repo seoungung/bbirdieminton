@@ -1,9 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { ChevronsUpDown, Plus, KeyRound, Check } from 'lucide-react'
-import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 
 export interface ClubOption {
   id: string
@@ -51,12 +51,12 @@ export function ClubSwitcher({ current, available = [] }: Props) {
           className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
           style={{ background: current.thumbnailColor ?? '#beff00' }}
         >
-          <ShuttlecockIcon size={16} className="text-[#111]/70" strokeWidth={1.7} />
+          <Image src="/symbol_birdieminton-black.png" alt="" width={20} height={20} className="h-5 w-auto opacity-70" aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0 text-left">
           <p className="text-[14px] font-extrabold text-[#111] truncate">{current.name}</p>
           <p className="text-[11px] text-[#999] truncate mt-0.5">
-            {current.isDemo ? '데모 체험 중' : current.location || '모임'}
+            {current.isDemo ? '체험 중' : current.location || '모임'}
           </p>
         </div>
         <ChevronsUpDown
@@ -128,12 +128,12 @@ function ClubRow({ club, isCurrent }: { club: ClubOption; isCurrent?: boolean })
         className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
         style={{ background: club.thumbnailColor ?? '#beff00' }}
       >
-        <ShuttlecockIcon size={14} className="text-[#111]/70" strokeWidth={1.7} />
+        <Image src="/symbol_birdieminton-black.png" alt="" width={18} height={18} className="h-[18px] w-auto opacity-70" aria-hidden="true" />
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-[13px] font-semibold text-[#111] truncate">{club.name}</p>
         <p className="text-[11px] text-[#999] truncate">
-          {club.isDemo ? '데모' : club.location || '모임'}
+          {club.isDemo ? '체험' : club.location || '모임'}
         </p>
       </div>
       {isCurrent && <Check size={13} className="text-[#0a0a0a] shrink-0" strokeWidth={2.5} />}

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import {
   ArrowRight,
@@ -12,7 +13,6 @@ import {
   Trophy,
   Megaphone,
 } from 'lucide-react'
-import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 
 export const metadata: Metadata = {
   title: '제품 소개 | 버디민턴',
@@ -269,7 +269,7 @@ export default function ProductPage() {
               href="/demo"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-[#0a0a0a] border border-[#e5e5e5] font-bold text-[15px] rounded-full hover:border-[#0a0a0a] transition-colors"
             >
-              데모 먼저 보기
+              먼저 체험해 보기
             </Link>
           </div>
 
@@ -547,7 +547,7 @@ export default function ProductPage() {
       {/* ──────────────────────────────────── */}
       <section className="bg-[#0a0a0a] text-white py-28 sm:py-36 px-8">
         <div className="max-w-[720px] mx-auto text-center">
-          <ShuttlecockIcon size={40} className="text-[#beff00] mx-auto mb-6" strokeWidth={1.5} />
+          <Image src="/symbol_birdieminton-color.png" alt="버디민턴" width={48} height={48} className="h-12 w-auto mx-auto mb-6" />
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-[1.1] mb-6">
             5분 만에 시작하세요.
           </h2>
@@ -562,7 +562,7 @@ export default function ProductPage() {
             <ArrowRight size={18} />
           </Link>
           <p className="text-[12px] text-white/30 mt-6">
-            로그인 없이 먼저 보고 싶다면? <Link href="/demo" className="underline hover:text-white/60">데모 체험하기</Link>
+            로그인 없이 먼저 보고 싶다면? <Link href="/demo" className="underline hover:text-white/60">체험하기</Link>
           </p>
         </div>
       </section>

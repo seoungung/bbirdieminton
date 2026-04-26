@@ -1,8 +1,8 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { X, ArrowRight, Rocket, Play } from 'lucide-react'
-import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 
 const STORAGE_KEY = 'birdieminton.demo.welcomed.v1'
 
@@ -78,7 +78,7 @@ export function DemoWelcomeModal() {
         {/* Hero 영역 */}
         <div className="bg-[#0a0a0a] text-white px-8 pt-10 pb-8 text-center">
           <div className="w-14 h-14 rounded-2xl bg-[#beff00] flex items-center justify-center mx-auto mb-4">
-            <ShuttlecockIcon size={26} className="text-[#0a0a0a]" strokeWidth={1.8} />
+            <Image src="/symbol_birdieminton-black.png" alt="버디민턴" width={32} height={32} className="h-8 w-auto" />
           </div>
           <h2 id="welcome-title" className="text-2xl font-extrabold tracking-tight mb-2">
             버디민턴에 오신 걸<br />환영해요! 👋

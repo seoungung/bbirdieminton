@@ -10,7 +10,7 @@ import { UserMenu } from './UserMenu'
 
 const navLinks = [
   { href: '/product', label: '제품 소개' },
-  { href: '/demo',    label: '데모 체험' },
+  { href: '/demo',    label: '체험하기' },
 ]
 
 interface UserState {

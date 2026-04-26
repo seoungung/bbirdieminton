@@ -61,13 +61,14 @@ export function ClubDashboardClient({
       {/* 1. Hero Welcome */}
       <section className="relative bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] rounded-3xl p-6 lg:p-8 overflow-hidden">
         <div className="absolute -right-6 -bottom-6 opacity-10">
-          <ShuttlecockIcon size={160} className="text-[#beff00]" strokeWidth={1.4} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/symbol_birdieminton-color.png" alt="" width={160} height={160} className="h-40 w-auto" aria-hidden="true" />
         </div>
         <div className="relative">
           <div className="flex items-center gap-1.5 mb-2">
             <Sparkles size={12} className="text-[#beff00]" strokeWidth={2.5} />
             <span className="text-[10px] font-extrabold text-[#beff00] uppercase tracking-wider">
-              {isDemo ? '데모 체험' : '오늘의 모임'}
+              {isDemo ? '체험하기' : '오늘의 모임'}
             </span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-extrabold text-white mb-1 leading-tight">

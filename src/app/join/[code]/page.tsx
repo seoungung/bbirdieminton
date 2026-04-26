@@ -1,7 +1,7 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Users, KeyRound } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { JoinClient } from './JoinClient'
 import type { Metadata } from 'next'
 
@@ -39,7 +39,7 @@ export default async function JoinPage({ params }: Props) {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-3">
             <div className="w-10 h-10 rounded-xl bg-[#0a0a0a] flex items-center justify-center">
-              <ShuttlecockIcon size={20} className="text-[#beff00]" strokeWidth={2} />
+              <Image src="/symbol_birdieminton-color.png" alt="버디민턴" width={26} height={26} className="h-[26px] w-auto" />
             </div>
           </div>
           <p className="text-[13px] text-[#999]">배드민턴 모임 초대</p>
@@ -53,7 +53,7 @@ export default async function JoinPage({ params }: Props) {
             <>
               <div className="flex items-center gap-3 mb-5 pb-5 border-b border-[#f0f0f0]">
                 <div className="w-12 h-12 rounded-xl bg-[#beff00] flex items-center justify-center shrink-0">
-                  <ShuttlecockIcon size={22} className="text-[#0a0a0a]" strokeWidth={1.7} />
+                  <Image src="/symbol_birdieminton-black.png" alt="" width={26} height={26} className="h-[26px] w-auto" aria-hidden="true" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[16px] font-extrabold text-[#111] truncate">{club.name}</p>

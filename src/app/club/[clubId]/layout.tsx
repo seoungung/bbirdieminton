@@ -22,13 +22,13 @@ export default async function ClubDetailLayout({
     return (
       <AppShell
         clubId={clubId}
-        clubName={demo?.name ?? '데모 모임'}
+        clubName={demo?.name ?? '체험 모임'}
         clubLocation={demo?.location ?? null}
         leaderName={demo?.leaderName ?? null}
         thumbnailColor={demo?.thumbnailColor}
         isOwner={false}
         isDemo
-        userName="데모 체험자"
+        userName="체험자"
         userEmail="demo@birdieminton.com"
         avatarUrl={null}
       >

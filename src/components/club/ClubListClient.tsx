@@ -321,7 +321,7 @@ export function ClubListClient({ myClubs, allClubs, isGuest }: ClubListClientPro
                 </div>
                 <h2 className="text-xl font-extrabold text-[#111] text-center mb-2">모임을 만들 수 없어요</h2>
                 <p className="text-base text-[#777] text-center leading-relaxed mb-7">
-                  데모 모드라 모임을 생성하기 위해서는<br />
+                  체험 모드라 모임을 생성하기 위해서는<br />
                   로그인 후 가능합니다.<br />
                   불편을 드려 죄송합니다.
                 </p>
@@ -439,7 +439,7 @@ export function ClubListClient({ myClubs, allClubs, isGuest }: ClubListClientPro
       {tab === 'my' && (
         filteredMy.length === 0 && query === '' ? (
           <EmptyState
-            icon={<ShuttlecockIcon size={40} className="text-[#ccc]" strokeWidth={1.5} />}
+            icon={<Image src="/symbol_birdieminton-black.png" alt="" width={40} height={40} className="h-10 w-auto opacity-25" aria-hidden="true" />}
             title="참여한 모임이 없어요"
             desc="새 모임을 만들거나 초대코드로 참여해보세요"
             onCreateClick={handleCreateClick}

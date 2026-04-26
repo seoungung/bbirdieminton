@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/app/login/actions'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
-// 데모 체험 링크: 로그인 상태면 /club/home, 아니면 로그인 페이지
+// 체험하기 링크: 로그인 상태면 /club/home, 아니면 로그인 페이지
 const getDemoHref = (isLoggedIn: boolean) =>
   isLoggedIn ? '/club/home' : '/login?next=%2Fclub%2Fhome'
 
@@ -116,12 +116,12 @@ export default function Header() {
 
           {/* 데스크톱 중앙 메뉴 */}
           <div className="hidden md:flex items-center gap-7 text-[14px] font-medium">
-            {/* 데모 체험: 로그인 상태면 /club/home, 아니면 로그인 페이지 */}
+            {/* 체험하기: 로그인 상태면 /club/home, 아니면 로그인 페이지 */}
             <Link
               href={getDemoHref(!!user)}
               className="flex items-center gap-1.5 text-[#beff00] font-semibold hover:text-[#beff00]/80 transition-colors"
             >
-              <ShuttlecockIcon size={15} /> 데모 체험
+              <ShuttlecockIcon size={15} /> 체험하기
             </Link>
             <Link href="/survey" className="text-white/70 hover:text-white transition-colors">
               설문 참여
@@ -206,7 +206,7 @@ export default function Header() {
               onClick={() => setOpen(false)}
               className="flex items-center gap-1.5 text-[#beff00] font-semibold py-1"
             >
-              <ShuttlecockIcon size={15} /> 데모 체험
+              <ShuttlecockIcon size={15} /> 체험하기
             </Link>
             <Link
               href="/survey"

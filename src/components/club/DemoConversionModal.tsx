@@ -1,10 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { X, Sparkles, ArrowRight } from 'lucide-react'
-import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 
 const VIEW_COUNT_KEY = 'birdieminton.demo.pageViews'
 const SHOWN_COUNT_KEY = 'birdieminton.demo.conversionShown'
@@ -16,7 +16,7 @@ const MAX_SHOW_COUNT = 3 // 최대 3번까지만 표시
 const COOL_DOWN_HOURS = 6 // 다시 표시하려면 6시간 경과 필요
 
 /**
- * 데모 체험 중 전환 유도 모달
+ * 체험 중 전환 유도 모달
  *
  * 조건: 4개 이상 페이지 방문 + 최대 3번 표시 + 6시간 쿨다운
  */
@@ -87,7 +87,7 @@ export function DemoConversionModal() {
             <Sparkles size={20} strokeWidth={2} />
           </div>
           <div className="w-14 h-14 rounded-2xl bg-[#beff00] flex items-center justify-center mx-auto mb-4">
-            <ShuttlecockIcon size={26} className="text-[#0a0a0a]" strokeWidth={1.8} />
+            <Image src="/symbol_birdieminton-black.png" alt="버디민턴" width={32} height={32} className="h-8 w-auto" />
           </div>
           <h2 id="conversion-title" className="text-2xl font-extrabold tracking-tight mb-2">
             꽤 둘러보셨네요!

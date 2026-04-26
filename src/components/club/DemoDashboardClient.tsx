@@ -50,7 +50,7 @@ export function DemoDashboardClient({
     const url = window.location.href
     try {
       if (navigator.share) {
-        await navigator.share({ title: `${club.name} - 버디민턴 데모`, url })
+        await navigator.share({ title: `${club.name} - 버디민턴 체험`, url })
       } else {
         await navigator.clipboard.writeText(url)
         setToast('링크가 복사됐어요')
@@ -97,7 +97,8 @@ export function DemoDashboardClient({
         >
           {/* 장식 셔틀콕 */}
           <div className="absolute -right-4 -bottom-4 opacity-10">
-            <ShuttlecockIcon size={140} className="text-[#beff00]" strokeWidth={1.5} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/symbol_birdieminton-color.png" alt="" width={140} height={140} className="h-36 w-auto" aria-hidden="true" />
           </div>
           <div className="relative">
             <div className="flex items-center gap-1.5 mb-2">
@@ -107,7 +108,7 @@ export function DemoDashboardClient({
               </span>
             </div>
             <h1 className="text-2xl font-extrabold text-white mb-1 leading-tight">
-              안녕하세요, 데모 체험자님 👋
+              안녕하세요, 체험자님 👋
             </h1>
             <p className="text-sm text-white/60 mb-4 leading-relaxed">
               {club.location} · {club.activityPlace} · 운영자 {club.leaderName}
@@ -383,7 +384,7 @@ export function DemoDashboardClient({
           <div className="max-w-[1088px] mx-auto px-4 py-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
               <Gamepad2 size={16} className="text-[#555] shrink-0" strokeWidth={2} />
-              <span className="text-sm font-semibold text-[#555] truncate">데모 체험 중입니다</span>
+              <span className="text-sm font-semibold text-[#555] truncate">체험 중입니다</span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button

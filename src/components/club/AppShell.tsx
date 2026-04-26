@@ -197,7 +197,7 @@ export function AppShell({
         <div className="sticky top-0 z-50 bg-[#0a0a0a] text-white flex items-center justify-between px-4 py-2.5">
           <p className="text-[13px] font-medium flex items-center gap-2">
             <span className="text-[#beff00]">●</span>
-            데모 체험 중 · 모든 데이터는 가상입니다
+            체험 중 · 모든 데이터는 가상입니다
           </p>
           <Link
             href="/club/create"

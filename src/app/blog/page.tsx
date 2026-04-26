@@ -76,7 +76,7 @@ export default function BlogPage() {
             href="/demo"
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#beff00] text-[#0a0a0a] font-extrabold text-[13px] rounded-full hover:bg-[#a8e600] transition-colors"
           >
-            데모 체험하기
+            체험하기
           </Link>
         </div>
       </section>

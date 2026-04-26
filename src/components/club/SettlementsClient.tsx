@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useState, useTransition } from 'react'
 import {
   ChevronDown, ChevronUp, CheckCircle2, Circle, Copy, Check,
@@ -246,7 +247,7 @@ export function SettlementsClient({
       {/* 정산 목록 */}
       {settlements.length === 0 ? (
         <div className="bg-white rounded-2xl border border-[#e5e5e5] py-14 text-center">
-          <ShuttlecockIcon size={40} className="text-[#ccc] mx-auto mb-3" strokeWidth={1.5} />
+          <Image src="/symbol_birdieminton-black.png" alt="" width={40} height={40} className="h-10 w-auto mx-auto mb-3 opacity-25" aria-hidden="true" />
           <p className="text-sm font-bold text-[#111]">아직 정산 내역이 없어요</p>
           <p className="text-xs text-[#999] mt-1">게임 마감 시 셔틀콕비를 입력하면 자동으로 기록됩니다</p>
         </div>

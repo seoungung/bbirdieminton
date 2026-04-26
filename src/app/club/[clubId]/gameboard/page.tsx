@@ -51,7 +51,7 @@ export default async function GameBoardPage({
     return (
       <GameBoardClient
         clubId={clubId}
-        clubName={demoClub?.name ?? '데모 모임'}
+        clubName={demoClub?.name ?? '체험 모임'}
         shuttleDefaultPrice={2500}
         settlementAccount={null}
         courtCount={courtCount}
