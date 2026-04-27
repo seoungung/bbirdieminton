@@ -128,7 +128,7 @@ export function ClubDashboardClient({
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         {nextRegularSession ? (
           <Link
-            href={`/club/${clubId}`}
+            href={`/club/${clubId}/events`}
             className="group block bg-white rounded-3xl border border-[#e5e5e5] p-5 hover:border-[#beff00] hover:shadow-sm transition-all"
           >
             <div className="flex items-center justify-between mb-3">
@@ -166,10 +166,14 @@ export function ClubDashboardClient({
             </div>
           </Link>
         ) : (
-          <EmptyCard
-            icon={<Calendar size={32} className="text-[#ccc]" strokeWidth={1.5} />}
-            label="등록된 정기모임이 없어요"
-          />
+          <Link
+            href={`/club/${clubId}/events`}
+            className="block group bg-white rounded-3xl border border-dashed border-[#ddd] hover:border-[#beff00] hover:bg-[#fafafa] p-6 flex flex-col items-center justify-center text-center min-h-[180px] transition-all"
+          >
+            <Calendar size={32} className="text-[#ccc] group-hover:text-emerald-600" strokeWidth={1.5} />
+            <p className="text-sm text-[#999] mt-2">등록된 정기모임이 없어요</p>
+            <p className="text-[11px] text-[#bbb] mt-0.5">새 정기모임 만들기 →</p>
+          </Link>
         )}
 
         <Link

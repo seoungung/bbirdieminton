@@ -104,7 +104,9 @@ export default async function ClubHomePage({ params }: PageProps) {
     getClubMembers(supabase, clubId),
     supabase
       .from('club_events')
-      .select('id, title, event_date, start_time, end_time, place, fee, max_attend')
+      .select(
+        'id, title, event_date, start_time, end_time, place, fee, max_attend, attendances:club_event_attendances(status)'
+      )
       .eq('club_id', clubId)
       .gte('event_date', new Date().toISOString().split('T')[0])
       .order('event_date', { ascending: true })
@@ -136,18 +138,34 @@ export default async function ClubHomePage({ params }: PageProps) {
   }))
 
   const DAY_KO = ['일', '월', '화', '수', '목', '금', '토']
-  const regularSessions: RegularSessionItem[] = (eventsResult.data ?? []).map(e => {
-    const d = new Date(e.event_date)
+  type EventRowWithAtt = {
+    id: string
+    title: string
+    event_date: string
+    start_time: string | null
+    end_time: string | null
+    place: string | null
+    fee: string | null
+    max_attend: number | null
+    attendances: { status: string }[] | null
+  }
+  const regularSessions: RegularSessionItem[] = ((eventsResult.data as EventRowWithAtt[] | null) ?? []).map(e => {
+    const d = new Date(e.event_date + 'T00:00:00')
+    const fmtTime = (t: string | null) => (t ? t.slice(0, 5) : '')
+    const start = fmtTime(e.start_time)
+    const end = fmtTime(e.end_time)
+    const time = start ? (end ? `${start} ~ ${end}` : start) : ''
+    const goingCount = (e.attendances ?? []).filter(a => a.status === 'going').length
     return {
       id: e.id,
       title: e.title,
       dayOfWeek: DAY_KO[d.getDay()],
-      time: e.start_time + (e.end_time ? `~${e.end_time}` : ''),
+      time,
       place: e.place ?? '',
       fee: e.fee ?? undefined,
       nextDate: e.event_date,
-      maxAttend: e.max_attend ?? 20,
-      currentAttend: 0,
+      maxAttend: e.max_attend ?? 0,
+      currentAttend: goingCount,
       thumbnailColor: club.thumbnail_color ?? '#f0f0f0',
     }
   })

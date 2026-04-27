@@ -1,0 +1,152 @@
+import { redirect, notFound } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import { getClubUserId } from '@/lib/club/auth'
+import { getMyMembership } from '@/lib/club/client'
+import { CalendarDays } from 'lucide-react'
+import { EventDetailClient } from '@/components/club/EventDetailClient'
+import { BackButton } from '@/components/club/BackButton'
+import { DEMO_CLUBS } from '@/lib/club/demoData'
+import { buildDemoEventDetail } from '@/lib/club/eventsDemo'
+import type { Metadata } from 'next'
+import type { EventAttendStatus } from '@/types/club'
+import type { EventDetail, AttendeeRow } from '@/components/club/events/types'
+
+interface PageProps {
+  params: Promise<{ clubId: string; eventId: string }>
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { clubId } = await params
+  const demo = DEMO_CLUBS.find((c) => c.id === clubId)
+  if (demo) return { title: `정기모임 | ${demo.name}`, description: '정기모임 상세' }
+  const supabase = await createClient()
+  const { data: club } = await supabase.from('clubs').select('name').eq('id', clubId).single()
+  return {
+    title: club ? `정기모임 | ${club.name}` : '정기모임 | 버디민턴',
+    description: '정기모임 상세',
+  }
+}
+
+function PageHeader({ clubId }: { clubId: string }) {
+  return (
+    <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
+      <div className="max-w-[880px] mx-auto flex items-center gap-3">
+        <BackButton fallback={`/club/${clubId}/events`} />
+        <div>
+          <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
+            <CalendarDays size={16} strokeWidth={2} />
+            정기모임 상세
+          </h1>
+        </div>
+      </div>
+    </header>
+  )
+}
+
+export default async function EventDetailPage({ params }: PageProps) {
+  const { clubId, eventId } = await params
+
+  /* ── 데모 ── */
+  if (clubId.startsWith('demo-')) {
+    const demo = buildDemoEventDetail(clubId, eventId)
+    if (!demo) notFound()
+    return (
+      <div>
+        <PageHeader clubId={clubId} />
+        <main className="max-w-[880px] mx-auto px-4 py-5">
+          <EventDetailClient
+            clubId={clubId}
+            event={demo.event}
+            attendees={demo.attendees}
+            myStatus={demo.myStatus}
+            isManager={false}
+            isDemo
+          />
+        </main>
+      </div>
+    )
+  }
+
+  /* ── 실제 ── */
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const clubUserId = await getClubUserId(supabase)
+  if (!clubUserId) redirect('/login')
+
+  const membership = await getMyMembership(supabase, clubId, clubUserId)
+  if (!membership) redirect('/club/home')
+
+  const { data: ev } = await supabase
+    .from('club_events')
+    .select(
+      'id, club_id, title, event_date, start_time, end_time, place, fee, max_attend, created_by, created_at'
+    )
+    .eq('id', eventId)
+    .eq('club_id', clubId)
+    .maybeSingle()
+
+  if (!ev) notFound()
+
+  const { data: attRows } = await supabase
+    .from('club_event_attendances')
+    .select(
+      'status, member_id, updated_at, member:club_members(id, skill_score, user:users(name))'
+    )
+    .eq('event_id', eventId)
+
+  type AttRowRaw = {
+    status: string
+    member_id: string
+    updated_at: string
+    member: {
+      id: string
+      skill_score: number
+      user: { name: string } | null
+    } | null
+  }
+
+  const attendees: AttendeeRow[] = ((attRows as AttRowRaw[] | null) ?? []).map((row) => ({
+    member_id: row.member_id,
+    status: row.status as EventAttendStatus,
+    name: row.member?.user?.name ?? '이름없음',
+    skill: row.member?.skill_score ?? 0,
+    updated_at: row.updated_at,
+  }))
+
+  const isManager = ['owner', 'manager'].includes(membership.role)
+  const myStatus =
+    attendees.find((a) => a.member_id === membership.id)?.status ?? null
+
+  const detail: EventDetail = {
+    id: ev.id,
+    club_id: ev.club_id,
+    title: ev.title,
+    event_date: ev.event_date,
+    start_time: ev.start_time,
+    end_time: ev.end_time,
+    place: ev.place,
+    fee: ev.fee,
+    max_attend: ev.max_attend,
+    created_by: ev.created_by,
+    created_at: ev.created_at,
+  }
+
+  return (
+    <div>
+      <PageHeader clubId={clubId} />
+      <main className="max-w-[880px] mx-auto px-4 py-5">
+        <EventDetailClient
+          clubId={clubId}
+          event={detail}
+          attendees={attendees}
+          myStatus={myStatus}
+          isManager={isManager}
+        />
+      </main>
+    </div>
+  )
+}

@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   Home, Gamepad2, Trophy, Users, Wallet, Settings as SettingsIcon,
-  Megaphone, BarChart3,
+  Megaphone, BarChart3, CalendarDays,
   Menu, X,
   User as UserIcon,
 } from 'lucide-react'
@@ -92,8 +92,9 @@ export function AppShell({
 
   /* 네비게이션 아이템 정의 */
   const mainNav: NavItem[] = [
-    { href: `/club/${clubId}`,           label: '대시보드', Icon: Home,     match: `/club/${clubId}` },
-    { href: `/club/${clubId}/gameboard`, label: '게임보드', Icon: Gamepad2 },
+    { href: `/club/${clubId}`,           label: '대시보드',   Icon: Home,         match: `/club/${clubId}` },
+    { href: `/club/${clubId}/gameboard`, label: '게임보드',   Icon: Gamepad2 },
+    { href: `/club/${clubId}/events`,    label: '정기모임',   Icon: CalendarDays },
   ]
 
   const communityNav: NavItem[] = [
@@ -347,6 +348,7 @@ function NavSection({
           const tourId = item.href.endsWith('/gameboard') ? 'nav-gameboard'
             : item.href.endsWith('/ranking') ? 'nav-ranking'
             : item.href.endsWith('/notices') ? 'nav-notices'
+            : item.href.endsWith('/events') ? 'nav-events'
             : item.href.endsWith('/members') ? 'nav-members'
             : item.href.endsWith('/finance') ? 'nav-finance'
             : item.href.endsWith('/settings') ? 'nav-settings'

@@ -49,32 +49,11 @@ CREATE POLICY "club_members: 운영진 수정" ON club_members
 
 -- INSERT: join_club_by_invite_code RPC / create_club RPC (SECURITY DEFINER) 사용
 
--- ── club_events ────────────────────────────────────────────
-CREATE POLICY "club_events: 멤버 조회" ON club_events
-  FOR SELECT USING (
-    is_club_member(club_events.club_id, auth_club_user_id())
-  );
-
-CREATE POLICY "club_events: 운영진 생성·수정·삭제" ON club_events
-  FOR ALL USING (
-    is_club_manager(club_events.club_id, auth_club_user_id())
-  );
-
--- ── club_event_attendances ─────────────────────────────────
-CREATE POLICY "club_event_attendances: 멤버 조회" ON club_event_attendances
-  FOR SELECT USING (
-    is_event_member(club_event_attendances.event_id)
-  );
-
--- 본인 참석 상태 UPSERT
-CREATE POLICY "club_event_attendances: 본인 UPSERT" ON club_event_attendances
-  FOR ALL USING (
-    member_id IN (
-      SELECT cm.id FROM club_members cm
-      WHERE cm.user_id = auth_club_user_id()
-        AND cm.removed_at IS NULL
-    )
-  );
+-- ── club_events / club_event_attendances ──────────────────
+-- 정기모임 RLS 는 20260427000004_events_rls.sql 에서 더 세분화된 정책으로 관리.
+-- 여기서는 멱등 보장을 위해 호환 정책을 (재)생성하지 않고 위임.
+-- 만약 이 파일이 먼저 적용된 환경(이전 배포)에서는 20260427000004 이 DROP IF EXISTS
+-- 로 덮어쓰므로 안전.
 
 -- ── sessions ───────────────────────────────────────────────
 CREATE POLICY "sessions: 멤버 조회" ON sessions
