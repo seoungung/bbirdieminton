@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { X, Check, Minus, Plus, Copy, Share2 } from 'lucide-react'
+import { X, Check, Minus, Plus, Copy, Share2, MessageSquare } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { createSettlementAction } from '@/app/club/[clubId]/settlements/actions'
 
@@ -81,6 +81,22 @@ export function ShuttlecockSettlementDialog({
     } catch {
       setError('클립보드 복사 실패')
     }
+  }
+
+  /** Web Share API — 모바일에서 카톡/문자 등 직접 공유 (지원 안 되면 클립보드 fallback) */
+  async function handleNativeShare() {
+    const text = buildShareMessage()
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: '셔틀콕비 정산', text })
+        return
+      } catch {
+        // 사용자 취소 등 — 조용히 무시
+        return
+      }
+    }
+    // fallback: 클립보드 복사
+    await handleCopyMessage()
   }
 
   function handleSave() {
@@ -204,24 +220,43 @@ export function ShuttlecockSettlementDialog({
             </div>
           )}
 
-          {/* 카톡 공유 메시지 */}
-          <button
-            onClick={handleCopyMessage}
-            disabled={!canSave}
-            className="w-full flex items-center justify-center gap-2 py-2.5 border border-[#e5e5e5] text-[#555] text-sm font-semibold rounded-xl hover:bg-[#f8f8f8] disabled:opacity-50 transition-colors"
-          >
-            {shareCopied ? (
-              <>
-                <Check size={14} className="text-emerald-600" />
-                <span className="text-emerald-700">복사됨!</span>
-              </>
-            ) : (
-              <>
-                <Copy size={14} />
-                카톡 메시지 복사
-              </>
-            )}
-          </button>
+          {/* 카톡/메시지 공유 — Web Share API 우선, fallback 클립보드 */}
+          <div className="space-y-2">
+            <p className="text-[11px] font-bold text-[#999] uppercase tracking-wider">
+              미납자에게 알리기
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={handleNativeShare}
+                disabled={!canSave}
+                className="flex items-center justify-center gap-1.5 py-2.5 border border-[#0a0a0a] bg-[#0a0a0a] text-white text-xs font-bold rounded-xl hover:bg-[#222] disabled:opacity-50 transition-colors"
+              >
+                <Share2 size={13} strokeWidth={2.5} />
+                메시지 공유
+              </button>
+              <button
+                onClick={handleCopyMessage}
+                disabled={!canSave}
+                className="flex items-center justify-center gap-1.5 py-2.5 border border-[#e5e5e5] text-[#555] text-xs font-bold rounded-xl hover:bg-[#f8f8f8] disabled:opacity-50 transition-colors"
+              >
+                {shareCopied ? (
+                  <>
+                    <Check size={13} className="text-emerald-600" strokeWidth={2.5} />
+                    <span className="text-emerald-700">복사됨</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={13} />
+                    텍스트 복사
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-[11px] text-[#999] leading-relaxed flex items-start gap-1.5">
+              <MessageSquare size={11} className="text-[#bbb] mt-0.5 shrink-0" strokeWidth={2} />
+              모바일은 <strong className="text-[#666] font-semibold">메시지 공유</strong>로 카톡 단체방에 바로 보낼 수 있어요. 안 되면 텍스트 복사 후 직접 붙여넣기.
+            </p>
+          </div>
 
           {error && (
             <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-xl">{error}</p>
@@ -249,7 +284,7 @@ export function ShuttlecockSettlementDialog({
               </>
             ) : (
               <>
-                <Share2 size={14} strokeWidth={2.5} />
+                <Check size={14} strokeWidth={2.5} />
                 정산 확정
               </>
             )}
