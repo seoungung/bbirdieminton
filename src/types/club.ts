@@ -33,10 +33,16 @@ export interface Club {
   max_members: number
   court_count: number
   plan: ClubPlan
-  /** 셔틀콕 1개당 기본 가격 (원) */
+  /** 셔틀콕 1개당 기본 가격 (원) — 풀 이체 시 회원 청구 단가로도 사용 (지정콕 ~2,500원) */
   shuttle_default_price: number
   /** 입금 계좌 안내 문구 (예: "신한 110-xxx-xxx (홍길동)") */
   settlement_account: string | null
+  /** 동호회 여유분 셔틀콕 잔량 — 트리거로 자동 갱신 */
+  shuttle_pool_count: number
+  /** 평일 출석자 1인당 기본 제출 개수 (기본 2) */
+  shuttle_weekday_required: number
+  /** 주말 출석자 1인당 기본 제출 개수 (기본 3) */
+  shuttle_weekend_required: number
   created_at: string
   updated_at: string
 }
@@ -71,6 +77,53 @@ export interface SettlementMember {
 export interface SettlementWithMembers extends SessionSettlement {
   members: Array<SettlementMember & { memberName: string }>
   paidCount: number
+}
+
+// ── 셔틀콕 제출 트래커 (v2 신규) ────────────────────────────
+
+/**
+ * 세션별 출석자 셔틀콕 제출 현황 (운영진 입력 전용)
+ *
+ * 운영 흐름:
+ * 1) 운영진이 출석자별로 본인이 가져온 개수(brought_count) 입력
+ * 2) 부족분은 풀에서 이체(paid_from_pool) — amount_owed 자동 계산
+ * 3) 회원이 동호회에 결제 완료 시 amount_paid_at 시각 기록
+ */
+export interface ShuttleSubmission {
+  id: string
+  club_id: string
+  session_id: string
+  member_id: string
+  required_count: number
+  brought_count: number
+  paid_from_pool: number
+  amount_owed: number
+  amount_paid_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+/** 풀 변동 사유 */
+export type ShuttlePoolReason = 'replenish' | 'pool_payment' | 'manual_adjust'
+
+/** 셔틀콕 풀 변동 감사 로그 (immutable) */
+export interface ShuttlePoolLog {
+  id: string
+  club_id: string
+  delta: number
+  reason: ShuttlePoolReason
+  related_submission_id: string | null
+  amount_paid: number | null
+  created_by: string | null
+  note: string | null
+  created_at: string
+}
+
+/** 출석자 + 제출 현황 결합 (운영진 입력 화면용) */
+export interface SubmissionWithMember extends ShuttleSubmission {
+  memberName: string
+  memberRole: MemberRole
+  skillScore: number
 }
 
 export interface ClubMember {
