@@ -61,7 +61,7 @@ export async function getClubMembers(
   return (data ?? []) as unknown as ClubMemberWithUser[]
 }
 
-/** 내 club_member row */
+/** 내 club_member row (추방된 멤버는 제외) */
 export async function getMyMembership(
   supabase: SupabaseClient,
   clubId: string,
@@ -72,6 +72,7 @@ export async function getMyMembership(
     .select('*')
     .eq('club_id', clubId)
     .eq('user_id', clubUserId)
+    .is('removed_at', null)
     .maybeSingle()
   return data
 }
