@@ -301,6 +301,8 @@ export function PlayingPhase({
 
   /* ── 대기열 구간 계산 ── */
   const emptyCourtsCount = courts.filter((c) => c.teamA.length === 0).length
+  /** 첫 번째 빈 코트 인덱스 — 다음 매치 미리보기를 이 코트 카드에 임베드 */
+  const firstEmptyCourtIdx = courts.findIndex((c) => c.teamA.length === 0)
 
   /* ── 다음 경기 프리뷰 (2v2 카드) ── */
   const nextMatchPreview = useMemo(() => {
@@ -408,12 +410,14 @@ export function PlayingPhase({
           {/* ── 왼쪽: 코트들 ── */}
           <div className="space-y-3 min-w-0">
         {/* 코트 카드 */}
-        {courts.map((court) => {
+        {courts.map((court, idx) => {
           const isEmpty = court.teamA.length === 0
           const canAssign = isEmpty && waitingPlayers.length >= 4
           const courtElapsed = court.startedAt > 0 ? Date.now() - court.startedAt : 0
           const winState = isEmpty ? null : getWinState(court.scoreA, court.scoreB)
           const hasWinner = winState === 'A' || winState === 'B'
+          /** 이 코트가 첫 번째 빈 코트이고 다음 매치 미리보기 있음 → 카드 내부에 임베드 */
+          const showEmbeddedPreview = isEmpty && idx === firstEmptyCourtIdx && nextMatchPreview !== null
 
           return (
             <div
@@ -476,47 +480,104 @@ export function PlayingPhase({
 
               {/* 코트 내용 */}
               {isEmpty ? (
-                <div className="py-10 px-5 bg-[linear-gradient(135deg,#fafafa_0%,#f3f3f3_100%)]">
-                  {/* 팀 A 슬롯 (점선) */}
-                  <div className="flex items-center gap-2 opacity-60">
-                    <p className="text-[10px] font-bold text-blue-400 w-8 shrink-0">팀 A</p>
-                    <div className="flex-1 grid grid-cols-2 gap-1.5">
-                      {[0, 1].map((i) => (
-                        <div
-                          key={i}
-                          className="h-7 rounded-lg border border-dashed border-[#ccc] bg-white/40"
-                        />
-                      ))}
+                showEmbeddedPreview && nextMatchPreview ? (
+                  /* 다음 매치 미리보기 임베드 — 우동배 운영 화면 패턴 */
+                  <div className="py-5 px-5 bg-emerald-50/60 border-t border-emerald-100">
+                    <p className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider mb-2 inline-flex items-center gap-1">
+                      <Sparkles size={11} strokeWidth={2.5} />
+                      이 코트로 들어올 다음 매치
+                    </p>
+                    {/* 팀 A */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <p className="text-[10px] font-bold text-blue-600 w-8 shrink-0">팀 A</p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 flex-1">
+                        {nextMatchPreview[0].map((p) => {
+                          const isMe = p.memberId === membershipId
+                          const isTemp = p.memberId.startsWith('temp-')
+                          return (
+                            <span key={p.memberId} className="inline-flex items-center gap-1">
+                              {isTemp ? (
+                                <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded bg-gray-100 text-gray-400 text-[8px] font-extrabold">?</span>
+                              ) : (
+                                <GradeBadge score={p.skillScore} size="xs" />
+                              )}
+                              <span className={`text-xs font-semibold ${isMe ? 'text-[#111] font-extrabold' : 'text-[#222]'}`}>
+                                {p.name}
+                              </span>
+                              {isMe && (
+                                <span className="text-[9px] font-bold text-[#555] bg-[#beff00]/40 rounded px-1 py-0.5 leading-none">나</span>
+                              )}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    {/* 네트 */}
+                    <div className="flex items-center gap-2 my-1.5">
+                      <div className="flex-1 border-t border-dashed border-emerald-300" />
+                      <span className="text-[9px] font-extrabold text-emerald-500/70 tracking-widest">VS</span>
+                      <div className="flex-1 border-t border-dashed border-emerald-300" />
+                    </div>
+                    {/* 팀 B */}
+                    <div className="flex items-center gap-2">
+                      <p className="text-[10px] font-bold text-red-500 w-8 shrink-0">팀 B</p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 flex-1">
+                        {nextMatchPreview[1].map((p) => {
+                          const isMe = p.memberId === membershipId
+                          const isTemp = p.memberId.startsWith('temp-')
+                          return (
+                            <span key={p.memberId} className="inline-flex items-center gap-1">
+                              {isTemp ? (
+                                <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded bg-gray-100 text-gray-400 text-[8px] font-extrabold">?</span>
+                              ) : (
+                                <GradeBadge score={p.skillScore} size="xs" />
+                              )}
+                              <span className={`text-xs font-semibold ${isMe ? 'text-[#111] font-extrabold' : 'text-[#222]'}`}>
+                                {p.name}
+                              </span>
+                              {isMe && (
+                                <span className="text-[9px] font-bold text-[#555] bg-[#beff00]/40 rounded px-1 py-0.5 leading-none">나</span>
+                              )}
+                            </span>
+                          )
+                        })}
+                      </div>
                     </div>
                   </div>
-                  {/* VS 라인 */}
-                  <div className="flex items-center gap-2 my-2.5 opacity-60">
-                    <div className="flex-1 border-t border-dashed border-[#d5d5d5]" />
-                    <span className="text-[9px] font-extrabold text-[#bbb] tracking-widest">VS</span>
-                    <div className="flex-1 border-t border-dashed border-[#d5d5d5]" />
-                  </div>
-                  {/* 팀 B 슬롯 */}
-                  <div className="flex items-center gap-2 opacity-60">
-                    <p className="text-[10px] font-bold text-red-400 w-8 shrink-0">팀 B</p>
-                    <div className="flex-1 grid grid-cols-2 gap-1.5">
-                      {[0, 1].map((i) => (
-                        <div
-                          key={i}
-                          className="h-7 rounded-lg border border-dashed border-[#ccc] bg-white/40"
-                        />
-                      ))}
+                ) : (
+                  /* 빈 슬롯 + 안내 */
+                  <div className="py-10 px-5 bg-[linear-gradient(135deg,#fafafa_0%,#f3f3f3_100%)]">
+                    <div className="flex items-center gap-2 opacity-60">
+                      <p className="text-[10px] font-bold text-blue-400 w-8 shrink-0">팀 A</p>
+                      <div className="flex-1 grid grid-cols-2 gap-1.5">
+                        {[0, 1].map((i) => (
+                          <div key={i} className="h-7 rounded-lg border border-dashed border-[#ccc] bg-white/40" />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 my-2.5 opacity-60">
+                      <div className="flex-1 border-t border-dashed border-[#d5d5d5]" />
+                      <span className="text-[9px] font-extrabold text-[#bbb] tracking-widest">VS</span>
+                      <div className="flex-1 border-t border-dashed border-[#d5d5d5]" />
+                    </div>
+                    <div className="flex items-center gap-2 opacity-60">
+                      <p className="text-[10px] font-bold text-red-400 w-8 shrink-0">팀 B</p>
+                      <div className="flex-1 grid grid-cols-2 gap-1.5">
+                        {[0, 1].map((i) => (
+                          <div key={i} className="h-7 rounded-lg border border-dashed border-[#ccc] bg-white/40" />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mt-4 flex items-center justify-center gap-1.5 text-[#bbb]">
+                      <ShuttlecockIcon size={12} className="text-[#d5d5d5]" strokeWidth={1.8} />
+                      <span className="text-[11px]">
+                        {canAssign
+                          ? '상단 "다음 경기 배정" 버튼으로 시작'
+                          : `대기 ${waitingPlayers.length}명 (4명 이상 필요)`}
+                      </span>
                     </div>
                   </div>
-                  {/* 안내 */}
-                  <div className="mt-4 flex items-center justify-center gap-1.5 text-[#bbb]">
-                    <ShuttlecockIcon size={12} className="text-[#d5d5d5]" strokeWidth={1.8} />
-                    <span className="text-[11px]">
-                      {canAssign
-                        ? '상단 "다음 경기 배정" 버튼으로 시작'
-                        : `대기 ${waitingPlayers.length}명 (4명 이상 필요)`}
-                    </span>
-                  </div>
-                </div>
+                )
               ) : (
                 <div className="p-4 bg-gradient-to-b from-emerald-50/60 via-white to-emerald-50/40">
                   {/* 팀 A */}
