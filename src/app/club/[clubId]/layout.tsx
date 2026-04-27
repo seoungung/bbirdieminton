@@ -44,12 +44,33 @@ export default async function ClubDetailLayout({
   const clubUserId = await getClubUserId(supabase, user)
   if (!clubUserId) redirect('/login')
 
-  const membership = await getMyMembership(supabase, clubId, clubUserId)
+  /* 클럽 정보 먼저 조회 (owner self-heal 판단을 위해 membership보다 선행) */
+  const { data: club } = await supabase
+    .from('clubs')
+    .select('name, location, thumbnail_color, owner_id, court_count')
+    .eq('id', clubId)
+    .maybeSingle()
+
+  if (!club) redirect('/club/home')
+
+  const isOwner = club.owner_id === clubUserId
+
+  let membership = await getMyMembership(supabase, clubId, clubUserId)
+
+  /* Self-heal: owner인데 멤버십 row 없음 → RPC로 복구 후 재조회 */
+  if (!membership && isOwner) {
+    const { data: healResult } = await supabase
+      .rpc('ensure_owner_membership', { p_club_id: clubId })
+    if (!(healResult as { ok?: boolean })?.ok) {
+      redirect('/club/home')
+    }
+    membership = await getMyMembership(supabase, clubId, clubUserId)
+  }
+
   if (!membership) redirect('/club/home')
 
-  /* 클럽 정보 + 유저 프로필 + 읽지 않은 공지 수 + 소속 클럽 목록 병렬 조회 */
-  const [clubResult, userProfileResult, unreadCount, clubsResult] = await Promise.all([
-    supabase.from('clubs').select('name, location, thumbnail_color, owner_id').eq('id', clubId).single(),
+  /* 유저 프로필 + 읽지 않은 공지 수 + 소속 클럽 목록 병렬 조회 */
+  const [userProfileResult, unreadCount, clubsResult] = await Promise.all([
     supabase.from('users').select('name').eq('id', clubUserId).single(),
     getUnreadCountAction(clubId).catch(() => 0),
     // 내가 소속된 다른 클럽 목록 (현재 클럽 제외)
@@ -60,9 +81,7 @@ export default async function ClubDetailLayout({
       .neq('club_id', clubId),
   ])
 
-  const club = clubResult.data
   const userProfile = userProfileResult.data
-  const isOwner = club?.owner_id === clubUserId
 
   /* 다른 클럽 목록 정리 */
   const availableClubs: ClubOption[] = (clubsResult.data ?? [])
@@ -85,9 +104,9 @@ export default async function ClubDetailLayout({
   return (
     <AppShell
       clubId={clubId}
-      clubName={club?.name ?? '모임'}
-      clubLocation={club?.location ?? null}
-      thumbnailColor={club?.thumbnail_color}
+      clubName={club.name}
+      clubLocation={club.location ?? null}
+      thumbnailColor={club.thumbnail_color}
       isOwner={isOwner}
       userName={userProfile?.name ?? user.email?.split('@')[0] ?? '이름없음'}
       userEmail={userEmail}
