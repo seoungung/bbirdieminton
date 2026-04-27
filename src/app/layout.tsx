@@ -30,6 +30,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://birdieminton.com',
   },
+  verification: {
+    google: 'xvS9STNiPaLzRicyjEmvQ4Jg7-yitkJpUvfDXfTprcI',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
