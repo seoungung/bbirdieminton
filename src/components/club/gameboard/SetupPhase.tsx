@@ -5,6 +5,7 @@ import { useState, useMemo } from 'react'
 import {
   ArrowLeft, ChevronDown, AlertCircle, Check, Minus, Plus,
   Sparkles, PenLine, AlertTriangle, Zap, Lightbulb, UserPlus,
+  RotateCw, Crown,
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { cn } from '@/lib/utils'
@@ -86,6 +87,7 @@ export function SetupPhase({
   setupSource,
   selectedSessionIdx,
   assignMode,
+  gameMode,
   activeCourts,
   maxCourts,
   sessionDate,
@@ -100,6 +102,7 @@ export function SetupPhase({
   onAddTempPlayer,
   onRemoveTempPlayer,
   onAssignModeChange,
+  onGameModeChange,
   onActiveCourtsChange,
   onSessionDateChange,
   onStartGame,
@@ -479,6 +482,38 @@ export function SetupPhase({
                 </div>
               ))}
             </div>
+          )}
+        </div>
+
+        {/* 게임 모드 — 일반 로테이션 vs 킹 오브 코트 */}
+        <div>
+          <p className="text-xs font-semibold text-[#999] mb-2">게임 모드</p>
+          <div className="grid grid-cols-2 gap-2">
+            {([
+              { value: 'normal',        Icon: RotateCw, label: '일반 로테이션', desc: '모든 플레이어 순환 참여' },
+              { value: 'king_of_court', Icon: Crown,    label: '킹 오브 코트',  desc: '승자 유지, 도전자 교체' },
+            ] as { value: GameMode; Icon: IconComp; label: string; desc: string }[]).map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => onGameModeChange(opt.value)}
+                className={cn(
+                  'flex flex-col items-center gap-1 py-3 px-2 rounded-xl border text-center transition-colors',
+                  gameMode === opt.value
+                    ? 'bg-[#beff00] border-[#beff00] text-[#111]'
+                    : 'bg-white border-[#e5e5e5] text-[#555] hover:border-[#beff00]'
+                )}
+              >
+                <opt.Icon size={20} strokeWidth={1.9} />
+                <span className="text-[11px] font-bold leading-none">{opt.label}</span>
+                <span className="text-[10px] text-[#999] leading-tight">{opt.desc}</span>
+              </button>
+            ))}
+          </div>
+          {gameMode === 'king_of_court' && (
+            <p className="text-xs text-[#999] mt-2 pl-1 flex items-start gap-1.5">
+              <AlertTriangle size={12} className="text-amber-500 mt-0.5 shrink-0" strokeWidth={2} />
+              승리 팀이 코트를 지키고, 패배 팀과 대기 도전자가 교체됩니다. (실험 기능)
+            </p>
           )}
         </div>
 

@@ -43,6 +43,8 @@ export interface Club {
   shuttle_weekday_required: number
   /** 주말 출석자 1인당 기본 제출 개수 (기본 3) */
   shuttle_weekend_required: number
+  /** 게임 종료 점수 (21 정식 대회 / 25 일반 클럽) — 디폴트 25 */
+  match_point_target: 21 | 25
   created_at: string
   updated_at: string
 }

@@ -68,6 +68,38 @@ export async function updateClubProfileAction(
   return { success: true }
 }
 
+// ── 게임 규칙: 종료 점수 (21/25) ───────────────────────────
+export async function updateMatchPointTargetAction(
+  clubId: string,
+  target: 21 | 25,
+) {
+  if (target !== 21 && target !== 25) {
+    return { error: '종료 점수는 21 또는 25만 가능합니다.' }
+  }
+  const supabase = await createClient()
+  const clubUserId = await getClubUserId(supabase)
+  if (!clubUserId) return { error: '로그인이 필요합니다.' }
+
+  const { data: membership } = await supabase
+    .from('club_members')
+    .select('role')
+    .eq('club_id', clubId)
+    .eq('user_id', clubUserId)
+    .maybeSingle()
+  if (!membership || !['owner', 'manager'].includes(membership.role))
+    return { error: '운영진(클럽장·매니저)만 변경할 수 있습니다.' }
+
+  const { error } = await supabase
+    .from('clubs')
+    .update({ match_point_target: target })
+    .eq('id', clubId)
+
+  if (error) return { error: '저장 실패: ' + error.message }
+  revalidatePath(`/club/${clubId}/settings`)
+  revalidatePath(`/club/${clubId}/gameboard`)
+  return { success: true }
+}
+
 // ── 모임 삭제 (owner 전용) ─────────────────────────────────
 // SettingsClient에서 직접 RPC 호출하던 것을 Server Action으로 이전.
 // 표준 사용자 경로의 권한 검증을 추가 (RPC 자체 가드는 별도 마이그레이션에서).

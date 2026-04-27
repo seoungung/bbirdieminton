@@ -60,6 +60,7 @@ export default async function GameBoardPage({
         recentSessions={[]}
         membership={{ id: 'demo-owner', role: 'owner' }}
         inProgressData={null}
+        matchPointTarget={25}
         isDemo
       />
     )
@@ -78,7 +79,7 @@ export default async function GameBoardPage({
     ipSessionResult,
   ] = await Promise.all([
     getAuthUser(),
-    supabase.from('clubs').select('id, name, court_count, shuttle_default_price, settlement_account').eq('id', clubId).single(),
+    supabase.from('clubs').select('id, name, court_count, shuttle_default_price, settlement_account, match_point_target').eq('id', clubId).single(),
     getClubMembers(supabase, clubId),
     supabase
       .from('player_stats')
@@ -197,6 +198,7 @@ export default async function GameBoardPage({
       stats={statsResult.data ?? []}
       recentSessions={closedSessionAttendances}
       membership={{ id: membershipResult.id, role: membershipResult.role }}
+      matchPointTarget={(club.match_point_target ?? 25) as 21 | 25}
       inProgressData={inProgressData}
     />
   )

@@ -34,9 +34,9 @@ export type { RecentSessionData, InProgressData }
 interface Props {
   clubId: string
   clubName: string
-  /** 셔틀콕 1개당 기본 가격 (정산 다이얼로그 기본값) */
+  /** 셔틀콕 1개당 기본 가격 — 이전 정산 시스템 잔재 (v2에선 /shuttle 페이지에서 사용) */
   shuttleDefaultPrice: number
-  /** 입금 계좌 안내 (정산 다이얼로그 표시) */
+  /** 입금 계좌 안내 — 이전 정산 시스템 잔재 (v2에선 /shuttle 페이지에서 사용) */
   settlementAccount: string | null
   courtCount: number
   members: ClubMemberWithUser[]
@@ -44,6 +44,8 @@ interface Props {
   recentSessions: RecentSessionData[]
   membership: { id: string; role: string }
   inProgressData?: InProgressData | null
+  /** 게임 종료 점수 (21 정식 / 25 일반) — 디폴트 25 */
+  matchPointTarget?: 21 | 25
   /** true 이면 체험 모드 — Supabase DB 쓰기를 모두 건너뜀 */
   isDemo?: boolean
 }
@@ -58,6 +60,7 @@ export function GameBoardClient({
   recentSessions,
   membership,
   inProgressData,
+  matchPointTarget = 25,
   isDemo = false,
 }: Props) {
   const router = useRouter()
@@ -522,11 +525,11 @@ export function GameBoardClient({
           team === 'A'
             ? { ...c, scoreA: Math.max(0, c.scoreA + delta) }
             : { ...c, scoreB: Math.max(0, c.scoreB + delta) }
-        // 25점 최초 도달 시 모바일 진동 피드백 (한국 클럽 표준 점수)
+        // 목표 점수 최초 도달 시 모바일 진동 피드백 (클럽 설정 21/25)
         if (delta > 0) {
           const newScore = team === 'A' ? updated.scoreA : updated.scoreB
           const oldScore = team === 'A' ? c.scoreA : c.scoreB
-          if (oldScore < 25 && newScore >= 25) {
+          if (oldScore < matchPointTarget && newScore >= matchPointTarget) {
             if (typeof navigator !== 'undefined') navigator.vibrate?.(200)
           }
         }
@@ -893,6 +896,7 @@ export function GameBoardClient({
         membershipId={membership.id}
         assignMode={assignMode}
         onAssignModeChange={handleAssignModeChange}
+        matchPointTarget={matchPointTarget}
         onOpenCustomPick={handleOpenCustomPick}
         customPickCourt={customPickCourt}
         onCustomAssign={handleCustomAssign}

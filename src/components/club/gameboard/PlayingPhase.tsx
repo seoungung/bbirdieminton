@@ -224,19 +224,22 @@ function ModeSwitcher({
 
 /* CustomPickOverlay 는 ./playing/CustomPickOverlay.tsx 로 이동됨 */
 
-/* ── 25점제 승자 판정 (한국 클럽·동호회 표준) ──────────────────
- * 정식 대회는 21점이지만 일반 클럽·동호인 게임은 25점 듀스가 표준.
- * 25점 선취 + 2점 차 이상. 30-29 → 30점에서 강제 종료 (5점 듀스 max).
+/* ── 승자 판정 (21/25점 클럽 옵션) ──────────────────────────
+ * 정식 대회는 21점 / 일반 클럽·동호회는 25점 듀스가 표준.
+ * target 점수 선취 + 2점 차 이상. (target+9)점 강제 종료.
+ *   21점제: 30점 캡 (9점 듀스 max)
+ *   25점제: 34점 캡 (9점 듀스 max — 기존 30 캡에서 일관된 듀스 길이로)
  */
 type WinState = 'A' | 'B' | 'deuce' | null
 
-function getWinState(scoreA: number, scoreB: number): WinState {
+function getWinState(scoreA: number, scoreB: number, target: 21 | 25 = 25): WinState {
   const max = Math.max(scoreA, scoreB)
-  if (max < 25) return null
+  if (max < target) return null
   const diff = scoreA - scoreB
-  if (max >= 30) return diff > 0 ? 'A' : 'B'   // 30점 강제 종료
+  const cap = target + 9
+  if (max >= cap) return diff > 0 ? 'A' : 'B'    // 강제 종료
   if (Math.abs(diff) >= 2) return diff > 0 ? 'A' : 'B'
-  return 'deuce'  // 20-20 이상 1점 차 = 듀스 진행 중
+  return 'deuce'
 }
 
 /* QueueRow 는 ./playing/QueueRow.tsx 로 이동됨 */
@@ -255,6 +258,8 @@ interface Props {
   assignMode: AssignMode
   /** 기본 배정 방식 변경 */
   onAssignModeChange: (v: AssignMode) => void
+  /** 게임 종료 점수 (21 정식 / 25 일반) — 디폴트 25 */
+  matchPointTarget?: 21 | 25
   /** 이번 한 경기만 직접 배정 (기본 모드와 상관없이) */
   onOpenCustomPick: (courtIndex: number) => void
   /** 직접 배정 모드일 때 열린 코트 인덱스 (null = 닫힘) */
@@ -282,6 +287,7 @@ export function PlayingPhase({
   membershipId,
   assignMode,
   onAssignModeChange,
+  matchPointTarget = 25,
   onOpenCustomPick,
   customPickCourt,
   onCustomAssign,
@@ -415,7 +421,7 @@ export function PlayingPhase({
           const isEmpty = court.teamA.length === 0
           const canAssign = isEmpty && waitingPlayers.length >= 4
           const courtElapsed = court.startedAt > 0 ? Date.now() - court.startedAt : 0
-          const winState = isEmpty ? null : getWinState(court.scoreA, court.scoreB)
+          const winState = isEmpty ? null : getWinState(court.scoreA, court.scoreB, matchPointTarget)
           const hasWinner = winState === 'A' || winState === 'B'
           /** 이 코트가 첫 번째 빈 코트이고 다음 매치 미리보기 있음 → 카드 내부에 임베드 */
           const showEmbeddedPreview = isEmpty && idx === firstEmptyCourtIdx && nextMatchPreview !== null

@@ -5,7 +5,11 @@ import { useRouter } from 'next/navigation'
 import { Copy, LogOut, Crown, Shield, User, Trash2 } from 'lucide-react'
 import type { Club, ClubMemberWithUser, MemberRole } from '@/types/club'
 import { updateMemberRoleAction, regenerateInviteCodeAction } from '@/app/club/[clubId]/members/actions'
-import { deleteClubAction, leaveClubAction } from '@/app/club/[clubId]/settings/actions'
+import {
+  deleteClubAction,
+  leaveClubAction,
+  updateMatchPointTargetAction,
+} from '@/app/club/[clubId]/settings/actions'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
 interface Props {
@@ -28,11 +32,27 @@ const ROLE_LABEL: Record<MemberRole, string> = {
   member: '멤버',
 }
 
-export function SettingsClient({ club, members, myMemberId, isOwner, isManager: _isManager }: Props) {
+export function SettingsClient({ club, members, myMemberId, isOwner, isManager }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [copied, setCopied] = useState(false)
   const [codeRegen, setCodeRegen] = useState<string | null>(null)
+  const [pointTarget, setPointTarget] = useState<21 | 25>(
+    (club.match_point_target ?? 25) as 21 | 25,
+  )
+
+  const handlePointTargetChange = (next: 21 | 25) => {
+    if (next === pointTarget) return
+    const prev = pointTarget
+    setPointTarget(next) // 낙관적
+    startTransition(async () => {
+      const r = await updateMatchPointTargetAction(club.id, next)
+      if (r.error) {
+        setPointTarget(prev)
+        alert(r.error)
+      }
+    })
+  }
   const [dialog, setDialog] = useState<{
     title: string
     description: string
@@ -132,6 +152,48 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager: 
           </div>
         </div>
       </div>
+
+      {/* 게임 규칙 — 운영진만 변경 가능 */}
+      {isManager && (
+        <div className="bg-white border border-[#e5e5e5] rounded-2xl p-4">
+          <p className="text-xs font-bold text-[#999] mb-1">게임 규칙</p>
+          <p className="text-[12px] text-[#666] leading-relaxed mb-3">
+            한국 클럽·동호회는 <strong className="text-[#111]">25점 듀스</strong>가 표준,
+            정식 대회는 <strong className="text-[#111]">21점</strong>입니다.
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {([21, 25] as const).map((n) => {
+              const active = pointTarget === n
+              return (
+                <button
+                  key={n}
+                  onClick={() => handlePointTargetChange(n)}
+                  disabled={isPending}
+                  className={
+                    'py-3 rounded-xl border text-left transition-colors px-3 ' +
+                    (active
+                      ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white'
+                      : 'bg-white border-[#e5e5e5] text-[#555] hover:border-[#0a0a0a]')
+                  }
+                >
+                  <span className="text-sm font-extrabold">{n}점 듀스</span>
+                  <p
+                    className={
+                      'text-[10px] mt-0.5 ' + (active ? 'text-white/70' : 'text-[#999]')
+                    }
+                  >
+                    {n === 21 ? '정식 대회' : '일반 클럽 (기본)'}
+                  </p>
+                </button>
+              )
+            })}
+          </div>
+          <p className="text-[10px] text-[#bbb] mt-2 leading-relaxed">
+            · 듀스 시 2점 차로 종료 · 강제 종료점은 종료점+9
+            ({pointTarget === 21 ? '21→30' : '25→34'})
+          </p>
+        </div>
+      )}
 
       {/* 멤버 목록 */}
       <div>
