@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { KakaoLoginButton } from '@/components/auth/KakaoLoginButton'
+import { GoogleLoginButton } from '@/components/auth/GoogleLoginButton'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -43,10 +44,13 @@ export default async function LoginPage({
         {/* 로그인 카드 */}
         <div className="bg-white border border-[#e5e5e5] rounded-2xl p-6 shadow-sm">
           <p className="text-center text-[15px] font-semibold text-[#111] mb-5">
-            카카오 계정으로 시작하세요
+            소셜 계정으로 시작하세요
           </p>
 
-          <KakaoLoginButton next={next} />
+          <div className="space-y-2.5">
+            <KakaoLoginButton next={next} />
+            <GoogleLoginButton next={next} />
+          </div>
 
           {error && (
             <p className="mt-4 text-center text-[13px] text-red-500">

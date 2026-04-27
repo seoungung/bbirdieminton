@@ -5,9 +5,9 @@ import { redirect } from 'next/navigation'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://birdieminton.com'
 
-// 이메일 로그인·구글 로그인 Server Action은 v2 카카오 단일 정책 도입 후 호출처가
-// 모두 사라졌으나, Server Action ID로의 외부 호출 가능성과 open redirect를 막기
-// 위해 통째로 제거함. (이전 액션: loginWithEmail/signupWithEmail/loginWithGoogle)
+// 이메일 로그인 Server Action은 v2 카카오 단일 정책 도입 후 호출처가
+// 사라졌으며, Server Action ID로의 외부 호출 가능성과 open redirect를 막기
+// 위해 제거함. (이전 액션: loginWithEmail/signupWithEmail)
 
 export async function loginWithKakao(next?: string) {
   const supabase = await createClient()
@@ -18,6 +18,18 @@ export async function loginWithKakao(next?: string) {
     },
   })
   if (error || !data.url) return { error: '카카오 로그인에 실패했습니다.' }
+  redirect(data.url)
+}
+
+export async function loginWithGoogle(next?: string) {
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${SITE_URL}/auth/callback?next=${encodeURIComponent(next ?? '/club/home')}`,
+    },
+  })
+  if (error || !data.url) return { error: '구글 로그인에 실패했습니다.' }
   redirect(data.url)
 }
 
