@@ -178,11 +178,9 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[#111] mb-1.5">
-                  코트 수 <span className="text-[#999] font-normal text-xs">(1~6개)</span>
-                </label>
+                <label className="block text-sm font-semibold text-[#111] mb-1.5">최대 코트 수</label>
                 <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5, 6].map((n) => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                     <button
                       key={n}
                       type="button"
@@ -198,6 +196,9 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
                     </button>
                   ))}
                 </div>
+                <p className="text-[11px] text-[#999] mt-1.5 leading-relaxed">
+                  이 모임이 운영할 수 있는 최대 코트 수예요. 매 게임 시작 시 그날 사용할 코트 수를 1~최대값 사이로 조정할 수 있어요.
+                </p>
               </div>
 
               {createError && (

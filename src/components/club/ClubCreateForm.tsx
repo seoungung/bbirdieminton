@@ -150,20 +150,23 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
           </div>
         </div>
 
-        {/* 코트 수 */}
+        {/* 최대 코트 수 */}
         <div>
-          <label className="block text-sm font-semibold text-[#111] mb-1.5">코트 수</label>
+          <label className="block text-sm font-semibold text-[#111] mb-1.5">최대 코트 수</label>
           <div className="flex items-center gap-3">
             <input
               type="number"
               name="court_count"
               min={1}
               max={20}
-              defaultValue={2}
+              defaultValue={5}
               className="w-24 border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm text-[#111] focus:outline-none focus:border-[#beff00] bg-white transition-colors text-center"
             />
             <span className="text-sm text-[#999]">면 (1~20)</span>
           </div>
+          <p className="text-[11px] text-[#999] mt-1.5 leading-relaxed">
+            이 모임이 운영할 수 있는 최대 코트 수예요. 매 게임 시작 시 게임보드에서 그날 사용할 코트 수를 1~최대값 사이로 조정할 수 있어요.
+          </p>
         </div>
 
         {/* 지역 + 활동 장소 */}

@@ -195,7 +195,7 @@ function MyClubCard({ club }: { club: Club }) {
             </span>
             <span className="text-sm text-[#888] inline-flex items-center gap-1">
               <ShuttlecockIcon size={13} strokeWidth={1.8} />
-              코트 {club.court_count}면
+              최대 {club.court_count}면
             </span>
           </div>
           <div className="mt-auto pt-1">

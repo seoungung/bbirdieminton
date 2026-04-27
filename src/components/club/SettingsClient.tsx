@@ -9,6 +9,7 @@ import {
   deleteClubAction,
   leaveClubAction,
   updateMatchPointTargetAction,
+  updateClubProfileAction,
 } from '@/app/club/[clubId]/settings/actions'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
@@ -40,6 +41,23 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
   const [pointTarget, setPointTarget] = useState<21 | 25>(
     (club.match_point_target ?? 25) as 21 | 25,
   )
+  const [courtCount, setCourtCount] = useState<number>(club.court_count)
+  const [courtCountError, setCourtCountError] = useState<string | null>(null)
+
+  const handleCourtCountSave = () => {
+    const clamped = Math.min(20, Math.max(1, courtCount))
+    if (clamped === club.court_count) return
+    setCourtCountError(null)
+    startTransition(async () => {
+      const r = await updateClubProfileAction(club.id, {
+        name: club.name,
+        description: club.description ?? undefined,
+        location: club.location ?? undefined,
+        court_count: clamped,
+      })
+      if (r.error) setCourtCountError(r.error)
+    })
+  }
 
   const handlePointTargetChange = (next: 21 | 25) => {
     if (next === pointTarget) return
@@ -152,6 +170,32 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
           </div>
         </div>
       </div>
+
+      {/* 최대 코트 수 — 운영진만 변경 가능 */}
+      {isManager && (
+        <div className="bg-white border border-[#e5e5e5] rounded-2xl p-4">
+          <p className="text-xs font-bold text-[#999] mb-3">최대 코트 수</p>
+          <div className="flex items-center gap-3">
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={courtCount}
+              onChange={(e) => setCourtCount(Number(e.target.value))}
+              onBlur={handleCourtCountSave}
+              disabled={isPending}
+              className="w-24 border border-[#e5e5e5] rounded-xl px-4 py-2.5 text-sm text-[#111] focus:outline-none focus:border-[#beff00] bg-white transition-colors text-center disabled:opacity-50"
+            />
+            <span className="text-sm text-[#999]">면 (1~20)</span>
+          </div>
+          {courtCountError && (
+            <p className="text-xs text-red-500 mt-1.5">{courtCountError}</p>
+          )}
+          <p className="text-[11px] text-[#999] mt-1.5 leading-relaxed">
+            이 모임이 운영할 수 있는 최대 코트 수예요. 매 게임 시작 시 그날 사용할 코트 수를 1~최대값 사이로 조정할 수 있어요.
+          </p>
+        </div>
+      )}
 
       {/* 게임 규칙 — 운영진만 변경 가능 */}
       {isManager && (
