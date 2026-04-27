@@ -1,6 +1,7 @@
 'use client'
 
 import { CalendarDays, MapPin, Pencil, Wallet } from 'lucide-react'
+import { parseEventDate } from '@/lib/date'
 import type { EventDetail } from './types'
 
 interface Props {
@@ -22,12 +23,13 @@ export function EventHero({
   isManager,
   onEditClick,
 }: Props) {
-  const eventDate = new Date(event.event_date + 'T00:00:00')
+  const eventDate = parseEventDate(event.event_date)
   const dateLabel = eventDate.toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
     weekday: 'long',
+    timeZone: 'Asia/Seoul',
   })
   const timeLabel = formatTimeRange(event.start_time, event.end_time)
 

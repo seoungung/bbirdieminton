@@ -4,6 +4,7 @@ import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership, getClubMembers } from '@/lib/club/client'
 import { DEMO_CLUBS, DEMO_MEMBERS, DEMO_REGULAR_SESSIONS, DEMO_SESSIONS } from '@/lib/club/demoData'
 import { ClubDashboardClient } from '@/components/club/ClubDashboardClient'
+import { todayKST, parseEventDate } from '@/lib/date'
 import type { Metadata } from 'next'
 import type { MemberViewItem, RegularSessionItem, GameSessionItem } from '@/components/club/clubview/types'
 
@@ -108,7 +109,7 @@ export default async function ClubHomePage({ params }: PageProps) {
         'id, title, event_date, start_time, end_time, place, fee, max_attend, attendances:club_event_attendances(status)'
       )
       .eq('club_id', clubId)
-      .gte('event_date', new Date().toISOString().split('T')[0])
+      .gte('event_date', todayKST())
       .order('event_date', { ascending: true })
       .limit(3),
     supabase
@@ -150,7 +151,10 @@ export default async function ClubHomePage({ params }: PageProps) {
     attendances: { status: string }[] | null
   }
   const regularSessions: RegularSessionItem[] = ((eventsResult.data as EventRowWithAtt[] | null) ?? []).map(e => {
-    const d = new Date(e.event_date + 'T00:00:00')
+    // KST 날짜의 요일 — parseEventDate는 KST midnight 절대시각을 가짐.
+    // 서버 TZ(UTC)에서도 일관되게 KST 요일을 얻으려면 UTC 기준 +9h 시점으로 읽기.
+    const d = parseEventDate(e.event_date)
+    const kstWallTime = new Date(d.getTime() + 9 * 60 * 60 * 1000)
     const fmtTime = (t: string | null) => (t ? t.slice(0, 5) : '')
     const start = fmtTime(e.start_time)
     const end = fmtTime(e.end_time)
@@ -159,7 +163,7 @@ export default async function ClubHomePage({ params }: PageProps) {
     return {
       id: e.id,
       title: e.title,
-      dayOfWeek: DAY_KO[d.getDay()],
+      dayOfWeek: DAY_KO[kstWallTime.getUTCDay()],
       time,
       place: e.place ?? '',
       fee: e.fee ?? undefined,

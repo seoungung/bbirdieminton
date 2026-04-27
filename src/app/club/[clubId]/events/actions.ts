@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { revalidatePath } from 'next/cache'
+import { todayKST } from '@/lib/date'
 import type { EventAttendStatus } from '@/types/club'
 
 // ── 타입 ───────────────────────────────────────────────────
@@ -57,26 +58,6 @@ async function assertManager(
     return { ok: false, error: '운영진만 정기모임을 관리할 수 있습니다.' }
   }
   return { ok: true, clubUserId, memberId: membership.id }
-}
-
-async function assertMember(
-  clubId: string
-): Promise<{ ok: true; memberId: string } | { ok: false; error: string }> {
-  const supabase = await createClient()
-  const clubUserId = await getClubUserId(supabase)
-  if (!clubUserId) return { ok: false, error: '로그인이 필요합니다.' }
-
-  const { data: membership } = await supabase
-    .from('club_members')
-    .select('id, removed_at')
-    .eq('club_id', clubId)
-    .eq('user_id', clubUserId)
-    .maybeSingle()
-
-  if (!membership || membership.removed_at) {
-    return { ok: false, error: '모임 멤버가 아닙니다.' }
-  }
-  return { ok: true, memberId: membership.id }
 }
 
 // ── 입력 검증 ─────────────────────────────────────────────
@@ -187,75 +168,22 @@ export async function deleteEventAction(
 // ── RSVP 설정 ──────────────────────────────────────────────
 /**
  * 본인 RSVP 등록/변경.
- * - status='going' 이고 max_attend > 0 이면 정원 초과 시 거절.
- * - UNIQUE(event_id, member_id) 에 따라 upsert.
+ * - 정원/과거이벤트/멤버십/직렬화는 set_rsvp RPC 가 모두 처리.
+ * - clubId 인자는 revalidatePath 용으로만 유지.
  */
 export async function setRsvpAction(
   clubId: string,
   eventId: string,
   status: EventAttendStatus
 ): Promise<{ success?: true; error?: string }> {
-  const guard = await assertMember(clubId)
-  if (!guard.ok) return { error: guard.error }
-
   const supabase = await createClient()
-
-  // 이벤트 존재 + 같은 클럽 검증 + max_attend 조회
-  const { data: event } = await supabase
-    .from('club_events')
-    .select('id, club_id, max_attend, event_date')
-    .eq('id', eventId)
-    .eq('club_id', clubId)
-    .maybeSingle()
-
-  if (!event) return { error: '존재하지 않는 정기모임입니다.' }
-
-  // 과거 이벤트 차단 (KST 기준)
-  const todayKST = new Date(Date.now() + 9 * 60 * 60 * 1000)
-    .toISOString()
-    .split('T')[0]
-  if (event.event_date < todayKST) {
-    return { error: '지난 정기모임은 응답을 변경할 수 없어요.' }
-  }
-
-  // 정원 체크: going 으로 바꾸려는 경우만
-  if (status === 'going' && event.max_attend > 0) {
-    // 본인이 이미 going 인지 확인 (upsert 라 본인 카운트 중복 방지)
-    const { data: existing } = await supabase
-      .from('club_event_attendances')
-      .select('status')
-      .eq('event_id', eventId)
-      .eq('member_id', guard.memberId)
-      .maybeSingle()
-
-    const alreadyGoing = existing?.status === 'going'
-
-    if (!alreadyGoing) {
-      const { count } = await supabase
-        .from('club_event_attendances')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', eventId)
-        .eq('status', 'going')
-
-      if ((count ?? 0) >= event.max_attend) {
-        return { error: '정원이 가득 찼습니다.' }
-      }
-    }
-  }
-
-  const { error } = await supabase
-    .from('club_event_attendances')
-    .upsert(
-      {
-        event_id: eventId,
-        member_id: guard.memberId,
-        status,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'event_id,member_id' }
-    )
-
-  if (error) return { error: 'RSVP 변경에 실패했습니다.' }
+  const { data, error } = await supabase.rpc('set_rsvp', {
+    p_event_id: eventId,
+    p_status: status,
+  })
+  if (error) return { error: 'RSVP 처리 중 오류가 발생했어요.' }
+  const result = data as { ok?: boolean; error?: string } | null
+  if (result?.error) return { error: result.error }
 
   revalidatePath(`/club/${clubId}/events`)
   revalidatePath(`/club/${clubId}/events/${eventId}`)
@@ -268,7 +196,7 @@ export async function getUpcomingEventsCountAction(
   clubId: string
 ): Promise<number> {
   const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayKST()
 
   const { count, error } = await supabase
     .from('club_events')

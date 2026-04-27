@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { CalendarDays, MapPin, Users } from 'lucide-react'
+import { parseEventDate } from '@/lib/date'
 import type { EventListRow } from '@/app/club/[clubId]/events/actions'
 
 interface Props {
@@ -16,11 +17,12 @@ export function EventCard({ clubId, event, past, isManager, onEdit }: Props) {
   const isFull = event.max_attend > 0 && event.going_count >= event.max_attend
   const isMine = event.my_status === 'going'
 
-  const eventDate = new Date(event.event_date + 'T00:00:00')
+  const eventDate = parseEventDate(event.event_date)
   const dayLabel = eventDate.toLocaleDateString('ko-KR', {
     month: 'long',
     day: 'numeric',
     weekday: 'short',
+    timeZone: 'Asia/Seoul',
   })
   const timeLabel = formatTimeRange(event.start_time, event.end_time)
 

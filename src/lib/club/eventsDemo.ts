@@ -2,20 +2,23 @@ import type { EventListRow } from '@/app/club/[clubId]/events/actions'
 import type { EventAttendStatus } from '@/types/club'
 import type { EventDetail, AttendeeRow } from '@/components/club/events/types'
 import { DEMO_MEMBERS } from '@/lib/club/demoData'
+import { todayKST, parseEventDate } from '@/lib/date'
 
-const fmt = (d: Date) => d.toISOString().split('T')[0]
-const addDays = (d: Date, n: number) => {
-  const r = new Date(d)
-  r.setDate(r.getDate() + n)
-  return r
+const fmt = (d: Date) => {
+  // KST midnight 절대시각 → KST 벽시계 자체로 이동시킨 뒤 UTC 슬라이스로 YYYY-MM-DD 추출
+  const kstWall = new Date(d.getTime() + 9 * 60 * 60 * 1000)
+  return kstWall.toISOString().split('T')[0]
 }
+const addDays = (d: Date, n: number) => new Date(d.getTime() + n * 24 * 60 * 60 * 1000)
+// KST 기준 "오늘"을 anchor 삼아 +N / -N 일 후 KST midnight Date 객체 생성
+const todayAnchor = (): Date => parseEventDate(todayKST())
 
 /** 데모 정기모임 목록 (다가오는 / 지난) */
 export function buildDemoEventsList(clubId: string): {
   upcoming: EventListRow[]
   past: EventListRow[]
 } {
-  const today = new Date()
+  const today = todayAnchor()
   const upcoming: EventListRow[] = [
     {
       id: 'demo-e1',
@@ -103,7 +106,7 @@ export function buildDemoEventDetail(
   clubId: string,
   eventId: string
 ): { event: EventDetail; attendees: AttendeeRow[]; myStatus: EventAttendStatus | null } | null {
-  const today = new Date()
+  const today = todayAnchor()
   const detailMap: Record<string, EventDetail> = {
     'demo-e1': {
       id: 'demo-e1',

@@ -7,6 +7,7 @@ import { EventsListClient } from '@/components/club/EventsListClient'
 import { BackButton } from '@/components/club/BackButton'
 import { DEMO_CLUBS } from '@/lib/club/demoData'
 import { buildDemoEventsList } from '@/lib/club/eventsDemo'
+import { todayKST } from '@/lib/date'
 import type { Metadata } from 'next'
 import type { EventListRow } from '@/app/club/[clubId]/events/actions'
 import type { EventAttendStatus } from '@/types/club'
@@ -81,7 +82,7 @@ export default async function EventsListPage({ params }: PageProps) {
   const membership = await getMyMembership(supabase, clubId, clubUserId)
   if (!membership) redirect('/club/home')
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayKST()
   const isManager = ['owner', 'manager'].includes(membership.role)
 
   const SELECT =

@@ -8,6 +8,7 @@ import { EventHero } from './events/EventHero'
 import { RsvpToggle } from './events/RsvpToggle'
 import { AttendeeList } from './events/AttendeeList'
 import type { EventDetail, AttendeeRow } from './events/types'
+import { todayKST } from '@/lib/date'
 import {
   setRsvpAction,
   updateEventAction,
@@ -45,10 +46,8 @@ export function EventDetailClient({
   )
 
   const isPast = useMemo(() => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const eventD = new Date(event.event_date + 'T00:00:00')
-    return eventD < today
+    // KST 기준 문자열 비교 (브라우저 TZ 무관, DB 저장값과 동일 포맷)
+    return event.event_date < todayKST()
   }, [event.event_date])
 
   const isFull = event.max_attend > 0 && going.length >= event.max_attend
