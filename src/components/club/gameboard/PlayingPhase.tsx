@@ -224,14 +224,15 @@ function ModeSwitcher({
 
 /* CustomPickOverlay 는 ./playing/CustomPickOverlay.tsx 로 이동됨 */
 
-/* ── 21점제 승자 판정 ──────────────────────────────────────
- * 배드민턴 규칙: 21점 선취 + 2점 차 이상. 30-29 → 30점에서 강제 종료.
+/* ── 25점제 승자 판정 (한국 클럽·동호회 표준) ──────────────────
+ * 정식 대회는 21점이지만 일반 클럽·동호인 게임은 25점 듀스가 표준.
+ * 25점 선취 + 2점 차 이상. 30-29 → 30점에서 강제 종료 (5점 듀스 max).
  */
 type WinState = 'A' | 'B' | 'deuce' | null
 
 function getWinState(scoreA: number, scoreB: number): WinState {
   const max = Math.max(scoreA, scoreB)
-  if (max < 21) return null
+  if (max < 25) return null
   const diff = scoreA - scoreB
   if (max >= 30) return diff > 0 ? 'A' : 'B'   // 30점 강제 종료
   if (Math.abs(diff) >= 2) return diff > 0 ? 'A' : 'B'
@@ -475,9 +476,46 @@ export function PlayingPhase({
 
               {/* 코트 내용 */}
               {isEmpty ? (
-                <div className="py-10 text-center text-sm text-[#ccc] flex flex-col items-center gap-2 bg-[linear-gradient(135deg,#fafafa_0%,#f3f3f3_100%)]">
-                  <ShuttlecockIcon size={22} className="text-[#d5d5d5]" strokeWidth={1.5} />
-                  <span className="text-[11px] text-[#bbb]">비어있음</span>
+                <div className="py-10 px-5 bg-[linear-gradient(135deg,#fafafa_0%,#f3f3f3_100%)]">
+                  {/* 팀 A 슬롯 (점선) */}
+                  <div className="flex items-center gap-2 opacity-60">
+                    <p className="text-[10px] font-bold text-blue-400 w-8 shrink-0">팀 A</p>
+                    <div className="flex-1 grid grid-cols-2 gap-1.5">
+                      {[0, 1].map((i) => (
+                        <div
+                          key={i}
+                          className="h-7 rounded-lg border border-dashed border-[#ccc] bg-white/40"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  {/* VS 라인 */}
+                  <div className="flex items-center gap-2 my-2.5 opacity-60">
+                    <div className="flex-1 border-t border-dashed border-[#d5d5d5]" />
+                    <span className="text-[9px] font-extrabold text-[#bbb] tracking-widest">VS</span>
+                    <div className="flex-1 border-t border-dashed border-[#d5d5d5]" />
+                  </div>
+                  {/* 팀 B 슬롯 */}
+                  <div className="flex items-center gap-2 opacity-60">
+                    <p className="text-[10px] font-bold text-red-400 w-8 shrink-0">팀 B</p>
+                    <div className="flex-1 grid grid-cols-2 gap-1.5">
+                      {[0, 1].map((i) => (
+                        <div
+                          key={i}
+                          className="h-7 rounded-lg border border-dashed border-[#ccc] bg-white/40"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  {/* 안내 */}
+                  <div className="mt-4 flex items-center justify-center gap-1.5 text-[#bbb]">
+                    <ShuttlecockIcon size={12} className="text-[#d5d5d5]" strokeWidth={1.8} />
+                    <span className="text-[11px]">
+                      {canAssign
+                        ? '상단 "다음 경기 배정" 버튼으로 시작'
+                        : `대기 ${waitingPlayers.length}명 (4명 이상 필요)`}
+                    </span>
+                  </div>
                 </div>
               ) : (
                 <div className="p-4 bg-gradient-to-b from-emerald-50/60 via-white to-emerald-50/40">

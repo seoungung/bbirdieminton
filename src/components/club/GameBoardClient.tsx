@@ -524,11 +524,11 @@ export function GameBoardClient({
           team === 'A'
             ? { ...c, scoreA: Math.max(0, c.scoreA + delta) }
             : { ...c, scoreB: Math.max(0, c.scoreB + delta) }
-        // 21점 최초 도달 시 모바일 진동 피드백
+        // 25점 최초 도달 시 모바일 진동 피드백 (한국 클럽 표준 점수)
         if (delta > 0) {
           const newScore = team === 'A' ? updated.scoreA : updated.scoreB
           const oldScore = team === 'A' ? c.scoreA : c.scoreB
-          if (oldScore < 21 && newScore >= 21) {
+          if (oldScore < 25 && newScore >= 25) {
             if (typeof navigator !== 'undefined') navigator.vibrate?.(200)
           }
         }
@@ -786,16 +786,10 @@ export function GameBoardClient({
         }
       }
 
-      /* 권한 있고 출석자 있으면 정산 다이얼로그 표시 — 없으면 즉시 마감 */
-      const canSettle =
-        !isDemo &&
-        ['owner', 'manager'].includes(membership.role) &&
-        attendeeCount >= 1
-      if (canSettle) {
-        setSettlementDialog({ sessionId: capturedSessionId, attendeeCount })
-      } else {
-        await finalizeEndGameInternal(capturedSessionId)
-      }
+      /* v2 변경: 셔틀콕비 정산은 한국 클럽 운영 방식과 안 맞아 자동 노출 제거.
+       * (실제 운영: 평일 2개·주말 3개 셔틀콕 제출 트래커 + 잔여 분배 — 별도 재설계 예정)
+       * ShuttlecockSettlementDialog 코드는 보존됨 — 필요 시 다시 활성화 가능. */
+      await finalizeEndGameInternal(capturedSessionId)
     })
   }
 
