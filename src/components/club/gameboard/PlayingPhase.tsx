@@ -405,10 +405,11 @@ export function PlayingPhase({
         )}
 
         {/* 🖥️ 데스크톱(lg+): 좌측 코트 / 우측 sticky 사이드바 (다음 경기 + 대기열)
-            📱 모바일: 단순 세로 스택 */}
+            📱 모바일: 단순 세로 스택
+            💻 큰 화면(xl+)에서는 코트들도 2열 그리드 — 우동배 운영 화면 패턴 */}
         <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-4 lg:items-start space-y-3 lg:space-y-0">
-          {/* ── 왼쪽: 코트들 ── */}
-          <div className="space-y-3 min-w-0">
+          {/* ── 왼쪽: 코트들 (xl+에서 2열) ── */}
+          <div className="space-y-3 xl:space-y-0 xl:grid xl:grid-cols-2 xl:gap-3 min-w-0">
         {/* 코트 카드 */}
         {courts.map((court, idx) => {
           const isEmpty = court.teamA.length === 0
