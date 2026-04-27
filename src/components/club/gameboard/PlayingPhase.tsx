@@ -10,6 +10,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { GradeBadge } from '@/components/club/GradeBadge'
 import type { CourtEntry, PlayerEntry, DialogState, GameMode, KingStreaks, AssignMode } from './types'
 import { formatDuration, pickTeams } from './types'
+import { AttendeePool } from './AttendeePool'
 import { CustomPickOverlay } from './playing/CustomPickOverlay'
 import { QueueRow } from './playing/QueueRow'
 
@@ -99,81 +100,6 @@ function NextMatchPreview({
             <PreviewPlayerChip key={p.memberId} player={p} membershipId={membershipId} />
           ))}
         </div>
-      </div>
-    </div>
-  )
-}
-
-/* ── 상단 참가자 플레이트 ── */
-function ParticipantPlate({
-  players,
-  membershipId,
-}: {
-  players: PlayerEntry[]
-  membershipId?: string
-}) {
-  const playing = players.filter(p => p.status === 'playing')
-  const waiting = players.filter(p => p.status === 'waiting')
-
-  return (
-    <div className="bg-white rounded-2xl border border-[#e5e5e5] p-3">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-baseline gap-2">
-          <span className="text-[10px] font-extrabold text-[#555] uppercase tracking-wider">
-            참가자
-          </span>
-          <span className="text-xs font-bold text-[#111] tabular-nums">{players.length}명</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-[10px]">
-          <span className="inline-flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span className="text-emerald-700 font-bold">{playing.length}</span>
-          </span>
-          <span className="text-[#ccc]">·</span>
-          <span className="inline-flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#bbb]" />
-            <span className="text-[#555] font-bold">{waiting.length}</span>
-          </span>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-1.5">
-        {players.map(p => {
-          const isMe = p.memberId === membershipId
-          const isTemp = p.memberId.startsWith('temp-')
-          const isPlaying = p.status === 'playing'
-          return (
-            <span
-              key={p.memberId}
-              className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full border text-[10px] font-semibold transition-colors ${
-                isMe
-                  ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white'
-                  : isPlaying
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                  : 'bg-[#f8f8f8] border-[#e5e5e5] text-[#555]'
-              }`}
-            >
-              {isTemp ? (
-                <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded bg-gray-200 text-gray-500 text-[8px] font-extrabold shrink-0">
-                  ?
-                </span>
-              ) : (
-                <GradeBadge score={p.skillScore} size="xs" />
-              )}
-              <span className="truncate max-w-[8rem]">{p.name}</span>
-              {isMe && (
-                <span className="text-[9px] font-bold text-[#beff00] bg-[#beff00]/15 rounded px-1 py-0.5 leading-none">나</span>
-              )}
-              <span
-                className={`text-[9px] tabular-nums ${
-                  isMe ? 'text-white/50' : isPlaying ? 'text-emerald-600/70' : 'text-[#aaa]'
-                }`}
-              >
-                {p.todayGames}
-              </span>
-            </span>
-          )
-        })}
       </div>
     </div>
   )
@@ -376,9 +302,9 @@ export function PlayingPhase({
           </div>
         )}
 
-        {/* ── 상단 참가자 플레이트 (전체 한눈에) ── */}
+        {/* ── 상단 참가자 풀 (전체 한눈에 — setup 과 같은 컴포넌트 재사용) ── */}
         {allPlayers.length > 0 && (
-          <ParticipantPlate players={allPlayers} membershipId={membershipId} />
+          <AttendeePool mode="playing" players={allPlayers} />
         )}
 
         {/* ── 배정 방식 전환 바 ── */}

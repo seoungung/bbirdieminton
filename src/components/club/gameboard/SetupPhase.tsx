@@ -1,32 +1,17 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import {
-  ArrowLeft, ChevronDown, AlertCircle, Check, Minus, Plus,
+  ArrowLeft, ChevronDown, AlertCircle, Minus, Plus,
   Sparkles, PenLine, AlertTriangle, Zap, Lightbulb, UserPlus,
   RotateCw, Crown,
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { cn } from '@/lib/utils'
-import { GradeBadge } from '@/components/club/GradeBadge'
-import { buildRankMap, scoreToGrade, type Grade } from '@/lib/club/grade'
 import type { ClubMemberWithUser } from '@/types/club'
+import { AttendeePool } from './AttendeePool'
 import type { SetupSource, AssignMode, GameMode, RecentSessionData, InProgressData } from './types'
-
-type GradeFilter = 'all' | Grade
-
-/** 급수 필터 옵션 — 우동배의 급수 필터 패턴 차용. 30명+ 클럽에서 출석자 빠르게 골라내기 */
-const GRADE_FILTER_OPTS: { value: GradeFilter; label: string }[] = [
-  { value: 'all', label: '전체' },
-  { value: 'S',   label: 'S' },
-  { value: 'A',   label: 'A' },
-  { value: 'B',   label: 'B' },
-  { value: 'C',   label: 'C' },
-  { value: 'D',   label: 'D' },
-  { value: 'E',   label: 'E' },
-  { value: 'F',   label: 'F' },
-]
 
 type IconComp = React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
 
@@ -109,28 +94,9 @@ export function SetupPhase({
   onResume,
 }: Props) {
   const [tempInput, setTempInput] = useState('')
-  const [gradeFilter, setGradeFilter] = useState<GradeFilter>('all')
-  const rankMap = useMemo(() => buildRankMap(members), [members])
 
   const selectedCount = selectedPlayers.size
   const canStart = selectedCount >= 4
-
-  /** 급수별 회원 수 (필터 칩에 N 표시용) */
-  const gradeCounts = useMemo(() => {
-    const counts: Record<GradeFilter, number> = {
-      all: members.length, S: 0, A: 0, B: 0, C: 0, D: 0, E: 0, F: 0,
-    }
-    for (const m of members) {
-      counts[scoreToGrade(m.skill_score)]++
-    }
-    return counts
-  }, [members])
-
-  /** 필터 적용된 회원 목록 */
-  const visibleMembers = useMemo(() => {
-    if (gradeFilter === 'all') return members
-    return members.filter(m => scoreToGrade(m.skill_score) === gradeFilter)
-  }, [members, gradeFilter])
 
   const handleAddTemp = () => {
     const name = tempInput.trim()
@@ -175,7 +141,7 @@ export function SetupPhase({
               </div>
               <div className="bg-white/5 rounded-xl p-3">
                 <p className="font-bold text-[#beff00] mb-1">2단계</p>
-                <p className="text-white/80 leading-relaxed">코트 수와 배정 방식 확인 (기본값 OK)</p>
+                <p className="text-white/80 leading-relaxed">그날 사용할 코트 수와 배정 방식 확인</p>
               </div>
               <div className="bg-white/5 rounded-xl p-3">
                 <p className="font-bold text-[#beff00] mb-1">3단계</p>
@@ -229,7 +195,7 @@ export function SetupPhase({
 
         {/* 코트 수 조정 */}
         <div>
-          <p className="text-xs font-semibold text-[#999] mb-2">사용 코트 수</p>
+          <p className="text-xs font-semibold text-[#999] mb-2">그날 사용할 코트 수</p>
           <div className="bg-white rounded-xl border border-[#e5e5e5] px-4 py-3 flex items-center justify-between">
             <span className="text-sm text-[#555]">코트 수</span>
             <div className="flex items-center gap-3">
@@ -326,34 +292,6 @@ export function SetupPhase({
             </p>
           </div>
 
-          {/* 급수 필터 칩 — 회원 8명 이상일 때만 노출 */}
-          {members.length >= 8 && (
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 pb-2 mb-2">
-              {GRADE_FILTER_OPTS.map(opt => {
-                const count = gradeCounts[opt.value]
-                if (opt.value !== 'all' && count === 0) return null
-                const isActive = gradeFilter === opt.value
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() => setGradeFilter(opt.value)}
-                    className={cn(
-                      'shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full border text-xs font-bold transition-colors',
-                      isActive
-                        ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white'
-                        : 'bg-white border-[#e5e5e5] text-[#555] hover:border-[#beff00]'
-                    )}
-                  >
-                    {opt.label}
-                    <span className={cn('text-[10px] tabular-nums', isActive ? 'text-white/60' : 'text-[#bbb]')}>
-                      {count}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          )}
-
           {members.length === 0 ? (
             <div className="bg-white border border-[#e5e5e5] rounded-2xl p-6 text-center">
               <UserPlus size={28} className="text-[#bbb] mx-auto mb-3" strokeWidth={1.6} />
@@ -383,54 +321,12 @@ export function SetupPhase({
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {visibleMembers.length === 0 ? (
-                <p className="col-span-full text-xs text-[#bbb] text-center py-4">
-                  이 급수에 해당하는 회원이 없어요
-                </p>
-              ) : null}
-              {visibleMembers.map((member) => {
-                const isOn = selectedPlayers.has(member.id)
-                const rank = rankMap.get(member.id)
-                return (
-                  <button
-                    key={member.id}
-                    onClick={() => onTogglePlayer(member.id)}
-                    className={cn(
-                      'flex items-center gap-2 px-2.5 py-2 rounded-xl border text-left transition-colors',
-                      isOn
-                        ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white'
-                        : 'bg-white border-[#e5e5e5] text-[#111] hover:border-[#beff00]'
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        'w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-colors',
-                        isOn ? 'bg-[#beff00] border-[#beff00]' : 'border-[#ccc]'
-                      )}
-                    >
-                      {isOn && <Check size={9} className="text-[#111]" strokeWidth={3} />}
-                    </div>
-                    <GradeBadge score={member.skill_score} size="sm" />
-                    <div className="flex-1 min-w-0 flex items-center gap-1">
-                      <span className="text-sm font-semibold truncate">
-                        {member.user?.name ?? '?'}
-                      </span>
-                      {rank && (
-                        <span
-                          className={cn(
-                            'text-[10px] font-bold tabular-nums shrink-0',
-                            isOn ? 'text-white/50' : 'text-[#aaa]'
-                          )}
-                        >
-                          {rank}위
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
+            <AttendeePool
+              mode="setup"
+              members={members}
+              selectedPlayers={selectedPlayers}
+              onTogglePlayer={onTogglePlayer}
+            />
           )}
 
           {!canStart && selectedCount > 0 && (
