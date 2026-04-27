@@ -168,21 +168,36 @@ export function MembersClient({ clubId, members, statsData, isManager, isOwner, 
               {isManager && (
                 <div className="mt-3 pt-3 border-t border-[#f0f0f0]">
                   {editingSkill === member.id ? (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        min={0}
-                        max={100}
-                        value={skillInput}
-                        onChange={e => setSkillInput(e.target.value)}
-                        className="w-20 border border-[#e5e5e5] rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-[#111]"
-                        placeholder="0-100"
-                        autoFocus
-                      />
-                      <button onClick={() => handleSkillSave(member.id)} disabled={isPending}
-                        className="text-sm px-3 py-1.5 bg-[#beff00] text-[#111] rounded-lg font-bold disabled:opacity-50">저장</button>
-                      <button onClick={() => setEditingSkill(null)}
-                        className="text-sm px-3 py-1.5 bg-[#f0f0f0] text-[#555] rounded-lg">취소</button>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={skillInput}
+                          onChange={e => setSkillInput(e.target.value)}
+                          className="w-20 border border-[#e5e5e5] rounded-lg px-2 py-1 text-sm focus:outline-none focus:border-[#111]"
+                          placeholder="0-100"
+                          autoFocus
+                        />
+                        <button onClick={() => handleSkillSave(member.id)} disabled={isPending}
+                          className="text-sm px-3 py-1.5 bg-[#beff00] text-[#111] rounded-lg font-bold disabled:opacity-50">저장</button>
+                        <button onClick={() => setEditingSkill(null)}
+                          className="text-sm px-3 py-1.5 bg-[#f0f0f0] text-[#555] rounded-lg">취소</button>
+                      </div>
+                      {/* 점수 → 급수 가이드 */}
+                      <div className="bg-[#f8f8f8] border border-[#f0f0f0] rounded-lg p-2.5">
+                        <p className="text-[10px] font-bold text-[#999] mb-1.5 uppercase tracking-wider">급수별 점수 기준</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 text-[10px]">
+                          <span><strong className="text-purple-700">S</strong> 90~100 자강조</span>
+                          <span><strong className="text-red-700">A</strong> 80~89 A조</span>
+                          <span><strong className="text-orange-700">B</strong> 65~79 B조</span>
+                          <span><strong className="text-amber-700">C</strong> 50~64 C조</span>
+                          <span><strong className="text-green-700">D</strong> 35~49 D조</span>
+                          <span><strong className="text-sky-700">E</strong> 20~34 초심</span>
+                          <span><strong className="text-gray-600">F</strong> 0~19 왕초보</span>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <button

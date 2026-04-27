@@ -4,6 +4,7 @@ import { getClubUserId } from '@/lib/club/auth'
 import { getClubRanking } from '@/lib/club/client'
 import { Trophy } from 'lucide-react'
 import { RankingTable } from '@/components/club/RankingTable'
+import { RankingGuideBanner } from '@/components/club/RankingGuideBanner'
 import { BackButton } from '@/components/club/BackButton'
 import { DEMO_CLUBS, DEMO_MEMBERS } from '@/lib/club/demoData'
 import type { RankingRow, ClubMemberWithUser, MemberRole } from '@/types/club'
@@ -78,7 +79,8 @@ export default async function RankingPage({
             </div>
           </div>
         </header>
-        <main className="max-w-[1088px] mx-auto px-4 py-5">
+        <main className="max-w-[1088px] mx-auto px-4 py-5 space-y-4">
+          <RankingGuideBanner />
           <RankingTable ranking={DEMO_RANKING} currentUserId="demo" />
         </main>
       </div>
@@ -111,7 +113,8 @@ export default async function RankingPage({
         </div>
       </header>
 
-      <main className="max-w-[1088px] mx-auto px-4 py-5">
+      <main className="max-w-[1088px] mx-auto px-4 py-5 space-y-4">
+        <RankingGuideBanner />
         <RankingTable ranking={ranking} currentUserId={clubUserId} />
       </main>
     </div>

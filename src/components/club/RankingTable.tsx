@@ -2,6 +2,9 @@ import { BarChart3, Medal, Crown } from 'lucide-react'
 import { GradeBadge } from '@/components/club/GradeBadge'
 import type { RankingRow } from '@/types/club'
 
+/** 정식 랭킹 진입 최소 경기 수 — 적은 게임 수가 유리한 왜곡 방지 */
+export const MIN_GAMES_FOR_RANK = 5
+
 const PODIUM_STYLES: Array<{
   icon: string
   cardBg: string
@@ -30,9 +33,65 @@ export function RankingTable({
     )
   }
 
+  /** 5전 이상만 정식 랭킹, 그 미만은 "수습" 섹션 */
+  const ranked = ranking.filter((r) => r.games_played >= MIN_GAMES_FOR_RANK)
+  const provisional = ranking.filter((r) => r.games_played < MIN_GAMES_FOR_RANK)
+
+  // 정식 랭킹은 1-based로 다시 매김 (입력 ranking이 이미 정렬되어 있다고 가정)
+  const rerankedFormal: RankingRow[] = ranked.map((r, i) => ({ ...r, rank: i + 1 }))
+
   return (
-    <div className="space-y-2" role="table" aria-label="모임 랭킹">
-      {ranking.map((row) => {
+    <div className="space-y-6">
+      {rerankedFormal.length > 0 && (
+        <RankingSection
+          title="공식 랭킹"
+          subtitle={`${MIN_GAMES_FOR_RANK}전 이상 · 승률 순`}
+          rows={rerankedFormal}
+          currentUserId={currentUserId}
+        />
+      )}
+
+      {provisional.length > 0 && (
+        <ProvisionalSection rows={provisional} currentUserId={currentUserId} />
+      )}
+
+      {rerankedFormal.length === 0 && provisional.length > 0 && (
+        <p className="text-[12px] text-[#999] text-center bg-[#fffbeb] border border-[#fef3c7] rounded-2xl p-3 leading-relaxed">
+          아직 모든 회원이 <strong className="text-[#92400e]">{MIN_GAMES_FOR_RANK}전 미만</strong>이에요.
+          <br />
+          {MIN_GAMES_FOR_RANK}전 이상 뛰면 공식 랭킹에 진입합니다.
+        </p>
+      )}
+    </div>
+  )
+}
+
+/** 공식·수습 공통 행 렌더 */
+function RankingSection({
+  title,
+  subtitle,
+  rows,
+  currentUserId,
+  isProvisional,
+}: {
+  title: string
+  subtitle: string
+  rows: RankingRow[]
+  currentUserId: string
+  isProvisional?: boolean
+}) {
+  return (
+    <section>
+      <div className="flex items-baseline justify-between mb-2 px-1">
+        <h2 className="text-[13px] font-extrabold text-[#111]">{title}</h2>
+        <span className="text-[11px] text-[#999]">{subtitle}</span>
+      </div>
+      <div
+        className="space-y-2"
+        role="table"
+        aria-label={title}
+      >
+        {rows.map((row) => {
         const isMe = row.member.user_id === currentUserId
         const podium = row.rank <= 3 ? PODIUM_STYLES[row.rank - 1] : null
         const winRate =
@@ -114,11 +173,33 @@ export function RankingTable({
                 {winRate}
                 <span className="text-[10px] font-semibold text-[#999] ml-0.5">%</span>
               </p>
-              <p className="text-[10px] text-[#999] mt-1">승률</p>
+              <p className="text-[10px] text-[#999] mt-1">
+                {isProvisional ? `${row.games_played}전` : '승률'}
+              </p>
             </div>
           </div>
         )
       })}
-    </div>
+      </div>
+    </section>
+  )
+}
+
+/** 5전 미만 — 표본 부족이라 별도 섹션 */
+function ProvisionalSection({
+  rows,
+  currentUserId,
+}: {
+  rows: RankingRow[]
+  currentUserId: string
+}) {
+  return (
+    <RankingSection
+      title="수습 (표본 부족)"
+      subtitle={`${MIN_GAMES_FOR_RANK}전 미만 · 표본 적어 별도 표시`}
+      rows={rows.map((r) => ({ ...r, rank: 0 }))}
+      currentUserId={currentUserId}
+      isProvisional
+    />
   )
 }
