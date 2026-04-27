@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import {
   AlertCircle, Flame, Trophy, Crown, Clock, Check, X,
-  Dice5, Scale, Repeat2, PenLine, Sparkles,
+  PenLine, Sparkles,
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -11,11 +11,11 @@ import { GradeBadge } from '@/components/club/GradeBadge'
 import type { CourtEntry, PlayerEntry, DialogState, GameMode, KingStreaks, AssignMode } from './types'
 import { formatDuration, pickTeams } from './types'
 
-/* ── 배정 모드 라벨 ── */
+/* ── 배정 모드 라벨 (v2 단순화: 자동 / 직접) ── */
 const ASSIGN_MODE_LABEL: Record<AssignMode, string> = {
-  random: '랜덤',
-  skill_balance: '실력 균등',
-  freshness: '중복 방지',
+  random: '자동 매칭',        // legacy 값 — 자동 매칭으로 통일
+  skill_balance: '자동 매칭', // legacy 값 — 자동 매칭으로 통일
+  freshness: '자동 매칭',
   custom: '직접 배정',
 }
 
@@ -179,7 +179,7 @@ function ParticipantPlate({
 
 type IconComp = React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
 
-/* ── 모드 전환 바 (경기 중 기본 배정 방식 변경) ── */
+/* ── 모드 전환 바 (경기 중 기본 배정 방식 변경) — v2 단순화: 2개 ── */
 function ModeSwitcher({
   assignMode,
   onChange,
@@ -188,22 +188,23 @@ function ModeSwitcher({
   onChange: (v: AssignMode) => void
 }) {
   const OPTS: { value: AssignMode; label: string; Icon: IconComp }[] = [
-    { value: 'random',        label: '랜덤',      Icon: Dice5   },
-    { value: 'skill_balance', label: '실력',      Icon: Scale   },
-    { value: 'freshness',     label: '중복 방지', Icon: Repeat2 },
-    { value: 'custom',        label: '직접',      Icon: PenLine },
+    { value: 'freshness', label: '자동 매칭', Icon: Sparkles },
+    { value: 'custom',    label: '직접 배정', Icon: PenLine  },
   ]
+  // legacy random/skill_balance 값이 들어오면 자동 매칭으로 표시
+  const activeValue: AssignMode =
+    assignMode === 'custom' ? 'custom' : 'freshness'
 
   return (
     <div className="bg-white rounded-2xl border border-[#e5e5e5] p-3">
       <p className="text-[10px] font-bold text-[#999] mb-2 uppercase tracking-wider">배정 방식</p>
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-2 gap-1.5">
         {OPTS.map(opt => (
           <button
             key={opt.value}
             onClick={() => onChange(opt.value)}
-            className={`flex flex-col items-center gap-1 py-2 rounded-xl border transition-colors ${
-              assignMode === opt.value
+            className={`flex flex-col items-center gap-1 py-2.5 rounded-xl border transition-colors ${
+              activeValue === opt.value
                 ? 'bg-[#beff00] border-[#beff00] text-[#111]'
                 : 'bg-white border-[#e5e5e5] text-[#555] hover:border-[#beff00]'
             }`}

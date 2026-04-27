@@ -1,9 +1,10 @@
 'use client'
 
+import Link from 'next/link'
 import { useState, useMemo } from 'react'
 import {
   ArrowLeft, ChevronDown, AlertCircle, Check, Minus, Plus,
-  Dice5, Scale, Repeat2, PenLine, RotateCw, Crown, AlertTriangle, Zap,
+  Sparkles, PenLine, AlertTriangle, Zap, Lightbulb, UserPlus,
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { cn } from '@/lib/utils'
@@ -16,6 +17,8 @@ type IconComp = React.ComponentType<{ size?: number; className?: string; strokeW
 
 interface Props {
   members: ClubMemberWithUser[]
+  /** 클럽 ID — 멤버 0명 빈 상태에서 회원 추가 페이지 링크 */
+  clubId?: string
   recentSessions: RecentSessionData[]
   selectedPlayers: Set<string>
   tempPlayers: Array<{ id: string; name: string }>
@@ -30,6 +33,8 @@ interface Props {
   inProgressData?: InProgressData | null
   isPending: boolean
   error: string | null
+  /** 체험 모드 — 빈 상태/멤버 0명 처리 분기 */
+  isDemo?: boolean
   onBack: () => void
   onSourceChange: (src: SetupSource) => void
   onSessionSelect: (idx: number) => void
@@ -44,28 +49,36 @@ interface Props {
   onResume?: () => void
 }
 
+/**
+ * v2 단순화: 모드 4개 → 2개로 축소.
+ * - `auto` (UI 라벨, 내부적으로 'freshness') — 대기 우선순위 + 파트너 중복 방지.
+ *   배드민턴 동호회 90% 케이스. 가장 안정적인 자동 알고리즘.
+ * - `custom` (직접 배정) — 운영진이 4명 직접 선택.
+ *
+ * 숨긴 모드: random / skill_balance — 코드는 살아있고 UI만 미노출.
+ * skill_score 가이드 정비 후 재오픈 예정.
+ */
 const ASSIGN_OPTS: { value: AssignMode; label: string; Icon: IconComp; desc: string }[] = [
-  { value: 'random',        label: '랜덤',      Icon: Dice5,   desc: '무작위 배정' },
-  { value: 'skill_balance', label: '실력 균등', Icon: Scale,   desc: '실력 점수 기반' },
-  { value: 'freshness',     label: '중복 방지', Icon: Repeat2, desc: '파트너 중복 최소화' },
-  { value: 'custom',        label: '직접 배정', Icon: PenLine, desc: '내가 직접 팀 선택' },
+  { value: 'freshness', label: '자동 매칭', Icon: Sparkles, desc: '대기 인원 우선 + 파트너 중복 방지' },
+  { value: 'custom',    label: '직접 배정', Icon: PenLine,  desc: '운영진이 4명 직접 선택' },
 ]
 
 export function SetupPhase({
   members,
+  clubId,
   recentSessions,
   selectedPlayers,
   tempPlayers,
   setupSource,
   selectedSessionIdx,
   assignMode,
-  gameMode,
   activeCourts,
   maxCourts,
   sessionDate,
   inProgressData,
   isPending,
   error,
+  isDemo,
   onBack,
   onSourceChange,
   onSessionSelect,
@@ -73,7 +86,6 @@ export function SetupPhase({
   onAddTempPlayer,
   onRemoveTempPlayer,
   onAssignModeChange,
-  onGameModeChange,
   onActiveCourtsChange,
   onSessionDateChange,
   onStartGame,
@@ -110,6 +122,34 @@ export function SetupPhase({
       </div>
 
       <div className="max-w-[1088px] mx-auto px-4 py-5 space-y-5">
+        {/* 첫 진입 가이드 — 진행 중 게임 없고 아직 아무도 선택 안 한 상태 */}
+        {!inProgressData && members.length > 0 && selectedCount === 0 && (
+          <div className="bg-[#0a0a0a] text-white rounded-2xl p-5 sm:p-6">
+            <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[#beff00] mb-3">
+              <Lightbulb size={12} strokeWidth={2.5} />
+              오늘 게임 만들기
+            </p>
+            <h2 className="text-lg sm:text-xl font-extrabold leading-snug mb-4">
+              출석한 회원 4명 이상을 선택하면<br />
+              자동으로 팀이 짜집니다.
+            </h2>
+            <div className="grid sm:grid-cols-3 gap-3 text-[12px]">
+              <div className="bg-white/5 rounded-xl p-3">
+                <p className="font-bold text-[#beff00] mb-1">1단계</p>
+                <p className="text-white/80 leading-relaxed">아래에서 오늘 출석한 회원을 탭으로 선택</p>
+              </div>
+              <div className="bg-white/5 rounded-xl p-3">
+                <p className="font-bold text-[#beff00] mb-1">2단계</p>
+                <p className="text-white/80 leading-relaxed">코트 수와 배정 방식 확인 (기본값 OK)</p>
+              </div>
+              <div className="bg-white/5 rounded-xl p-3">
+                <p className="font-bold text-[#beff00] mb-1">3단계</p>
+                <p className="text-white/80 leading-relaxed">하단 &ldquo;게임 시작&rdquo; → 자동 배정 결과 확인</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 진행 중인 게임 재개 배너 */}
         {inProgressData && onResume && (
           <div className="bg-[#fff8e1] border border-[#ffe082] rounded-2xl p-4 flex items-center justify-between">
@@ -252,7 +292,33 @@ export function SetupPhase({
           </div>
 
           {members.length === 0 ? (
-            <p className="text-sm text-[#bbb] text-center py-6">모임에 멤버가 없어요</p>
+            <div className="bg-white border border-[#e5e5e5] rounded-2xl p-6 text-center">
+              <UserPlus size={28} className="text-[#bbb] mx-auto mb-3" strokeWidth={1.6} />
+              <p className="text-sm font-bold text-[#111] mb-1.5">아직 회원이 없어요</p>
+              <p className="text-xs text-[#999] mb-4 leading-relaxed">
+                게임을 시작하려면 먼저 회원을 등록해 주세요.<br />
+                초대코드 또는 엑셀 임포트로 한 번에 추가할 수 있어요.
+              </p>
+              {!isDemo && clubId && (
+                <div className="flex gap-2 justify-center">
+                  <Link
+                    href={`/club/${clubId}/settings`}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0a0a0a] text-white text-xs font-bold rounded-full hover:bg-[#222] transition-colors"
+                  >
+                    초대코드 보기
+                  </Link>
+                  <Link
+                    href={`/club/${clubId}/import`}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-[#0a0a0a] border border-[#e5e5e5] text-xs font-bold rounded-full hover:border-[#0a0a0a] transition-colors"
+                  >
+                    엑셀로 일괄 등록
+                  </Link>
+                </div>
+              )}
+              {isDemo && (
+                <p className="text-[11px] text-[#bbb]">체험 모드에서는 임시 참가자를 추가해 보세요.</p>
+              )}
+            </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {members.map((member) => {
@@ -351,59 +417,31 @@ export function SetupPhase({
           )}
         </div>
 
-        {/* 게임 모드 */}
-        <div>
-          <p className="text-xs font-semibold text-[#999] mb-2">게임 모드</p>
-          <div className="grid grid-cols-2 gap-2">
-            {([
-              { value: 'normal',        Icon: RotateCw, label: '일반 로테이션', desc: '모든 플레이어 순환 참여' },
-              { value: 'king_of_court', Icon: Crown,    label: '킹 오브 코트',  desc: '승자 유지, 도전자 교체' },
-            ] as { value: GameMode; Icon: IconComp; label: string; desc: string }[]).map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => onGameModeChange(opt.value)}
-                className={cn(
-                  'flex flex-col items-center gap-1 py-3 px-2 rounded-xl border text-center transition-colors',
-                  gameMode === opt.value
-                    ? 'bg-[#beff00] border-[#beff00] text-[#111]'
-                    : 'bg-white border-[#e5e5e5] text-[#555] hover:border-[#beff00]'
-                )}
-              >
-                <opt.Icon size={20} strokeWidth={1.9} />
-                <span className="text-[11px] font-bold leading-none">{opt.label}</span>
-                <span className="text-[10px] text-[#999] leading-tight">{opt.desc}</span>
-              </button>
-            ))}
-          </div>
-          {gameMode === 'king_of_court' && (
-            <p className="text-xs text-[#999] mt-2 pl-1 flex items-start gap-1.5">
-              <AlertTriangle size={12} className="text-amber-500 mt-0.5 shrink-0" strokeWidth={2} />
-              킹 오브 코트 모드에서는 승리 팀이 코트를 지키고, 패배 팀과 대기 중인 도전자가 교체됩니다.
-            </p>
-          )}
-        </div>
-
-        {/* 팀 배정 방식 */}
+        {/* 팀 배정 방식 — v2 단순화: 자동 매칭 / 직접 배정 2개만 노출 */}
         <div>
           <p className="text-xs font-semibold text-[#999] mb-2">팀 배정 방식</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {ASSIGN_OPTS.map(({ value, label, Icon, desc }) => (
               <button
                 key={value}
                 onClick={() => onAssignModeChange(value)}
                 className={cn(
-                  'flex flex-col items-center gap-1 py-3 px-2 rounded-xl border text-center transition-colors',
+                  'flex flex-col items-center gap-1 py-3.5 px-2 rounded-xl border text-center transition-colors',
                   assignMode === value
                     ? 'bg-[#beff00] border-[#beff00] text-[#111]'
                     : 'bg-white border-[#e5e5e5] text-[#555] hover:border-[#beff00]'
                 )}
               >
-                <Icon size={20} strokeWidth={1.9} />
-                <span className="text-[11px] font-bold leading-none">{label}</span>
-                <span className="text-[10px] text-[#999] leading-tight">{desc}</span>
+                <Icon size={22} strokeWidth={1.9} />
+                <span className="text-[12px] font-bold leading-none">{label}</span>
+                <span className="text-[10px] text-[#999] leading-tight px-1">{desc}</span>
               </button>
             ))}
           </div>
+          <p className="text-[11px] text-[#bbb] mt-2 pl-1 flex items-start gap-1.5">
+            <AlertTriangle size={11} className="text-[#999] mt-0.5 shrink-0" strokeWidth={2} />
+            잘 모르겠으면 <strong className="text-[#666] font-semibold">자동 매칭</strong> 그대로 두세요.
+          </p>
         </div>
 
         {/* 게임 시작 버튼 */}

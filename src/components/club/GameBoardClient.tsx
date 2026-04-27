@@ -73,15 +73,14 @@ export function GameBoardClient({
   const [setupSource, setSetupSource] = useState<SetupSource>('manual')
   const [selectedSessionIdx, setSelectedSessionIdx] = useState(0)
   const [selectedPlayers, setSelectedPlayers] = useState<Set<string>>(new Set())
-  // localStorage 에서 마지막 배정 방식 복원 (구 game_count/smart → freshness 마이그레이션)
+  // localStorage 에서 마지막 배정 방식 복원
+  // v2 단순화: UI는 freshness/custom 2개만 노출. 구 값(random/skill_balance/game_count/smart)이
+  // 들어오면 모두 freshness 로 통합. custom 만 그대로 보존.
   const [assignMode, setAssignMode] = useState<AssignMode>(() => {
-    if (typeof window === 'undefined') return 'random'
+    if (typeof window === 'undefined') return 'freshness'
     const stored = localStorage.getItem(`gameboard-assign-${clubId}`)
-    if (stored === 'game_count' || stored === 'smart') return 'freshness'
-    if (stored === 'random' || stored === 'skill_balance' || stored === 'freshness' || stored === 'custom') {
-      return stored as AssignMode
-    }
-    return 'random'
+    if (stored === 'custom') return 'custom'
+    return 'freshness'
   })
   /* ── 직접 배정 모드: 열린 코트 인덱스 ── */
   const [customPickCourt, setCustomPickCourt] = useState<number | null>(null)
@@ -855,6 +854,7 @@ export function GameBoardClient({
     return (
       <SetupPhase
         members={members}
+        clubId={clubId}
         recentSessions={recentSessions}
         selectedPlayers={selectedPlayers}
         tempPlayers={tempPlayers}
@@ -869,6 +869,7 @@ export function GameBoardClient({
         inProgressData={inProgressData}
         isPending={isPending}
         error={error}
+        isDemo={isDemo}
         onBack={() => {
           if (
             typeof document !== 'undefined' &&
