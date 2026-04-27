@@ -24,7 +24,9 @@ import {
 } from './gameboard/types'
 import { SetupPhase } from './gameboard/SetupPhase'
 import { PlayingPhase } from './gameboard/PlayingPhase'
-import { ShuttlecockSettlementDialog } from './ShuttlecockSettlementDialog'
+/* ShuttlecockSettlementDialog 는 v2에서 dead — 한국 클럽은 셔틀콕비 정산이 아닌
+ * "셔틀콕 제출 트래커"(평일 2개·주말 3개) 방식으로 운영. /club/[id]/shuttle 참고.
+ * 기존 다이얼로그 파일은 보존(필요시 복원). 여기서는 import 제거. */
 
 // 하위 호환을 위해 재익스포트
 export type { RecentSessionData, InProgressData }
@@ -85,11 +87,7 @@ export function GameBoardClient({
   /* ── 직접 배정 모드: 열린 코트 인덱스 ── */
   const [customPickCourt, setCustomPickCourt] = useState<number | null>(null)
 
-  /* ── 셔틀콕비 정산 다이얼로그 (게임 마감 플로우) ── */
-  const [settlementDialog, setSettlementDialog] = useState<{
-    sessionId: string
-    attendeeCount: number
-  } | null>(null)
+  /* settlementDialog state 는 v2에서 dead — 셔틀콕은 /club/[id]/shuttle 에서 별도 관리 */
   const [tempPlayers, setTempPlayers] = useState<Array<{ id: string; name: string }>>([])
   // 날짜 및 코트 수 (SetupPhase 에서 조정 가능)
   const [sessionDate, setSessionDate] = useState<string>(() => new Date().toISOString().split('T')[0])
@@ -750,7 +748,6 @@ export function GameBoardClient({
       setActiveCourts(courtCount)
       setSelectedPlayers(new Set())
       setTempPlayers([])
-      setSettlementDialog(null)
 
       /* 데모는 게임보드 페이지 내에서 머물고 (세션 DB 없음), 실제는 모임 뷰의 게임보드 탭으로 이동해 히스토리 확인 */
       if (!isDemo) {
@@ -792,15 +789,6 @@ export function GameBoardClient({
       await finalizeEndGameInternal(capturedSessionId)
     })
   }
-
-  /* ── 정산 다이얼로그 결과 핸들러 ── */
-  const handleSettlementDone = useCallback(() => {
-    if (!settlementDialog) return
-    const sid = settlementDialog.sessionId
-    startTransition(async () => {
-      await finalizeEndGameInternal(sid)
-    })
-  }, [settlementDialog, finalizeEndGameInternal, startTransition])
 
   /* ── 게임 전체 삭제 ── */
   const handleDeleteGame = () => {
@@ -917,22 +905,6 @@ export function GameBoardClient({
         onEndCourt={handleEndCourt}
         onCancelCourt={handleCancelCourt}
       />
-
-      {/* 셔틀콕비 정산 다이얼로그 (게임 마감 플로우) */}
-      {settlementDialog && (
-        <ShuttlecockSettlementDialog
-          open
-          clubId={clubId}
-          sessionId={settlementDialog.sessionId}
-          clubName={clubName}
-          sessionDate={sessionDate}
-          attendeeCount={settlementDialog.attendeeCount}
-          defaultShuttlePrice={shuttleDefaultPrice}
-          settlementAccount={settlementAccount}
-          onSaved={handleSettlementDone}
-          onSkip={handleSettlementDone}
-        />
-      )}
     </>
   )
 }

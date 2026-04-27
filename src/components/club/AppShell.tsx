@@ -103,7 +103,8 @@ export function AppShell({
 
   const adminNav: NavItem[] = [
     { href: `/club/${clubId}/members`,   label: '회원',   Icon: Users,        ownerOnly: true },
-    { href: `/club/${clubId}/finance`,   label: '정산',   Icon: Wallet,       ownerOnly: true },
+    { href: `/club/${clubId}/finance`,   label: '회비',   Icon: Wallet,       ownerOnly: true },
+    { href: `/club/${clubId}/shuttle`,   label: '셔틀콕', Icon: ShuttlecockIcon, ownerOnly: true },
     { href: `#`,                         label: '분석',   Icon: BarChart3,    ownerOnly: true, proOnly: true },
     { href: `/club/${clubId}/settings`,  label: '설정',   Icon: SettingsIcon, ownerOnly: true },
   ]
