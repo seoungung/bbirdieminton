@@ -27,7 +27,23 @@ export async function GET(request: NextRequest) {
     )
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
+      let finalNext = next
+      // next가 기본값(/ 또는 /club/home)일 때만 last_visited 적용
+      // 사용자가 명시적 경로를 보낸 경우엔 그대로 존중
+      if (next === '/' || next === '/club/home') {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: userRow } = await supabase
+            .from('users')
+            .select('last_visited_club_id')
+            .eq('birdieminton_user_id', user.id)
+            .maybeSingle()
+          if (userRow?.last_visited_club_id) {
+            finalNext = `/club/${userRow.last_visited_club_id}`
+          }
+        }
+      }
+      return NextResponse.redirect(`${origin}${finalNext}`)
     }
   }
 

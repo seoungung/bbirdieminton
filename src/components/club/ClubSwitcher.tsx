@@ -108,7 +108,7 @@ export function ClubSwitcher({ current, available = [] }: Props) {
               <div className="w-7 h-7 rounded-lg bg-[#f5f5f5] flex items-center justify-center">
                 <KeyRound size={12} strokeWidth={2} className="text-[#555]" />
               </div>
-              모임 목록·초대코드 가입
+              모임 더보기
             </Link>
           </div>
         </div>

@@ -6,7 +6,7 @@ import { DEMO_CLUBS } from '@/lib/club/demoData'
 import type { Metadata } from 'next'
 import type { Club } from '@/types/club'
 
-export const metadata: Metadata = { title: '모임 리스트 | 버디민턴', description: '내가 속한 배드민턴 모임 목록을 확인하세요' }
+export const metadata: Metadata = { title: '내 모임 | 버디민턴', description: '가입한 모임 전체와 새 모임 디스커버리' }
 
 export default async function ClubHomePage() {
   const supabase = await createClient()

@@ -69,6 +69,11 @@ export default async function ClubDetailLayout({
 
   if (!membership) redirect('/club/home')
 
+  /* last_visited 추적 — fire-and-forget, 실패해도 진입 막지 않음 */
+  void supabase.from('users')
+    .update({ last_visited_club_id: clubId })
+    .eq('id', clubUserId)
+
   /* 유저 프로필 + 읽지 않은 공지 수 + 소속 클럽 목록 병렬 조회 */
   const [userProfileResult, unreadCount, clubsResult] = await Promise.all([
     supabase.from('users').select('name').eq('id', clubUserId).single(),
