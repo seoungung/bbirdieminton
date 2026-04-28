@@ -30,9 +30,9 @@ export function ClubPreviewHero({
   const meta = [location, category].filter(Boolean).join(' · ')
 
   return (
-    <section>
-      {/* 배너 */}
-      <div className="relative w-full aspect-[5/3] sm:aspect-[16/9] overflow-hidden bg-[#f0f0f0]">
+    <section className="max-w-[720px] mx-auto">
+      {/* 배너 — 모바일 5/3, 데스크톱 16/9, 280px 높이 캡 */}
+      <div className="relative w-full aspect-[5/3] sm:aspect-[16/9] max-h-[280px] overflow-hidden bg-[#f0f0f0]">
         {thumbnailUrl ? (
           <Image
             src={thumbnailUrl}
@@ -51,15 +51,15 @@ export function ClubPreviewHero({
             aria-hidden
           >
             <span
-              className="text-[140px] sm:text-[180px] font-black leading-none tracking-tighter"
+              className="text-[120px] sm:text-[140px] font-black leading-none tracking-tighter"
               style={{ color: 'rgba(0,0,0,0.15)' }}
             >
               {initial}
             </span>
             <ShuttlecockIcon
-              size={56}
+              size={48}
               strokeWidth={1}
-              className="absolute bottom-6 right-6 opacity-15"
+              className="absolute bottom-5 right-5 opacity-15"
               aria-label="셔틀콕"
             />
           </div>
@@ -77,7 +77,7 @@ export function ClubPreviewHero({
       </div>
 
       {/* 제목·메타 */}
-      <div className="max-w-[720px] mx-auto px-4 pt-5 pb-1">
+      <div className="px-4 pt-5 pb-1">
         {meta && (
           <p className="text-[12px] font-medium text-[#999] tracking-tight">
             {meta}
