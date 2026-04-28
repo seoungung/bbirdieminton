@@ -67,7 +67,7 @@ export default async function ClubDetailLayout({
     membership = await getMyMembership(supabase, clubId, clubUserId)
   }
 
-  if (!membership) redirect('/club/home')
+  if (!membership) redirect(`/clubs/${clubId}`)
 
   /* last_visited 추적 — fire-and-forget, 실패해도 진입 막지 않음 */
   void supabase.from('users')

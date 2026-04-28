@@ -73,7 +73,10 @@ type PinterestClubCardProps =
 export function PinterestClubCard(props: PinterestClubCardProps) {
   const { mode, club } = props
   const isNew = isNewClub(club.created_at)
-  const href = `/club/${club.id}`
+  // 멤버/데모/내 모임 → 대시보드. 비멤버 → preview 라우트(/clubs/[id]).
+  const isMember = mode === 'my' || (mode === 'all' && props.isMember)
+  const href =
+    isMember || club.isDemo ? `/club/${club.id}` : `/clubs/${club.id}`
 
   return (
     <div className="bg-white border border-[#f0f0f0] rounded-2xl overflow-hidden break-inside-avoid mb-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
