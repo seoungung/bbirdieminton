@@ -276,3 +276,50 @@ export interface Notification {
   read_at: string | null
   created_at: string
 }
+
+// ── 비멤버 미리보기 (get_club_preview RPC) ─────────────────
+
+/** preview 페이지 정기모임 카드 */
+export interface ClubPreviewEvent {
+  id: string
+  title: string
+  /** YYYY-MM-DD (KST) */
+  event_date: string
+  /** HH:MM:SS or null */
+  start_time: string | null
+  /** HH:MM:SS or null */
+  end_time: string | null
+  place: string | null
+  fee: string | null
+  /** 0 = 무제한 */
+  max_attend: number
+  going_count: number
+}
+
+/** preview 페이지 멤버 미리보기 */
+export interface ClubPreviewMember {
+  id: string
+  name: string
+  profile_img: string | null
+  role: MemberRole
+  /** ISO timestamp */
+  joined_at: string
+}
+
+/** get_club_preview RPC 반환 JSON */
+export interface ClubPreview {
+  id: string
+  name: string
+  description: string | null
+  location: string | null
+  activity_place: string | null
+  category: string | null
+  court_count: number | null
+  thumbnail_color: string | null
+  thumbnail_url: string | null
+  created_at: string
+  owner_name: string | null
+  member_count: number
+  upcoming_events: ClubPreviewEvent[]
+  recent_members: ClubPreviewMember[]
+}

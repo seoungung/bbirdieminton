@@ -8,26 +8,12 @@ import {
   type JoinRequestStatus,
 } from '@/app/club/[clubId]/join-requests/actions'
 import { ClubPreviewClient } from '@/components/club/preview/ClubPreviewClient'
+import type { ClubPreview } from '@/types/club'
 
 export const dynamic = 'force-dynamic'
 
 interface PageProps {
   params: Promise<{ clubId: string }>
-}
-
-interface ClubPreview {
-  id: string
-  name: string
-  description: string | null
-  location: string | null
-  activity_place: string | null
-  category: string | null
-  court_count: number | null
-  thumbnail_color: string | null
-  thumbnail_url: string | null
-  created_at: string
-  owner_name: string | null
-  member_count: number
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -101,6 +87,8 @@ export default async function ClubPreviewPage({ params }: PageProps) {
       thumbnailUrl={preview.thumbnail_url}
       ownerName={preview.owner_name}
       memberCount={preview.member_count}
+      upcomingEvents={preview.upcoming_events ?? []}
+      recentMembers={preview.recent_members ?? []}
       isLoggedIn={isLoggedIn}
       isMember={isMember}
       myJoinStatus={myStatus}

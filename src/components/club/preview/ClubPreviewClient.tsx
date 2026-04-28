@@ -1,16 +1,18 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Tag } from 'lucide-react'
-import { BackButton } from '@/components/club/BackButton'
-import { ClubCardImage } from '@/components/club/cards/ClubCardImage'
-import { ClubPreviewCTA } from './ClubPreviewCTA'
-import { ClubPreviewMeta } from './ClubPreviewMeta'
+import { ClubPreviewHeader } from './ClubPreviewHeader'
+import { ClubPreviewHero } from './ClubPreviewHero'
+import { ClubPreviewAbout } from './ClubPreviewAbout'
+import { ClubPreviewEvents } from './ClubPreviewEvents'
+import { ClubPreviewMembers } from './ClubPreviewMembers'
+import { ClubPreviewStickyCTA } from './ClubPreviewStickyCTA'
 import {
   submitJoinRequestAction,
   cancelJoinRequestAction,
   type JoinRequestStatus,
 } from '@/app/club/[clubId]/join-requests/actions'
+import type { ClubPreviewEvent, ClubPreviewMember } from '@/types/club'
 
 export interface ClubPreviewClientProps {
   clubId: string
@@ -24,6 +26,8 @@ export interface ClubPreviewClientProps {
   thumbnailUrl: string | null
   ownerName: string | null
   memberCount: number
+  upcomingEvents: ClubPreviewEvent[]
+  recentMembers: ClubPreviewMember[]
   isLoggedIn: boolean
   isMember: boolean
   myJoinStatus: JoinRequestStatus | null
@@ -42,6 +46,8 @@ export function ClubPreviewClient(props: ClubPreviewClientProps) {
     thumbnailUrl,
     ownerName,
     memberCount,
+    upcomingEvents,
+    recentMembers,
     isLoggedIn,
     isMember,
     myJoinStatus: initialStatus,
@@ -62,7 +68,6 @@ export function ClubPreviewClient(props: ClubPreviewClientProps) {
         return
       }
       if (result.alreadyMember) {
-        // 멤버 row 가 있으면 바로 모임으로 진입
         window.location.href = `/club/${clubId}`
         return
       }
@@ -86,93 +91,61 @@ export function ClubPreviewClient(props: ClubPreviewClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8]">
-      {/* 헤더 */}
-      <header className="bg-white border-b border-[#e5e5e5] px-4 py-3 sticky top-0 z-10">
-        <div className="max-w-[720px] mx-auto flex items-center gap-3">
-          <BackButton fallback="/club/home" />
-          <h1 className="text-base font-bold text-[#111] truncate">{name}</h1>
-        </div>
-      </header>
+    <div className="min-h-screen bg-white">
+      <ClubPreviewHeader name={name} />
 
-      <main className="max-w-[720px] mx-auto px-4 py-5 pb-24">
-        {/* 썸네일 */}
-        <div className="mb-5 rounded-2xl overflow-hidden border border-[#f0f0f0]">
-          <ClubCardImage
-            name={name}
-            thumbnailUrl={thumbnailUrl}
-            thumbnailColor={thumbnailColor}
-          />
-        </div>
-
-        {/* 타이틀 */}
-        <div className="mb-4">
-          <h2 className="text-2xl font-extrabold text-[#111] leading-snug">
-            {name}
-          </h2>
-          {category && (
-            <span className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-[#555] bg-[#f0f0f0] px-2.5 py-1 rounded-full">
-              <Tag size={11} strokeWidth={2.2} />
-              {category}
-            </span>
-          )}
-        </div>
-
-        {/* 메타 그리드 */}
-        <ClubPreviewMeta
-          memberCount={memberCount}
-          ownerName={ownerName}
+      {/* sticky CTA(약 76px) + safe-area 만큼 본문 하단 여백 확보 */}
+      <main className="pb-32">
+        <ClubPreviewHero
+          name={name}
+          thumbnailUrl={thumbnailUrl}
+          thumbnailColor={thumbnailColor}
+          category={category}
           location={location}
-          courtCount={courtCount}
+          memberCount={memberCount}
         />
 
-        {/* 활동 장소 */}
-        {activityPlace && (
-          <section className="bg-white border border-[#f0f0f0] rounded-2xl px-4 py-3.5 mb-4">
-            <p className="text-xs font-semibold text-[#999] mb-1">활동 장소</p>
-            <p className="text-sm text-[#111] leading-relaxed">
-              {activityPlace}
-            </p>
-          </section>
-        )}
+        <div className="max-w-[720px] mx-auto px-4 pt-3 pb-2 space-y-9">
+          <ClubPreviewAbout
+            description={description}
+            ownerName={ownerName}
+            activityPlace={activityPlace}
+            courtCount={courtCount}
+          />
 
-        {/* 모임 소개 */}
-        <section className="bg-white border border-[#f0f0f0] rounded-2xl px-4 py-4 mb-5">
-          <p className="text-xs font-semibold text-[#999] mb-2">모임 소개</p>
-          {description ? (
-            <p className="text-sm text-[#222] leading-relaxed whitespace-pre-wrap">
-              {description}
-            </p>
-          ) : (
-            <p className="text-sm text-[#bbb] leading-relaxed">
-              아직 소개가 등록되지 않았어요.
-            </p>
+          <ClubPreviewEvents events={upcomingEvents} />
+
+          <ClubPreviewMembers
+            members={recentMembers}
+            totalCount={memberCount}
+          />
+
+          {(flash || error) && (
+            <div className="space-y-2">
+              {flash && (
+                <div className="px-3 py-2.5 bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court-deep)] text-[12.5px] rounded-xl border border-[var(--color-brand-court-soft)]">
+                  {flash}
+                </div>
+              )}
+              {error && (
+                <div className="px-3 py-2.5 bg-red-50 text-red-600 text-[12.5px] rounded-xl border border-red-100">
+                  {error}
+                </div>
+              )}
+            </div>
           )}
-        </section>
-
-        {/* 알림 영역 */}
-        {flash && (
-          <div className="mb-3 px-3 py-2.5 bg-[#ecfdf5] text-[#059669] text-xs rounded-xl border border-[#a7f3d0]">
-            {flash}
-          </div>
-        )}
-        {error && (
-          <div className="mb-3 px-3 py-2.5 bg-red-50 text-red-500 text-xs rounded-xl border border-red-100">
-            {error}
-          </div>
-        )}
-
-        {/* CTA */}
-        <ClubPreviewCTA
-          clubId={clubId}
-          isLoggedIn={isLoggedIn}
-          isMember={isMember}
-          status={status}
-          isPending={isPending}
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-        />
+        </div>
       </main>
+
+      <ClubPreviewStickyCTA
+        clubId={clubId}
+        isLoggedIn={isLoggedIn}
+        isMember={isMember}
+        status={status}
+        isPending={isPending}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+      />
     </div>
   )
 }
