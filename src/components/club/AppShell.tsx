@@ -9,6 +9,7 @@ import {
   Megaphone, BarChart3, CalendarDays,
   Menu, X,
   User as UserIcon,
+  BookOpen, Newspaper,
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { ClubSwitcher, type ClubOption } from './ClubSwitcher'
@@ -110,6 +111,11 @@ export function AppShell({
     { href: `/club/${clubId}/settings`,  label: '설정',   Icon: SettingsIcon, ownerOnly: true },
   ]
 
+  const resourceNav: NavItem[] = [
+    { href: '/manual',  label: '사용설명서', Icon: BookOpen,   match: '/manual' },
+    { href: '/blog',    label: '블로그',     Icon: Newspaper,  match: '/blog' },
+  ]
+
   /* 하단 탭바 (모바일 전용) */
   const bottomTabs = [
     { href: `/club/${clubId}`,           label: '홈',     Icon: Home,     match: `/club/${clubId}` },
@@ -170,6 +176,12 @@ export function AppShell({
         <NavSection
           title="관리"
           items={adminNav.filter(item => !item.ownerOnly || isOwner)}
+          isActive={isActive}
+          unreadNoticeCount={0}
+        />
+        <NavSection
+          title="리소스"
+          items={resourceNav}
           isActive={isActive}
           unreadNoticeCount={0}
         />

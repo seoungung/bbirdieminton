@@ -9,6 +9,7 @@ import {
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { GradeBadge } from '@/components/club/GradeBadge'
 import type { MemberViewItem, RegularSessionItem, GameSessionItem } from './clubview/types'
+import { LatestBlogWidget } from './dashboard/LatestBlogWidget'
 
 interface Props {
   clubId: string
@@ -249,7 +250,10 @@ export function ClubDashboardClient({
         </div>
       </section>
 
-      {/* 5. 최근 경기 기록 */}
+      {/* 5. 최신 블로그 */}
+      <LatestBlogWidget />
+
+      {/* 7. 최근 경기 기록 */}
       <section className="bg-white rounded-3xl border border-[#e5e5e5] p-5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1.5">
@@ -310,7 +314,7 @@ export function ClubDashboardClient({
         )}
       </section>
 
-      {/* 6. 모임 활동 */}
+      {/* 8. 모임 활동 */}
       <section className="bg-white rounded-3xl border border-[#e5e5e5] p-5">
         <div className="flex items-center gap-1.5 mb-3">
           <Megaphone size={13} className="text-[#555]" strokeWidth={2.5} />
