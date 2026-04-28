@@ -6,6 +6,8 @@ export interface BlogPost {
   date: string
   author: string
   coverGradient: string
+  /** 본문 컴포넌트가 작성되어 있는지 (기본 false → ComingSoon) */
+  hasContent?: boolean
 }
 
 /* placeholder 글 (실제 콘텐츠 작성 전) */
@@ -75,4 +77,9 @@ export const POSTS: BlogPost[] = [
 /** 최신 N개 반환 (배열이 이미 날짜 내림차순이라고 가정) */
 export function getLatestPosts(n: number = 3): BlogPost[] {
   return POSTS.slice(0, n)
+}
+
+/** slug로 포스트 단건 조회 */
+export function getPost(slug: string): BlogPost | null {
+  return POSTS.find((p) => p.slug === slug) ?? null
 }

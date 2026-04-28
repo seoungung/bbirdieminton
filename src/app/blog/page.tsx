@@ -52,7 +52,7 @@ export default function BlogPage() {
           {POSTS.map((post) => (
             <Link
               key={post.slug}
-              href="#"
+              href={`/blog/${post.slug}`}
               className="group block"
             >
               {/* 썸네일 */}

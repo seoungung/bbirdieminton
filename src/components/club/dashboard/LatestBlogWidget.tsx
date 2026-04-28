@@ -3,15 +3,7 @@
 import Link from 'next/link'
 import { Newspaper, ChevronRight, Calendar } from 'lucide-react'
 import { getLatestPosts } from '@/lib/blog/posts'
-import type { BlogPost } from '@/lib/blog/posts'
-
-/* 카테고리별 배지 색 매핑 */
-const CATEGORY_BADGE: Record<BlogPost['category'], string> = {
-  '총무 노하우': 'bg-blue-50 text-blue-700 border-blue-100',
-  '인사이트':   'bg-violet-50 text-violet-700 border-violet-100',
-  '업데이트':   'bg-emerald-50 text-emerald-700 border-emerald-100',
-  '사례 공유':  'bg-amber-50 text-amber-700 border-amber-100',
-}
+import { getCategoryBadge } from '@/lib/blog/category'
 
 /**
  * 대시보드용 최신 블로그 위젯 (3개 카드)
@@ -43,7 +35,7 @@ export function LatestBlogWidget() {
         {posts.map((post) => (
           <Link
             key={post.slug}
-            href="/blog"
+            href={`/blog/${post.slug}`}
             className="group block rounded-2xl border border-[#e5e5e5] hover:border-[#beff00] hover:shadow-sm transition-all overflow-hidden"
           >
             {/* 커버 그라데이션 */}
@@ -56,7 +48,7 @@ export function LatestBlogWidget() {
             <div className="p-3">
               {/* 카테고리 배지 */}
               <span
-                className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border mb-2 ${CATEGORY_BADGE[post.category]}`}
+                className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border mb-2 ${getCategoryBadge(post.category)}`}
               >
                 {post.category}
               </span>
