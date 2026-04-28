@@ -151,9 +151,9 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleCreateSubmit} className="px-6 py-5 space-y-5">
+            <form onSubmit={handleCreateSubmit} className="px-6 py-5 space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-[#111] mb-1.5">
+                <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
                   모임 이름 <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -162,23 +162,23 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
                   placeholder="예: 화요일 배드민턴 모임"
                   maxLength={30}
                   required
-                  className="w-full border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#beff00] bg-white transition-colors"
+                  className="w-full border border-[#ebebeb] rounded-xl px-4 py-2.5 text-sm text-[#111] placeholder:text-[#bbb] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] focus:bg-white transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[#111] mb-1.5">모임 소개</label>
+                <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">모임 소개</label>
                 <textarea
                   name="description"
                   placeholder="모임에 대한 간단한 소개를 작성해주세요"
                   rows={3}
                   maxLength={200}
-                  className="w-full border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#beff00] bg-white transition-colors resize-none"
+                  className="w-full border border-[#ebebeb] rounded-xl px-4 py-2.5 text-sm text-[#111] placeholder:text-[#bbb] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] focus:bg-white transition-colors resize-none leading-relaxed"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[#111] mb-1.5">최대 코트 수</label>
+                <label className="text-[12px] font-semibold text-[#666] mb-2 block">최대 코트 수</label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                     <button
@@ -186,10 +186,10 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
                       type="button"
                       onClick={() => setCourtCount(n)}
                       className={
-                        'flex-1 h-10 border rounded-xl text-sm font-semibold transition-colors ' +
+                        'flex-1 h-9 border rounded-xl text-sm font-semibold transition-colors ' +
                         (courtCount === n
                           ? 'bg-[#beff00] border-[#beff00] text-[#111]'
-                          : 'border-[#e5e5e5] text-[#999] hover:border-[#beff00]')
+                          : 'border-[#e5e5e5] text-[#aaa] hover:border-[#beff00] hover:text-[#555]')
                       }
                     >
                       {n}
@@ -197,7 +197,7 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
                   ))}
                 </div>
                 <p className="text-[11px] text-[#999] mt-1.5 leading-relaxed">
-                  이 모임이 운영할 수 있는 최대 코트 수예요. 매 게임 시작 시 그날 사용할 코트 수를 1~최대값 사이로 조정할 수 있어요.
+                  운영 가능한 최대 코트 수예요. 게임 시작 시 1~최대값 사이로 조정할 수 있어요.
                 </p>
               </div>
 
@@ -205,24 +205,24 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
                 <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-xl">{createError}</p>
               )}
 
-              <div className="flex gap-3 pt-2 pb-2">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="flex-1 py-3.5 border border-[#e5e5e5] text-[#555] font-semibold text-sm rounded-xl hover:bg-[#f8f8f8] transition-colors"
-                >
-                  취소
-                </button>
+              <div className="space-y-2 pt-1 pb-1">
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="flex-1 py-3.5 bg-[#beff00] text-[#111] font-bold text-sm rounded-xl hover:brightness-95 transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  className="w-full py-3 bg-[#beff00] text-[#111] font-bold text-sm rounded-xl hover:brightness-95 transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
                   {isPending ? (
                     <span className="animate-spin rounded-full h-4 w-4 border-2 border-[#111] border-t-transparent" />
                   ) : (
                     <><Plus size={14} /> 모임 만들기</>
                   )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="w-full py-2 text-[#999] text-sm font-medium hover:text-[#555] transition-colors"
+                >
+                  취소
                 </button>
               </div>
             </form>

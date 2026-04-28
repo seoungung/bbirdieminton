@@ -1,32 +1,26 @@
 'use client'
 
-import { useState, useTransition, useRef } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ImagePlus, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { createClubAction } from '@/app/club/create/actions'
+import { FormSection } from '@/components/club/createClub/FormSection'
+import { CategoryChips, type Category } from '@/components/club/createClub/CategoryChips'
+import { ColorSwatchPicker, type SwatchColor } from '@/components/club/createClub/ColorSwatchPicker'
+import { ThumbnailUpload } from '@/components/club/createClub/ThumbnailUpload'
+
+const inputCls =
+  'w-full border border-[#ebebeb] rounded-xl px-4 py-2.5 text-sm text-[#111] ' +
+  'placeholder:text-[#bbb] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] ' +
+  'focus:bg-white transition-colors'
 
 export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const [category, setCategory] = useState<'동호회' | '클럽'>('동호회')
+  const [category, setCategory] = useState<Category>('동호회')
+  const [thumbColor, setThumbColor] = useState<SwatchColor>('#10b981')
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setImageFile(file)
-    setPreviewUrl(URL.createObjectURL(file))
-  }
-
-  const clearImage = () => {
-    setImageFile(null)
-    setPreviewUrl(null)
-    if (fileRef.current) fileRef.current.value = ''
-  }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -37,7 +31,6 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
     startTransition(async () => {
       let thumbnailUrl = ''
 
-      /* 이미지 파일이 있으면 Supabase Storage에 업로드 */
       if (imageFile) {
         const supabase = createClient()
         const ext = imageFile.name.split('.').pop() ?? 'jpg'
@@ -51,9 +44,7 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
           return
         }
 
-        const { data } = supabase.storage
-          .from('club-thumbnails')
-          .getPublicUrl(path)
+        const { data } = supabase.storage.from('club-thumbnails').getPublicUrl(path)
         thumbnailUrl = data.publicUrl
       }
 
@@ -65,164 +56,98 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
 
   return (
     <div className="flex justify-center">
-      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
+      <form onSubmit={handleSubmit} className="w-full max-w-md">
+        <div className="bg-white border border-[#f0f0f0] rounded-3xl p-6 sm:p-8 space-y-8">
 
-        {/* 썸네일 업로드 */}
-        <div>
-          <label className="block text-sm font-semibold text-[#111] mb-2 text-center">
-            모임 썸네일
-          </label>
-
-          {previewUrl ? (
-            /* 미리보기 */
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-[#f0f0f0]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={previewUrl}
-                alt="썸네일 미리보기"
-                className="w-full h-full object-cover"
+          {/* 섹션 1 — 기본 정보 */}
+          <FormSection title="기본 정보">
+            <div>
+              <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
+                모임 이름 <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="text" name="name"
+                placeholder="예: 관악구 화요일 배드민턴 모임"
+                maxLength={30} required className={inputCls}
               />
-              <button
-                type="button"
-                onClick={clearImage}
-                className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 flex items-center justify-center hover:bg-black/80 transition-colors"
-              >
-                <X size={14} className="text-white" />
-              </button>
             </div>
-          ) : (
-            /* 업로드 버튼 */
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="w-full aspect-video rounded-2xl border-2 border-dashed border-[#e5e5e5] bg-[#fafafa] hover:border-[#beff00] hover:bg-[#f8ffe8] transition-colors flex flex-col items-center justify-center gap-2 group"
-            >
-              <ImagePlus size={28} className="text-[#ccc] group-hover:text-[#aad000] transition-colors" />
-              <span className="text-sm text-[#999] group-hover:text-[#777] transition-colors">
-                이미지 첨부 (선택)
-              </span>
-              <span className="text-xs text-[#bbb]">JPG, PNG, WEBP · 최대 5MB</span>
-            </button>
-          )}
 
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={handleImageChange}
-            className="hidden"
-          />
-        </div>
+            <CategoryChips value={category} onChange={setCategory} />
 
-        {/* 모임 이름 */}
-        <div>
-          <label className="block text-sm font-semibold text-[#111] mb-1.5">
-            모임 이름 <span className="text-red-400">*</span>
-          </label>
-          <input
-            type="text"
-            name="name"
-            placeholder="예: 관악구 화요일 배드민턴 모임"
-            maxLength={30}
-            className="w-full border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#beff00] bg-white transition-colors"
-            required
-          />
-        </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">지역</label>
+                <input
+                  type="text" name="location"
+                  placeholder="예: 관악구" maxLength={20} className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">활동 장소</label>
+                <input
+                  type="text" name="activity_place"
+                  placeholder="예: 국사봉체육관" maxLength={30} className={inputCls}
+                />
+              </div>
+            </div>
 
-        {/* 카테고리 */}
-        <div>
-          <label className="block text-sm font-semibold text-[#111] mb-1.5">카테고리</label>
-          <div className="flex gap-2">
-            {(['동호회', '클럽'] as const).map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setCategory(cat)}
-                className={`flex-1 py-3 rounded-xl text-sm font-semibold border transition-colors ${
-                  category === cat
-                    ? 'bg-[#111] text-white border-[#111]'
-                    : 'bg-white text-[#555] border-[#e5e5e5] hover:border-[#999]'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
+            <div>
+              <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">모임 소개</label>
+              <textarea
+                name="description"
+                placeholder="모임을 소개하는 글을 작성해주세요. (선택)"
+                rows={4} maxLength={500}
+                className={`${inputCls} resize-none leading-relaxed`}
+              />
+            </div>
+          </FormSection>
 
-        {/* 최대 코트 수 */}
-        <div>
-          <label className="block text-sm font-semibold text-[#111] mb-1.5">최대 코트 수</label>
-          <div className="flex items-center gap-3">
-            <input
-              type="number"
-              name="court_count"
-              min={1}
-              max={20}
-              defaultValue={5}
-              className="w-24 border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm text-[#111] focus:outline-none focus:border-[#beff00] bg-white transition-colors text-center"
+          <div className="border-t border-[#f0f0f0]" />
+
+          {/* 섹션 2 — 운영 설정 */}
+          <FormSection title="운영 설정">
+            <div>
+              <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">최대 코트 수</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="number" name="court_count" min={1} max={20} defaultValue={5}
+                  className="w-24 border border-[#ebebeb] rounded-xl px-4 py-2.5 text-sm text-[#111] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] focus:bg-white transition-colors text-center"
+                />
+                <span className="text-[12px] text-[#999]">면 (1~20)</span>
+              </div>
+              <p className="text-[11px] text-[#999] mt-1.5 leading-relaxed">
+                운영 가능한 최대 코트 수예요. 게임 시작 시 1~최대값 사이로 조정할 수 있어요.
+              </p>
+            </div>
+
+            <ColorSwatchPicker
+              value={thumbColor}
+              onChange={setThumbColor}
+              inputName="thumbnail_color"
             />
-            <span className="text-sm text-[#999]">면 (1~20)</span>
-          </div>
-          <p className="text-[11px] text-[#999] mt-1.5 leading-relaxed">
-            이 모임이 운영할 수 있는 최대 코트 수예요. 매 게임 시작 시 게임보드에서 그날 사용할 코트 수를 1~최대값 사이로 조정할 수 있어요.
-          </p>
-        </div>
 
-        {/* 지역 + 활동 장소 */}
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-semibold text-[#111] mb-1.5">지역</label>
-            <input
-              type="text"
-              name="location"
-              placeholder="예: 관악구"
-              maxLength={20}
-              className="w-full border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#beff00] bg-white transition-colors"
+            <ThumbnailUpload
+              onFileChange={(file) => setImageFile(file)}
             />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-[#111] mb-1.5">활동 장소</label>
-            <input
-              type="text"
-              name="activity_place"
-              placeholder="예: 국사봉체육관"
-              maxLength={30}
-              className="w-full border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#beff00] bg-white transition-colors"
-            />
-          </div>
-        </div>
-
-        {/* 모임 소개 */}
-        <div>
-          <label className="block text-sm font-semibold text-[#111] mb-1.5">모임 소개</label>
-          <textarea
-            name="description"
-            placeholder="모임을 소개하는 글을 작성해주세요. (선택)"
-            rows={4}
-            maxLength={500}
-            className="w-full border border-[#e5e5e5] rounded-xl px-4 py-3 text-sm text-[#111] placeholder:text-[#bbb] focus:outline-none focus:border-[#beff00] bg-white transition-colors resize-none leading-relaxed"
-          />
+          </FormSection>
         </div>
 
         {error && (
-          <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-xl">{error}</p>
+          <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-xl mt-4">{error}</p>
         )}
 
-        <div className="flex gap-3 pt-1">
+        <div className="mt-5 space-y-2">
           <button
-            type="button"
-            onClick={() => router.back()}
-            className="flex-1 py-3.5 border border-[#e5e5e5] text-[#555] font-semibold text-sm rounded-xl hover:bg-[#f8f8f8] transition-colors"
-          >
-            취소
-          </button>
-          <button
-            type="submit"
-            disabled={isPending}
-            className="flex-1 py-3.5 bg-[#beff00] text-[#111] font-bold text-sm rounded-xl hover:brightness-95 transition-all disabled:opacity-50"
+            type="submit" disabled={isPending}
+            className="w-full py-3 bg-[#beff00] text-[#111] font-bold text-base rounded-xl hover:brightness-95 transition-all disabled:opacity-50"
           >
             {isPending ? '생성 중...' : '모임 만들기'}
+          </button>
+          <button
+            type="button" onClick={() => router.back()}
+            className="w-full py-2.5 text-[#999] text-sm font-medium hover:text-[#555] transition-colors"
+          >
+            취소
           </button>
         </div>
       </form>
