@@ -6,6 +6,22 @@ import { DEMO_CLUBS } from '@/lib/club/demoData'
 import type { Metadata } from 'next'
 import type { Club } from '@/types/club'
 
+type PublicClubRow = {
+  id: string
+  name: string
+  description: string | null
+  location: string | null
+  activity_place: string | null
+  category: string | null
+  court_count: number
+  thumbnail_color: string | null
+  thumbnail_url: string | null
+  created_at: string
+  owner_id: string
+  owner_name: string | null
+  member_count: number
+}
+
 export const metadata: Metadata = { title: '내 모임 | 버디민턴', description: '가입한 모임 전체와 새 모임 디스커버리' }
 
 export default async function ClubHomePage() {
@@ -34,45 +50,29 @@ export default async function ClubHomePage() {
     )
   }
 
-  // ── 병렬 조회: 내 모임 목록 + 전체 모임 목록 ──────────────
+  // ── 병렬 조회: 내 모임 목록 + 전체 공개 모임 목록 (RPC) ───
   const [clubs, rawAllClubsResult] = await Promise.all([
     getMyClubs(supabase, clubUserId),
-    supabase
-      .from('clubs')
-      .select('id, name, description, court_count, created_at, owner_id, invite_code, max_members, plan, location, activity_place, thumbnail_color, thumbnail_url, category')
-      .order('created_at', { ascending: false })
-      .limit(50),
+    supabase.rpc('list_public_clubs', { p_limit: 50 }),
   ])
 
-  const realClubs = rawAllClubsResult.data ?? []
+  const realClubs = (rawAllClubsResult.data as PublicClubRow[] | null) ?? []
 
-  // ── 병렬 조회: owner 이름 + 멤버 수 (단 1회 쿼리로 통합) ──
-  const ownerIds = [...new Set(realClubs.map((c: Record<string, unknown>) => c.owner_id as string).filter(Boolean))]
-  const allClubIds = [...new Set([
-    ...clubs.map(c => c.id),
-    ...realClubs.map((c: Record<string, unknown>) => c.id as string),
-  ])]
+  // 내 모임 카운트 (RLS 통과 — 본인 가입 클럽이므로)
+  const myClubIds = clubs.map(c => c.id)
+  const countMap = await buildMemberCountMap(supabase, myClubIds)
 
-  const [ownerUsersResult, countMap] = await Promise.all([
-    ownerIds.length > 0
-      ? supabase.from('users').select('id, name').in('id', ownerIds)
-      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
-    buildMemberCountMap(supabase, allClubIds),
-  ])
-
-  const ownerMap: Record<string, string> = {}
-  for (const u of ownerUsersResult.data ?? []) ownerMap[u.id] = u.name
-
-  // 내 모임에 카운트 적용 (별도 쿼리 불필요 — countMap 재사용)
+  // 내 모임에 카운트 적용
   const clubsWithCount = clubs.map(c => ({ ...c, memberCount: countMap[c.id] ?? 0 }))
 
-  const allClubsWithCount = realClubs.map((c: Record<string, unknown>) => ({
+  // 전체 공개 클럽 — RPC가 owner_name, member_count 직접 반환
+  const allClubsWithCount = realClubs.map((c: PublicClubRow) => ({
     ...c,
     location: c.location ?? '',
     thumbnailColor: c.thumbnail_color ?? '#f0f0f0',
     thumbnail_url: c.thumbnail_url ?? null,
-    leaderName: ownerMap[c.owner_id as string] ?? '',
-    memberCount: countMap[c.id as string] ?? 0,
+    leaderName: c.owner_name ?? '',
+    memberCount: c.member_count,
   }))
 
   // 전체 모임에 데모 클럽도 포함 (체험용으로 항상 표시)
