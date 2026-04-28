@@ -13,6 +13,17 @@ export interface BlogPost {
 /* placeholder 글 (실제 콘텐츠 작성 전) */
 export const POSTS: BlogPost[] = [
   {
+    slug: 'beyond-tournament-tools',
+    title: '배드민턴 클럽 운영, 대회용 도구로는 부족했다',
+    excerpt:
+      '배드민턴 동호회 운영자라면 한 번쯤 본 대회 운영 도구. 큰 대회는 자동으로 굴러가지만, 매주 일상 운영은 다른 이야기였습니다.',
+    category: '인사이트',
+    date: '2026-04-29',
+    author: '버디민턴',
+    coverGradient: 'from-emerald-200 via-amber-100 to-emerald-50',
+    hasContent: true,
+  },
+  {
     slug: 'admin-guide-fees',
     title: '총무가 꼭 알아야 할 회비 정산 5가지',
     excerpt:

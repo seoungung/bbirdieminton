@@ -1,4 +1,5 @@
 import type React from 'react'
+import { BeyondTournamentToolsBody } from './beyond-tournament-tools'
 
 /**
  * 본문 컴포넌트 매핑 테이블.
@@ -7,7 +8,7 @@ import type React from 'react'
  *   POST_BODIES['some-slug'] = SomePostBody
  */
 const POST_BODIES: Record<string, () => React.ReactElement> = {
-  // 예: 'admin-guide-fees': AdminGuideFeesBody,
+  'beyond-tournament-tools': BeyondTournamentToolsBody,
 }
 
 /** slug에 해당하는 본문 컴포넌트를 반환. 미작성 시 null. */
