@@ -84,7 +84,11 @@ export function ClubPreviewHeader({ name }: Props) {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-[#f0f0f0] h-14 flex items-center">
+    /**
+     * SaaSShell 헤더(top-0 z-30 h-14) 아래에 위치하는 sub-header.
+     * → top-14 (SaaSShell header 높이만큼) z-20 으로 stacking 조정.
+     */
+    <header className="sticky top-14 z-20 bg-white/95 backdrop-blur-sm border-b border-[#f0f0f0] h-14 flex items-center">
       <div className="max-w-[720px] w-full mx-auto px-3 flex items-center gap-2">
         <BackButton
           fallback="/club/home"

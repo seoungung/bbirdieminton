@@ -28,13 +28,9 @@ export default async function ClubHomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // 비로그인 → 데모 모임 카드 3개 표시
+  // 비로그인 → 데모 모임 카드 3개 표시 (SaaSShell이 bg/min-h 처리)
   if (!user) {
-    return (
-      <div className="min-h-screen bg-[#f8f8f8]">
-        <ClubListClient myClubs={[]} allClubs={DEMO_CLUBS as never} isGuest />
-      </div>
-    )
+    return <ClubListClient myClubs={[]} allClubs={DEMO_CLUBS as never} isGuest />
   }
 
   // user를 전달해 auth.getUser() 이중 호출 방지
@@ -43,11 +39,7 @@ export default async function ClubHomePage() {
 
   // clubUserId 없어도 빈 리스트로 보여줌 (로그인은 됐지만 club user 미생성)
   if (!clubUserId) {
-    return (
-      <div className="min-h-screen bg-[#f8f8f8]">
-        <ClubListClient myClubs={[]} allClubs={[]} />
-      </div>
-    )
+    return <ClubListClient myClubs={[]} allClubs={[]} />
   }
 
   // ── 병렬 조회: 내 모임 목록 + 전체 공개 모임 목록 (RPC) ───
@@ -90,11 +82,9 @@ export default async function ClubHomePage() {
   }))
 
   return (
-    <div className="min-h-screen bg-[#f8f8f8]">
-      <ClubListClient
-        myClubs={clubsWithCount as never}
-        allClubs={[...allClubsWithCount as unknown as Club[], ...demoAsClubs] as never}
-      />
-    </div>
+    <ClubListClient
+      myClubs={clubsWithCount as never}
+      allClubs={[...allClubsWithCount as unknown as Club[], ...demoAsClubs] as never}
+    />
   )
 }
