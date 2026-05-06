@@ -14,7 +14,7 @@ export default function TermsPage() {
       <div className="max-w-2xl mx-auto px-5 py-14">
 
         {/* 헤더 */}
-        <p className="text-xs font-bold text-[#beff00] uppercase tracking-widest mb-3">Legal</p>
+        <p className="text-xs font-bold text-[var(--color-brand-lime)] uppercase tracking-widest mb-3">Legal</p>
         <h1 className="text-[1.8rem] font-extrabold mb-2">이용약관</h1>
         <p className="text-[0.85rem] text-[#999] mb-10">시행일: {EFFECTIVE_DATE}</p>
 
@@ -87,7 +87,7 @@ export default function TermsPage() {
           <Section title="제7조 (개인정보보호)">
             <p>
               회사는 이용자의 개인정보를 보호하기 위하여 「개인정보보호법」 등 관련 법령에서 정하는 바를 준수합니다.
-              개인정보의 처리에 관한 사항은 별도의 <a href="/privacy" className="text-[#beff00] underline">개인정보처리방침</a>에 따릅니다.
+              개인정보의 처리에 관한 사항은 별도의 <a href="/privacy" className="text-[var(--color-brand-lime)] underline">개인정보처리방침</a>에 따릅니다.
             </p>
           </Section>
 

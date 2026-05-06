@@ -29,12 +29,17 @@ interface ClubListClientProps {
   myClubs: Club[]
   allClubs: Club[]
   isGuest?: boolean
+  /**
+   * "전체 모임" 탭 숨김 — 디스커버리는 /clubs로 분리됨.
+   * /clubs에서 true로 사용. 기본 false.
+   */
+  hideAllTab?: boolean
 }
 
 type TabKey = 'my' | 'all' | 'recent' | 'favorite'
 type ModalType = 'create' | 'join' | null
 
-const TAB_LIST: { key: TabKey; label: string }[] = [
+const ALL_TAB_LIST: { key: TabKey; label: string }[] = [
   { key: 'all',      label: '전체 모임'    },
   { key: 'my',       label: '내 모임'      },
   { key: 'recent',   label: '최근 본 모임' },
@@ -45,8 +50,11 @@ const TAB_LIST: { key: TabKey; label: string }[] = [
 const MASONRY = 'columns-1 sm:columns-2 lg:columns-3 gap-4'
 
 // ── 메인 컴포넌트 ─────────────────────────────────────────
-export function ClubListClient({ myClubs, allClubs, isGuest }: ClubListClientProps) {
-  const [tab, setTab]               = useState<TabKey>('all')
+export function ClubListClient({ myClubs, allClubs, isGuest, hideAllTab }: ClubListClientProps) {
+  const TAB_LIST = hideAllTab
+    ? ALL_TAB_LIST.filter((t) => t.key !== 'all')
+    : ALL_TAB_LIST
+  const [tab, setTab]               = useState<TabKey>(hideAllTab ? 'my' : 'all')
   const [query, setQuery]           = useState('')
   const [modal, setModal]           = useState<ModalType>(null)
   const [favorites, setFavorites]   = useState<string[]>([])
@@ -107,8 +115,8 @@ export function ClubListClient({ myClubs, allClubs, isGuest }: ClubListClientPro
             <p className="text-sm text-white/50 mt-0.5">체험용 모임을 클릭해서 게임보드를 경험해보세요</p>
           </div>
           <Link
-            href="/login?next=%2Fclub%2Fhome"
-            className="shrink-0 text-sm font-bold px-4 py-2 bg-[#beff00] text-[#111] rounded-xl hover:brightness-95 transition-all"
+            href="/login?next=%2Fclubs"
+            className="shrink-0 text-sm font-bold px-4 py-2 bg-[var(--color-brand-lime)] text-[#111] rounded-xl hover:brightness-95 transition-all"
           >
             내 모임 만들기 →
           </Link>
@@ -118,10 +126,24 @@ export function ClubListClient({ myClubs, allClubs, isGuest }: ClubListClientPro
       {/* ── 상단 바 ── */}
       <div className="flex items-center justify-between flex-wrap gap-y-3 mb-5">
         <div>
-          <h1 className="text-2xl font-extrabold text-[#111]">내 모임</h1>
-          <p className="text-sm text-[#999] mt-0.5">가입한 모임 전체와 새 모임 디스커버리</p>
+          <h1 className="text-2xl font-extrabold text-[#111]">
+            {hideAllTab ? '내 모임' : '모임'}
+          </h1>
+          <p className="text-sm text-[#999] mt-0.5">
+            {hideAllTab
+              ? '가입한 모임으로 바로 진입하세요'
+              : '가입한 모임 전체와 새 모임 디스커버리'}
+          </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {hideAllTab && (
+            <Link
+              href="/clubs"
+              className="inline-flex items-center gap-1.5 border border-[#e5e5e5] text-[#555] font-semibold text-sm px-4 py-2 rounded-xl hover:bg-[#f8f8f8] transition-all"
+            >
+              다른 모임 둘러보기
+            </Link>
+          )}
           <Link
             href="/club/join"
             className="inline-flex items-center gap-1.5 border border-[#e5e5e5] text-[#555] font-semibold text-sm px-4 py-2 rounded-xl hover:bg-[#f8f8f8] transition-all"
@@ -131,7 +153,7 @@ export function ClubListClient({ myClubs, allClubs, isGuest }: ClubListClientPro
           <Link
             href="/club/create"
             onClick={handleCreateClick}
-            className="inline-flex items-center gap-1.5 bg-[#beff00] text-[#111] font-bold text-sm px-4 py-2 rounded-xl hover:brightness-95 transition-all"
+            className="inline-flex items-center gap-1.5 bg-[var(--color-brand-lime)] text-[#111] font-bold text-sm px-4 py-2 rounded-xl hover:brightness-95 transition-all"
           >
             <Plus size={15} />
             모임 만들기

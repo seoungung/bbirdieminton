@@ -30,7 +30,7 @@ export function FilterChips({
               'shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full border text-xs font-bold transition-colors',
               isActive
                 ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white'
-                : 'bg-white border-[#e5e5e5] text-[#555] hover:border-[#beff00]'
+                : 'bg-white border-[#e5e5e5] text-[#555] hover:border-[var(--color-brand-lime)]'
             )}
           >
             {opt.label}

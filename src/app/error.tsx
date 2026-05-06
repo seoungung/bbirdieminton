@@ -29,12 +29,12 @@ export default function ErrorBoundary({
         <div className="flex gap-3 justify-center">
           <button
             onClick={reset}
-            className="px-5 py-2.5 bg-[#beff00] text-[#111] font-bold rounded-xl text-sm hover:brightness-95"
+            className="px-5 py-2.5 bg-[var(--color-brand-lime)] text-[#111] font-bold rounded-xl text-sm hover:brightness-95"
           >
             다시 시도
           </button>
           <Link
-            href="/club/home"
+            href="/clubs"
             className="px-5 py-2.5 bg-[#f0f0f0] text-[#555] font-semibold rounded-xl text-sm hover:bg-[#e5e5e5]"
           >
             홈으로

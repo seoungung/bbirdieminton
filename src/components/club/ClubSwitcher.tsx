@@ -4,6 +4,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 import { ChevronsUpDown, Plus, KeyRound, Check } from 'lucide-react'
+import type { MemberRole } from '@/types/club'
+import { ROLE_LABEL } from '@/lib/club/labels'
 
 export interface ClubOption {
   id: string
@@ -11,6 +13,33 @@ export interface ClubOption {
   location?: string | null
   thumbnailColor?: string
   isDemo?: boolean
+  /** 현재 사용자의 이 클럽 내 역할 — 사이드바 클럽 카드에 배지로 표시 */
+  role?: MemberRole
+}
+
+/** 역할별 배지 색상 — owner: lime, manager: court, member: zinc */
+function roleStyle(role: MemberRole | undefined): { bg: string; text: string; ring: string } {
+  switch (role) {
+    case 'owner':
+      return {
+        bg: 'bg-[var(--color-brand-lime)]',
+        text: 'text-[var(--color-brand-ink)]',
+        ring: 'ring-[var(--color-brand-lime)]/30',
+      }
+    case 'manager':
+      return {
+        bg: 'bg-[var(--color-brand-court)]',
+        text: 'text-white',
+        ring: 'ring-[var(--color-brand-court)]/30',
+      }
+    case 'member':
+    default:
+      return {
+        bg: 'bg-[#f0f0f0]',
+        text: 'text-[#555]',
+        ring: 'ring-[#e5e5e5]',
+      }
+  }
 }
 
 interface Props {
@@ -42,22 +71,41 @@ export function ClubSwitcher({ current, available = [] }: Props) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-[#fafafa] border border-[#f0f0f0] hover:border-[#e5e5e5] hover:bg-[#f5f5f5] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-1"
+        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-[#fafafa] border border-[#f0f0f0] hover:border-[#e5e5e5] hover:bg-[#f5f5f5] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-lime)] focus-visible:ring-offset-1"
         aria-label="모임 전환"
         aria-expanded={open}
         aria-haspopup="menu"
       >
         <div
           className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-          style={{ background: current.thumbnailColor ?? '#beff00' }}
+          style={{ background: current.thumbnailColor ?? '#DBE64C' }}
         >
           <Image src="/symbol_birdieminton-black.png" alt="" width={20} height={20} className="h-5 w-auto opacity-70" aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0 text-left">
           <p className="text-[14px] font-extrabold text-[#111] truncate">{current.name}</p>
-          <p className="text-[11px] text-[#999] truncate mt-0.5">
-            {current.isDemo ? '체험 중' : current.location || '모임'}
-          </p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            {/* 역할 배지 — 운영자/매니저/회원 (체험 중 우선) */}
+            {current.isDemo ? (
+              <span className="inline-flex items-center rounded-full bg-[var(--color-brand-streak-bg)] text-[var(--color-brand-streak)] px-1.5 py-0 text-[10px] font-bold leading-[1.4]">
+                체험 중
+              </span>
+            ) : current.role ? (
+              (() => {
+                const s = roleStyle(current.role)
+                return (
+                  <span
+                    className={`inline-flex items-center rounded-full ${s.bg} ${s.text} px-1.5 py-0 text-[10px] font-bold leading-[1.4] ring-1 ${s.ring}`}
+                  >
+                    {ROLE_LABEL[current.role]}
+                  </span>
+                )
+              })()
+            ) : null}
+            {!current.isDemo && current.location && (
+              <span className="text-[11px] text-[#999] truncate">{current.location}</span>
+            )}
+          </div>
         </div>
         <ChevronsUpDown
           size={13}
@@ -100,7 +148,7 @@ export function ClubSwitcher({ current, available = [] }: Props) {
               새 모임 만들기
             </Link>
             <Link
-              href="/club/home"
+              href="/clubs"
               onClick={() => setOpen(false)}
               role="menuitem"
               className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#f8f8f8] text-[13px] font-semibold text-[#555] transition-colors"
@@ -126,7 +174,7 @@ function ClubRow({ club, isCurrent }: { club: ClubOption; isCurrent?: boolean })
     >
       <div
         className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-        style={{ background: club.thumbnailColor ?? '#beff00' }}
+        style={{ background: club.thumbnailColor ?? '#DBE64C' }}
       >
         <Image src="/symbol_birdieminton-black.png" alt="" width={18} height={18} className="h-[18px] w-auto opacity-70" aria-hidden="true" />
       </div>

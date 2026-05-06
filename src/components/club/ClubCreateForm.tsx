@@ -8,19 +8,64 @@ import { FormSection } from '@/components/club/createClub/FormSection'
 import { CategoryChips, type Category } from '@/components/club/createClub/CategoryChips'
 import { ColorSwatchPicker, type SwatchColor } from '@/components/club/createClub/ColorSwatchPicker'
 import { ThumbnailUpload } from '@/components/club/createClub/ThumbnailUpload'
+import { TagPicker } from '@/components/club/createClub/TagPicker'
+import { FeeInputs } from '@/components/club/createClub/FeeInputs'
+import { FaqEditor } from '@/components/club/createClub/FaqEditor'
+import { PhotoMultiUpload } from '@/components/club/createClub/PhotoMultiUpload'
+import type { ClubTag } from '@/lib/club/tags'
+import type { ClubFAQ } from '@/types/club'
 
 const inputCls =
   'w-full border border-[#ebebeb] rounded-xl px-4 py-2.5 text-sm text-[#111] ' +
   'placeholder:text-[#bbb] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] ' +
   'focus:bg-white transition-colors'
 
+/** 스토리지 버킷 — 신규 'clubs' 버킷이 적용된 환경이면 그쪽,
+ *  미적용이면 기존 'club-thumbnails' 으로 fallback. */
+const PRIMARY_BUCKET = 'clubs'
+const FALLBACK_BUCKET = 'club-thumbnails'
+
+async function uploadWithFallback(
+  supabase: ReturnType<typeof createClient>,
+  file: File,
+  path: string,
+): Promise<string | null> {
+  // 1차: clubs 버킷 시도
+  const primary = await supabase.storage
+    .from(PRIMARY_BUCKET)
+    .upload(path, file, { upsert: true })
+
+  if (!primary.error) {
+    const { data } = supabase.storage.from(PRIMARY_BUCKET).getPublicUrl(path)
+    return data.publicUrl
+  }
+
+  // 2차: club-thumbnails 버킷 fallback
+  const fallback = await supabase.storage
+    .from(FALLBACK_BUCKET)
+    .upload(path, file, { upsert: true })
+  if (fallback.error) return null
+  const { data } = supabase.storage.from(FALLBACK_BUCKET).getPublicUrl(path)
+  return data.publicUrl
+}
+
 export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [category, setCategory] = useState<Category>('동호회')
-  const [thumbColor, setThumbColor] = useState<SwatchColor>('#10b981')
+  const [thumbColor, setThumbColor] = useState<SwatchColor>('#00804C')
   const [imageFile, setImageFile] = useState<File | null>(null)
+
+  // ── Phase A state ──────────────────────────────────────────
+  const [tags, setTags] = useState<ClubTag[]>([])
+  const [feeMonthly, setFeeMonthly] = useState('')
+  const [feePerSession, setFeePerSession] = useState('')
+  const [feeNote, setFeeNote] = useState('')
+  const [scheduleSummary, setScheduleSummary] = useState('')
+  const [ownerBio, setOwnerBio] = useState('')
+  const [photoFiles, setPhotoFiles] = useState<File[]>([])
+  const [faqs, setFaqs] = useState<ClubFAQ[]>([])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -29,26 +74,42 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
     setError(null)
 
     startTransition(async () => {
+      const supabase = createClient()
       let thumbnailUrl = ''
 
+      // 1) 대표 썸네일 업로드
       if (imageFile) {
-        const supabase = createClient()
         const ext = imageFile.name.split('.').pop() ?? 'jpg'
-        const path = `${Date.now()}.${ext}`
-        const { error: uploadErr } = await supabase.storage
-          .from('club-thumbnails')
-          .upload(path, imageFile, { upsert: true })
-
-        if (uploadErr) {
-          setError('이미지 업로드에 실패했어요. 다시 시도해주세요.')
+        const path = `cover/${Date.now()}.${ext}`
+        const url = await uploadWithFallback(supabase, imageFile, path)
+        if (!url) {
+          setError('대표 이미지 업로드에 실패했어요. 다시 시도해주세요.')
           return
         }
-
-        const { data } = supabase.storage.from('club-thumbnails').getPublicUrl(path)
-        thumbnailUrl = data.publicUrl
+        thumbnailUrl = url
       }
 
+      // 2) 활동 사진 multi-upload
+      const photoUrls: string[] = []
+      for (let i = 0; i < photoFiles.length; i++) {
+        const f = photoFiles[i]
+        const ext = f.name.split('.').pop() ?? 'jpg'
+        const path = `gallery/${Date.now()}-${i}.${ext}`
+        const url = await uploadWithFallback(supabase, f, path)
+        if (url) photoUrls.push(url)
+      }
+
+      // 3) FormData 보강
       fd.set('thumbnail_url', thumbnailUrl)
+      fd.set('tags', JSON.stringify(tags))
+      fd.set('fee_monthly', feeMonthly)
+      fd.set('fee_per_session', feePerSession)
+      fd.set('fee_note', feeNote)
+      fd.set('owner_bio', ownerBio)
+      fd.set('schedule_summary', scheduleSummary)
+      fd.set('photo_urls', JSON.stringify(photoUrls))
+      fd.set('faqs', JSON.stringify(faqs))
+
       const result = await createClubAction(fd)
       if (result?.error) setError(result.error)
     })
@@ -63,7 +124,7 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
           <FormSection title="기본 정보">
             <div>
               <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
-                모임 이름 <span className="text-red-400">*</span>
+                모임 이름 <span className="text-[var(--color-brand-streak)]">*</span>
               </label>
               <input
                 type="text" name="name"
@@ -104,7 +165,61 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
 
           <div className="border-t border-[#f0f0f0]" />
 
-          {/* 섹션 2 — 운영 설정 */}
+          {/* 섹션 2 — 모임 분위기 (태그) */}
+          <FormSection title="모임 분위기">
+            <TagPicker value={tags} onChange={setTags} />
+          </FormSection>
+
+          <div className="border-t border-[#f0f0f0]" />
+
+          {/* 섹션 3 — 활동 정보 (일정 / 회비) */}
+          <FormSection title="활동 정보">
+            <div>
+              <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
+                정기 일정 요약 <span className="text-[#bbb] font-normal">(선택)</span>
+              </label>
+              <input
+                type="text"
+                placeholder="예: 매주 화/목 19:00~22:00"
+                maxLength={80}
+                value={scheduleSummary}
+                onChange={(e) => setScheduleSummary(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+
+            <FeeInputs
+              feeMonthly={feeMonthly}
+              onFeeMonthlyChange={setFeeMonthly}
+              feePerSession={feePerSession}
+              onFeePerSessionChange={setFeePerSession}
+              feeNote={feeNote}
+              onFeeNoteChange={setFeeNote}
+            />
+          </FormSection>
+
+          <div className="border-t border-[#f0f0f0]" />
+
+          {/* 섹션 4 — 운영자 정보 */}
+          <FormSection title="운영자 정보">
+            <div>
+              <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
+                운영자 한 줄 소개 <span className="text-[#bbb] font-normal">(선택)</span>
+              </label>
+              <input
+                type="text"
+                placeholder="예: 10년차 동호인, 초심자 환영합니다"
+                maxLength={120}
+                value={ownerBio}
+                onChange={(e) => setOwnerBio(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+          </FormSection>
+
+          <div className="border-t border-[#f0f0f0]" />
+
+          {/* 섹션 5 — 운영 설정 (코트 수 / 색상 / 대표 이미지 / 활동 사진) */}
           <FormSection title="운영 설정">
             <div>
               <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">최대 코트 수</label>
@@ -126,20 +241,27 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
               inputName="thumbnail_color"
             />
 
-            <ThumbnailUpload
-              onFileChange={(file) => setImageFile(file)}
-            />
+            <ThumbnailUpload onFileChange={(file) => setImageFile(file)} />
+
+            <PhotoMultiUpload files={photoFiles} onChange={setPhotoFiles} />
+          </FormSection>
+
+          <div className="border-t border-[#f0f0f0]" />
+
+          {/* 섹션 6 — FAQ */}
+          <FormSection title="FAQ">
+            <FaqEditor value={faqs} onChange={setFaqs} />
           </FormSection>
         </div>
 
         {error && (
-          <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-xl mt-4">{error}</p>
+          <p className="text-sm text-[var(--color-brand-streak)] bg-[var(--color-brand-streak-bg)] px-3 py-2 rounded-xl mt-4">{error}</p>
         )}
 
         <div className="mt-5 space-y-2">
           <button
             type="submit" disabled={isPending}
-            className="w-full py-3 bg-[#beff00] text-[#111] font-bold text-base rounded-xl hover:brightness-95 transition-all disabled:opacity-50"
+            className="w-full py-3 bg-[var(--color-brand-lime)] text-[#111] font-bold text-base rounded-xl hover:brightness-95 transition-all disabled:opacity-50"
           >
             {isPending ? '생성 중...' : '모임 만들기'}
           </button>

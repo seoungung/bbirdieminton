@@ -14,7 +14,7 @@ export function ComingSoonBody({ currentSlug }: Props) {
     <div>
       {/* 작성 중 안내 */}
       <div className="text-center py-12 mb-10">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#fef3c7] text-[#d97706] mb-6">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 mb-6">
           <Construction size={28} strokeWidth={2} />
         </div>
         <h2 className="text-2xl font-extrabold text-[#111] mb-3">

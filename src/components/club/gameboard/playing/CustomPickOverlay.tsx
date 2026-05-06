@@ -87,14 +87,14 @@ export function CustomPickOverlay({
             </div>
           </div>
           <div>
-            <p className="text-[10px] font-bold text-red-400 mb-1.5">팀 B · {teamB.length}/2</p>
+            <p className="text-[10px] font-bold text-[var(--color-brand-streak)] mb-1.5">팀 B · {teamB.length}/2</p>
             <div className="space-y-1">
               {[0, 1].map(i => (
                 <div
                   key={i}
                   className={`h-8 rounded-lg flex items-center px-2.5 text-xs font-semibold transition-colors ${
                     teamB[i]
-                      ? 'bg-red-50 border border-red-200 text-red-600'
+                      ? 'bg-[var(--color-brand-streak-bg)] border border-[var(--color-brand-streak-soft)] text-[var(--color-brand-streak)]'
                       : 'bg-white border border-dashed border-[#ccc] text-[#ccc]'
                   }`}
                 >
@@ -127,10 +127,10 @@ export function CustomPickOverlay({
                     inA
                       ? 'bg-blue-50 border-blue-200'
                       : inB
-                      ? 'bg-red-50 border-red-200'
+                      ? 'bg-[var(--color-brand-streak-bg)] border-[var(--color-brand-streak-soft)]'
                       : isFull
                       ? 'bg-[#f0f0f0] border-[#e5e5e5] opacity-40 cursor-not-allowed'
-                      : 'bg-white border-[#e5e5e5] hover:border-[#beff00]'
+                      : 'bg-white border-[#e5e5e5] hover:border-[var(--color-brand-lime)]'
                   }`}
                 >
                   <div
@@ -156,7 +156,7 @@ export function CustomPickOverlay({
                   <div className="flex-1 min-w-0 flex items-center gap-1.5">
                     <span
                       className={`text-sm font-semibold truncate ${
-                        inA ? 'text-blue-700' : inB ? 'text-red-600' : 'text-[#111]'
+                        inA ? 'text-blue-700' : inB ? 'text-[var(--color-brand-streak)]' : 'text-[#111]'
                       }`}
                     >
                       {p.name}
@@ -167,7 +167,7 @@ export function CustomPickOverlay({
                       </span>
                     )}
                     {isMe && (
-                      <span className="text-[9px] font-bold text-[#555] bg-[#beff00]/40 rounded px-1 py-0.5 shrink-0">
+                      <span className="text-[9px] font-bold text-[#555] bg-[var(--color-brand-lime)]/40 rounded px-1 py-0.5 shrink-0">
                         나
                       </span>
                     )}
@@ -190,7 +190,7 @@ export function CustomPickOverlay({
           <button
             onClick={() => canConfirm && onConfirm(teamA, teamB)}
             disabled={!canConfirm}
-            className="w-full py-3.5 bg-[#beff00] text-[#111] font-extrabold rounded-xl hover:brightness-95 active:scale-[0.99] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-3.5 bg-[var(--color-brand-lime)] text-[#111] font-extrabold rounded-xl hover:brightness-95 active:scale-[0.99] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <span className="inline-flex items-center gap-1.5">
               <Check size={16} strokeWidth={2.5} />

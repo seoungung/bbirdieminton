@@ -78,7 +78,7 @@ export function EventFormDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
       onClick={onClose}
     >
       <div
@@ -102,7 +102,7 @@ export function EventFormDialog({
         {/* 본문 — 스크롤 가능 */}
         <div className="px-5 py-4 flex flex-col gap-3.5 overflow-y-auto flex-1">
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-100 px-3 py-2 rounded-lg">
+            <p className="text-sm text-[var(--color-brand-streak)] bg-[var(--color-brand-streak-bg)] border border-[var(--color-brand-streak-soft)]/50 px-3 py-2 rounded-lg">
               {error}
             </p>
           )}
@@ -184,7 +184,7 @@ export function EventFormDialog({
             <button
               onClick={onDelete}
               disabled={isPending}
-              className="px-3 py-2.5 border border-red-200 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50 transition-colors inline-flex items-center gap-1.5"
+              className="px-3 py-2.5 border border-[var(--color-brand-streak-soft)] rounded-xl text-sm font-medium text-[var(--color-brand-streak)] hover:bg-[var(--color-brand-streak-bg)] disabled:opacity-50 transition-colors inline-flex items-center gap-1.5"
             >
               <Trash2 size={14} />
               삭제

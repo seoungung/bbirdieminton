@@ -1,205 +1,179 @@
-import { redirect, notFound } from 'next/navigation'
+import { redirect } from 'next/navigation'
+import { Gamepad2 } from 'lucide-react'
 import { createClient, getAuthUser } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
-import { getMyMembership, getClubMembers } from '@/lib/club/client'
-import { GameBoardClient } from '@/components/club/GameBoardClient'
-import { DEMO_CLUBS, DEMO_MEMBERS } from '@/lib/club/demoData'
+import { DEMO_CLUBS } from '@/lib/club/demoData'
+import { GameboardListClient, type SessionItem } from '@/components/club/gameboard/list/GameboardListClient'
 import type { Metadata } from 'next'
-import type { ClubMemberWithUser, MemberRole } from '@/types/club'
 
-interface GameBoardMetadataProps { params: Promise<{ clubId: string }> }
-
-export async function generateMetadata({ params }: GameBoardMetadataProps): Promise<Metadata> {
-  const { clubId } = await params
-  const demo = DEMO_CLUBS.find(c => c.id === clubId)
-  if (demo) return { title: `게임보드 | ${demo.name}`, description: '실시간 경기 배정 및 결과 입력' }
-  const supabase = await createClient()
-  const { data: club } = await supabase.from('clubs').select('name').eq('id', clubId).single()
-  return { title: club ? `게임보드 | ${club.name}` : '게임보드 | 버디민턴', description: '실시간 경기 배정 및 결과 입력' }
+interface PageProps {
+  params: Promise<{ clubId: string }>
 }
 
-export default async function GameBoardPage({
-  params,
-}: {
-  params: Promise<{ clubId: string }>
-}) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { clubId } = await params
+  const demo = DEMO_CLUBS.find(c => c.id === clubId)
+  if (demo) return { title: `게임보드 | ${demo.name}`, description: '게임보드 목록' }
+  const supabase = await createClient()
+  const { data: club } = await supabase.from('clubs').select('name').eq('id', clubId).single()
+  return { title: club ? `게임보드 | ${club.name}` : '게임보드 | 버디민턴', description: '게임보드 목록' }
+}
+
+export default async function GameboardListPage({ params }: PageProps) {
   const { clubId } = await params
 
-  // ── 데모 모임: 인증 없이 목 데이터로 GameBoardClient 렌더 ──
+  // ── 데모 모드 ──────────────────────────────────────────────
   if (clubId.startsWith('demo-')) {
+    const today = new Date().toISOString().split('T')[0]
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+
+    const demoGrouped = {
+      in_progress: [
+        {
+          id: 'demo-session-1',
+          session_date: today,
+          status: 'in_progress' as const,
+          court_count: 3,
+          notes: null,
+          created_at: new Date().toISOString(),
+          event_id: null,
+          event: { id: 'demo-event-1', title: '[데모] 저녁 게임', event_date: today, place: null },
+          attendance_count: 12,
+        },
+      ],
+      closed: [
+        {
+          id: 'demo-session-2',
+          session_date: yesterday,
+          status: 'closed' as const,
+          court_count: 3,
+          notes: null,
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          event_id: null,
+          event: { id: 'demo-event-2', title: '[데모] 저녁 게임', event_date: yesterday, place: null },
+          attendance_count: 14,
+        },
+      ],
+    }
+
     const demoClub = DEMO_CLUBS.find(c => c.id === clubId)
-    const courtCount = demoClub?.court_count ?? 3
+    const clubName = demoClub?.name ?? '체험 모임'
 
-    const demoMembers: ClubMemberWithUser[] = DEMO_MEMBERS.map(m => ({
-      id: m.id,
-      club_id: clubId,
-      user_id: m.id,
-      role: m.role as MemberRole,
-      skill_score: m.skill,
-      joined_at: '2026-01-01T00:00:00Z',
-      removed_at: null,
-      user: {
-        id: m.id,
-        birdieminton_user_id: m.id,
-        name: m.name,
-        phone: null,
-        profile_img: null,
-        created_at: '2026-01-01T00:00:00Z',
-      },
-    }))
-
-    return (
-      <GameBoardClient
-        clubId={clubId}
-        clubName={demoClub?.name ?? '체험 모임'}
-        shuttleDefaultPrice={2500}
-        settlementAccount={null}
-        courtCount={courtCount}
-        members={demoMembers}
-        stats={[]}
-        recentSessions={[]}
-        membership={{ id: 'demo-owner', role: 'owner' }}
-        inProgressData={null}
-        matchPointTarget={25}
-        isDemo
-      />
-    )
+    return <GameboardListPageShell clubId={clubId} clubName={clubName} grouped={demoGrouped} />
   }
 
+  // ── 실서비스 ───────────────────────────────────────────────
   const supabase = await createClient()
-
-  // ── Phase 1: 독립 쿼리 병렬 실행 ─────────────────────────
-  // getAuthUser() 는 React.cache — layout에서 이미 호출됐다면 캐시 반환 (추가 네트워크 없음)
-  const [
-    user,
-    clubResult,
-    membersResult,
-    statsResult,
-    closedSessionsResult,
-    ipSessionResult,
-  ] = await Promise.all([
-    getAuthUser(),
-    supabase.from('clubs').select('id, name, court_count, shuttle_default_price, settlement_account, match_point_target').eq('id', clubId).single(),
-    getClubMembers(supabase, clubId),
-    supabase
-      .from('player_stats')
-      .select('id, club_id, member_id, wins, losses, draws, games_played, win_rate, updated_at')
-      .eq('club_id', clubId),
-    supabase
-      .from('sessions')
-      .select('id, session_date, status, notes, match_mode, club_id, created_by, created_at')
-      .eq('club_id', clubId)
-      .eq('status', 'closed')
-      .order('created_at', { ascending: false })
-      .limit(5),
-    supabase
-      .from('sessions')
-      .select('id, session_date')
-      .eq('club_id', clubId)
-      .eq('status', 'in_progress')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-  ])
-
+  const user = await getAuthUser()
   if (!user) redirect('/login')
 
-  const club = clubResult.data
-  if (!club) notFound()
-
-  // ── Phase 2: user 결과에 의존하는 쿼리 ───────────────────
   const clubUserId = await getClubUserId(supabase, user)
   if (!clubUserId) redirect('/login')
 
-  // ── Phase 3: clubUserId에 의존하는 멤버십 + 세션 데이터 병렬 ──
-  const ipSession = ipSessionResult.data
-  const closedSessions = closedSessionsResult.data ?? []
+  // 클럽 이름 가져오기
+  const { data: club } = await supabase
+    .from('clubs')
+    .select('name')
+    .eq('id', clubId)
+    .single()
 
-  const [membershipResult, closedSessionAttendances, ipMatchesResult] = await Promise.all([
-    getMyMembership(supabase, clubId, clubUserId),
-    // 종료된 세션 출석자 일괄 조회 (Promise.all 내부 중첩)
-    Promise.all(
-      closedSessions.map(async (session) => {
-        const { data: attendances } = await supabase
-          .from('attendances')
-          .select('member_id')
-          .eq('session_id', session.id)
-          .eq('status', 'present')
-        return {
-          session,
-          memberIds: (attendances ?? []).map((a: { member_id: string }) => a.member_id),
-          attendeeCount: attendances?.length ?? 0,
-        }
-      })
-    ),
-    // 진행 중 세션 매치 조회 (있을 때만)
-    ipSession
-      ? supabase
-          .from('matches')
-          .select('id, court_number, team_a_score, team_b_score')
-          .eq('session_id', ipSession.id)
-      : Promise.resolve({ data: [] as { id: string; court_number: number; team_a_score: number | null; team_b_score: number | null }[] }),
-  ])
+  if (!club) redirect('/clubs')
 
-  if (!membershipResult) redirect('/club/home')
+  // 세션 목록 조회 (최신 100개)
+  const { data: sessions } = await supabase
+    .from('sessions')
+    .select(`
+      id, session_date, status, court_count, notes, created_at, event_id,
+      event:club_events(id, title, event_date, place)
+    `)
+    .eq('club_id', clubId)
+    .order('created_at', { ascending: false })
+    .limit(100)
 
-  // ── Phase 4: 매치 플레이어 + 출석자 조회 (ipSession 있을 때) ──
-  let inProgressData: {
-    sessionId: string
-    sessionDate: string
-    matches: Array<{
-      id: string
-      court_number: number
-      team_a_score: number | null
-      team_b_score: number | null
-      players: Array<{ member_id: string; team: string }>
-    }>
-    attendeeMemberIds: string[]
-  } | null = null
+  const rawSessions = sessions ?? []
 
-  if (ipSession && ipMatchesResult.data) {
-    const ipMatches = ipMatchesResult.data
-    const matchIds = ipMatches.map(m => m.id)
+  // 출석 수 집계 (attendances + session_guests 합산)
+  const sessionIds = rawSessions.map(s => s.id)
+  const [attendanceResult, guestCountResult] = await (sessionIds.length > 0
+    ? Promise.all([
+        supabase.from('attendances').select('session_id').in('session_id', sessionIds),
+        supabase.from('session_guests').select('session_id').in('session_id', sessionIds),
+      ])
+    : Promise.all([
+        Promise.resolve({ data: [] as { session_id: string }[] }),
+        Promise.resolve({ data: [] as { session_id: string }[] }),
+      ]))
 
-    const [ipMatchPlayersResult, ipAttendancesResult] = await Promise.all([
-      matchIds.length > 0
-        ? supabase
-            .from('match_players')
-            .select('match_id, member_id, team')
-            .in('match_id', matchIds)
-        : Promise.resolve({ data: [] as { match_id: string; member_id: string; team: string }[] }),
-      supabase
-        .from('attendances')
-        .select('member_id')
-        .eq('session_id', ipSession.id),
-    ])
-
-    inProgressData = {
-      sessionId: ipSession.id,
-      sessionDate: ipSession.session_date,
-      matches: ipMatches.map(m => ({
-        ...m,
-        players: (ipMatchPlayersResult.data ?? [])
-          .filter(p => p.match_id === m.id)
-          .map(p => ({ member_id: p.member_id, team: p.team })),
-      })),
-      attendeeMemberIds: (ipAttendancesResult.data ?? []).map(a => a.member_id),
-    }
+  // JS에서 session_id별 카운트 (회원 + 게스트)
+  const countMap: Record<string, number> = {}
+  for (const row of (attendanceResult.data ?? [])) {
+    countMap[row.session_id] = (countMap[row.session_id] ?? 0) + 1
+  }
+  for (const row of (guestCountResult.data ?? [])) {
+    countMap[row.session_id] = (countMap[row.session_id] ?? 0) + 1
   }
 
+  const enriched: SessionItem[] = rawSessions.map(s => {
+    // Supabase returns event as array from joins — normalise to single or null
+    const eventRaw = s.event
+    const event = Array.isArray(eventRaw)
+      ? (eventRaw[0] ?? null)
+      : (eventRaw ?? null)
+
+    return {
+      id: s.id,
+      session_date: s.session_date,
+      status: s.status as SessionItem['status'],
+      court_count: s.court_count,
+      notes: s.notes ?? null,
+      created_at: s.created_at,
+      event_id: s.event_id ?? null,
+      event: event
+        ? { id: event.id, title: event.title, event_date: event.event_date, place: event.place ?? null }
+        : null,
+      attendance_count: countMap[s.id] ?? 0,
+    }
+  })
+
+  // 'open' 세션은 A안에서 노출하지 않음 (DB에 잔존할 수 있으나 목록에서 숨김)
+  const grouped = {
+    in_progress: enriched.filter(s => s.status === 'in_progress'),
+    closed: enriched.filter(s => s.status === 'closed').slice(0, 20),
+  }
+
+  return <GameboardListPageShell clubId={clubId} clubName={club.name} grouped={grouped} />
+}
+
+/* ── 공통 렌더 ── */
+function GameboardListPageShell({
+  clubId,
+  grouped,
+}: {
+  clubId: string
+  /** @deprecated 헤더 표준화 후 사용 안 함 — 호출부 호환을 위해 옵셔널로 유지 */
+  clubName?: string
+  grouped: {
+    in_progress: SessionItem[]
+    closed: SessionItem[]
+  }
+}) {
   return (
-    <GameBoardClient
-      clubId={clubId}
-      clubName={club.name}
-      shuttleDefaultPrice={club.shuttle_default_price ?? 2500}
-      settlementAccount={club.settlement_account ?? null}
-      courtCount={club.court_count ?? 2}
-      members={membersResult}
-      stats={statsResult.data ?? []}
-      recentSessions={closedSessionAttendances}
-      membership={{ id: membershipResult.id, role: membershipResult.role }}
-      matchPointTarget={(club.match_point_target ?? 25) as 21 | 25}
-      inProgressData={inProgressData}
-    />
+    <div className="min-h-[calc(100vh-5rem)] bg-[#f8f8f8]">
+      {/* 헤더 — 정기모임 패턴 통일 (semantic <header>, h1+subtitle) */}
+      <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
+        <div className="max-w-[1280px] mx-auto flex items-center gap-3">
+          <div>
+            <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
+              <Gamepad2 size={16} strokeWidth={2} />
+              게임보드
+            </h1>
+            <p className="text-xs text-[#999] mt-0.5">오늘의 경기 진행 및 결과 입력</p>
+          </div>
+        </div>
+      </header>
+
+      {/* 목록 영역 */}
+      <GameboardListClient clubId={clubId} grouped={grouped} />
+    </div>
   )
 }

@@ -49,7 +49,7 @@ export function ProfileForm({ initialName }: Props) {
       )}
 
       {state?.success && (
-        <div className="flex items-center gap-2 text-[13px] text-[#10b981] bg-[#ecfdf5] px-3 py-2.5 rounded-lg">
+        <div className="flex items-center gap-2 text-[13px] text-[var(--color-brand-court)] bg-[var(--color-brand-court-bg)] px-3 py-2.5 rounded-lg">
           <CheckCircle2 size={15} />
           <span>{state.success}</span>
         </div>

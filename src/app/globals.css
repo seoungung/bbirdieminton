@@ -47,64 +47,79 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 
   /* ══════════════════════════════════════════════════
-     버디민턴 브랜드 토큰 v2
+     버디민턴 브랜드 토큰 v3 (2026-05-04)
+     팔레트: White / Praxeti White / Black / Spring (라임)
+            Picture Book Green / Mantis / Nuit Blanche
+            Coral Red / Soft Pink / Midnight Mirage
      ══════════════════════════════════════════════════ */
 
   /* ─── Primary (hero 컬러 — CTA 전용, 5~10%만 사용) ─── */
-  --color-brand-lime: #beff00;
-  --color-brand-lime-dim: #a8e600;
+  --color-brand-lime: #DBE64C;          /* First Colors of Spring — Primary CTA */
+  --color-brand-lime-dim: #BAC633;      /* Spring 약간 어두운 (hover/active) */
 
   /* ─── Ink & Canvas ─── */
-  --color-brand-ink: #0a0a0a;
-  --color-brand-text: #111111;
+  --color-brand-ink: #0a0a0a;           /* 검정 유지 — 헤더/사이드바 다크 영역 */
+  --color-brand-text: #000000;          /* Pure black — 본문 */
   --color-brand-text-sub: #555555;
   --color-brand-text-muted: #999999;
-  --color-brand-bg: #ffffff;
-  --color-brand-bg-sub: #f8f8f8;
-  --color-brand-bg-muted: #f0f0f0;
+  --color-brand-bg: #ffffff;            /* Pure White — 메인 surface */
+  --color-brand-bg-sub: #F6F7ED;        /* Praxeti White — 카드/섹션 보조 surface */
+  --color-brand-bg-muted: #ECEDE3;      /* Praxeti darker — 옅은 회색 톤 영역 */
   --color-brand-border: #e5e5e5;
   --color-brand-border-sub: #ebebeb;
 
-  /* ─── Semantic Accents (v2 신규) ─── */
-  /* Court: 배드민턴 코트 녹색 — 경기 진행중, 성공, 활성 상태 */
-  --color-brand-court: #10b981;        /* emerald-500 */
-  --color-brand-court-deep: #059669;   /* emerald-600 */
-  --color-brand-court-soft: #d1fae5;   /* emerald-100 */
-  --color-brand-court-bg: #ecfdf5;     /* emerald-50 */
+  /* ─── Semantic Accents ─── */
+  /* Court — 진행중/성공/활성 (Picture Book Green primary, Mantis soft) */
+  --color-brand-court: #00804C;         /* Picture Book Green */
+  --color-brand-court-deep: #005A35;    /* Picture Book 어두운 변종 */
+  --color-brand-court-soft: #74C365;    /* Mantis */
+  --color-brand-court-bg: #E5F5EE;      /* 매우 옅은 그린 배경 */
 
-  /* Team A — 팀 구분 파랑 (국제 배드민턴 표준) */
-  --color-brand-team-a: #2563eb;       /* blue-600 */
-  --color-brand-team-a-soft: #dbeafe;  /* blue-100 */
-  --color-brand-team-a-bg: #eff6ff;    /* blue-50 */
+  /* 성별 구분 — 풀/매칭보드/대기순서 카드 (파스텔 톤, 명도 ↑) */
+  --color-brand-team-a: #7AB0DB;        /* 파스텔 하늘색 — 남자 카드 */
+  --color-brand-team-a-soft: #C5DCEF;   /* 더 옅은 하늘색 */
+  --color-brand-team-a-bg: #EAEDF4;     /* 매우 옅은 블루 */
 
-  /* Team B — 팀 구분 빨강 */
-  --color-brand-team-b: #dc2626;       /* red-600 */
-  --color-brand-team-b-soft: #fee2e2;  /* red-100 */
-  --color-brand-team-b-bg: #fef2f2;    /* red-50 */
+  --color-brand-team-b: #F08FB0;        /* 파스텔 핑크 — 여자 카드 */
+  --color-brand-team-b-soft: #F5B2CF;   /* Soft Pink */
+  --color-brand-team-b-bg: #FCE6E5;     /* 매우 옅은 핑크 */
 
-  /* Streak — 연승/성취/골드 하이라이트 */
-  --color-brand-streak: #f59e0b;       /* amber-500 */
-  --color-brand-streak-soft: #fef3c7;  /* amber-100 */
-  --color-brand-streak-bg: #fffbeb;    /* amber-50 */
+  /* 코트 팀 구분 — 코트 카드 한정 (좌 A / 우 B), 위치 기반 (성별 무관) */
+  --color-brand-court-team-a: #00804C;  /* Picture Book Green — 좌측 팀 (A) */
+  --color-brand-court-team-b: #EBE64C;  /* 옐로우 라임 — 우측 팀 (B) */
 
-  /* Elite — S급/프리미엄/특별 */
-  --color-brand-elite: #8b5cf6;        /* violet-500 */
-  --color-brand-elite-soft: #ede9fe;   /* violet-100 */
-  --color-brand-elite-bg: #f5f3ff;     /* violet-50 */
+  /* Streak — 연승/성취/종료 칩 (Coral 재사용 — 알림성 강조) */
+  --color-brand-streak: #ee433f;        /* Coral Red */
+  --color-brand-streak-soft: #f5b2cf;   /* Soft Pink */
+  --color-brand-streak-bg: #FCE6E5;
 
-  /* Deuce — 듀스/긴장/경고 (빨강보다 부드럽게) */
-  --color-brand-deuce: #fb923c;        /* orange-400 */
-  --color-brand-deuce-soft: #ffedd5;   /* orange-100 */
+  /* Elite — S급/프리미엄/자강 (Midnight Mirage 진한 네이비 — 보라 자리 차지) */
+  --color-brand-elite: #001F3F;         /* Midnight Mirage */
+  --color-brand-elite-soft: #A8B9D5;    /* Nuit 라이트 (재사용) */
+  --color-brand-elite-bg: #EAEDF4;
+
+  /* Deuce — 듀스/긴장 (Coral 재사용 — 강한 경고는 destructive 와 통일) */
+  --color-brand-deuce: #ee433f;         /* Coral Red */
+  --color-brand-deuce-soft: #f5b2cf;    /* Soft Pink */
+
+  /* ─── Neutral Surface 토큰 (페이지 간 통일 — raw hex 대체용) ─── */
+  --color-text-strong: #111111;          /* 본문 강조 (페이지 H1, 카드 제목) */
+  --color-text-body:   #333333;          /* 본문 */
+  --color-text-sub:    #555555;          /* 서브 텍스트 (= brand-text-sub) */
+  --color-text-muted:  #999999;          /* 약한 텍스트 (= brand-text-muted) */
+  --color-text-faint:  #bbbbbb;          /* placeholder, 비활성 */
+  --color-surface-sub:    #fafafa;       /* 페이지 배경 */
+  --color-surface-muted:  #f5f5f5;       /* 호버, 입력 비활성 */
 
   /* ══════════════════════════════════════════════════
      사용 규칙:
-     - Lime: CTA, 긍정 액션, 로고에만 — 전체 면적 5~10%
-     - Ink: 헤더/어두운 surface (예: 상단 nav, dark CTA)
-     - Court green: 경기 진행중 코트, "활성" 상태 배지
-     - Team A/B: 오직 팀 구분에만 사용 (Team A는 파랑, Team B는 빨강)
-     - Streak: 3연승 이상, 성취 뱃지
-     - Elite: S급, 자강조, 프리미엄 기능
-     - Deuce: 20-20 이상 긴장 상태
+     - Spring (lime): CTA, 긍정 액션, 로고 — 전체 면적 5~10%, 검정 텍스트와 페어링
+     - Ink (검정): 헤더/사이드바/다크 surface
+     - Picture Book Green: 진행중 코트, 성공 상태, 활성 배지
+     - Nuit Blanche: 남자 카드 (Team A), 좌팀
+     - Coral Red: 여자 카드 (Team B), 우팀, 종료/destructive/duece 알림
+     - Midnight Mirage: S급, 자강조, 프리미엄 (보라 대체)
+     - Soft Pink / Mantis: 각각 Team B / Court 의 -soft 변종으로 사용
      ══════════════════════════════════════════════════ */
 }
 
@@ -115,15 +130,15 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --primary: var(--color-brand-ink);
+  --primary-foreground: var(--color-brand-bg);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.58 0.22 27);
+  --destructive: var(--color-brand-streak);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -144,37 +159,68 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.87 0.00 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.371 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --background: oklch(0.16 0.004 285);          /* cool dark, slightly blue */
+  --foreground: oklch(0.94 0.002 285);          /* near-white, soft */
+  --card: oklch(0.19 0.004 285);                /* subtly elevated */
+  --card-foreground: oklch(0.94 0.002 285);
+  --popover: oklch(0.19 0.004 285);
+  --popover-foreground: oklch(0.94 0.002 285);
+  --primary: oklch(0.92 0.18 122);              /* brand lime — single accent */
+  --primary-foreground: oklch(0.16 0.004 285);
+  --secondary: oklch(0.24 0.004 285);
+  --secondary-foreground: oklch(0.94 0.002 285);
+  --muted: oklch(0.24 0.004 285);
+  --muted-foreground: oklch(0.65 0.005 285);    /* mid cool gray */
+  --accent: oklch(0.28 0.008 285);
+  --accent-foreground: oklch(0.94 0.002 285);
+  --destructive: oklch(0.65 0.20 22);
+  --border: oklch(1 0 0 / 8%);                  /* very subtle */
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.92 0.18 122 / 50%);           /* lime focus ring */
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: oklch(0.17 0.004 285);
+  --sidebar-foreground: oklch(0.94 0.002 285);
+  --sidebar-primary: oklch(0.92 0.18 122);
+  --sidebar-primary-foreground: oklch(0.16 0.004 285);
+  --sidebar-accent: oklch(0.24 0.004 285);
+  --sidebar-accent-foreground: oklch(0.94 0.002 285);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.92 0.18 122 / 50%);
+}
+
+/* Force-light, high-contrast theme for game board (projection screen).
+   Apply at gameboard route wrapper to override .dark inherited from <html>. */
+.theme-board-light {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
+  --primary: #0a0a0a;
+  --primary-foreground: #ffffff;
+  --secondary: #f5f5f5;
+  --secondary-foreground: #0a0a0a;
+  --muted: #f5f5f5;
+  --muted-foreground: #525252;
+  --accent: #E5F5EE;            /* court soft bg */
+  --accent-foreground: #00804C;
+  --destructive: oklch(0.58 0.22 27);
+  --border: #e5e5e5;
+  --input: #e5e5e5;
+  --ring: #00804C;              /* court green focus ring */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0a0a0a;
+  --sidebar-primary: #00804C;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f5f5f5;
+  --sidebar-accent-foreground: #0a0a0a;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: #00804C;
 }
 
 @layer base {
@@ -268,6 +314,18 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* 우측 하단 위젯이 위쪽으로 펼쳐질 때 */
+@keyframes fadeInUpRight {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 사이드바 하단 유저메뉴 — 위쪽 anchor 드롭다운 */
+@keyframes fadeInUpAnchor {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ── 스크롤바 숨김 유틸리티 ── */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE/Edge */
@@ -275,4 +333,28 @@
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;             /* Chrome/Safari/Opera */
+}
+
+/* ── 인쇄/PDF 전용 룰 (시즌 리포트 등) ── */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 12mm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+  }
+
+  /* 색상 보존 — 브라우저 기본 잉크 절약 모드가 배경색 제거하는 문제 방지 */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 카드/섹션이 페이지 사이로 잘리지 않도록 */
+  section, article {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }

@@ -10,6 +10,7 @@ import { UserMenu } from './UserMenu'
 
 const navLinks = [
   { href: '/demo',    label: '체험하기' },
+  { href: '/clubs',   label: '모임 둘러보기' },
   { href: '/blog',    label: '블로그' },
   { href: '/manual',  label: '사용설명서' },
   { href: '/pricing', label: '가격' },
@@ -104,8 +105,8 @@ export function MarketingHeader() {
                 로그인
               </Link>
               <Link
-                href="/login?next=%2Fclub%2Fhome"
-                className="text-[13px] font-semibold px-4 py-2 rounded-full bg-[#beff00] text-[#0a0a0a] hover:bg-[#a8e600] transition-colors"
+                href="/login?next=%2Fclubs"
+                className="text-[13px] font-semibold px-4 py-2 rounded-full bg-[var(--color-brand-lime)] text-[#0a0a0a] hover:bg-[var(--color-brand-lime-dim)] transition-colors"
               >
                 무료로 시작하기
               </Link>
@@ -172,7 +173,7 @@ export function MarketingHeader() {
             ) : user.isLoggedIn ? (
               <>
                 <Link
-                  href="/club/home"
+                  href="/clubs"
                   onClick={() => setOpen(false)}
                   className="text-center py-2.5 rounded-full bg-[#0a0a0a] text-[13px] font-semibold text-white"
                 >
@@ -208,9 +209,9 @@ export function MarketingHeader() {
                   로그인
                 </Link>
                 <Link
-                  href="/login?next=%2Fclub%2Fhome"
+                  href="/login?next=%2Fclubs"
                   onClick={() => setOpen(false)}
-                  className="text-center py-2.5 rounded-full bg-[#beff00] text-[13px] font-semibold text-[#0a0a0a]"
+                  className="text-center py-2.5 rounded-full bg-[var(--color-brand-lime)] text-[13px] font-semibold text-[#0a0a0a]"
                 >
                   무료로 시작하기
                 </Link>

@@ -201,7 +201,8 @@ export default async function NoticesPage({ params }: PageProps) {
   if (!clubUserId) redirect('/login')
 
   const membership = await getMyMembership(supabase, clubId, clubUserId)
-  if (!membership) redirect('/login')
+  // 비멤버는 클럽 홈으로 (다른 페이지들과 일관성 — /login으로 떨어뜨리지 않음)
+  if (!membership) redirect('/clubs')
 
   const notices = await getNoticesAction(clubId)
 

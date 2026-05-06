@@ -7,7 +7,7 @@ import { MarketingShell } from './marketing/MarketingShell'
  * 글로벌 chrome 라우터.
  *
  * AppShell 라우트  → `/club/[id]/*` (단, /club/{home,create,join,login,onboard,demo} 제외)
- * SaaSShell 라우트 → `/club/home`, `/club/create`, `/clubs/*`
+ * SaaSShell 라우트 → `/clubs`, `/club/create`, `/clubs/*`
  * 그 외             → MarketingShell (홈, /blog, /pricing, /login, /demo, /manual 등)
  *
  * AppShell·SaaSShell은 각자의 layout.tsx에서 직접 렌더링하므로
@@ -21,8 +21,8 @@ export function MainShell({ children }: { children: React.ReactNode }) {
     !/^\/club\/(home|create|join|login|onboard|demo)(\/|$)/.test(pathname)
 
   const isSaaSShell =
-    pathname === '/club/home' ||
-    pathname.startsWith('/club/home/') ||
+    pathname === '/clubs' ||
+    pathname.startsWith('/clubs/') ||
     pathname === '/club/create' ||
     pathname.startsWith('/club/create/') ||
     /^\/clubs\/[^/]+(\/|$)/.test(pathname)

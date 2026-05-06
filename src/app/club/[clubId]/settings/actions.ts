@@ -8,6 +8,8 @@ import {
   validateClubDescription,
   validateCourtCount,
 } from '@/lib/club/validation'
+import { sanitizeClubTags } from '@/lib/club/tags'
+import type { ClubFAQ } from '@/types/club'
 
 // ── 모임 프로필 저장 ─────────────────────────────────────
 export async function updateClubProfileAction(
@@ -68,6 +70,118 @@ export async function updateClubProfileAction(
   return { success: true }
 }
 
+// ── Phase A — 모임 프로필 추가 정보 저장 ────────────────────
+// 태그/회비/일정/운영자 소개/사진/FAQ 일괄 update.
+// 필드 단위가 아니라 폼 전체 저장 (단순화).
+// RLS 환경에서 컬럼 미존재 시 update 실패 → 에러 메시지로 안내.
+export async function updateClubProfileExtrasAction(
+  clubId: string,
+  data: {
+    tags?: string[]
+    fee_monthly?: number | null
+    fee_per_session?: number | null
+    fee_note?: string | null
+    owner_bio?: string | null
+    photo_urls?: string[]
+    schedule_summary?: string | null
+    faqs?: ClubFAQ[]
+    contact_url?: string | null
+  },
+) {
+  const supabase = await createClient()
+  const clubUserId = await getClubUserId(supabase)
+  if (!clubUserId) return { error: '로그인이 필요합니다.' }
+
+  const { data: membership } = await supabase
+    .from('club_members')
+    .select('role')
+    .eq('club_id', clubId)
+    .eq('user_id', clubUserId)
+    .maybeSingle()
+  if (!membership || !['owner', 'manager'].includes(membership.role))
+    return { error: '운영진(클럽장·매니저)만 변경할 수 있습니다.' }
+
+  const patch: Record<string, unknown> = {}
+
+  if (data.tags !== undefined) {
+    patch.tags = sanitizeClubTags(data.tags)
+  }
+  if (data.fee_monthly !== undefined) {
+    patch.fee_monthly =
+      data.fee_monthly === null
+        ? null
+        : Math.max(0, Math.floor(Number(data.fee_monthly) || 0)) || null
+  }
+  if (data.fee_per_session !== undefined) {
+    patch.fee_per_session =
+      data.fee_per_session === null
+        ? null
+        : Math.max(0, Math.floor(Number(data.fee_per_session) || 0)) || null
+  }
+  if (data.fee_note !== undefined) {
+    const t = (data.fee_note ?? '').trim()
+    patch.fee_note = t || null
+  }
+  if (data.owner_bio !== undefined) {
+    const t = (data.owner_bio ?? '').trim()
+    patch.owner_bio = t.slice(0, 200) || null
+  }
+  if (data.schedule_summary !== undefined) {
+    const t = (data.schedule_summary ?? '').trim()
+    patch.schedule_summary = t.slice(0, 120) || null
+  }
+  if (data.photo_urls !== undefined) {
+    patch.photo_urls = (data.photo_urls ?? [])
+      .filter((u) => typeof u === 'string' && u.length > 0)
+      .slice(0, 6)
+  }
+  if (data.faqs !== undefined) {
+    patch.faqs = (data.faqs ?? [])
+      .filter(
+        (f): f is ClubFAQ =>
+          !!f &&
+          typeof f.question === 'string' &&
+          typeof f.answer === 'string' &&
+          f.question.trim().length > 0 &&
+          f.answer.trim().length > 0,
+      )
+      .slice(0, 6)
+      .map((f) => ({
+        question: f.question.trim().slice(0, 120),
+        answer: f.answer.trim().slice(0, 500),
+      }))
+  }
+  if (data.contact_url !== undefined) {
+    const t = (data.contact_url ?? '').trim()
+    /* 빈 값 → null. 길이 200 초과는 자르지 않고 거부 — UX 적으로 잘못된 입력 방지 */
+    if (t.length === 0) {
+      patch.contact_url = null
+    } else if (t.length > 200) {
+      return { error: '연락처 입력은 200자 이하여야 해요.' }
+    } else {
+      patch.contact_url = t
+    }
+  }
+
+  if (Object.keys(patch).length === 0) {
+    return { success: true }
+  }
+
+  const { error } = await supabase.from('clubs').update(patch).eq('id', clubId)
+  if (error) {
+    return {
+      error:
+        '저장에 실패했습니다. 마이그레이션이 적용되었는지 확인하세요. (' +
+        error.message +
+        ')',
+    }
+  }
+
+  revalidatePath(`/clubs/${clubId}`)
+  revalidatePath(`/club/${clubId}/settings`)
+  return { success: true }
+}
+
 // ── 게임 규칙: 종료 점수 (21/25) ───────────────────────────
 export async function updateMatchPointTargetAction(
   clubId: string,
@@ -124,7 +238,7 @@ export async function deleteClubAction(clubId: string) {
   })
   if (error) return { error: '모임 삭제에 실패했습니다.' }
 
-  revalidatePath('/club/home')
+  revalidatePath('/clubs')
   return { success: true }
 }
 
@@ -153,6 +267,6 @@ export async function leaveClubAction(clubId: string) {
     .eq('user_id', clubUserId)
   if (error) return { error: '모임 나가기에 실패했습니다.' }
 
-  revalidatePath('/club/home')
+  revalidatePath('/clubs')
   return { success: true }
 }

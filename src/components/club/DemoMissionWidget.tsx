@@ -150,7 +150,7 @@ export function DemoMissionWidget({ clubId }: Props) {
             className="flex items-center gap-2 px-4 py-2.5 bg-[#0a0a0a] text-white rounded-full shadow-lg hover:bg-[#222] transition-colors"
             aria-label="미션 열기"
           >
-            <Target size={14} className="text-[#beff00]" strokeWidth={2.2} />
+            <Target size={14} className="text-[var(--color-brand-lime)]" strokeWidth={2.2} />
             <span className="text-[13px] font-bold">
               미션 {completedCount}/{totalCount}
             </span>
@@ -161,7 +161,7 @@ export function DemoMissionWidget({ clubId }: Props) {
             {/* 헤더 */}
             <div className="px-4 py-3 bg-[#0a0a0a] text-white flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Target size={14} className="text-[#beff00]" strokeWidth={2.2} />
+                <Target size={14} className="text-[var(--color-brand-lime)]" strokeWidth={2.2} />
                 <span className="text-[12px] font-bold uppercase tracking-widest">
                   체험 미션
                 </span>
@@ -196,7 +196,7 @@ export function DemoMissionWidget({ clubId }: Props) {
               </div>
               <div className="h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-[#10b981] rounded-full transition-all duration-300"
+                  className="h-full bg-[var(--color-brand-court)] rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -212,14 +212,14 @@ export function DemoMissionWidget({ clubId }: Props) {
                     href={mission.href(clubId)}
                     className={`flex items-start gap-3 p-2.5 rounded-xl transition-colors ${
                       completed
-                        ? 'bg-[#ecfdf5] hover:bg-[#d1fae5]'
+                        ? 'bg-[var(--color-brand-court-bg)] hover:bg-[var(--color-brand-court-soft)]/30'
                         : 'hover:bg-[#f8f8f8]'
                     }`}
                   >
                     {completed ? (
                       <CheckCircle2
                         size={18}
-                        className="text-[#10b981] flex-shrink-0 mt-0.5"
+                        className="text-[var(--color-brand-court)] flex-shrink-0 mt-0.5"
                         strokeWidth={2.2}
                       />
                     ) : (
@@ -232,7 +232,7 @@ export function DemoMissionWidget({ clubId }: Props) {
                     <div className="flex-1 min-w-0">
                       <p
                         className={`text-[13px] font-semibold ${
-                          completed ? 'text-[#10b981] line-through' : 'text-[#111]'
+                          completed ? 'text-[var(--color-brand-court)] line-through' : 'text-[#111]'
                         }`}
                       >
                         {mission.label}
@@ -253,7 +253,7 @@ export function DemoMissionWidget({ clubId }: Props) {
                   href="/login?next=%2Fclub%2Fcreate"
                   className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#0a0a0a] text-white text-[12px] font-extrabold rounded-xl hover:bg-[#222] transition-colors"
                 >
-                  <Sparkles size={13} className="text-[#beff00]" />
+                  <Sparkles size={13} className="text-[var(--color-brand-lime)]" />
                   내 모임 만들러 가기
                 </Link>
               </div>
@@ -276,7 +276,7 @@ function CelebrateModal({ onClose }: { onClose: () => void }) {
         aria-hidden="true"
       />
       <div className="relative bg-white rounded-3xl max-w-[440px] w-full overflow-hidden shadow-2xl">
-        <div className="bg-gradient-to-br from-[#10b981] to-[#059669] text-white px-8 pt-10 pb-8 text-center relative">
+        <div className="bg-gradient-to-br from-[var(--color-brand-court)] to-[var(--color-brand-court-deep)] text-white px-8 pt-10 pb-8 text-center relative">
           <div className="absolute top-4 right-4">
             <Sparkles size={22} strokeWidth={2} className="text-white/60 animate-pulse" />
           </div>
@@ -296,7 +296,7 @@ function CelebrateModal({ onClose }: { onClose: () => void }) {
             href="/login?next=%2Fclub%2Fcreate"
             className="w-full flex items-center justify-center gap-2 py-4 bg-[#0a0a0a] text-white font-extrabold text-[14px] rounded-2xl hover:bg-[#222] transition-colors"
           >
-            <Sparkles size={15} className="text-[#beff00]" />
+            <Sparkles size={15} className="text-[var(--color-brand-lime)]" />
             내 모임 만들러 가기
           </a>
           <button

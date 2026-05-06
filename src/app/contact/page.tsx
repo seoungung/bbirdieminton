@@ -41,19 +41,19 @@ export default function ContactPage() {
           {/* 사이드 정보 */}
           <aside className="space-y-5">
             <div className="bg-[#0a0a0a] text-white rounded-3xl p-6">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[#beff00] mb-3">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--color-brand-lime)] mb-3">
                 CONTACT INFO
               </p>
               <h3 className="text-lg font-extrabold mb-5">직접 연락하기</h3>
 
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <Mail size={16} className="text-[#beff00] mt-0.5 flex-shrink-0" />
+                  <Mail size={16} className="text-[var(--color-brand-lime)] mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-[11px] text-white/50 mb-0.5">이메일</p>
                     <a
                       href="mailto:skyyolle7@gmail.com"
-                      className="text-[14px] font-semibold hover:text-[#beff00] transition-colors break-all"
+                      className="text-[14px] font-semibold hover:text-[var(--color-brand-lime)] transition-colors break-all"
                     >
                       skyyolle7@gmail.com
                     </a>
@@ -61,12 +61,12 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Phone size={16} className="text-[#beff00] mt-0.5 flex-shrink-0" />
+                  <Phone size={16} className="text-[var(--color-brand-lime)] mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-[11px] text-white/50 mb-0.5">연락처</p>
                     <a
                       href="tel:01049773867"
-                      className="text-[14px] font-semibold hover:text-[#beff00] transition-colors"
+                      className="text-[14px] font-semibold hover:text-[var(--color-brand-lime)] transition-colors"
                     >
                       010-4977-3867
                     </a>
@@ -74,7 +74,7 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Clock size={16} className="text-[#beff00] mt-0.5 flex-shrink-0" />
+                  <Clock size={16} className="text-[var(--color-brand-lime)] mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-[11px] text-white/50 mb-0.5">답변 시간</p>
                     <p className="text-[14px] font-semibold">

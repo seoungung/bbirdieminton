@@ -31,6 +31,7 @@ export default async function ClubDetailLayout({
         userName="체험자"
         userEmail="demo@birdieminton.com"
         avatarUrl={null}
+        role="member"
       >
         {children}
       </AppShell>
@@ -51,7 +52,7 @@ export default async function ClubDetailLayout({
     .eq('id', clubId)
     .maybeSingle()
 
-  if (!club) redirect('/club/home')
+  if (!club) redirect('/clubs')
 
   const isOwner = club.owner_id === clubUserId
 
@@ -62,7 +63,7 @@ export default async function ClubDetailLayout({
     const { data: healResult } = await supabase
       .rpc('ensure_owner_membership', { p_club_id: clubId })
     if (!(healResult as { ok?: boolean })?.ok) {
-      redirect('/club/home')
+      redirect('/clubs')
     }
     membership = await getMyMembership(supabase, clubId, clubUserId)
   }
@@ -117,6 +118,7 @@ export default async function ClubDetailLayout({
       userEmail={userEmail}
       avatarUrl={avatarUrl}
       unreadNoticeCount={unreadCount}
+      role={membership.role as 'owner' | 'manager' | 'member'}
       availableClubs={availableClubs}
     >
       {children}

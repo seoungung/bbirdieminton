@@ -1,10 +1,9 @@
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
-import { getMyMembership, getClubMembers } from '@/lib/club/client'
+import { getMyMembership, getClubMembers, getClubMemberRatings } from '@/lib/club/client'
 import { Users } from 'lucide-react'
 import { MembersClient } from '@/components/club/MembersClient'
-import { BackButton } from '@/components/club/BackButton'
 import { DEMO_CLUBS, DEMO_MEMBERS } from '@/lib/club/demoData'
 import type { ClubMemberWithUser, PlayerStats, MemberRole } from '@/types/club'
 import type { Metadata } from 'next'
@@ -89,7 +88,7 @@ export default async function MembersPage({ params }: { params: Promise<{ clubId
   if (!clubUserId) redirect('/login')
 
   const membership = await getMyMembership(supabase, clubId, clubUserId)
-  if (!membership) redirect('/club/home')
+  if (!membership) redirect('/clubs')
 
   const { data: club } = await supabase.from('clubs').select('*').eq('id', clubId).single()
   if (!club) notFound()
@@ -98,17 +97,17 @@ export default async function MembersPage({ params }: { params: Promise<{ clubId
   const isManager = ['owner', 'manager'].includes(membership.role)
   const isOwner = membership.role === 'owner'
 
-  // player_stats 조회
-  const { data: statsData } = await supabase
-    .from('player_stats')
-    .select('*')
-    .eq('club_id', clubId)
+  // player_stats + Glicko-2 레이팅 병렬 조회
+  const [statsResult, ratingsMap] = await Promise.all([
+    supabase.from('player_stats').select('*').eq('club_id', clubId),
+    getClubMemberRatings(supabase, clubId),
+  ])
+  const statsData = statsResult.data
 
   return (
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
         <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-          <BackButton fallback={`/club/${clubId}`} />
           <div>
             <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
               <Users size={16} strokeWidth={2} />
@@ -126,6 +125,7 @@ export default async function MembersPage({ params }: { params: Promise<{ clubId
           isManager={isManager}
           isOwner={isOwner}
           myMemberId={membership.id}
+          ratingsMap={ratingsMap}
         />
       </main>
     </div>

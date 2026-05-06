@@ -65,12 +65,12 @@ export function ClubCardImage({
 
       {/* 배지 영역 */}
       {isNew && (
-        <span className="absolute top-3 left-3 text-[10px] font-extrabold px-2 py-0.5 bg-[#111] text-[#beff00] rounded-md tracking-wider z-10 uppercase">
+        <span className="absolute top-3 left-3 text-[10px] font-extrabold px-2 py-0.5 bg-[#111] text-[var(--color-brand-lime)] rounded-md tracking-wider z-10 uppercase">
           NEW
         </span>
       )}
       {isDemo && (
-        <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 bg-[#beff00] text-[#111] rounded-md tracking-wide z-10">
+        <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 bg-[var(--color-brand-lime)] text-[#111] rounded-md tracking-wide z-10">
           체험용
         </span>
       )}

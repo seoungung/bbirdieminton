@@ -35,7 +35,7 @@ const ROLE_LABEL: Record<MemberRole, string> = {
 // ── 역할 배지 스타일 ──────────────────────────────────────
 const ROLE_STYLE: Record<MemberRole, string> = {
   owner: 'bg-[#fff9e6] text-[#b45309] border border-[#fde68a]',
-  manager: 'bg-[#f0fdf4] text-[#059669] border border-[#a7f3d0]',
+  manager: 'bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court)] border border-[var(--color-brand-court-soft)]',
   member: 'bg-[#f5f5f5] text-[#555] border border-[#e5e5e5]',
 }
 
@@ -112,7 +112,7 @@ export function PinterestClubCard(props: PinterestClubCardProps) {
                 size={16}
                 className={
                   props.isFavorited
-                    ? 'fill-red-400 text-red-400'
+                    ? 'fill-red-400 text-[var(--color-brand-streak)]'
                     : 'text-[#ccc] hover:text-red-300'
                 }
               />
@@ -151,7 +151,7 @@ export function PinterestClubCard(props: PinterestClubCardProps) {
             href={href}
             className={
               props.isMember || club.isDemo
-                ? 'w-full flex items-center justify-center bg-[#beff00] text-[#111] font-bold text-sm py-2 rounded-xl hover:brightness-95 transition-all'
+                ? 'w-full flex items-center justify-center bg-[var(--color-brand-lime)] text-[#111] font-bold text-sm py-2 rounded-xl hover:brightness-95 transition-all'
                 : 'w-full flex items-center justify-center border border-[#e5e5e5] text-[#555] font-semibold text-sm py-2 rounded-xl hover:bg-[#f8f8f8] transition-all'
             }
           >
@@ -160,7 +160,7 @@ export function PinterestClubCard(props: PinterestClubCardProps) {
         ) : (
           <Link
             href={href}
-            className="w-full flex items-center justify-center bg-[#beff00] text-[#111] font-bold text-sm py-2 rounded-xl hover:brightness-95 transition-all"
+            className="w-full flex items-center justify-center bg-[var(--color-brand-lime)] text-[#111] font-bold text-sm py-2 rounded-xl hover:brightness-95 transition-all"
           >
             입장하기
           </Link>

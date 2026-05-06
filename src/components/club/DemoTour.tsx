@@ -182,13 +182,13 @@ export function DemoTour({ clubId }: Props) {
       {/* 하이라이트 테두리 (펄스) */}
       {hole && (
         <div
-          className="fixed pointer-events-none z-[76] rounded-[10px] border-2 border-[#beff00]"
+          className="fixed pointer-events-none z-[76] rounded-[10px] border-2 border-[var(--color-brand-lime)]"
           style={{
             left: hole.x,
             top: hole.y,
             width: hole.w,
             height: hole.h,
-            boxShadow: '0 0 0 4px rgba(190, 255, 0, 0.2)',
+            boxShadow: '0 0 0 4px rgba(219, 230, 76, 0.2)',
           }}
         />
       )}
@@ -350,10 +350,10 @@ function TourCompleteModal({ onClose }: { onClose: () => void }) {
       />
       <div className="relative bg-white rounded-3xl max-w-[440px] w-full overflow-hidden shadow-2xl">
         <div className="bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] text-white px-8 pt-10 pb-8 text-center relative">
-          <div className="absolute top-4 right-4 text-[#beff00]">
+          <div className="absolute top-4 right-4 text-[var(--color-brand-lime)]">
             <Sparkles size={22} strokeWidth={2} className="animate-pulse" />
           </div>
-          <div className="w-16 h-16 rounded-2xl bg-[#beff00] flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-[var(--color-brand-lime)] flex items-center justify-center mx-auto mb-4">
             <span className="text-3xl">🎉</span>
           </div>
           <h2 className="text-2xl font-extrabold tracking-tight mb-2">

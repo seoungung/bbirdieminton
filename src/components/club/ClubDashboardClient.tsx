@@ -58,7 +58,7 @@ export function ClubDashboardClient({
   const nextRegularSession = regularSessions[0] ?? null
 
   return (
-    <div className="max-w-[1280px] mx-auto px-5 lg:px-8 py-6 lg:py-8 space-y-5 pb-24 lg:pb-8">
+    <div className="max-w-[1088px] mx-auto px-5 lg:px-8 py-6 lg:py-8 space-y-5 pb-8">
       {/* 1. Hero Welcome */}
       <section className="relative bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] rounded-3xl p-6 lg:p-8 overflow-hidden">
         <div className="absolute -right-6 -bottom-6 opacity-10">
@@ -67,12 +67,12 @@ export function ClubDashboardClient({
         </div>
         <div className="relative">
           <div className="flex items-center gap-1.5 mb-2">
-            <Sparkles size={12} className="text-[#beff00]" strokeWidth={2.5} />
-            <span className="text-[10px] font-extrabold text-[#beff00] uppercase tracking-wider">
+            <Sparkles size={12} className="text-[var(--color-brand-lime)]" strokeWidth={2.5} />
+            <span className="text-[11px] font-bold text-[var(--color-brand-lime)] uppercase tracking-widest">
               {isDemo ? '체험하기' : '오늘의 모임'}
             </span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-extrabold text-white mb-1 leading-tight">
+          <h1 className="text-2xl lg:text-3xl font-bold text-white mb-1 leading-tight">
             {clubName}
           </h1>
           <p className="text-sm text-white/60 mb-4 leading-relaxed">
@@ -98,30 +98,30 @@ export function ClubDashboardClient({
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard
           Icon={Users}
-          label="총 멤버"
+          label="총 회원"
           value={`${memberCount}명`}
-          accent="blue"
+          accent="info"
         />
         <KpiCard
           Icon={ShuttlecockIcon}
           label="누적 경기"
           value={`${closedSessions.length}회`}
           delta={closedSessions.length > 0 ? '이번 달' : undefined}
-          accent="emerald"
+          accent="success"
         />
         <KpiCard
           Icon={Calendar}
           label="정기 모임"
           value={`${regularSessions.length}개`}
           delta={regularSessions.length > 0 ? '운영 중' : undefined}
-          accent="amber"
+          accent="success"
         />
         <KpiCard
           Icon={Trophy}
           label="1위"
           value={topRankings[0]?.name ?? '-'}
           delta={topRankings[0] ? `${topRankings[0].skill}점` : ''}
-          accent="violet"
+          accent="primary"
         />
       </section>
 
@@ -130,18 +130,18 @@ export function ClubDashboardClient({
         {nextRegularSession ? (
           <Link
             href={`/club/${clubId}/events`}
-            className="group block bg-white rounded-3xl border border-[#e5e5e5] p-5 hover:border-[#beff00] hover:shadow-sm transition-all"
+            className="group block bg-white rounded-3xl border border-[#e5e5e5] p-5 hover:border-[var(--color-brand-lime)] hover:shadow-sm transition-all"
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-1.5">
-                <Calendar size={13} className="text-emerald-600" strokeWidth={2.5} />
-                <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider">
+                <Calendar size={13} className="text-[var(--color-brand-court)]" strokeWidth={2.5} />
+                <span className="text-[11px] font-bold text-[var(--color-brand-court-deep)] uppercase tracking-widest">
                   다음 정기모임
                 </span>
               </div>
               <ChevronRight size={16} className="text-[#ccc] group-hover:text-[#111] transition-colors" />
             </div>
-            <p className="text-lg font-extrabold text-[#111] mb-1">{nextRegularSession.title}</p>
+            <p className="text-lg font-bold text-[#111] mb-1">{nextRegularSession.title}</p>
             <p className="text-sm text-[#555] mb-3">
               {nextRegularSession.dayOfWeek}요일 · {nextRegularSession.time}
             </p>
@@ -154,7 +154,7 @@ export function ClubDashboardClient({
             </div>
             <div className="w-full bg-[#f0f0f0] rounded-full h-2 overflow-hidden">
               <div
-                className="h-2 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all"
+                className="h-2 bg-[var(--color-brand-court)] rounded-full transition-all"
                 style={{
                   width: `${Math.min(
                     100,
@@ -169,9 +169,9 @@ export function ClubDashboardClient({
         ) : (
           <Link
             href={`/club/${clubId}/events`}
-            className="block group bg-white rounded-3xl border border-dashed border-[#ddd] hover:border-[#beff00] hover:bg-[#fafafa] p-6 flex flex-col items-center justify-center text-center min-h-[180px] transition-all"
+            className="block group bg-white rounded-3xl border border-dashed border-[#ddd] hover:border-[var(--color-brand-lime)] hover:bg-[#fafafa] p-6 flex flex-col items-center justify-center text-center min-h-[180px] transition-all"
           >
-            <Calendar size={32} className="text-[#ccc] group-hover:text-emerald-600" strokeWidth={1.5} />
+            <Calendar size={32} className="text-[#ccc] group-hover:text-[var(--color-brand-court)]" strokeWidth={1.5} />
             <p className="text-sm text-[#999] mt-2">등록된 정기모임이 없어요</p>
             <p className="text-[11px] text-[#bbb] mt-0.5">새 정기모임 만들기 →</p>
           </Link>
@@ -179,12 +179,12 @@ export function ClubDashboardClient({
 
         <Link
           href={`/club/${clubId}/ranking`}
-          className="group block bg-white rounded-3xl border border-[#e5e5e5] p-5 hover:border-[#beff00] hover:shadow-sm transition-all"
+          className="group block bg-white rounded-3xl border border-[#e5e5e5] p-5 hover:border-[var(--color-brand-lime)] hover:shadow-sm transition-all"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-1.5">
-              <Trophy size={13} className="text-amber-500" strokeWidth={2.5} />
-              <span className="text-[10px] font-extrabold text-amber-700 uppercase tracking-wider">
+              <Trophy size={13} className="text-[var(--color-brand-elite)]" strokeWidth={2.5} />
+              <span className="text-[11px] font-bold text-[var(--color-brand-elite)] uppercase tracking-widest">
                 랭킹 TOP 3
               </span>
             </div>
@@ -212,8 +212,8 @@ export function ClubDashboardClient({
       {/* 4. 바로 시작하기 */}
       <section>
         <div className="flex items-center gap-1.5 mb-2 px-1">
-          <Sparkles size={13} className="text-[#555]" strokeWidth={2.5} />
-          <p className="text-xs font-extrabold text-[#555] uppercase tracking-wider">
+          <Sparkles size={13} className="text-[var(--color-brand-text-muted)]" strokeWidth={2.5} />
+          <p className="text-[11px] font-bold text-[var(--color-brand-text-muted)] uppercase tracking-widest">
             바로 시작하기
           </p>
         </div>
@@ -223,7 +223,7 @@ export function ClubDashboardClient({
             Icon={Gamepad2}
             label="게임보드"
             desc="대진·점수 관리"
-            accent="lime"
+            accent="primary"
             primary
           />
           <ShortcutCard
@@ -231,21 +231,21 @@ export function ClubDashboardClient({
             Icon={Wallet}
             label="셔틀콕 정산"
             desc="비용 계산·납부"
-            accent="emerald"
+            accent="success"
           />
           <ShortcutCard
             href={`/club/${clubId}/members`}
             Icon={Users}
-            label="멤버 관리"
+            label="회원 관리"
             desc="급수·역할"
-            accent="blue"
+            accent="info"
           />
           <ShortcutCard
             href={`/club/${clubId}/settings`}
             Icon={SettingsIcon}
             label="운영·관리"
             desc="회비·공지"
-            accent="violet"
+            accent="info"
           />
         </div>
       </section>
@@ -257,8 +257,8 @@ export function ClubDashboardClient({
       <section className="bg-white rounded-3xl border border-[#e5e5e5] p-5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1.5">
-            <ClipboardList size={13} className="text-[#555]" strokeWidth={2.5} />
-            <span className="text-xs font-extrabold text-[#555] uppercase tracking-wider">
+            <ClipboardList size={13} className="text-[var(--color-brand-text-muted)]" strokeWidth={2.5} />
+            <span className="text-[11px] font-bold text-[var(--color-brand-text-muted)] uppercase tracking-widest">
               최근 경기 기록
             </span>
           </div>
@@ -282,8 +282,8 @@ export function ClubDashboardClient({
                   className="flex items-center justify-between py-2.5 border-b border-[#f0f0f0] last:border-0"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-                      <ShuttlecockIcon size={14} className="text-emerald-600" strokeWidth={2} />
+                    <div className="w-9 h-9 rounded-xl bg-[var(--color-brand-court-bg)] border border-[var(--color-brand-court-soft)]/40 flex items-center justify-center">
+                      <ShuttlecockIcon size={14} className="text-[var(--color-brand-court)]" strokeWidth={2} />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-[#111]">
@@ -302,7 +302,7 @@ export function ClubDashboardClient({
                     className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
                       s.status === 'closed'
                         ? 'text-[#999] bg-[#f8f8f8] border-[#e5e5e5]'
-                        : 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                        : 'text-[var(--color-brand-court-deep)] bg-[var(--color-brand-court-bg)] border-[var(--color-brand-court-soft)]/40'
                     }`}
                   >
                     {label}
@@ -317,28 +317,28 @@ export function ClubDashboardClient({
       {/* 8. 모임 활동 */}
       <section className="bg-white rounded-3xl border border-[#e5e5e5] p-5">
         <div className="flex items-center gap-1.5 mb-3">
-          <Megaphone size={13} className="text-[#555]" strokeWidth={2.5} />
-          <span className="text-xs font-extrabold text-[#555] uppercase tracking-wider">
+          <Megaphone size={13} className="text-[var(--color-brand-text-muted)]" strokeWidth={2.5} />
+          <span className="text-[11px] font-bold text-[var(--color-brand-text-muted)] uppercase tracking-widest">
             모임 활동
           </span>
         </div>
         <div className="space-y-2.5">
           <ActivityRow
             Icon={TrendingUp}
-            iconTone="emerald"
+            iconTone="success"
             title={`운영자 ${leaderName}님이 모임을 운영 중이에요`}
             time="활성"
           />
           <ActivityRow
             Icon={Users}
-            iconTone="blue"
-            title={`현재 활성 멤버 ${memberCount}명`}
+            iconTone="info"
+            title={`현재 활성 회원 ${memberCount}명`}
             time="오늘"
           />
           {closedSessions.length > 0 && (
             <ActivityRow
               Icon={ShuttlecockIcon}
-              iconTone="amber"
+              iconTone="success"
               title={`누적 경기 ${closedSessions.length}회 진행됨`}
               time="전체 기간"
             />
@@ -359,7 +359,8 @@ function Chip({ children }: { children: React.ReactNode }) {
 }
 
 /* ── KPI/Shortcut/Empty/Activity (DemoDashboardClient과 동일 패턴) ── */
-type AccentTone = 'lime' | 'emerald' | 'blue' | 'amber' | 'violet'
+/* 3색 토큰 매핑: primary (라임 CTA) / success (코트 그린) / info (네이비 elite) */
+type AccentTone = 'primary' | 'success' | 'info'
 
 function KpiCard({
   Icon,
@@ -375,11 +376,9 @@ function KpiCard({
   accent: AccentTone
 }) {
   const accentStyles: Record<AccentTone, { bg: string; text: string }> = {
-    lime: { bg: 'bg-lime-100', text: 'text-lime-700' },
-    emerald: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
-    blue: { bg: 'bg-blue-100', text: 'text-blue-700' },
-    amber: { bg: 'bg-amber-100', text: 'text-amber-700' },
-    violet: { bg: 'bg-violet-100', text: 'text-violet-700' },
+    primary: { bg: 'bg-[var(--color-brand-lime)]', text: 'text-[#111]' },
+    success: { bg: 'bg-[var(--color-brand-court-bg)]', text: 'text-[var(--color-brand-court)]' },
+    info: { bg: 'bg-[var(--color-brand-elite-bg)]', text: 'text-[var(--color-brand-elite)]' },
   }
   const c = accentStyles[accent]
   return (
@@ -410,11 +409,9 @@ function ShortcutCard({
   primary?: boolean
 }) {
   const accentStyles: Record<AccentTone, { icon: string; iconBg: string }> = {
-    lime: { icon: 'text-[#111]', iconBg: 'bg-[#beff00]' },
-    emerald: { icon: 'text-emerald-700', iconBg: 'bg-emerald-100' },
-    blue: { icon: 'text-blue-700', iconBg: 'bg-blue-100' },
-    amber: { icon: 'text-amber-700', iconBg: 'bg-amber-100' },
-    violet: { icon: 'text-violet-700', iconBg: 'bg-violet-100' },
+    primary: { icon: 'text-[#111]', iconBg: 'bg-[var(--color-brand-lime)]' },
+    success: { icon: 'text-[var(--color-brand-court)]', iconBg: 'bg-[var(--color-brand-court-bg)]' },
+    info: { icon: 'text-[var(--color-brand-elite)]', iconBg: 'bg-[var(--color-brand-elite-bg)]' },
   }
   const c = accentStyles[accent]
   return (
@@ -423,30 +420,21 @@ function ShortcutCard({
       className={`group block rounded-2xl p-4 transition-all ${
         primary
           ? 'bg-gradient-to-br from-[#0a0a0a] to-[#1a1a1a] text-white hover:brightness-110'
-          : 'bg-white border border-[#e5e5e5] hover:border-[#beff00] hover:shadow-sm'
+          : 'bg-white border border-[#e5e5e5] hover:border-[var(--color-brand-lime)] hover:shadow-sm'
       }`}
     >
       <div className={`w-10 h-10 rounded-xl ${c.iconBg} flex items-center justify-center mb-2.5`}>
         <Icon size={18} className={c.icon} strokeWidth={2.2} />
       </div>
-      <p className={`text-sm font-extrabold mb-0.5 ${primary ? 'text-white' : 'text-[#111]'}`}>{label}</p>
+      <p className={`text-sm font-bold mb-0.5 ${primary ? 'text-white' : 'text-[#111]'}`}>{label}</p>
       <p className={`text-[10px] ${primary ? 'text-white/60' : 'text-[#999]'}`}>{desc}</p>
       <ChevronRight
         size={12}
         className={`mt-2 transition-transform group-hover:translate-x-0.5 ${
-          primary ? 'text-[#beff00]' : 'text-[#bbb]'
+          primary ? 'text-[var(--color-brand-lime)]' : 'text-[#bbb]'
         }`}
       />
     </Link>
-  )
-}
-
-function EmptyCard({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <div className="bg-white rounded-3xl border border-dashed border-[#ddd] p-6 flex flex-col items-center justify-center text-center min-h-[180px]">
-      {icon}
-      <p className="text-sm text-[#999] mt-2">{label}</p>
-    </div>
   )
 }
 
@@ -457,14 +445,14 @@ function ActivityRow({
   time,
 }: {
   Icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
-  iconTone: 'emerald' | 'blue' | 'amber'
+  iconTone: 'success' | 'info' | 'primary'
   title: string
   time: string
 }) {
   const tones = {
-    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    blue: 'bg-blue-50 text-blue-600 border-blue-100',
-    amber: 'bg-amber-50 text-amber-600 border-amber-100',
+    success: 'bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court)] border-[var(--color-brand-court-soft)]/40',
+    info: 'bg-[var(--color-brand-elite-bg)] text-[var(--color-brand-elite)] border-[var(--color-brand-elite-soft)]/40',
+    primary: 'bg-[var(--color-brand-lime)] text-[#111] border-[var(--color-brand-lime-dim)]/40',
   }
   return (
     <div className="flex items-center gap-3">

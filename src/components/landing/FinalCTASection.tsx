@@ -2,53 +2,50 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
 /**
- * Section 5 — CTA 재등장.
+ * Final CTA — 블랙 마침표.
  *
- * 톤이 "운영자 모집"에서 "함께 즐기자"로 바뀌었으므로
- * secondary CTA는 두지 않는다. 단일 primary CTA만.
- *
- * 마지막 섹션이므로 세로 여백 좀 더 후하게.
+ * Hero에서 시작한 블랙 톤을 페이지 끝에서 다시 한 번 (수미상관).
+ * 단일 lime primary CTA만.
  */
 export function FinalCTASection() {
   return (
     <section
-      aria-labelledby="section-05"
-      className="relative overflow-hidden border-t border-[#ebebeb] bg-white"
+      aria-labelledby="section-cta"
+      className="relative overflow-hidden bg-[#0a0a0a] text-white"
     >
-      {/* 미세한 lime glow — 마지막 마침표 느낌 */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[480px] w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(190,255,0,0.18),transparent_65%)] blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(190,255,0,0.20),transparent_65%)] blur-3xl"
       />
 
-      <div className="relative mx-auto max-w-[680px] px-6 py-20 sm:py-28">
-        {/* 챕터 마커 */}
-        <div
-          id="section-05"
-          className="mb-10 flex items-center gap-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-[#999]"
+      <div className="relative mx-auto max-w-[720px] px-6 py-24 sm:py-32 text-center">
+        <p
+          id="section-cta"
+          className="mb-8 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/60"
         >
-          <span className="font-mono text-[#bbb]">05</span>
-          <span className="h-px w-8 bg-[#e5e5e5]" />
-          <span className="text-[#555]">시작</span>
-        </div>
+          Start here
+        </p>
 
-        {/* CTA — 단일 primary (보조 CTA 없음, 추가 카피 없음) */}
+        <h2
+          className="mb-10 text-[28px] font-extrabold leading-[1.18] tracking-[-0.02em] text-white sm:text-[40px] sm:leading-[1.12]"
+          style={{ wordBreak: 'keep-all' }}
+        >
+          이번 주말 모임에서,
+          <br />
+          매칭 30분이 10초가 됩니다.
+        </h2>
+
         <Link
           href="/demo"
-          className="group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[#beff00] px-8 text-[15px] font-extrabold text-[#0a0a0a] shadow-[0_8px_24px_-12px_rgba(190,255,0,0.6)] transition-all hover:bg-[#a8e600] hover:shadow-[0_10px_28px_-10px_rgba(190,255,0,0.7)] focus:outline-none focus:ring-4 focus:ring-[#beff00]/40 sm:h-[60px] sm:w-auto sm:px-10 sm:text-[16px]"
+          className="group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[var(--color-brand-lime)] px-8 text-[15px] font-extrabold text-[#0a0a0a] shadow-[0_12px_32px_-10px_rgba(219,230,76,0.45)] transition-all hover:bg-[var(--color-brand-lime-dim)] hover:shadow-[0_14px_36px_-8px_rgba(219,230,76,0.55)] focus:outline-none focus:ring-4 focus:ring-[var(--color-brand-lime)]/40 sm:h-[60px] sm:w-auto sm:px-10 sm:text-[16px]"
         >
-          30초로 둘러보기
-          <ArrowRight
-            size={18}
-            strokeWidth={2.5}
-            className="transition-transform group-hover:translate-x-1"
-          />
+          1분 안에 직접 만들어보세요
+          <ArrowRight size={18} strokeWidth={2.5} className="transition-transform group-hover:translate-x-1" />
         </Link>
 
-        {/* 안심 신호 반복 */}
-        <p className="mt-5 flex items-center gap-1.5 text-[13px] text-[#888] sm:text-[14px]">
-          <span aria-hidden className="text-[#10b981]">✓</span>
-          가입 X · 카드 X · 30초
+        <p className="mt-5 flex items-center justify-center gap-1.5 text-[13px] text-white/40 sm:text-[14px]">
+          <span aria-hidden className="text-[var(--color-brand-lime)]">✓</span>
+          가입 X · 카드 X · 1분
         </p>
       </div>
     </section>

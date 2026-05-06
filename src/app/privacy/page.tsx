@@ -14,7 +14,7 @@ export default function PrivacyPage() {
       <div className="max-w-2xl mx-auto px-5 py-14">
 
         {/* 헤더 */}
-        <p className="text-xs font-bold text-[#beff00] uppercase tracking-widest mb-3">Legal</p>
+        <p className="text-xs font-bold text-[var(--color-brand-lime)] uppercase tracking-widest mb-3">Legal</p>
         <h1 className="text-[1.8rem] font-extrabold mb-2">개인정보처리방침</h1>
         <p className="text-[0.85rem] text-[#999] mb-4">시행일: {EFFECTIVE_DATE}</p>
         <p className="text-[0.9rem] text-[#555] leading-relaxed mb-10 bg-[#f8f8f8] rounded-xl p-4">

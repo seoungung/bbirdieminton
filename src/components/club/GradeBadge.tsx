@@ -1,8 +1,14 @@
 import { scoreToGrade, GRADE_COLOR, type Grade } from '@/lib/club/grade'
+import { muToGrade } from '@/lib/club/glicko2'
 
 interface Props {
-  /** skill_score (0-100) */
+  /** skill_score (0-100) — fallback */
   score: number
+  /**
+   * Glicko-2 mu — 있으면 우선 사용 (자동 갱신되는 경기 기반 등급).
+   * 없거나 null이면 skill_score로 등급 산정.
+   */
+  mu?: number | null
   /** 사이즈 프리셋 */
   size?: 'xs' | 'sm' | 'md'
   /** 외곽선 포함 여부 (기본 false — 채움 형태) */
@@ -13,10 +19,11 @@ interface Props {
 /**
  * 급수(F~S) 배지 — 플레이어 이름 옆에 인라인으로 배치
  *
- * 예: <GradeBadge score={65} />  →  [B]
+ * 예: <GradeBadge score={65} />          →  [B] (skill_score 기반)
+ *     <GradeBadge score={65} mu={1750} /> →  [A] (Glicko-2 mu 우선)
  */
-export function GradeBadge({ score, size = 'sm', outlined = false, className = '' }: Props) {
-  const grade: Grade = scoreToGrade(score)
+export function GradeBadge({ score, mu, size = 'sm', outlined = false, className = '' }: Props) {
+  const grade: Grade = mu != null ? muToGrade(mu) : scoreToGrade(score)
   const color = GRADE_COLOR[grade]
 
   const sizeClass =

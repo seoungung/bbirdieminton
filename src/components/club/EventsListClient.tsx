@@ -98,7 +98,7 @@ export function EventsListClient({ clubId, upcoming, past, isManager, isDemo }: 
         {isManager && (
           <button
             onClick={openCreate}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#beff00] text-[#0a0a0a] text-sm font-bold rounded-lg hover:bg-[#a8e600] transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[var(--color-brand-lime)] text-[#0a0a0a] text-sm font-bold rounded-lg hover:bg-[var(--color-brand-lime-dim)] transition-colors"
           >
             <Plus size={14} strokeWidth={2.5} />
             정기모임 만들기
@@ -157,7 +157,7 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`px-3.5 py-1.5 text-sm font-semibold rounded-md transition-colors ${
+      className={`px-3.5 py-2.5 text-sm font-semibold rounded-md transition-colors ${
         active
           ? 'bg-white text-[#111] shadow-sm'
           : 'text-[#666] hover:text-[#111]'
@@ -187,7 +187,7 @@ function EmptyState({
       {isManager && tab === 'upcoming' && (
         <button
           onClick={onCreateClick}
-          className="mt-4 inline-flex items-center gap-1.5 bg-[#beff00] text-[#111] font-bold text-sm px-5 py-2.5 rounded-xl hover:brightness-95 transition"
+          className="mt-4 inline-flex items-center gap-1.5 bg-[var(--color-brand-lime)] text-[#111] font-bold text-sm px-5 py-2.5 rounded-xl hover:brightness-95 transition"
         >
           <Plus size={14} strokeWidth={2.5} />
           첫 정기모임 만들기

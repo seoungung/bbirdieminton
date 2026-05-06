@@ -1,11 +1,10 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
-import { getClubRanking } from '@/lib/club/client'
+import { getClubRanking, getClubMemberRatings } from '@/lib/club/client'
 import { Trophy } from 'lucide-react'
 import { RankingTable } from '@/components/club/RankingTable'
 import { RankingGuideBanner } from '@/components/club/RankingGuideBanner'
-import { BackButton } from '@/components/club/BackButton'
 import { DEMO_CLUBS, DEMO_MEMBERS } from '@/lib/club/demoData'
 import type { RankingRow, ClubMemberWithUser, MemberRole } from '@/types/club'
 import type { Metadata } from 'next'
@@ -96,13 +95,15 @@ export default async function RankingPage({
   const clubUserId = await getClubUserId(supabase)
   if (!clubUserId) redirect('/login')
 
-  const ranking = await getClubRanking(supabase, clubId)
+  const [ranking, ratingsMap] = await Promise.all([
+    getClubRanking(supabase, clubId),
+    getClubMemberRatings(supabase, clubId),
+  ])
 
   return (
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
         <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-          <BackButton fallback={`/club/${clubId}`} />
           <div>
             <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
               <Trophy size={16} strokeWidth={2} />
@@ -115,7 +116,7 @@ export default async function RankingPage({
 
       <main className="max-w-[1088px] mx-auto px-4 py-5 space-y-4">
         <RankingGuideBanner />
-        <RankingTable ranking={ranking} currentUserId={clubUserId} />
+        <RankingTable ranking={ranking} currentUserId={clubUserId} ratingsMap={ratingsMap} />
       </main>
     </div>
   )

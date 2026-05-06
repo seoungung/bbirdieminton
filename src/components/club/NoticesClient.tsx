@@ -26,8 +26,8 @@ const TYPE_LABEL: Record<NoticeType, string> = {
 }
 
 const TYPE_BADGE: Record<NoticeType, string> = {
-  announcement: 'bg-red-50 text-red-600',
-  event: 'bg-blue-50 text-blue-600',
+  announcement: 'bg-[var(--color-brand-elite-bg)] text-[var(--color-brand-elite)]',
+  event: 'bg-[var(--color-brand-team-a-bg)] text-[var(--color-brand-team-a)]',
   general: 'bg-[#f8f8f8] text-[#555]',
 }
 
@@ -121,7 +121,7 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
   ]
 
   return (
-    <div className="bg-white rounded-xl border border-[#e5e5e5] overflow-hidden">
+    <div className="bg-white rounded-2xl border border-[#e5e5e5] overflow-hidden">
       {/* 헤더 탭 + 작성 버튼 */}
       <div className="flex items-center justify-between px-4 pt-4 pb-0">
         <div className="flex gap-1">
@@ -129,7 +129,7 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === tab.key
                   ? 'bg-[#0a0a0a] text-white'
                   : 'text-[#555] hover:bg-[#f8f8f8]'
@@ -142,9 +142,9 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
         {isOwner && (
           <button
             onClick={openCreate}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0a0a0a] text-white text-sm font-medium rounded-lg hover:bg-[#222] transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[var(--color-brand-lime)] text-[var(--color-brand-ink)] text-sm font-bold rounded-full hover:bg-[var(--color-brand-lime-dim)] transition-colors"
           >
-            <Megaphone size={14} />
+            <Megaphone size={14} strokeWidth={2.4} />
             공지 작성
           </button>
         )}
@@ -168,7 +168,7 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
               <div
                 key={notice.id}
                 className={`border-b border-[#f0f0f0] last:border-b-0 ${
-                  notice.is_pinned ? 'border-l-4 border-l-[#beff00]' : ''
+                  notice.is_pinned ? 'border-l-4 border-l-[var(--color-brand-lime)]' : ''
                 }`}
               >
                 <button
@@ -183,7 +183,7 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
                         {TYPE_LABEL[notice.type]}
                       </span>
                       {notice.is_pinned && (
-                        <Pin size={12} className="text-[#beff00] fill-[#beff00]" />
+                        <Pin size={12} className="text-[var(--color-brand-lime)] fill-[var(--color-brand-lime)]" />
                       )}
                     </div>
                     <p className="font-semibold text-sm text-[#111] truncate">{notice.title}</p>
@@ -210,7 +210,7 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
                             e.stopPropagation()
                             handleDelete(notice.id)
                           }}
-                          className="p-1.5 rounded hover:bg-red-50 text-[#999] hover:text-red-500 transition-colors"
+                          className="p-1.5 rounded hover:bg-[var(--color-brand-streak-bg)] text-[#999] hover:text-[var(--color-brand-streak)] transition-colors"
                         >
                           <Trash2 size={14} />
                         </span>
@@ -236,7 +236,7 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
 
       {/* 모달 */}
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl">
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#e5e5e5]">
               <h2 className="font-bold text-[#111]">
@@ -251,7 +251,7 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
             </div>
             <div className="px-5 py-4 flex flex-col gap-4">
               {error && (
-                <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+                <p className="text-sm text-[var(--color-brand-streak)] bg-[var(--color-brand-streak-bg)] px-3 py-2 rounded-lg">{error}</p>
               )}
               <div className="flex gap-3">
                 <div className="flex-1">
@@ -274,7 +274,7 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
                     type="checkbox"
                     checked={modal.is_pinned}
                     onChange={(e) => setModal({ ...modal, is_pinned: e.target.checked })}
-                    className="w-4 h-4 accent-[#beff00]"
+                    className="w-4 h-4 accent-[var(--color-brand-lime)]"
                   />
                   <label htmlFor="is_pinned" className="text-sm text-[#555]">
                     상단 고정

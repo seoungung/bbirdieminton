@@ -18,7 +18,7 @@ interface ClubListModalProps {
 export function ClubListModal({ type, onClose }: ClubListModalProps) {
   return (
     <div
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4"
+      className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4"
       onClick={onClose}
     >
       <div
@@ -37,8 +37,8 @@ export function ClubListModal({ type, onClose }: ClubListModalProps) {
             </p>
             <div className="flex flex-col gap-2">
               <Link
-                href="/login?next=%2Fclub%2Fhome"
-                className="w-full flex items-center justify-center bg-[#beff00] text-[#111] font-bold py-3.5 rounded-2xl hover:brightness-95 transition-all text-sm"
+                href="/login?next=%2Fclubs"
+                className="w-full flex items-center justify-center bg-[var(--color-brand-lime)] text-[#111] font-bold py-3.5 rounded-2xl hover:brightness-95 transition-all text-sm"
               >
                 로그인하고 모임 만들기
               </Link>

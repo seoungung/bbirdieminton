@@ -62,13 +62,13 @@ export function SetupModePool({
                 'flex items-center gap-2 px-2.5 py-2 rounded-xl border text-left transition-colors',
                 isOn
                   ? 'bg-[#0a0a0a] border-[#0a0a0a] text-white'
-                  : 'bg-white border-[#e5e5e5] text-[#111] hover:border-[#beff00]'
+                  : 'bg-white border-[#e5e5e5] text-[#111] hover:border-[var(--color-brand-lime)]'
               )}
             >
               <div
                 className={cn(
                   'w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-colors',
-                  isOn ? 'bg-[#beff00] border-[#beff00]' : 'border-[#ccc]'
+                  isOn ? 'bg-[var(--color-brand-lime)] border-[var(--color-brand-lime)]' : 'border-[#ccc]'
                 )}
               >
                 {isOn && <Check size={9} className="text-[#111]" strokeWidth={3} />}

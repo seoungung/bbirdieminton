@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
-import { BackButton } from '@/components/club/BackButton'
 import { ShuttleManageClient } from '@/components/club/ShuttleManageClient'
 import { ShuttleSubmissionTracker } from '@/components/club/ShuttleSubmissionTracker'
 import {
@@ -48,7 +47,7 @@ export default async function ShuttlePage({ params }: Props) {
   if (!clubUserId) redirect('/login')
 
   const membership = await getMyMembership(supabase, clubId, clubUserId)
-  if (!membership) redirect('/club/home')
+  if (!membership) redirect('/clubs')
 
   // 운영진(owner/manager)만 진입
   if (!['owner', 'manager'].includes(membership.role)) {
@@ -93,10 +92,9 @@ export default async function ShuttlePage({ params }: Props) {
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
         <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-          <BackButton fallback={`/club/${clubId}`} />
           <div>
             <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
-              <ShuttlecockIcon size={16} className="text-[#10b981]" strokeWidth={2} />
+              <ShuttlecockIcon size={16} className="text-[var(--color-brand-court)]" strokeWidth={2} />
               셔틀콕 관리
             </h1>
             <p className="text-xs text-[#999] mt-0.5">

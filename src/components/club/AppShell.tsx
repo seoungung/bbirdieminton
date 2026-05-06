@@ -6,22 +6,20 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   Home, Gamepad2, Trophy, Users, Wallet, Settings as SettingsIcon,
-  Megaphone, BarChart3, CalendarDays,
-  Menu, X,
-  User as UserIcon,
+  Megaphone, BarChart3, CalendarDays, Award, FileBarChart, Compass,
+  Menu, X, ChevronLeft, ChevronRight,
   BookOpen, Newspaper,
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { ClubSwitcher, type ClubOption } from './ClubSwitcher'
-import { AppHeader } from './AppHeader'
-import { HelpCard } from './HelpCard'
-import { NotificationBell } from './NotificationBell'
-import { QuickCreate } from './QuickCreate'
 import { DemoWelcomeModal } from './DemoWelcomeModal'
 import { DemoConversionModal } from './DemoConversionModal'
 import { DemoTour } from './DemoTour'
 import { DemoMissionWidget } from './DemoMissionWidget'
-import { UserMenu } from '@/components/layout/marketing/UserMenu'
+import { HelpFloatingWidget } from './HelpFloatingWidget'
+import { SidebarSearch } from './SidebarSearch'
+import { SidebarNotificationBell } from './SidebarNotificationBell'
+import { SidebarUserMenu } from './SidebarUserMenu'
 
 /* ── 사이드바 메뉴 아이템 타입 ── */
 interface NavItem {
@@ -46,6 +44,8 @@ interface Props {
   userEmail?: string
   avatarUrl?: string | null
   unreadNoticeCount?: number
+  /** 현재 사용자의 이 클럽 내 역할 (사이드바 배지 표시용) */
+  role?: 'owner' | 'manager' | 'member'
   /** 유저가 소속된 다른 클럽들 (현재 클럽 제외) */
   availableClubs?: ClubOption[]
   children: React.ReactNode
@@ -68,11 +68,43 @@ export function AppShell({
   userEmail,
   avatarUrl,
   unreadNoticeCount = 0,
+  role,
   availableClubs = [],
   children,
 }: Props) {
   const pathname = usePathname()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [demoBannerHidden, setDemoBannerHidden] = useState(false)
+
+  /* 데스크톱 사이드바 접기/펼치기 — localStorage 영구 저장.
+   * xl+ (≥1280px) 에서만 토글 의미 있음. xl 미만은 항상 접힌 상태. */
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    return localStorage.getItem('appshell-sidebar-collapsed') === '1'
+  })
+  const toggleSidebar = () => {
+    setSidebarCollapsed(prev => {
+      const next = !prev
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('appshell-sidebar-collapsed', next ? '1' : '0')
+      }
+      return next
+    })
+  }
+
+  /* xl 브레이크포인트 (1280px) 감지 — 미만이면 사이드바 강제 접힘.
+   * 모바일 (< md, 768px)는 사이드바 자체가 안 보이고 햄버거 드로어만. */
+  const [isXlScreen, setIsXlScreen] = useState(false)
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 1280px)')
+    setIsXlScreen(mql.matches)
+    const handler = (e: MediaQueryListEvent) => setIsXlScreen(e.matches)
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  }, [])
+
+  /* 실효 접힘 상태: xl 미만이면 강제 접힘, xl+ 면 사용자 설정 따름 */
+  const effectiveCollapsed = !isXlScreen || sidebarCollapsed
 
   /* 경로 변경 시 드로어 자동 닫기 */
   useEffect(() => {
@@ -99,29 +131,24 @@ export function AppShell({
   ]
 
   const communityNav: NavItem[] = [
-    { href: `/club/${clubId}/ranking`,   label: '랭킹', Icon: Trophy },
-    { href: `/club/${clubId}/notices`,   label: '공지', Icon: Megaphone },
+    { href: `/club/${clubId}/ranking`,   label: '랭킹',   Icon: Trophy },
+    { href: `/club/${clubId}/me`,        label: '내 카드', Icon: Award },
+    { href: `/club/${clubId}/notices`,   label: '공지',   Icon: Megaphone },
   ]
 
   const adminNav: NavItem[] = [
     { href: `/club/${clubId}/members`,   label: '회원',   Icon: Users,        ownerOnly: true },
     { href: `/club/${clubId}/finance`,   label: '회비',   Icon: Wallet,       ownerOnly: true },
     { href: `/club/${clubId}/shuttle`,   label: '셔틀콕', Icon: ShuttlecockIcon, ownerOnly: true },
-    { href: `#`,                         label: '분석',   Icon: BarChart3,    ownerOnly: true, proOnly: true },
+    { href: `/club/${clubId}/stats`,     label: '분석',   Icon: BarChart3,    ownerOnly: true, proOnly: true },
+    { href: `/club/${clubId}/report`,    label: '리포트', Icon: FileBarChart, ownerOnly: true, proOnly: true },
     { href: `/club/${clubId}/settings`,  label: '설정',   Icon: SettingsIcon, ownerOnly: true },
   ]
 
   const resourceNav: NavItem[] = [
-    { href: '/manual',  label: '사용설명서', Icon: BookOpen,   match: '/manual' },
-    { href: '/blog',    label: '블로그',     Icon: Newspaper,  match: '/blog' },
-  ]
-
-  /* 하단 탭바 (모바일 전용) */
-  const bottomTabs = [
-    { href: `/club/${clubId}`,           label: '홈',     Icon: Home,     match: `/club/${clubId}` },
-    { href: `/club/${clubId}/gameboard`, label: '게임보드', Icon: Gamepad2, match: `/club/${clubId}/gameboard` },
-    { href: `/club/${clubId}/ranking`,   label: '랭킹',   Icon: Trophy,   match: `/club/${clubId}/ranking` },
-    { href: `/my/profile`,               label: '내정보', Icon: UserIcon, match: `/my/profile` },
+    { href: '/clubs',   label: '모임 둘러보기', Icon: Compass,    match: '/clubs' },
+    { href: '/manual',  label: '사용설명서',     Icon: BookOpen,   match: '/manual' },
+    { href: '/blog',    label: '블로그',         Icon: Newspaper,  match: '/blog' },
   ]
 
   /* 활성 경로 판정 */
@@ -139,97 +166,179 @@ export function AppShell({
     location: clubLocation,
     thumbnailColor,
     isDemo,
+    role,
   }
 
-  /* 사이드바 내용 렌더 */
-  const sidebarContent = (
+  /* 사이드바 내용 렌더 — collapsed 일 때는 아이콘만 표시 (lg+ 데스크톱 한정) */
+  const renderSidebar = (collapsed: boolean) => (
     <>
       {/* 상단: 로고 */}
-      <div className="px-4 pt-5 pb-4">
+      <div className={collapsed ? 'px-2 pt-5 pb-3' : 'px-4 pt-5 pb-3'}>
         <Link
-          href="/club/home"
-          className="flex items-center mb-4 hover:opacity-80 transition-opacity"
+          href="/clubs"
+          className={`flex items-center mb-3 hover:opacity-80 transition-opacity ${
+            collapsed ? 'justify-center' : ''
+          }`}
+          title={collapsed ? '버디민턴' : undefined}
         >
-          <Image
-            src="/textlogo_height_birdieminton-black.png"
-            alt="버디민턴"
-            width={120}
-            height={28}
-            priority
-            className="h-6 w-auto object-contain"
-          />
+          {collapsed ? (
+            <Image
+              src="/symbol_birdieminton-black.png"
+              alt="버디민턴"
+              width={28}
+              height={28}
+              priority
+              className="h-7 w-7 object-contain"
+            />
+          ) : (
+            <Image
+              src="/textlogo_height_birdieminton-black.png"
+              alt="버디민턴"
+              width={120}
+              height={28}
+              priority
+              className="h-6 w-auto object-contain"
+            />
+          )}
         </Link>
 
-        {/* 클럽 스위처 */}
-        <ClubSwitcher current={currentClub} available={availableClubs} />
+        {/* 클럽 스위처 — 접힘 상태에서는 숨김 (펼치기 후 사용) */}
+        {!collapsed && <ClubSwitcher current={currentClub} available={availableClubs} />}
+      </div>
+
+      {/* 검색 + 알림 — 사이드바 상단 액션 영역 */}
+      <div
+        className={`pb-3 border-b border-[#f0f0f0] ${
+          collapsed ? 'px-2 space-y-1' : 'px-3 space-y-1.5'
+        }`}
+      >
+        <SidebarSearch collapsed={collapsed} />
+        <SidebarNotificationBell
+          clubId={clubId}
+          unreadNoticeCount={unreadNoticeCount}
+          collapsed={collapsed}
+        />
       </div>
 
       {/* 메인 네비게이션 */}
-      <nav className="flex-1 overflow-y-auto px-3 pb-4 space-y-6">
-        <NavSection title="운영" items={mainNav} isActive={isActive} unreadNoticeCount={0} />
+      <nav className={`flex-1 overflow-y-auto py-4 space-y-6 ${collapsed ? 'px-2' : 'px-3'}`}>
+        <NavSection title="운영" items={mainNav} isActive={isActive} unreadNoticeCount={0} collapsed={collapsed} />
         <NavSection
           title="커뮤니티"
           items={communityNav}
           isActive={isActive}
           unreadNoticeCount={unreadNoticeCount}
+          collapsed={collapsed}
         />
         <NavSection
           title="관리"
           items={adminNav.filter(item => !item.ownerOnly || isOwner)}
           isActive={isActive}
           unreadNoticeCount={0}
+          collapsed={collapsed}
         />
         <NavSection
           title="리소스"
           items={resourceNav}
           isActive={isActive}
           unreadNoticeCount={0}
+          collapsed={collapsed}
         />
       </nav>
 
-      {/* 하단: 도움말 카드 */}
-      <div className="p-3">
-        <HelpCard />
-      </div>
+      {/* 하단: 유저 메뉴 — 로그인 상태에서만 노출 */}
+      {userName && userEmail !== undefined ? (
+        <div
+          className={`border-t border-[#f0f0f0] ${
+            collapsed ? 'px-2 py-3' : 'px-3 py-3'
+          }`}
+        >
+          <SidebarUserMenu
+            userName={userName}
+            userEmail={userEmail ?? ''}
+            avatarUrl={avatarUrl ?? null}
+            collapsed={collapsed}
+          />
+        </div>
+      ) : (
+        <div className={`border-t border-[#f0f0f0] ${collapsed ? 'px-2 py-3' : 'px-3 py-3'}`}>
+          <Link
+            href="/login"
+            className={`flex items-center rounded-lg text-[13px] font-semibold text-[#111] hover:bg-[#f5f5f5] transition-colors ${
+              collapsed ? 'justify-center py-2' : 'gap-2 px-3 py-2'
+            }`}
+            title={collapsed ? '로그인' : undefined}
+          >
+            <span className={collapsed ? 'sr-only' : ''}>로그인</span>
+            {collapsed && <span aria-hidden="true">→</span>}
+          </Link>
+        </div>
+      )}
     </>
   )
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
-      {/* ── 데모 모달·투어·미션 ── */}
+      {/* ── 데모 모달·투어·미션 (인쇄 시 모두 숨김) ── */}
       {isDemo && (
-        <>
+        <div className="print:hidden">
           <DemoWelcomeModal />
           <DemoTour clubId={clubId} />
           <DemoMissionWidget clubId={clubId} />
           <DemoConversionModal />
-        </>
-      )}
-
-      {/* ── 데모 배너 ── */}
-      {isDemo && (
-        <div className="sticky top-0 z-50 bg-[#0a0a0a] text-white flex items-center justify-between px-4 py-2.5">
-          <p className="text-[13px] font-medium flex items-center gap-2">
-            <span className="text-[#beff00]">●</span>
-            체험 중 · 모든 데이터는 가상입니다
-          </p>
-          <Link
-            href="/club/create"
-            className="text-[12px] font-bold bg-[#beff00] text-[#0a0a0a] px-3.5 py-1.5 rounded-full hover:bg-[#a8e600] transition-colors whitespace-nowrap"
-          >
-            내 모임 만들기 →
-          </Link>
         </div>
       )}
 
-      {/* ── 데스크톱 고정 사이드바 ── */}
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 z-30 w-[260px] bg-white border-r border-[#f0f0f0] flex-col">
-        {sidebarContent}
+      {/* ── 데모 배너 ── */}
+      {isDemo && !demoBannerHidden && (
+        <div className="sticky top-0 z-50 bg-[#0a0a0a] text-white flex items-center justify-between px-4 py-2.5 print:hidden">
+          <p className="text-[13px] font-medium flex items-center gap-2">
+            <span className="text-[var(--color-brand-lime)]">●</span>
+            체험 중 · 모든 데이터는 가상입니다
+          </p>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/club/create"
+              className="text-[12px] font-bold bg-[var(--color-brand-lime)] text-[#0a0a0a] px-3.5 py-1.5 rounded-full hover:bg-[var(--color-brand-lime-dim)] transition-colors whitespace-nowrap"
+            >
+              내 모임 만들기 →
+            </Link>
+            <button
+              type="button"
+              onClick={() => setDemoBannerHidden(true)}
+              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+              aria-label="배너 닫기"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── 사이드바 (md+ 노출) ──
+          · md ~ xl 미만: 강제 접힘 (68px, 아이콘 only)
+          · xl+: 사용자 설정 따라 220px 펼침 또는 68px 접힘 (토글 가능)
+          · md 미만: 숨김 (햄버거 드로어로 대체) */}
+      <aside
+        className={`hidden md:flex fixed inset-y-0 left-0 z-30 bg-white border-r border-[#f0f0f0] flex-col print:hidden transition-[width] duration-200 ${
+          effectiveCollapsed ? 'w-[68px]' : 'w-[220px]'
+        }`}
+      >
+        {renderSidebar(effectiveCollapsed)}
+        {/* 토글 버튼 — xl+ 에서만 노출 (그 이하는 강제 접힘이라 토글 의미 X) */}
+        <button
+          onClick={toggleSidebar}
+          aria-label={sidebarCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
+          title={sidebarCollapsed ? '사이드바 펼치기' : '사이드바 접기'}
+          className="hidden xl:flex absolute top-6 -right-3 w-6 h-6 rounded-full bg-white border border-[#e5e5e5] hover:bg-[#f5f5f5] items-center justify-center text-[#555] z-10 shadow-sm transition-colors"
+        >
+          {sidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </button>
       </aside>
 
-      {/* ── 모바일 드로어 ── */}
+      {/* ── 모바일 드로어 (< md 에서만) ── */}
       {drawerOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
+        <div className="md:hidden fixed inset-0 z-50 flex">
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => setDrawerOpen(false)}
@@ -243,27 +352,19 @@ export function AppShell({
             >
               <X size={16} />
             </button>
-            {sidebarContent}
+            {renderSidebar(false)}
           </aside>
         </div>
       )}
 
-      {/* ── 메인 영역 ── */}
-      <div className="lg:pl-[260px]">
-        {/* 데스크톱 전역 헤더 */}
-        {userName && userEmail !== undefined && (
-          <AppHeader
-            clubId={clubId}
-            isOwner={isOwner}
-            unreadNoticeCount={unreadNoticeCount}
-            userName={userName}
-            userEmail={userEmail ?? ''}
-            avatarUrl={avatarUrl ?? null}
-          />
-        )}
-
-        {/* 모바일 상단 바 (검색·알림·유저 포함) */}
-        <header className="lg:hidden sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-[#f0f0f0]">
+      {/* ── 메인 영역 — md+ 에서 사이드바 폭만큼 좌측 패딩 ── */}
+      <div
+        className={`print:pl-0 transition-[padding] duration-200 ${
+          effectiveCollapsed ? 'md:pl-[68px]' : 'md:pl-[220px]'
+        }`}
+      >
+        {/* 모바일 상단 바 (< md 에서만) — 햄버거 + 로고 + 클럽명 만 (검색·알림·유저메뉴는 드로어 사이드바로 이동) */}
+        <header className="md:hidden sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-[#f0f0f0] print:hidden">
           <div className="flex items-center gap-2 px-3 h-14">
             <button
               onClick={() => setDrawerOpen(true)}
@@ -287,48 +388,16 @@ export function AppShell({
                 {clubName}
               </span>
             </Link>
-            <NotificationBell clubId={clubId} unreadNoticeCount={unreadNoticeCount} />
-            <QuickCreate clubId={clubId} isOwner={isOwner} />
-            {userName && userEmail !== undefined ? (
-              <UserMenu userName={userName} userEmail={userEmail ?? ''} avatarUrl={avatarUrl ?? null} />
-            ) : (
-              <Link
-                href="/login"
-                className="w-9 h-9 rounded-full bg-[#f5f5f5] flex items-center justify-center text-[#555]"
-                aria-label="로그인"
-              >
-                <UserIcon size={15} />
-              </Link>
-            )}
           </div>
         </header>
 
-        <main id="main-content" className="pb-16 lg:pb-0">{children}</main>
+        <main id="main-content" className="print:pb-0">{children}</main>
       </div>
 
-      {/* ── 모바일 하단 탭바 ── */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-20 bg-white/90 backdrop-blur-md border-t border-[#f0f0f0] flex items-center justify-around h-16">
-        {bottomTabs.map(({ href, label, Icon, match }) => {
-          const active = match === `/club/${clubId}`
-            ? pathname === match
-            : pathname === match || pathname.startsWith(match + '/')
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`relative flex flex-col items-center gap-0.5 py-2 px-3 transition-colors ${
-                active ? 'text-[#0a0a0a]' : 'text-[#bbb]'
-              }`}
-            >
-              {active && (
-                <span className="absolute top-0 w-8 h-[2px] bg-[#0a0a0a] rounded-b-full" />
-              )}
-              <Icon size={20} strokeWidth={active ? 2.2 : 1.7} />
-              <span className="text-[10px] font-semibold">{label}</span>
-            </Link>
-          )
-        })}
-      </nav>
+      {/* ── 우측 하단 floating 고객센터 위젯 (인쇄 시 숨김) ── */}
+      <HelpFloatingWidget />
+
+      {/* 하단 탭바 제거됨 (사이드바·드로어로 충분) */}
     </div>
   )
 }
@@ -339,18 +408,26 @@ function NavSection({
   items,
   isActive,
   unreadNoticeCount,
+  collapsed = false,
 }: {
   title: string
   items: NavItem[]
   isActive: (item: NavItem) => boolean
   unreadNoticeCount: number
+  /** true 일 때 라벨/뱃지/섹션 타이틀 숨기고 아이콘만 중앙 정렬 */
+  collapsed?: boolean
 }) {
   if (items.length === 0) return null
   return (
     <div>
-      <p className="px-3 mb-2 text-[11px] font-bold text-[#999] uppercase tracking-widest">
-        {title}
-      </p>
+      {/* 섹션 타이틀 — 접힘 상태에서는 가는 구분선으로 대체 */}
+      {collapsed ? (
+        <div className="mx-2 mb-2 border-t border-[#f0f0f0]" />
+      ) : (
+        <p className="px-3 mb-2 text-[11px] font-bold text-[#999] uppercase tracking-widest">
+          {title}
+        </p>
+      )}
       <div className="space-y-0.5">
         {items.map(item => {
           const active = isActive(item)
@@ -373,30 +450,41 @@ function NavSection({
               key={item.href}
               href={item.href}
               data-tour={tourId}
-              className={`relative group flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-medium transition-colors ${
+              title={collapsed ? item.label : undefined}
+              className={`relative group flex items-center rounded-lg text-[14px] font-medium transition-colors ${
+                collapsed ? 'justify-center px-0 py-3' : 'gap-3 px-3 py-3'
+              } ${
                 active
                   ? 'bg-[#f5f5f5] text-[#0a0a0a]'
                   : 'text-[#555] hover:bg-[#fafafa] hover:text-[#111]'
               }`}
             >
-              {active && (
+              {active && !collapsed && (
                 <span className="absolute left-0 top-1.5 bottom-1.5 w-[2.5px] bg-[#0a0a0a] rounded-r-full" />
               )}
               <item.Icon
-                size={15}
+                size={collapsed ? 18 : 15}
                 strokeWidth={active ? 2.2 : 1.9}
                 className={active ? 'text-[#0a0a0a]' : 'text-[#bbb] group-hover:text-[#555]'}
               />
-              <span className="flex-1 truncate">{item.label}</span>
-              {item.proOnly && (
-                <span className="text-[9px] font-extrabold text-[#f59e0b] bg-[#fef3c7] px-1.5 py-0.5 rounded tracking-wider">
-                  PRO
-                </span>
+              {!collapsed && (
+                <>
+                  <span className="flex-1 truncate">{item.label}</span>
+                  {item.proOnly && (
+                    <span className="text-[9px] font-extrabold text-white bg-[var(--color-brand-elite)] px-1.5 py-0.5 rounded tracking-wider">
+                      PRO
+                    </span>
+                  )}
+                  {showBadge && (
+                    <span className="text-[10px] font-extrabold text-white bg-[var(--color-brand-court)] rounded-full min-w-[18px] h-[18px] px-1.5 inline-flex items-center justify-center leading-none">
+                      {unreadNoticeCount > 99 ? '99+' : unreadNoticeCount}
+                    </span>
+                  )}
+                </>
               )}
-              {showBadge && (
-                <span className="text-[10px] font-extrabold text-white bg-[#10b981] rounded-full min-w-[18px] h-[18px] px-1.5 inline-flex items-center justify-center leading-none">
-                  {unreadNoticeCount > 99 ? '99+' : unreadNoticeCount}
-                </span>
+              {/* 접힘 상태에서도 공지 미확인 갯수는 작은 점으로 표시 */}
+              {collapsed && showBadge && (
+                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[var(--color-brand-court)] rounded-full" />
               )}
             </Link>
           )

@@ -9,12 +9,26 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://birdieminton.com'
 // 사라졌으며, Server Action ID로의 외부 호출 가능성과 open redirect를 막기
 // 위해 제거함. (이전 액션: loginWithEmail/signupWithEmail)
 
+/**
+ * Open-redirect 방어 — 내부 절대경로(/...)만 허용.
+ * 프로토콜 상대 (//evil.com), 외부 도메인, javascript: 등 차단.
+ */
+function safeNext(next: string | undefined): string {
+  if (!next) return '/'
+  if (typeof next !== 'string') return '/'
+  if (!next.startsWith('/')) return '/'
+  if (next.startsWith('//')) return '/'
+  if (next.length > 200) return '/'
+  return next
+}
+
 export async function loginWithKakao(next?: string) {
   const supabase = await createClient()
+  const safe = safeNext(next)
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'kakao',
     options: {
-      redirectTo: `${SITE_URL}/auth/callback?next=${encodeURIComponent(next ?? '/')}`,
+      redirectTo: `${SITE_URL}/auth/callback?next=${encodeURIComponent(safe)}`,
     },
   })
   if (error || !data.url) return { error: '카카오 로그인에 실패했습니다.' }
@@ -23,10 +37,11 @@ export async function loginWithKakao(next?: string) {
 
 export async function loginWithGoogle(next?: string) {
   const supabase = await createClient()
+  const safe = safeNext(next)
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${SITE_URL}/auth/callback?next=${encodeURIComponent(next ?? '/')}`,
+      redirectTo: `${SITE_URL}/auth/callback?next=${encodeURIComponent(safe)}`,
     },
   })
   if (error || !data.url) return { error: '구글 로그인에 실패했습니다.' }

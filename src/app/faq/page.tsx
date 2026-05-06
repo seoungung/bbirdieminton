@@ -43,12 +43,12 @@ const FAQS: Faq[] = [
   {
     category: '요금제',
     q: '무료 플랜으로 어디까지 쓸 수 있나요?',
-    a: '최대 30명까지 가입 가능하며, 게임보드·랭킹·공지 등 핵심 기능을 전부 사용할 수 있습니다. 회비 정산 자동화는 Pro 플랜부터 제공됩니다.',
+    a: '최대 50명까지 가입 가능하며, 게임보드·실력 균형 자동 매칭·랭킹·공지·정기모임 RSVP·백업복원까지 핵심 운영 기능을 전부 쓸 수 있어요. 회비 자동 정산과 카카오 알림톡은 Pro 플랜부터, 멀티 클럽·고급 통계는 Team 플랜부터 제공됩니다.',
   },
   {
     category: '요금제',
-    q: 'v2.0 베타 기간 동안은 Pro 기능도 무료인가요?',
-    a: '네. v2.1 정식 출시 전까지 모든 유저에게 Pro 기능을 무료로 제공합니다. 그 이후에도 Free 플랜은 계속 무료로 유지됩니다.',
+    q: 'v2.0 베타 기간 동안은 Pro·Team 기능도 무료인가요?',
+    a: '네. 베타 기간(약 1~3개월) 동안 모든 유저에게 Pro·Team 기능을 무료로 제공합니다. 정식 출시 후에도 Free 플랜은 계속 무료이며, 베타 가입자에게는 Pro 3개월 무료 혜택을 드립니다.',
   },
   {
     category: '요금제',
@@ -189,7 +189,7 @@ export default function FaqPage() {
           </p>
           <Link
             href="/contact"
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#beff00] text-[#0a0a0a] font-extrabold text-[14px] rounded-full hover:bg-[#a8e600] transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[var(--color-brand-lime)] text-[#0a0a0a] font-extrabold text-[14px] rounded-full hover:bg-[var(--color-brand-lime-dim)] transition-colors"
           >
             문의하기 →
           </Link>

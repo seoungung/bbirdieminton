@@ -4,7 +4,6 @@ import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
 import { CalendarDays } from 'lucide-react'
 import { EventDetailClient } from '@/components/club/EventDetailClient'
-import { BackButton } from '@/components/club/BackButton'
 import { DEMO_CLUBS } from '@/lib/club/demoData'
 import { buildDemoEventDetail } from '@/lib/club/eventsDemo'
 import type { Metadata } from 'next'
@@ -30,13 +29,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 function PageHeader({ clubId }: { clubId: string }) {
   return (
     <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
-      <div className="max-w-[880px] mx-auto flex items-center gap-3">
-        <BackButton fallback={`/club/${clubId}/events`} />
+      <div className="max-w-[720px] mx-auto flex items-center gap-3">
         <div>
           <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
             <CalendarDays size={16} strokeWidth={2} />
             정기모임 상세
           </h1>
+          <p className="text-xs text-[#999] mt-0.5">참석자 및 일정 상세</p>
         </div>
       </div>
     </header>
@@ -53,7 +52,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     return (
       <div>
         <PageHeader clubId={clubId} />
-        <main className="max-w-[880px] mx-auto px-4 py-5">
+        <main className="max-w-[720px] mx-auto px-4 py-5">
           <EventDetailClient
             clubId={clubId}
             event={demo.event}
@@ -78,7 +77,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   if (!clubUserId) redirect('/login')
 
   const membership = await getMyMembership(supabase, clubId, clubUserId)
-  if (!membership) redirect('/club/home')
+  if (!membership) redirect('/clubs')
 
   const { data: ev } = await supabase
     .from('club_events')
@@ -138,7 +137,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   return (
     <div>
       <PageHeader clubId={clubId} />
-      <main className="max-w-[880px] mx-auto px-4 py-5">
+      <main className="max-w-[720px] mx-auto px-4 py-5">
         <EventDetailClient
           clubId={clubId}
           event={detail}

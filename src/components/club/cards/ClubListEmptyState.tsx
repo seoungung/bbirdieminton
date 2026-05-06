@@ -34,7 +34,7 @@ export function ClubListEmptyState({
           <Link
             href="/club/create"
             onClick={onCreateClick}
-            className="px-5 py-2.5 bg-[#beff00] text-[#111] font-semibold text-sm rounded-xl hover:brightness-95 transition-all inline-flex items-center gap-1.5"
+            className="px-5 py-2.5 bg-[var(--color-brand-lime)] text-[#111] font-semibold text-sm rounded-xl hover:brightness-95 transition-all inline-flex items-center gap-1.5"
           >
             <Plus size={14} />
             모임 만들기

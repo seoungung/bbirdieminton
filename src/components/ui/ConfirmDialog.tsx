@@ -68,7 +68,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             className={`px-4 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
               variant === 'destructive'
-                ? 'bg-red-500 text-white hover:bg-red-600'
+                ? 'bg-[var(--color-brand-streak)] text-white hover:bg-[var(--color-brand-streak)]'
                 : 'bg-[#111] text-white hover:bg-[#333]'
             }`}
           >

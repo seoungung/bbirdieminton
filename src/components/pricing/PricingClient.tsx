@@ -12,6 +12,12 @@ interface Plan {
   monthly: string
   yearly: string
   unit: string
+  /**
+   * 가격 옆 셔틀콕 비유 보조 카피.
+   * 한국 동호회 4대 지정콕(삼화블랙·강산연 301/501·KBB79) 평균 시세 기준.
+   * 1타(12개) ≈ 29,000원 / 1개 ≈ 2,400원
+   */
+  priceContext?: string
   features: string[]
   cta: string
   href: string
@@ -22,57 +28,61 @@ interface Plan {
 const PLANS: Plan[] = [
   {
     name: 'Free',
-    description: '소규모 동호회를 위한 기본 플랜',
+    description: '시작하는 모임·소규모 운영',
     monthly: '0',
     yearly: '0',
     unit: '원',
     features: [
-      '회원 30명까지',
-      '게임보드 & 자동 팀배정',
-      '경기 기록 & 랭킹',
-      '공지 게시판',
-      '기본 회원 관리',
+      '멤버 50명까지',
+      '게임보드 + 실력 균형 자동 매칭',
+      '출석·공지·정기모임 RSVP',
+      '회비 수동 관리 · 셔틀콕 풀',
+      '개인 시즌 리포트 PDF',
+      '백업·복원',
     ],
     cta: '지금 시작하기',
-    href: '/login?next=%2Fclub%2Fhome',
+    href: '/login?next=%2Fclubs',
     highlight: false,
   },
   {
     name: 'Pro',
-    description: '회원 무제한 동호회 운영자에게',
+    description: '운영을 자동화하고 싶은 모임',
     monthly: '9,900',
     yearly: '7,920',
     unit: '원/월',
+    priceContext: '한 모임 셔틀콕 4개 가격 — 지정콕 1타의 1/3',
     features: [
-      'Free 모든 기능',
-      '회원 무제한',
-      '회비 정산 자동화',
-      '셔틀콕비 자동 정산',
-      '엑셀 내보내기',
-      '카카오 공지 자동 공유',
-      '미납자 자동 알림',
+      'Free 모든 기능 + 멤버 100명',
+      '회비 정산 자동화 (출석·셔틀콕·코트비)',
+      '카카오 알림톡 월 200건 (미납·공지·이벤트)',
+      '운영진 권한 분배 (오너·매니저·총무)',
+      '모임 커스터마이징 (로고·배너·색상)',
+      '단일 모임 통계 + 멤버 인사이트',
+      '시즌 리포트 자동 PDF',
     ],
     cta: 'Pro 시작하기',
-    href: '/login?next=%2Fclub%2Fhome',
+    href: '/login?next=%2Fclubs',
     highlight: true,
     badge: '가장 인기',
   },
   {
     name: 'Team',
-    description: '여러 동호회를 운영하는 분께',
+    description: '큰 모임·체육관·연맹',
     monthly: '29,900',
     yearly: '23,920',
     unit: '원/월',
+    priceContext: '지정콕 1타 가격 — 모임 5개 + 고급 분석',
     features: [
-      'Pro 모든 기능',
-      '클럽 5개까지 관리',
-      '맞춤 통계 대시보드',
-      '우선 고객 지원',
-      'Webhook 연동 (Zapier)',
-      '전용 온보딩',
+      'Pro 모든 기능 + 멤버 무제한',
+      '여러 모임 한꺼번에 (최대 5개)',
+      '통합 통계 + 모임 간 비교',
+      '고급 통계 dashboard',
+      '분기·연간 종합 리포트 PDF',
+      '데이터 내보내기 (엑셀·CSV)',
+      '우선 지원 (카톡 1:1 채널)',
     ],
     cta: 'Team 시작하기',
-    href: '/login?next=%2Fclub%2Fhome',
+    href: '/login?next=%2Fclubs',
     highlight: false,
   },
 ]
@@ -80,7 +90,15 @@ const PLANS: Plan[] = [
 const FAQS = [
   {
     q: 'v2.0 베타 기간 동안은 어떻게 되나요?',
-    a: '베타 기간 중에는 모든 유저에게 Pro 기능을 무료로 제공합니다. 정식 출시 후에도 Free 플랜은 계속 무료입니다.',
+    a: '베타 기간(약 1~3개월) 중에는 모든 유저에게 Pro·Team 기능을 무료로 제공합니다. 정식 출시 후에도 Free 플랜은 계속 무료이며, 베타 가입자에게는 Pro 3개월 무료 혜택을 드립니다.',
+  },
+  {
+    q: '이 가격이 정말 합리적인가요?',
+    a: '한국 동호회에서 가장 많이 쓰는 지정콕(삼화블랙·강산연 301/501·KBB79) 평균 시세로 1타(12개) 약 29,000원, 1개 약 2,400원입니다. Pro 한 달 9,900원은 셔틀콕 4개 가격으로 지정콕 1타의 1/3 수준이고, Team 29,900원은 정확히 지정콕 1타 가격이에요. 한 모임이 한 게임에 보통 셔틀콕 4~6개를 쓰는데, 그 정도 비용으로 매주의 매칭·회비 정산·알림톡까지 다 자동화됩니다. 운영 자동화로 회비 미수금 한 명만 줄여도 본전이 나와요.',
+  },
+  {
+    q: '실력 매칭은 어떻게 작동하나요?',
+    a: '매 경기 결과를 우리 모임 안에서 자동으로 학습해 멤버별 실력 점수를 매겨요. 운영자가 D조·C조 일일이 입력하지 않아도 됩니다. 다른 사람에겐 등급 라벨만 보이고, 본인 카드에서만 정밀한 점수·진행도를 확인할 수 있어요. 신입은 "강한 사람과 한 팀이 되는 매칭 모드"로 이탈을 줄이고, 운영진 매칭 결정에 정치적 부담이 사라집니다.',
   },
   {
     q: '연간 결제는 어떻게 할인되나요?',
@@ -99,8 +117,12 @@ const FAQS = [
     a: '서비스 이용 이력이 없는 경우 결제일로부터 7일 이내 전액 환불 가능합니다. 자세한 내용은 환불정책 페이지를 확인해주세요.',
   },
   {
-    q: '회원이 30명을 넘으면 어떻게 되나요?',
-    a: 'Free 플랜에서 30명을 초과하면 신규 회원 가입이 제한됩니다. Pro 플랜으로 업그레이드하시면 무제한으로 받을 수 있습니다.',
+    q: '회원이 50명을 넘으면 어떻게 되나요?',
+    a: 'Free 플랜에서 50명을 초과하면 신규 회원 가입이 제한됩니다. Pro 플랜(100명)이나 Team 플랜(무제한)으로 업그레이드하시면 계속 받을 수 있습니다.',
+  },
+  {
+    q: '카카오 알림톡 200건 한도가 부족하면요?',
+    a: 'Pro 플랜은 월 200건의 알림톡(미납·공지·이벤트 알림)을 포함합니다. 100명 규모 클럽에선 충분하지만, 큰 클럽이라 부족할 경우 Team 플랜으로 확장하시거나 별도 패키지로 추가 구매가 가능합니다.',
   },
 ]
 
@@ -112,15 +134,15 @@ export function PricingClient() {
       {/* ── 헤더 ── */}
       <section className="px-8 py-20 sm:py-28 border-b border-white/10">
         <div className="max-w-[1200px] mx-auto text-center">
-          <p className="text-[12px] font-bold uppercase tracking-widest text-[#beff00] mb-4">
+          <p className="text-[12px] font-bold uppercase tracking-widest text-[var(--color-brand-lime)] mb-4">
             PRICING
           </p>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] mb-5">
             나에게 맞는 플랜을<br />선택하세요
           </h1>
           <p className="text-lg text-white/60 max-w-[560px] mx-auto leading-relaxed mb-10">
-            v2.0 베타 기간 동안 모든 기능 무료입니다.<br />
-            정식 출시 후에도 Free 플랜은 계속 무료로 제공됩니다.
+            v2.0 베타 기간(1~3개월) 동안 Pro·Team 모든 기능 무료.<br />
+            베타 가입자에게는 Pro 3개월 무료 혜택을 드립니다.
           </p>
 
           {/* 월간/연간 토글 */}
@@ -147,8 +169,8 @@ export function PricingClient() {
               <span
                 className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded ${
                   cycle === 'yearly'
-                    ? 'bg-[#beff00] text-[#0a0a0a]'
-                    : 'bg-[#beff00]/20 text-[#beff00]'
+                    ? 'bg-[var(--color-brand-lime)] text-[#0a0a0a]'
+                    : 'bg-[var(--color-brand-lime)]/20 text-[var(--color-brand-lime)]'
                 }`}
               >
                 20% 할인
@@ -173,7 +195,7 @@ export function PricingClient() {
                 }`}
               >
                 {plan.badge && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-extrabold text-[#0a0a0a] bg-[#beff00] px-3 py-1 rounded-full">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[11px] font-extrabold text-[#0a0a0a] bg-[var(--color-brand-lime)] px-3 py-1 rounded-full">
                     {plan.badge}
                   </span>
                 )}
@@ -204,6 +226,17 @@ export function PricingClient() {
                       월 {plan.monthly}원의 20% 할인
                     </p>
                   )}
+                  {plan.priceContext && (
+                    <p
+                      className={`text-[11px] mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-md ${
+                        plan.highlight
+                          ? 'bg-[#0a0a0a]/5 text-[#0a0a0a]'
+                          : 'bg-[var(--color-brand-lime)]/15 text-[var(--color-brand-lime)]'
+                      }`}
+                    >
+                      🏸 {plan.priceContext}
+                    </p>
+                  )}
                 </div>
 
                 <ul className="space-y-3 mb-8 flex-1">
@@ -213,7 +246,7 @@ export function PricingClient() {
                         size={15}
                         strokeWidth={2.5}
                         className={`mt-0.5 shrink-0 ${
-                          plan.highlight ? 'text-[#10b981]' : 'text-[#beff00]'
+                          plan.highlight ? 'text-[var(--color-brand-court)]' : 'text-[var(--color-brand-lime)]'
                         }`}
                       />
                       <span className="text-[14px]">{f}</span>
@@ -283,8 +316,8 @@ export function PricingClient() {
             v2.0 베타 기간, 모든 기능 무료입니다.
           </p>
           <Link
-            href="/login?next=%2Fclub%2Fhome"
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#beff00] text-[#0a0a0a] font-extrabold text-[14px] rounded-full hover:bg-[#a8e600] transition-colors"
+            href="/login?next=%2Fclubs"
+            className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[var(--color-brand-lime)] text-[#0a0a0a] font-extrabold text-[14px] rounded-full hover:bg-[var(--color-brand-lime-dim)] transition-colors"
           >
             무료로 시작하기
             <ArrowRight size={15} />

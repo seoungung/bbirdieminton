@@ -27,7 +27,7 @@ const PRODUCTS: Product[] = [
     description: '왕초보부터 C조까지, 레벨별 라켓 선택 완벽 가이드 PDF (약 30~40p)',
     badge: 'PDF · 즉시 다운로드',
     coverBg: '#0a0a0a',
-    coverText: '#beff00',
+    coverText: '#DBE64C',
   },
 ]
 
@@ -37,7 +37,7 @@ export default function ShopPage() {
       {/* 헤더 */}
       <header className="bg-[#0a0a0a] py-14">
         <div className="max-w-[1088px] mx-auto px-4 sm:px-8">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[#beff00] bg-[#beff00]/10 px-3 py-1.5 rounded-full mb-4">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[var(--color-brand-lime)] bg-[var(--color-brand-lime)]/10 px-3 py-1.5 rounded-full mb-4">
             <BookOpen size={13} /> SHOP
           </span>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">

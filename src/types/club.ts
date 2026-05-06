@@ -19,6 +19,11 @@ export interface ClubUser {
   created_at: string
 }
 
+export interface ClubFAQ {
+  question: string
+  answer: string
+}
+
 export interface Club {
   id: string
   owner_id: string | null
@@ -45,6 +50,25 @@ export interface Club {
   shuttle_weekend_required: number
   /** 게임 종료 점수 (21 정식 대회 / 25 일반 클럽) — 디폴트 25 */
   match_point_target: 21 | 25
+  /** 사전 정의 태그 (예: '#아침', '#초심환영') */
+  tags: string[]
+  /** 월회비 (원). null = 미설정/협의 */
+  fee_monthly: number | null
+  /** 회당 회비 (원) */
+  fee_per_session: number | null
+  /** 회비 추가 안내 (자유 텍스트) */
+  fee_note: string | null
+  /** 운영자 한 줄 소개 */
+  owner_bio: string | null
+  /** 활동 사진 URL 배열 */
+  photo_urls: string[]
+  /** 정기 일정 자유 텍스트 — 예: "매주 화/목 19:00~22:00" */
+  schedule_summary: string | null
+  /** 자주 묻는 질문 */
+  faqs: ClubFAQ[]
+  /** 공개 연락처 — mailto:..., https://open.kakao.com/..., tel:... 등 자유 형식 (200자 이내).
+   *  null = 미입력 → 미리보기 페이지의 메시지 버튼 숨김. */
+  contact_url: string | null
   created_at: string
   updated_at: string
 }
@@ -134,6 +158,7 @@ export interface ClubMember {
   user_id: string
   role: MemberRole
   skill_score: number
+  gender?: 'M' | 'F' | null
   joined_at: string
   removed_at: string | null  // 강퇴 시각 (null = 활성 멤버)
 }
@@ -319,7 +344,31 @@ export interface ClubPreview {
   thumbnail_url: string | null
   created_at: string
   owner_name: string | null
+  /** Phase A — 운영자 프로필 이미지 */
+  owner_profile_img?: string | null
   member_count: number
   upcoming_events: ClubPreviewEvent[]
   recent_members: ClubPreviewMember[]
+  // ── Phase A 확장 컬럼 (없을 수 있어 옵셔널) ──────────────
+  tags?: string[]
+  fee_monthly?: number | null
+  fee_per_session?: number | null
+  fee_note?: string | null
+  owner_bio?: string | null
+  photo_urls?: string[]
+  schedule_summary?: string | null
+  faqs?: ClubFAQ[]
+  /** Phase C — 공개 연락처 */
+  contact_url?: string | null
+}
+
+/** get_club_preview_vibe RPC 반환 JSON — Phase A 통계 카드 */
+export interface ClubPreviewVibe {
+  total_members: number
+  male_count: number
+  female_count: number
+  recent_join_30d: number
+  grade_distribution: Partial<Record<'F' | 'E' | 'D' | 'C' | 'B' | 'A' | 'S', number>>
+  /** 평균 출석 (최근 30일) — 소수점 1자리 */
+  avg_attendance_30d: number
 }

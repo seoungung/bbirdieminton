@@ -36,7 +36,7 @@ export function LatestBlogWidget() {
           <Link
             key={post.slug}
             href={`/blog/${post.slug}`}
-            className="group block rounded-2xl border border-[#e5e5e5] hover:border-[#beff00] hover:shadow-sm transition-all overflow-hidden"
+            className="group block rounded-2xl border border-[#e5e5e5] hover:border-[var(--color-brand-lime)] hover:shadow-sm transition-all overflow-hidden"
           >
             {/* 커버 그라데이션 */}
             <div

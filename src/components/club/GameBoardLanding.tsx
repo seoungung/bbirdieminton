@@ -26,7 +26,7 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
 
   const handleMyClubs = () => {
     if (!isLoggedIn) { setShowLoginModal(true); return }
-    router.push('/club/home')
+    router.push('/clubs')
   }
 
   const handleLoginConfirm = () => {
@@ -50,9 +50,9 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
       {/* ── Hero ── */}
       <div className="bg-[#0a0a0a] pt-10 pb-6 px-4 text-center">
         <div className="max-w-[1088px] mx-auto">
-          <p className="text-[#beff00] text-[10px] font-bold tracking-[0.2em] mb-3 uppercase">Birdieminton</p>
+          <p className="text-[var(--color-brand-lime)] text-[10px] font-bold tracking-[0.2em] mb-3 uppercase">Birdieminton</p>
           <h1 className="text-[32px] font-extrabold text-white mb-2 tracking-tight inline-flex items-center gap-2.5 justify-center">
-            <Gamepad2 size={30} strokeWidth={2.2} className="text-[#beff00]" />
+            <Gamepad2 size={30} strokeWidth={2.2} className="text-[var(--color-brand-lime)]" />
             게임보드
           </h1>
           <p className="text-sm text-white/50 mb-6">함께하는 배드민턴, 더 스마트하게</p>
@@ -62,9 +62,9 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
             <input
               type="text"
               placeholder="게임보드 이름으로 검색..."
-              className="flex-1 bg-white/8 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#beff00]/60 transition-colors"
+              className="flex-1 bg-white/8 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[var(--color-brand-lime)]/60 transition-colors"
             />
-            <button className="bg-[#beff00] text-[#111] px-4 py-2.5 rounded-xl text-sm font-bold hover:brightness-95 transition-all shrink-0">
+            <button className="bg-[var(--color-brand-lime)] text-[#111] px-4 py-2.5 rounded-xl text-sm font-bold hover:brightness-95 transition-all shrink-0">
               검색
             </button>
           </div>
@@ -73,7 +73,7 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
           <div className="flex gap-2">
             <button
               onClick={handleCreate}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#beff00] text-[#111] font-bold py-3 rounded-xl hover:brightness-95 transition-all text-sm"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[var(--color-brand-lime)] text-[#111] font-bold py-3 rounded-xl hover:brightness-95 transition-all text-sm"
             >
               <Plus size={15} />
               모임 만들기
@@ -97,7 +97,7 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
           { Icon: Trophy,    title: '자동 랭킹',      desc: '경기 결과가 자동으로 누적되어 랭킹을 산출합니다' },
         ] as { Icon: IconComp; title: string; desc: string }[]).map(({ Icon, title, desc }) => (
           <div key={title} className="bg-white border border-[#e5e5e5] rounded-2xl p-4 flex items-center gap-4">
-            <div className="w-11 h-11 bg-[#beff00]/15 rounded-xl flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 bg-[var(--color-brand-lime)]/15 rounded-xl flex items-center justify-center shrink-0">
               <Icon size={20} strokeWidth={2} className="text-[#111]" />
             </div>
             <div className="flex-1">
@@ -142,7 +142,7 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
             {/* Modal header */}
             <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-[#e5e5e5] sticky top-0 bg-white">
               <div className="flex items-center gap-2">
-                <Plus size={18} className="text-[#beff00]" />
+                <Plus size={18} className="text-[var(--color-brand-lime)]" />
                 <h3 className="font-bold text-[#111] text-base">모임 만들기</h3>
               </div>
               <button onClick={() => setShowCreateModal(false)} className="text-[#bbb] hover:text-[#555] transition-colors">
@@ -154,7 +154,7 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
             <form onSubmit={handleCreateSubmit} className="px-6 py-5 space-y-4">
               <div>
                 <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
-                  모임 이름 <span className="text-red-400">*</span>
+                  모임 이름 <span className="text-[var(--color-brand-streak)]">*</span>
                 </label>
                 <input
                   type="text"
@@ -188,8 +188,8 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
                       className={
                         'flex-1 h-9 border rounded-xl text-sm font-semibold transition-colors ' +
                         (courtCount === n
-                          ? 'bg-[#beff00] border-[#beff00] text-[#111]'
-                          : 'border-[#e5e5e5] text-[#aaa] hover:border-[#beff00] hover:text-[#555]')
+                          ? 'bg-[var(--color-brand-lime)] border-[var(--color-brand-lime)] text-[#111]'
+                          : 'border-[#e5e5e5] text-[#aaa] hover:border-[var(--color-brand-lime)] hover:text-[#555]')
                       }
                     >
                       {n}
@@ -202,14 +202,14 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
               </div>
 
               {createError && (
-                <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-xl">{createError}</p>
+                <p className="text-sm text-[var(--color-brand-streak)] bg-[var(--color-brand-streak-bg)] px-3 py-2 rounded-xl">{createError}</p>
               )}
 
               <div className="space-y-2 pt-1 pb-1">
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="w-full py-3 bg-[#beff00] text-[#111] font-bold text-sm rounded-xl hover:brightness-95 transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  className="w-full py-3 bg-[var(--color-brand-lime)] text-[#111] font-bold text-sm rounded-xl hover:brightness-95 transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
                   {isPending ? (
                     <span className="animate-spin rounded-full h-4 w-4 border-2 border-[#111] border-t-transparent" />

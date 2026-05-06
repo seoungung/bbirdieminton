@@ -32,8 +32,8 @@ export function EventCard({ clubId, event, past, isManager, onEdit }: Props) {
         past
           ? 'border-[#ebebeb] opacity-75'
           : isMine
-          ? 'border-emerald-300 shadow-sm'
-          : 'border-[#e5e5e5] hover:border-[#beff00] hover:shadow-sm'
+          ? 'border-[var(--color-brand-court-soft)] shadow-sm'
+          : 'border-[#e5e5e5] hover:border-[var(--color-brand-lime)] hover:shadow-sm'
       }`}
     >
       <Link href={`/club/${clubId}/events/${event.id}`} className="block">
@@ -45,14 +45,14 @@ export function EventCard({ clubId, event, past, isManager, onEdit }: Props) {
                   className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider ${
                     isFull
                       ? 'bg-[#f0f0f0] text-[#999]'
-                      : 'bg-emerald-50 text-emerald-700'
+                      : 'bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court-deep)]'
                   }`}
                 >
                   {isFull ? '마감' : '모집중'}
                 </span>
               )}
               {isMine && (
-                <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-600 text-white uppercase tracking-wider">
+                <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-[var(--color-brand-court)] text-white uppercase tracking-wider">
                   참가
                 </span>
               )}
@@ -77,7 +77,7 @@ export function EventCard({ clubId, event, past, isManager, onEdit }: Props) {
 
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#f0f0f0]">
           <div className="inline-flex items-center gap-1 text-[12px] font-semibold">
-            <Users size={12} className="text-emerald-600" strokeWidth={2.5} />
+            <Users size={12} className="text-[var(--color-brand-court)]" strokeWidth={2.5} />
             <span className="text-[#111] tabular-nums">{event.going_count}명</span>
             {event.max_attend > 0 && (
               <span className="text-[#999] tabular-nums">/ 정원 {event.max_attend}</span>

@@ -61,8 +61,8 @@ function RsvpButton({
   const styles =
     tone === 'going'
       ? active
-        ? 'bg-[#beff00] text-[#0a0a0a] border-[#beff00] shadow-sm'
-        : 'bg-white text-[#111] border-[#e5e5e5] hover:border-[#beff00]'
+        ? 'bg-[var(--color-brand-lime)] text-[#0a0a0a] border-[var(--color-brand-lime)] shadow-sm'
+        : 'bg-white text-[#111] border-[#e5e5e5] hover:border-[var(--color-brand-lime)]'
       : active
       ? 'bg-[#0a0a0a] text-white border-[#0a0a0a]'
       : 'bg-white text-[#555] border-[#e5e5e5] hover:border-[#999]'

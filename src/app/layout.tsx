@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import './globals.css'
 import { MainShell } from '@/components/layout/MainShell'
 import { Analytics } from '@vercel/analytics/next'
@@ -21,11 +22,20 @@ export const metadata: Metadata = {
     siteName: '버디민턴',
     title: '버디민턴 | 배드민턴 동호회 관리 플랫폼',
     description: '배드민턴 동호회 운영의 모든 것. 게임보드, 랭킹, 정산, 공지를 한 곳에서.',
+    images: [
+      {
+        url: '/api/og',
+        width: 1200,
+        height: 630,
+        alt: '버디민턴 — 매주의 매칭, 코트 두 개를 10초 안에',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: '버디민턴 | 배드민턴 동호회 관리 플랫폼',
     description: '배드민턴 동호회 운영의 모든 것. 게임보드, 랭킹, 정산, 공지를 한 곳에서.',
+    images: ['/api/og'],
   },
   alternates: {
     canonical: 'https://birdieminton.com',
@@ -49,6 +59,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="antialiased min-h-screen flex flex-col" suppressHydrationWarning>
         <MainShell>{children}</MainShell>
         <Analytics />
+        {/* Kakao SDK — 카카오톡 공유용. integrity는 카카오 공식 권장값. */}
+        <Script
+          src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.5/kakao.min.js"
+          integrity="sha384-dok87au0gKqJdxs7msEdBPNnKSRT+/mhTVzq+qOhcL464zXwvcrpjeWvyj1kCdq6"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   )

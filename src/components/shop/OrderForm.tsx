@@ -206,7 +206,7 @@ export function OrderForm() {
 
         {keyMissing ? (
           <div className="px-6 py-8 text-center">
-            <div className="w-12 h-12 rounded-full bg-[#fef3c7] flex items-center justify-center mx-auto mb-4">
+            <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-4">
               <span className="text-xl">🚧</span>
             </div>
             <p className="text-sm font-bold text-[#111] mb-1">정식 출시 준비 중입니다</p>
@@ -237,7 +237,7 @@ export function OrderForm() {
         <button
           onClick={handlePay}
           disabled={!canPay || loading || keyMissing}
-          className="w-full py-4 bg-[#beff00] text-[#0a0a0a] font-extrabold text-base rounded-xl hover:bg-[#a8e600] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-lg"
+          className="w-full py-4 bg-[var(--color-brand-lime)] text-[#0a0a0a] font-extrabold text-base rounded-xl hover:bg-[var(--color-brand-lime-dim)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-lg"
         >
           {loading ? '결제 처리 중...' : `${AMOUNT.toLocaleString()}원 결제하기`}
         </button>
@@ -272,7 +272,7 @@ function AgreeRow({
           className="w-4 h-4 mt-0.5 accent-[#0a0a0a] shrink-0"
         />
         <span className="text-[13px] text-[#333] leading-snug">{label}</span>
-        {checked && <CheckCircle2 size={13} className="text-[#10b981] shrink-0 mt-0.5" />}
+        {checked && <CheckCircle2 size={13} className="text-[var(--color-brand-court)] shrink-0 mt-0.5" />}
       </label>
       <Link
         href={href}

@@ -54,13 +54,13 @@ export default function StarterGuidePage() {
       {/* 히어로 */}
       <section className="bg-[#0a0a0a] py-14 sm:py-20">
         <div className="max-w-[1088px] mx-auto px-4 sm:px-8 text-center">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[#beff00] bg-[#beff00]/10 px-3 py-1.5 rounded-full mb-5">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-[var(--color-brand-lime)] bg-[var(--color-brand-lime)]/10 px-3 py-1.5 rounded-full mb-5">
             <BookOpen size={13} /> PDF 가이드
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-tight mb-4">
             {PRODUCT.name.split(' ').map((word, i) => (
               <span key={i}>
-                {word === '완전정복' ? <span className="text-[#beff00]">{word}</span> : word}
+                {word === '완전정복' ? <span className="text-[var(--color-brand-lime)]">{word}</span> : word}
                 {i < PRODUCT.name.split(' ').length - 1 ? ' ' : ''}
               </span>
             ))}
@@ -104,7 +104,7 @@ export default function StarterGuidePage() {
             <div className="space-y-4">
               {CHAPTERS.map((ch) => (
                 <div key={ch.label} className="flex gap-4">
-                  <span className="text-xs font-bold text-[#beff00] bg-[#0a0a0a] px-2 py-1 rounded shrink-0 h-fit">{ch.label}</span>
+                  <span className="text-xs font-bold text-[var(--color-brand-lime)] bg-[#0a0a0a] px-2 py-1 rounded shrink-0 h-fit">{ch.label}</span>
                   <div>
                     <p className="font-semibold text-sm text-[#111]">{ch.title}</p>
                     <p className="text-xs text-[#999] mt-0.5">{ch.desc}</p>
@@ -119,7 +119,7 @@ export default function StarterGuidePage() {
             <h2 className="text-lg font-extrabold text-[#111] mb-5">이 가이드에 포함된 것</h2>
             {INCLUDES.map((item) => (
               <div key={item} className="flex items-start gap-2.5 mb-3">
-                <CheckCircle2 size={16} className="text-[#10b981] shrink-0 mt-0.5" strokeWidth={2.5} />
+                <CheckCircle2 size={16} className="text-[var(--color-brand-court)] shrink-0 mt-0.5" strokeWidth={2.5} />
                 <p className="text-sm text-[#555]">{item}</p>
               </div>
             ))}
@@ -167,7 +167,7 @@ export default function StarterGuidePage() {
 
             <Link
               href="/shop/starter-guide/order"
-              className="w-full inline-flex items-center justify-center gap-2 py-4 bg-[#beff00] text-[#0a0a0a] font-extrabold text-base rounded-xl hover:bg-[#a8e600] transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 py-4 bg-[var(--color-brand-lime)] text-[#0a0a0a] font-extrabold text-base rounded-xl hover:bg-[var(--color-brand-lime-dim)] transition-colors"
             >
               <ShoppingCart size={18} strokeWidth={2.5} />
               주문하기

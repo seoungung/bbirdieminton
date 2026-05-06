@@ -48,6 +48,28 @@ export const GRADE_COLOR: Record<Grade, { bg: string; text: string; border: stri
   F: { bg: 'bg-gray-100',   text: 'text-gray-600',   border: 'border-gray-300'   },
 }
 
+/**
+ * 등급 → 대표 skill_score (게스트가 grade 만 있을 때 사용).
+ * null = 미지정 (50 fallback 권장).
+ *
+ * 임계값은 scoreToGrade 역방향으로 매핑:
+ *  S (90+) → 95, A (80-89) → 84, B (65-79) → 72,
+ *  C (50-64) → 57, D (35-49) → 42, E (20-34) → 27, F (<20) → 10
+ */
+export function gradeToSkill(grade: string | null | undefined): number | null {
+  if (!grade) return null
+  switch (grade) {
+    case 'S': return 95
+    case 'A': return 84
+    case 'B': return 72
+    case 'C': return 57
+    case 'D': return 42
+    case 'E': return 27
+    case 'F': return 10
+    default:  return null
+  }
+}
+
 /** 클럽 멤버 목록에서 skill_score 기준 순위 맵 생성 (1-based) */
 export function buildRankMap<T extends { id: string; skill_score: number }>(
   members: T[]

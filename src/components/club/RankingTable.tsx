@@ -1,6 +1,8 @@
+import Link from 'next/link'
 import { BarChart3, Medal, Crown } from 'lucide-react'
 import { GradeBadge } from '@/components/club/GradeBadge'
 import type { RankingRow } from '@/types/club'
+import type { RatingMap } from '@/lib/club/client'
 
 /** 정식 랭킹 진입 최소 경기 수 — 적은 게임 수가 유리한 왜곡 방지 */
 export const MIN_GAMES_FOR_RANK = 5
@@ -19,9 +21,12 @@ const PODIUM_STYLES: Array<{
 export function RankingTable({
   ranking,
   currentUserId,
+  ratingsMap = {},
 }: {
   ranking: RankingRow[]
   currentUserId: string
+  /** member_id → Glicko-2 레이팅. 없으면 skill_score 기반 grade로 fallback */
+  ratingsMap?: RatingMap
 }) {
   if (ranking.length === 0) {
     return (
@@ -48,15 +53,16 @@ export function RankingTable({
           subtitle={`${MIN_GAMES_FOR_RANK}전 이상 · 승률 순`}
           rows={rerankedFormal}
           currentUserId={currentUserId}
+          ratingsMap={ratingsMap}
         />
       )}
 
       {provisional.length > 0 && (
-        <ProvisionalSection rows={provisional} currentUserId={currentUserId} />
+        <ProvisionalSection rows={provisional} currentUserId={currentUserId} ratingsMap={ratingsMap} />
       )}
 
       {rerankedFormal.length === 0 && provisional.length > 0 && (
-        <p className="text-[12px] text-[#999] text-center bg-[#fffbeb] border border-[#fef3c7] rounded-2xl p-3 leading-relaxed">
+        <p className="text-[12px] text-[#999] text-center bg-amber-50 border border-amber-100 rounded-2xl p-3 leading-relaxed">
           아직 모든 회원이 <strong className="text-[#92400e]">{MIN_GAMES_FOR_RANK}전 미만</strong>이에요.
           <br />
           {MIN_GAMES_FOR_RANK}전 이상 뛰면 공식 랭킹에 진입합니다.
@@ -73,12 +79,14 @@ function RankingSection({
   rows,
   currentUserId,
   isProvisional,
+  ratingsMap,
 }: {
   title: string
   subtitle: string
   rows: RankingRow[]
   currentUserId: string
   isProvisional?: boolean
+  ratingsMap: RatingMap
 }) {
   return (
     <section>
@@ -100,14 +108,15 @@ function RankingSection({
             : '0.0'
 
         return (
-          <div
+          <Link
             key={row.id}
+            href={`/club/${row.member.club_id}/members/${row.member.id}`}
             role="row"
             aria-current={isMe ? 'true' : undefined}
             className={
-              'flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-colors ' +
+              'flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all hover:shadow-sm hover:-translate-y-px ' +
               (isMe
-                ? 'border-[#beff00] bg-[#beff00]/5'
+                ? 'border-[var(--color-brand-lime)] bg-[var(--color-brand-lime)]/5'
                 : podium
                 ? `${podium.cardBg} ${podium.cardBorder}`
                 : 'bg-white border-[#e5e5e5]')
@@ -149,12 +158,16 @@ function RankingSection({
             {/* 이름 + 급수 + 전적 */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 mb-0.5">
-                <GradeBadge score={row.member.skill_score} size="sm" />
+                <GradeBadge
+                  score={row.member.skill_score}
+                  mu={ratingsMap[row.member.id]?.mu ?? null}
+                  size="sm"
+                />
                 <p className="text-sm font-bold text-[#111] truncate">
                   {row.member.user.name}
                 </p>
                 {isMe && (
-                  <span className="text-[10px] font-bold text-[#111] bg-[#beff00] px-1.5 py-0.5 rounded-md shrink-0">
+                  <span className="text-[10px] font-bold text-[#111] bg-[var(--color-brand-lime)] px-1.5 py-0.5 rounded-md shrink-0">
                     나
                   </span>
                 )}
@@ -177,7 +190,7 @@ function RankingSection({
                 {isProvisional ? `${row.games_played}전` : '승률'}
               </p>
             </div>
-          </div>
+          </Link>
         )
       })}
       </div>
@@ -189,9 +202,11 @@ function RankingSection({
 function ProvisionalSection({
   rows,
   currentUserId,
+  ratingsMap,
 }: {
   rows: RankingRow[]
   currentUserId: string
+  ratingsMap: RatingMap
 }) {
   return (
     <RankingSection
@@ -200,6 +215,7 @@ function ProvisionalSection({
       rows={rows.map((r) => ({ ...r, rank: 0 }))}
       currentUserId={currentUserId}
       isProvisional
+      ratingsMap={ratingsMap}
     />
   )
 }

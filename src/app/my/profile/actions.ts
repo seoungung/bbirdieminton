@@ -27,6 +27,6 @@ export async function updateNicknameAction(
   if (error) return { error: error.message }
 
   revalidatePath('/my/profile')
-  revalidatePath('/club/home')
+  revalidatePath('/clubs')
   return { success: '닉네임이 변경되었습니다.' }
 }

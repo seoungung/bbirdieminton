@@ -52,7 +52,7 @@ export default async function JoinPage({ params }: Props) {
             /* 클럽 정보 표시 */
             <>
               <div className="flex items-center gap-3 mb-5 pb-5 border-b border-[#f0f0f0]">
-                <div className="w-12 h-12 rounded-xl bg-[#beff00] flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-[var(--color-brand-lime)] flex items-center justify-center shrink-0">
                   <Image src="/symbol_birdieminton-black.png" alt="" width={26} height={26} className="h-[26px] w-auto" aria-hidden="true" />
                 </div>
                 <div className="min-w-0">

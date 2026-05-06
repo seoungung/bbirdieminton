@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Copy, LogOut, Crown, Shield, User, Trash2 } from 'lucide-react'
+import { Copy, LogOut, Crown, Shield, User, Trash2, MessageCircle } from 'lucide-react'
 import type { Club, ClubMemberWithUser, MemberRole } from '@/types/club'
 import { updateMemberRoleAction, regenerateInviteCodeAction } from '@/app/club/[clubId]/members/actions'
+import { shareToKakao } from '@/lib/kakao/share'
 import {
   deleteClubAction,
   leaveClubAction,
@@ -12,6 +13,8 @@ import {
   updateClubProfileAction,
 } from '@/app/club/[clubId]/settings/actions'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { ROLE_LABEL } from '@/lib/club/labels'
+import { SettingsProfileExtras } from '@/components/club/SettingsProfileExtras'
 
 interface Props {
   club: Club
@@ -22,15 +25,9 @@ interface Props {
 }
 
 const ROLE_ICON: Record<MemberRole, React.ReactNode> = {
-  owner: <Crown size={13} className="text-yellow-500" />,
-  manager: <Shield size={13} className="text-blue-500" />,
+  owner: <Crown size={13} className="text-[var(--color-brand-elite)]" />,
+  manager: <Shield size={13} className="text-[var(--color-brand-team-a)]" />,
   member: <User size={13} className="text-[#bbb]" />,
-}
-
-const ROLE_LABEL: Record<MemberRole, string> = {
-  owner: '운영자',
-  manager: '매니저',
-  member: '멤버',
 }
 
 export function SettingsClient({ club, members, myMemberId, isOwner, isManager }: Props) {
@@ -85,6 +82,30 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const shareInviteToKakao = () => {
+    if (typeof window === 'undefined') return
+    const code = codeRegen ?? club.invite_code
+    const url = `${window.location.origin}/join/${code}`
+    const ogParams = new URLSearchParams({
+      title: `${club.name} 모임 초대장`,
+      subtitle: `초대코드 ${code} · 버디민턴`,
+      tag: 'INVITE',
+    })
+    const ok = shareToKakao({
+      url,
+      title: `${club.name} 모임 초대장`,
+      description: `버디민턴에서 ${club.name} 모임에 합류해보세요. 초대코드: ${code}`,
+      imageUrl: `${window.location.origin}/api/og?${ogParams.toString()}`,
+      buttonText: '모임 합류하기',
+    })
+    if (!ok) {
+      // SDK 미로드 → 클립보드로 fallback
+      navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   const changeRole = (memberId: string, newRole: 'manager' | 'member') => {
     if (!isOwner) return
     startTransition(async () => {
@@ -104,7 +125,7 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
         startTransition(async () => {
           const result = await deleteClubAction(club.id)
           if (result?.error) { alert(result.error); return }
-          router.push('/club/home')
+          router.push('/clubs')
         })
       },
     })
@@ -121,7 +142,7 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
         startTransition(async () => {
           const result = await leaveClubAction(club.id)
           if (result?.error) { alert(result.error); return }
-          router.push('/club/home')
+          router.push('/clubs')
         })
       },
     })
@@ -167,8 +188,18 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
               <Copy size={13} />
               {copied ? '복사됨!' : '복사'}
             </button>
+            <button
+              onClick={shareInviteToKakao}
+              className="flex items-center gap-1.5 text-sm font-extrabold text-[#3a1d1d] bg-[#fee500] hover:bg-[#fdd835] px-3 py-1.5 rounded-xl transition-colors"
+            >
+              <MessageCircle size={13} fill="currentColor" strokeWidth={2.5} />
+              카톡 초대
+            </button>
           </div>
         </div>
+        <p className="mt-3 text-[11px] text-[#999]">
+          카톡 초대를 누르면 받는 사람이 카드를 눌러 곧바로 가입 페이지로 이동해요.
+        </p>
       </div>
 
       {/* 최대 코트 수 — 운영진만 변경 가능 */}
@@ -184,18 +215,21 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
               onChange={(e) => setCourtCount(Number(e.target.value))}
               onBlur={handleCourtCountSave}
               disabled={isPending}
-              className="w-24 border border-[#e5e5e5] rounded-xl px-4 py-2.5 text-sm text-[#111] focus:outline-none focus:border-[#beff00] bg-white transition-colors text-center disabled:opacity-50"
+              className="w-24 border border-[#e5e5e5] rounded-xl px-4 py-2.5 text-sm text-[#111] focus:outline-none focus:border-[var(--color-brand-lime)] bg-white transition-colors text-center disabled:opacity-50"
             />
             <span className="text-sm text-[#999]">면 (1~20)</span>
           </div>
           {courtCountError && (
-            <p className="text-xs text-red-500 mt-1.5">{courtCountError}</p>
+            <p className="text-xs text-[var(--color-brand-streak)] mt-1.5">{courtCountError}</p>
           )}
           <p className="text-[11px] text-[#999] mt-1.5 leading-relaxed">
             이 모임이 운영할 수 있는 최대 코트 수예요. 매 게임 시작 시 그날 사용할 코트 수를 1~최대값 사이로 조정할 수 있어요.
           </p>
         </div>
       )}
+
+      {/* Phase A — 모임 프로필 (가입 전 페이지) 편집 */}
+      {isManager && <SettingsProfileExtras club={club} isManager={isManager} />}
 
       {/* 게임 규칙 — 운영진만 변경 가능 */}
       {isManager && (
@@ -272,7 +306,7 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
                   value={m.role}
                   onChange={(e) => changeRole(m.id, e.target.value as 'manager' | 'member')}
                   disabled={isPending}
-                  className="text-xs border border-[#e5e5e5] rounded-xl px-2 py-1 text-[#555] bg-white focus:outline-none focus:border-[#beff00] transition-colors"
+                  className="text-xs border border-[#e5e5e5] rounded-xl px-2 py-1 text-[#555] bg-white focus:outline-none focus:border-[var(--color-brand-lime)] transition-colors"
                 >
                   <option value="member">멤버</option>
                   <option value="manager">매니저</option>
@@ -288,7 +322,7 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
         <button
           onClick={leaveClub}
           disabled={isPending}
-          className="w-full flex items-center justify-center gap-2 py-3.5 border border-red-200 text-red-500 font-semibold text-sm rounded-xl hover:bg-red-50 transition-colors disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 py-3.5 border border-[var(--color-brand-streak-soft)] text-[var(--color-brand-streak)] font-semibold text-sm rounded-xl hover:bg-[var(--color-brand-streak-bg)] transition-colors disabled:opacity-50"
         >
           <LogOut size={15} />
           모임 나가기
@@ -300,7 +334,7 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
         <button
           onClick={handleDeleteClub}
           disabled={isPending}
-          className="w-full flex items-center justify-center gap-2 py-3.5 border border-red-200 text-red-500 font-semibold text-sm rounded-xl hover:bg-red-50 transition-colors disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 py-3.5 border border-[var(--color-brand-streak-soft)] text-[var(--color-brand-streak)] font-semibold text-sm rounded-xl hover:bg-[var(--color-brand-streak-bg)] transition-colors disabled:opacity-50"
         >
           <Trash2 size={15} />
           모임 삭제

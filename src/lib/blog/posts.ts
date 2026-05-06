@@ -31,7 +31,7 @@ export const POSTS: BlogPost[] = [
     category: '총무 노하우',
     date: '2026.04.20',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#0a0a0a] via-[#1a1a1a] to-[#beff00]/20',
+    coverGradient: 'from-[#0a0a0a] via-[#1a1a1a] to-[#DBE64C]/20',
   },
   {
     slug: 'fair-team-matching',
@@ -41,7 +41,7 @@ export const POSTS: BlogPost[] = [
     category: '인사이트',
     date: '2026.04.15',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#10b981] via-[#059669] to-[#0a0a0a]',
+    coverGradient: 'from-[#00804C] via-[#005A35] to-[#0a0a0a]',
   },
   {
     slug: 'kakao-vs-app',
@@ -51,7 +51,7 @@ export const POSTS: BlogPost[] = [
     category: '인사이트',
     date: '2026.04.10',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#f59e0b] via-[#d97706] to-[#0a0a0a]',
+    coverGradient: 'from-[#DBE64C] via-[#BAC633] to-[#0a0a0a]',
   },
   {
     slug: 'newbie-onboarding',
@@ -61,7 +61,7 @@ export const POSTS: BlogPost[] = [
     category: '총무 노하우',
     date: '2026.04.05',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#8b5cf6] via-[#7c3aed] to-[#0a0a0a]',
+    coverGradient: 'from-[#001F3F] via-[#1E488F] to-[#0a0a0a]',
   },
   {
     slug: 'club-200-case',
@@ -71,7 +71,7 @@ export const POSTS: BlogPost[] = [
     category: '사례 공유',
     date: '2026.03.28',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#2563eb] via-[#1d4ed8] to-[#0a0a0a]',
+    coverGradient: 'from-[#1E488F] via-[#001F3F] to-[#0a0a0a]',
   },
   {
     slug: 'v2-release',
@@ -81,7 +81,7 @@ export const POSTS: BlogPost[] = [
     category: '업데이트',
     date: '2026.03.20',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#dc2626] via-[#991b1b] to-[#0a0a0a]',
+    coverGradient: 'from-[#ee433f] via-[#c0302d] to-[#0a0a0a]',
   },
 ]
 

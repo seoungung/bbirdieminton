@@ -35,7 +35,7 @@ export function QueueRow({
       {/* 순서 번호 */}
       <span
         className={`text-[10px] font-extrabold w-4 text-center tabular-nums shrink-0 ${
-          isMe ? 'text-[#beff00]' : isNextUp ? 'text-[#7db800]' : 'text-[#ccc]'
+          isMe ? 'text-[var(--color-brand-lime)]' : isNextUp ? 'text-[var(--color-brand-lime-dim)]' : 'text-[#ccc]'
         }`}
       >
         {position}
@@ -67,7 +67,7 @@ export function QueueRow({
           </span>
         )}
         {isMe && (
-          <span className="text-[9px] font-bold text-[#beff00] bg-[#beff00]/10 rounded px-1 py-0.5 leading-none">
+          <span className="text-[9px] font-bold text-[var(--color-brand-lime)] bg-[var(--color-brand-lime)]/10 rounded px-1 py-0.5 leading-none">
             나
           </span>
         )}
@@ -95,7 +95,7 @@ export function QueueRow({
         <span
           className={`text-[10px] rounded-full px-1.5 py-0.5 shrink-0 ${
             isMe
-              ? 'text-[#beff00]/70 bg-white/10 border border-white/10'
+              ? 'text-[var(--color-brand-lime)]/70 bg-white/10 border border-white/10'
               : 'text-[#aaa] bg-white border border-[#e5e5e5]'
           }`}
         >

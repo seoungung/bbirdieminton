@@ -140,7 +140,7 @@ export function ShuttleSubmissionTracker({
       <div className="bg-[#0a0a0a] text-white rounded-2xl p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <ShuttlecockIcon size={16} className="text-[#beff00]" strokeWidth={2} />
+            <ShuttlecockIcon size={16} className="text-[var(--color-brand-lime)]" strokeWidth={2} />
             <span className="text-sm font-bold">셔틀콕 제출</span>
           </div>
           <span className="text-[10px] text-white/40">
@@ -172,7 +172,7 @@ export function ShuttleSubmissionTracker({
                   <span className="text-xs font-medium text-amber-300/70 ml-0.5">원</span>
                 </span>
               ) : (
-                <span className="text-[#beff00]">0</span>
+                <span className="text-[var(--color-brand-lime)]">0</span>
               )}
             </p>
           </div>
@@ -181,7 +181,7 @@ export function ShuttleSubmissionTracker({
 
       {/* 에러 / 경고 */}
       {error && (
-        <div className="flex items-center gap-2 px-3 py-2.5 bg-red-50 text-red-600 text-xs rounded-xl">
+        <div className="flex items-center gap-2 px-3 py-2.5 bg-[var(--color-brand-streak-bg)] text-[var(--color-brand-streak)] text-xs rounded-xl">
           <AlertCircle size={14} className="shrink-0" />
           {error}
         </div>
@@ -306,7 +306,7 @@ function SubmissionRow({
               <button
                 onClick={() => onChangeBrought(1)}
                 disabled={isPending}
-                className="w-7 h-7 rounded-lg bg-[#beff00] flex items-center justify-center text-[#111] active:scale-95 disabled:opacity-30 transition-all"
+                className="w-7 h-7 rounded-lg bg-[var(--color-brand-lime)] flex items-center justify-center text-[#111] active:scale-95 disabled:opacity-30 transition-all"
               >
                 <Plus size={11} strokeWidth={2.5} />
               </button>
@@ -352,12 +352,12 @@ function SubmissionRow({
         {/* 좌측: 충족 / 부족 */}
         <div>
           {shortage > 0 ? (
-            <span className="inline-flex items-center gap-1 text-red-500 font-bold">
+            <span className="inline-flex items-center gap-1 text-[var(--color-brand-streak)] font-bold">
               <AlertCircle size={11} strokeWidth={2.5} />
               {shortage}개 부족
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-emerald-600 font-bold">
+            <span className="inline-flex items-center gap-1 text-[var(--color-brand-court)] font-bold">
               <Check size={11} strokeWidth={2.5} />
               충족
             </span>
@@ -377,7 +377,7 @@ function SubmissionRow({
             </button>
           )}
           {isPaid && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-100">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court-deep)] font-bold border border-[var(--color-brand-court-soft)]/40">
               <Check size={11} strokeWidth={2.5} />
               납부 완료
             </span>

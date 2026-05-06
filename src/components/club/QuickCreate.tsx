@@ -71,7 +71,7 @@ export function QuickCreate({ clubId, isOwner }: Props) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="w-9 h-9 rounded-full bg-[#0a0a0a] text-white hover:bg-[#222] flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a0a0a] focus-visible:ring-offset-2"
+        className="w-9 h-9 rounded-full bg-[#0a0a0a] text-white hover:bg-[#222] flex items-center justify-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-lime)] focus-visible:ring-offset-2"
         aria-label="빠른 만들기"
         aria-expanded={open}
         aria-haspopup="menu"

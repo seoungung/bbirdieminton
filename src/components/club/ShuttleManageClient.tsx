@@ -129,13 +129,13 @@ export function ShuttleManageClient({
     <div className="space-y-4">
       {/* 알림 */}
       {error && (
-        <div className="flex items-center gap-2 px-3 py-2.5 bg-red-50 text-red-600 text-xs rounded-xl">
+        <div className="flex items-center gap-2 px-3 py-2.5 bg-[var(--color-brand-streak-bg)] text-[var(--color-brand-streak)] text-xs rounded-xl">
           <AlertCircle size={14} className="shrink-0" />
           {error}
         </div>
       )}
       {success && (
-        <div className="flex items-center gap-2 px-3 py-2.5 bg-emerald-50 text-emerald-700 text-xs rounded-xl">
+        <div className="flex items-center gap-2 px-3 py-2.5 bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court-deep)] text-xs rounded-xl">
           <Check size={14} className="shrink-0" strokeWidth={2.5} />
           {success}
         </div>
@@ -145,7 +145,7 @@ export function ShuttleManageClient({
       <section className="bg-[#0a0a0a] text-white rounded-2xl p-5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <ShuttlecockIcon size={16} className="text-[#beff00]" strokeWidth={2} />
+            <ShuttlecockIcon size={16} className="text-[var(--color-brand-lime)]" strokeWidth={2} />
             <span className="text-sm font-bold">여유분 풀</span>
           </div>
           <button
@@ -163,7 +163,7 @@ export function ShuttleManageClient({
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => setOpenReplenish(true)}
-            className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#beff00] text-[#111] font-bold text-xs hover:brightness-95 active:scale-[0.99] transition-all"
+            className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[var(--color-brand-lime)] text-[#111] font-bold text-xs hover:brightness-95 active:scale-[0.99] transition-all"
           >
             <Plus size={13} strokeWidth={2.5} />
             충전
@@ -212,7 +212,7 @@ export function ShuttleManageClient({
                 className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-[#e5e5e5] text-[#555] hover:border-[#0a0a0a] transition-colors"
               >
                 {shareCopied ? (
-                  <Check size={11} className="text-emerald-600" strokeWidth={2.5} />
+                  <Check size={11} className="text-[var(--color-brand-court)]" strokeWidth={2.5} />
                 ) : (
                   <Copy size={11} />
                 )}
@@ -248,7 +248,7 @@ export function ShuttleManageClient({
                   <button
                     onClick={() => handleMarkPaid(r.submissionId)}
                     disabled={isPending}
-                    className="text-[10px] font-bold px-2 py-1 rounded-md bg-emerald-500 text-white hover:bg-emerald-600 active:scale-95 disabled:opacity-50 transition-all shrink-0"
+                    className="text-[10px] font-bold px-2 py-1 rounded-md bg-[var(--color-brand-court)] text-white hover:bg-[var(--color-brand-court)] active:scale-95 disabled:opacity-50 transition-all shrink-0"
                   >
                     납부완료
                   </button>
@@ -283,7 +283,7 @@ export function ShuttleManageClient({
                   <span
                     className={`text-[11px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
                       log.delta > 0
-                        ? 'text-emerald-700 bg-emerald-50 border border-emerald-100'
+                        ? 'text-[var(--color-brand-court-deep)] bg-[var(--color-brand-court-bg)] border border-[var(--color-brand-court-soft)]/40'
                         : 'text-amber-700 bg-amber-50 border border-amber-100'
                     }`}
                   >
@@ -565,7 +565,7 @@ function DialogActions({
       <button
         onClick={onConfirm}
         disabled={disabled}
-        className="flex-[2] py-3 text-sm font-extrabold bg-[#beff00] text-[#111] rounded-xl hover:brightness-95 disabled:opacity-40 transition-all"
+        className="flex-[2] py-3 text-sm font-extrabold bg-[var(--color-brand-lime)] text-[#111] rounded-xl hover:brightness-95 disabled:opacity-40 transition-all"
       >
         {confirmLabel}
       </button>

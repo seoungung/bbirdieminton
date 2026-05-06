@@ -39,7 +39,7 @@ export const MANUAL_ENTRIES: ManualEntry[] = [
     category: '시작하기',
     date: '2026.04.20',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#10b981] via-[#059669] to-[#0a0a0a]',
+    coverGradient: 'from-[#00804C] via-[#005A35] to-[#0a0a0a]',
     hasContent: true,
   },
   {
@@ -50,7 +50,7 @@ export const MANUAL_ENTRIES: ManualEntry[] = [
     category: '시작하기',
     date: '2026.04.18',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#beff00] via-[#a8e600] to-[#0a0a0a]',
+    coverGradient: 'from-[#DBE64C] via-[#BAC633] to-[#0a0a0a]',
     hasContent: true,
   },
   {
@@ -61,7 +61,7 @@ export const MANUAL_ENTRIES: ManualEntry[] = [
     category: '게임보드',
     date: '2026.04.15',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#0a0a0a] via-[#1a1a1a] to-[#beff00]/20',
+    coverGradient: 'from-[#0a0a0a] via-[#1a1a1a] to-[#DBE64C]/20',
     hasContent: false,
   },
   {
@@ -72,7 +72,7 @@ export const MANUAL_ENTRIES: ManualEntry[] = [
     category: '게임보드',
     date: '2026.04.13',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#2563eb] via-[#1d4ed8] to-[#0a0a0a]',
+    coverGradient: 'from-[#1E488F] via-[#001F3F] to-[#0a0a0a]',
     hasContent: false,
   },
   {
@@ -83,7 +83,7 @@ export const MANUAL_ENTRIES: ManualEntry[] = [
     category: '정산',
     date: '2026.04.10',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#f59e0b] via-[#d97706] to-[#0a0a0a]',
+    coverGradient: 'from-[#DBE64C] via-[#00804C] to-[#0a0a0a]',
     hasContent: false,
   },
   {
@@ -94,7 +94,7 @@ export const MANUAL_ENTRIES: ManualEntry[] = [
     category: '정산',
     date: '2026.04.08',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#10b981] via-[#047857] to-[#0a0a0a]',
+    coverGradient: 'from-[#00804C] via-[#005A35] to-[#0a0a0a]',
     hasContent: false,
   },
   {
@@ -105,7 +105,7 @@ export const MANUAL_ENTRIES: ManualEntry[] = [
     category: '회원 관리',
     date: '2026.04.05',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#8b5cf6] via-[#7c3aed] to-[#0a0a0a]',
+    coverGradient: 'from-[#001F3F] via-[#1E488F] to-[#0a0a0a]',
     hasContent: false,
   },
   {
@@ -116,7 +116,7 @@ export const MANUAL_ENTRIES: ManualEntry[] = [
     category: '회원 관리',
     date: '2026.04.02',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#dc2626] via-[#991b1b] to-[#0a0a0a]',
+    coverGradient: 'from-[#ee433f] via-[#c0302d] to-[#0a0a0a]',
     hasContent: false,
   },
   {
@@ -127,7 +127,7 @@ export const MANUAL_ENTRIES: ManualEntry[] = [
     category: '공지·일정',
     date: '2026.03.30',
     author: '버디민턴 팀',
-    coverGradient: 'from-[#fb923c] via-[#ea580c] to-[#0a0a0a]',
+    coverGradient: 'from-[#ee433f] via-[#005A35] to-[#0a0a0a]',
     hasContent: false,
   },
   {

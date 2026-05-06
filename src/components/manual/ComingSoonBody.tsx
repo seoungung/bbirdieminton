@@ -4,7 +4,7 @@ import { Construction, Bell } from 'lucide-react'
 export function ComingSoonBody() {
   return (
     <div className="text-center py-10">
-      <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#fef3c7] text-[#d97706] mb-6">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 mb-6">
         <Construction size={28} strokeWidth={2} />
       </div>
 

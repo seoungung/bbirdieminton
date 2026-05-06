@@ -1,16 +1,18 @@
 'use client'
 
+import Link from 'next/link'
 import { useState, useTransition, useMemo } from 'react'
-import { updateMemberRoleAction, updateSkillScoreAction, removeMemberAction } from '@/app/club/[clubId]/members/actions'
+import { updateMemberRoleAction, updateSkillScoreAction, removeMemberAction, updateMemberGenderAction } from '@/app/club/[clubId]/members/actions'
 import type { ClubMemberWithUser, PlayerStats, MemberRole } from '@/types/club'
 import { buildRankMap } from '@/lib/club/grade'
+import type { RatingMap } from '@/lib/club/client'
+import { ROLE_LABEL } from '@/lib/club/labels'
 import { GradeBadge } from '@/components/club/GradeBadge'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 
-const ROLE_LABEL: Record<MemberRole, string> = { owner: '회장', manager: '운영진', member: '회원' }
 const ROLE_COLOR: Record<MemberRole, string> = {
-  owner: 'bg-[#beff00] text-[#111]',
-  manager: 'bg-blue-100 text-blue-700',
+  owner: 'bg-[var(--color-brand-lime)] text-[#111]',
+  manager: 'bg-[var(--color-brand-team-a-bg)] text-[var(--color-brand-elite)]',
   member: 'bg-[#f0f0f0] text-[#555]',
 }
 
@@ -22,9 +24,11 @@ interface Props {
   isManager: boolean
   isOwner: boolean
   myMemberId: string
+  /** member_id → Glicko-2 레이팅. mu 있으면 mu 기반 등급, 없으면 skill_score fallback */
+  ratingsMap?: RatingMap
 }
 
-export function MembersClient({ clubId, members, statsData, isManager, isOwner, myMemberId }: Props) {
+export function MembersClient({ clubId, members, statsData, isManager, isOwner, myMemberId, ratingsMap = {} }: Props) {
   const [editingSkill, setEditingSkill] = useState<string | null>(null)
   const [skillInput, setSkillInput] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -92,7 +96,7 @@ export function MembersClient({ clubId, members, statsData, isManager, isOwner, 
           const isMe = member.id === myMemberId
 
           return (
-            <div key={member.id} className={`bg-white rounded-2xl border p-4 ${isMe ? 'border-[#beff00]' : 'border-[#e5e5e5]'}`}>
+            <div key={member.id} className={`bg-white rounded-2xl border p-4 ${isMe ? 'border-[var(--color-brand-lime)]' : 'border-[#e5e5e5]'}`}>
               <div className="flex items-center gap-3">
                 {/* 아바타 */}
                 <div className="w-10 h-10 rounded-full bg-[#f0f0f0] flex items-center justify-center text-base font-bold text-[#555] shrink-0">
@@ -102,10 +106,19 @@ export function MembersClient({ clubId, members, statsData, isManager, isOwner, 
                 {/* 이름 + 역할 */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <GradeBadge score={member.skill_score} size="md" />
-                    <span className="font-bold text-[#111] text-base truncate">{member.user?.name ?? '이름없음'}</span>
+                    <GradeBadge
+                      score={member.skill_score}
+                      mu={ratingsMap[member.id]?.mu ?? null}
+                      size="md"
+                    />
+                    <Link
+                      href={`/club/${clubId}/members/${member.id}`}
+                      className="font-bold text-[#111] text-base truncate hover:underline underline-offset-2 decoration-[var(--color-brand-lime)] decoration-2"
+                    >
+                      {member.user?.name ?? '이름없음'}
+                    </Link>
                     {isMe && (
-                      <span className="text-[10px] font-extrabold text-[#111] bg-[#beff00] px-1.5 py-0.5 rounded">나</span>
+                      <span className="text-[10px] font-extrabold text-[#111] bg-[var(--color-brand-lime)] px-1.5 py-0.5 rounded">나</span>
                     )}
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ROLE_COLOR[member.role]}`}>
                       {ROLE_LABEL[member.role]}
@@ -142,8 +155,8 @@ export function MembersClient({ clubId, members, statsData, isManager, isOwner, 
                       <button
                         onClick={() => {
                           setDialog({
-                            title: '멤버 내보내기',
-                            description: `'${member.user?.name ?? '이 멤버'}'를 내보내시겠어요?\n과거 경기 기록은 유지됩니다.`,
+                            title: '회원 내보내기',
+                            description: `'${member.user?.name ?? '이 회원'}'을 내보내시겠어요?\n과거 경기 기록은 유지됩니다.`,
                             confirmText: '내보내기',
                             variant: 'destructive',
                             onConfirm: () => {
@@ -155,12 +168,23 @@ export function MembersClient({ clubId, members, statsData, isManager, isOwner, 
                           })
                         }}
                         disabled={isPending}
-                        className="text-sm px-2.5 py-1.5 rounded-lg border border-red-200 text-red-400 hover:bg-red-50 transition-colors disabled:opacity-50"
+                        className="text-sm px-2.5 py-1.5 rounded-lg border border-[var(--color-brand-streak-soft)] text-[var(--color-brand-streak)] hover:bg-[var(--color-brand-streak-bg)] transition-colors disabled:opacity-50"
                       >
                         내보내기
                       </button>
                     )}
                   </div>
+                )}
+              </div>
+
+              {/* 성별 표시 */}
+              <div className="flex items-center gap-1.5 mt-1">
+                {member.gender === 'F' ? (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[var(--color-brand-team-b-bg)] text-[var(--color-brand-team-b)]">여</span>
+                ) : member.gender === 'M' ? (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[var(--color-brand-team-a-bg)] text-[var(--color-brand-team-a)]">남</span>
+                ) : (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#f0f0f0] text-[#999]">미지정</span>
                 )}
               </div>
 
@@ -181,7 +205,7 @@ export function MembersClient({ clubId, members, statsData, isManager, isOwner, 
                           autoFocus
                         />
                         <button onClick={() => handleSkillSave(member.id)} disabled={isPending}
-                          className="text-sm px-3 py-1.5 bg-[#beff00] text-[#111] rounded-lg font-bold disabled:opacity-50">저장</button>
+                          className="text-sm px-3 py-1.5 bg-[var(--color-brand-lime)] text-[#111] rounded-lg font-bold disabled:opacity-50">저장</button>
                         <button onClick={() => setEditingSkill(null)}
                           className="text-sm px-3 py-1.5 bg-[#f0f0f0] text-[#555] rounded-lg">취소</button>
                       </div>
@@ -200,12 +224,39 @@ export function MembersClient({ clubId, members, statsData, isManager, isOwner, 
                       </div>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => { setEditingSkill(member.id); setSkillInput(String(member.skill_score)) }}
-                      className="text-sm text-[#999] hover:text-[#111] transition-colors"
-                    >
-                      실력 점수 수정 →
-                    </button>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <button
+                        onClick={() => { setEditingSkill(member.id); setSkillInput(String(member.skill_score)) }}
+                        className="text-sm text-[#999] hover:text-[#111] transition-colors"
+                      >
+                        실력 점수 수정 →
+                      </button>
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        <span className="text-xs text-[#999]">성별</span>
+                        {(['M', 'F', null] as const).map((g) => (
+                          <button
+                            key={String(g)}
+                            onClick={() => {
+                              startTransition(async () => {
+                                await updateMemberGenderAction(member.id, clubId, g)
+                              })
+                            }}
+                            disabled={isPending}
+                            className={`text-xs px-2 py-0.5 rounded font-bold transition-colors disabled:opacity-50 ${
+                              member.gender === g
+                                ? g === 'F'
+                                  ? 'bg-[var(--color-brand-team-b)] text-white'
+                                  : g === 'M'
+                                  ? 'bg-[var(--color-brand-team-a)] text-white'
+                                  : 'bg-[#555] text-white'
+                                : 'bg-[#f0f0f0] text-[#555] hover:bg-[#e0e0e0]'
+                            }`}
+                          >
+                            {g === 'M' ? '남자' : g === 'F' ? '여자' : '미지정'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               )}

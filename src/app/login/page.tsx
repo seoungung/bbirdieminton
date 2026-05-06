@@ -19,7 +19,7 @@ export default async function LoginPage({
   const { next, error } = await searchParams
 
   // 이미 로그인된 유저는 대상 경로로 이동
-  if (user && !user.is_anonymous) redirect(next ?? '/club/home')
+  if (user && !user.is_anonymous) redirect(next ?? '/clubs')
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center px-4 py-16 bg-[#f8f8f8]">

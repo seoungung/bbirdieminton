@@ -46,12 +46,12 @@ export function EventHero({
               마감
             </span>
           ) : (
-            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 uppercase tracking-wider">
+            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court-deep)] uppercase tracking-wider">
               모집중
             </span>
           )}
           {isMineGoing && (
-            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-600 text-white uppercase tracking-wider">
+            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-[var(--color-brand-court)] text-white uppercase tracking-wider">
               참가
             </span>
           )}
@@ -102,7 +102,7 @@ export function EventHero({
         </div>
         <div className="w-full bg-[#f0f0f0] rounded-full h-2 overflow-hidden">
           <div
-            className="h-2 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all"
+            className="h-2 bg-[var(--color-brand-court)] rounded-full transition-all"
             style={{
               width: `${
                 event.max_attend > 0

@@ -1,47 +1,43 @@
 import type { Metadata } from 'next'
+import { getAuthUser } from '@/lib/supabase/server'
 import { HeroSection } from '@/components/landing/HeroSection'
-import { PainPointsSection } from '@/components/landing/PainPointsSection'
-import { FeaturesSection } from '@/components/landing/FeaturesSection'
 import { FounderNoteSection } from '@/components/landing/FounderNoteSection'
-import { TestimonialsSection } from '@/components/landing/TestimonialsSection'
+import { ClubsLiveSection } from '@/components/landing/ClubsLiveSection'
+import { ValuesSection } from '@/components/landing/ValuesSection'
 import { FAQSection } from '@/components/landing/FAQSection'
 import { FinalCTASection } from '@/components/landing/FinalCTASection'
 
 export const metadata: Metadata = {
-  title: '버디민턴 | 동호인이 만든 배드민턴 운영 도구',
+  title: '버디민턴 | 매주의 매칭, 코트 두 개를 10초 안에',
   description:
-    '인원, 매칭, 운영까지 — 혼자 책임지지 마세요. 게임보드, 회비 정산, 랭킹, 공지를 한 곳에서. 동호인이 만들고, 만든 사람이 첫 사용자입니다.',
+    '매칭 30분이 10초. 회비 계산은 자동. 운영자 머리가 가벼워집니다. — 동호인이 만든 도구.',
   openGraph: {
-    title: '버디민턴 | 동호인이 만든 배드민턴 운영 도구',
+    title: '버디민턴 | 매주의 매칭, 코트 두 개를 10초 안에',
     description:
-      '인원, 매칭, 운영까지 — 혼자 책임지지 마세요. 게임보드, 회비 정산, 랭킹, 공지를 한 곳에서.',
+      '매칭 30분이 10초. 회비 계산은 자동. 운영자 머리가 가벼워집니다. — 동호인이 만든 도구.',
   },
 }
 
 /**
- * 랜딩 페이지 — 신 Hero + product 섹션 블렌드.
+ * 랜딩 페이지 v3 — 게임보드 메인 후크 + 스토리 인라인 + 라이브 모임 노출.
  *
- *  01 · Hero            — 헤드라인 3줄 + 단일 lime CTA (above the fold)
- *  02 · Pain Points     — 카톡/엑셀/팀배정, 공감 트리거 카드 3개
- *  03 · Features        — 게임보드/회비/랭킹/공지, alternating layout
- *  04 · Founder Note    — 압축된 1인칭 raw 톤 (이전 5섹션 영웅 서사를 1섹션으로)
- *  05 · Testimonials    — 페르소나 5명 (런칭 후 실제 후기로 교체)
- *  06 · FAQ             — 8개, native <details> accordion
- *  07 · Final CTA       — lime 단일 primary
+ *  01 · Hero            — 블랙 + 인터랙티브 미니 게임보드 (자동 시퀀스)
+ *  02 · Founder Note    — 압축 1인칭 raw + 블로그 첫 글로 링크
+ *  02.5 · Clubs Live    — 운영 중 모임 6개 카드 + 전체 보기 → /clubs
+ *  03 · Values          — 핵심 3가치 카드 (실력 매칭 / 회비 / 운영)
+ *  04 · FAQ             — 8개 native <details> accordion
+ *  05 · Final CTA       — 블랙 (수미상관) + 단일 lime primary
  *
- * 톤 교차: SaaS 마케팅 매끄러움(Pain/Features/Testimonials/FAQ)과
- *         founder의 raw 1인칭(Hero, Founder Note)이 자연스럽게 alternation.
- *
- * 마케팅 헤더/푸터는 MarketingShell이 감싼다.
+ * 톤 전이: 블랙(Hero) → 라이트(Founder/Live/Values/FAQ) → 블랙(CTA).
  */
-export default function HomePage() {
+export default async function HomePage() {
+  const user = await getAuthUser()
   return (
     <>
-      <HeroSection />
-      <PainPointsSection />
-      <FeaturesSection />
+      <HeroSection isLoggedIn={!!user} />
       <FounderNoteSection />
-      <TestimonialsSection />
+      <ClubsLiveSection />
+      <ValuesSection />
       <FAQSection />
       <FinalCTASection />
     </>

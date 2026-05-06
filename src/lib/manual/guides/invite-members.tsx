@@ -10,8 +10,8 @@ export function InviteMembersGuide() {
           코드를 카톡으로 공유 → 회원이 카카오로 1초 가입 → 자동으로 우리 모임 회원 목록에 추가되는 흐름입니다.
         </p>
 
-        <div className="bg-[#ecfdf5] border border-[#d1fae5] rounded-2xl p-5 my-8">
-          <p className="flex items-center gap-2 text-[13px] font-bold text-[#059669] mb-2">
+        <div className="bg-[var(--color-brand-court-bg)] border border-[var(--color-brand-court-soft)] rounded-2xl p-5 my-8">
+          <p className="flex items-center gap-2 text-[13px] font-bold text-[var(--color-brand-court)] mb-2">
             <Lightbulb size={15} strokeWidth={2.5} />
             왜 초대코드 방식인가?
           </p>
@@ -36,7 +36,7 @@ export function InviteMembersGuide() {
         <div className="bg-[#0a0a0a] text-white rounded-2xl p-6 my-6 text-center">
           <p className="text-[11px] text-white/50 uppercase tracking-widest mb-3">초대 링크</p>
           <p className="font-mono text-[15px] sm:text-[17px] mb-4 break-all">
-            birdieminton.com/join/<span className="text-[#beff00] font-bold">A1B2C3D4</span>
+            birdieminton.com/join/<span className="text-[var(--color-brand-lime)] font-bold">A1B2C3D4</span>
           </p>
           <button
             type="button"
@@ -84,7 +84,7 @@ export function InviteMembersGuide() {
           </div>
         </div>
 
-        <div className="bg-[#fffbeb] border border-[#fef3c7] rounded-xl p-4 my-5">
+        <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 my-5">
           <p className="flex items-start gap-2 text-[13px] text-[#92400e] leading-relaxed">
             <AlertCircle size={15} className="mt-0.5 shrink-0" />
             <span>

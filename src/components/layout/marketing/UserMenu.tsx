@@ -80,7 +80,7 @@ export function UserMenu({ userName, userEmail, avatarUrl }: Props) {
           {/* 주 메뉴 */}
           <nav className="py-1.5">
             <MenuItem
-              href="/club/home"
+              href="/clubs"
               icon={Users}
               label="내 모임"
               description="소속된 클럽 목록"
@@ -112,7 +112,7 @@ export function UserMenu({ userName, userEmail, avatarUrl }: Props) {
               role="menuitem"
               onClick={handleLogout}
               disabled={isPending}
-              className="w-full flex items-center gap-3 px-5 py-2.5 text-left hover:bg-[#fef2f2] transition-colors disabled:opacity-50"
+              className="w-full flex items-center gap-3 px-5 py-2.5 text-left hover:bg-[var(--color-brand-team-b-bg)] transition-colors disabled:opacity-50"
             >
               <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-500">
                 <LogOut size={14} strokeWidth={2} />

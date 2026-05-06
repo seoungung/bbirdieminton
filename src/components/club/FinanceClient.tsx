@@ -72,17 +72,17 @@ export function FinanceClient({ clubId, members, duesData, isManager, year, mont
       {/* 셔틀콕비 정산 링크 배너 */}
       <Link
         href={`/club/${clubId}/settlements`}
-        className="block bg-emerald-50 border border-emerald-200 rounded-2xl p-4 hover:bg-emerald-100/70 transition-colors"
+        className="block bg-[var(--color-brand-court-bg)] border border-[var(--color-brand-court-soft)]/50 rounded-2xl p-4 hover:brightness-[0.98] transition-all"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white border border-emerald-200 flex items-center justify-center shrink-0">
-            <ShuttlecockIcon size={20} className="text-emerald-600" strokeWidth={1.8} />
+          <div className="w-10 h-10 rounded-xl bg-white border border-[var(--color-brand-court-soft)]/50 flex items-center justify-center shrink-0">
+            <ShuttlecockIcon size={20} className="text-[var(--color-brand-court)]" strokeWidth={1.8} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-emerald-800">셔틀콕비 정산</p>
-            <p className="text-xs text-emerald-700/70 mt-0.5">세션별 셔틀콕 사용량과 납부 관리</p>
+            <p className="text-sm font-bold text-[var(--color-brand-court-deep)]">셔틀콕비 정산</p>
+            <p className="text-xs text-[var(--color-brand-court)]/80 mt-0.5">세션별 셔틀콕 사용량과 납부 관리</p>
           </div>
-          <ArrowRight size={16} className="text-emerald-600 shrink-0" />
+          <ArrowRight size={16} className="text-[var(--color-brand-court)] shrink-0" />
         </div>
       </Link>
 
@@ -93,7 +93,7 @@ export function FinanceClient({ clubId, members, duesData, isManager, year, mont
           <p className="text-sm text-[#999] mt-1">납부 완료</p>
         </div>
         <div className="bg-white rounded-2xl border border-[#e5e5e5] p-4 text-center">
-          <p className="text-2xl font-extrabold text-[#beff00] text-shadow">{members.length - paidCount}</p>
+          <p className="text-2xl font-extrabold text-[var(--color-brand-streak)]">{members.length - paidCount}</p>
           <p className="text-sm text-[#999] mt-1">미납</p>
         </div>
         <div className="bg-white rounded-2xl border border-[#e5e5e5] p-4 text-center">
@@ -121,7 +121,7 @@ export function FinanceClient({ clubId, members, duesData, isManager, year, mont
                   autoFocus
                 />
                 <button onClick={handleSetAmount} disabled={isPending}
-                  className="text-sm px-3 py-1.5 bg-[#beff00] text-[#111] rounded-lg font-bold disabled:opacity-50">설정</button>
+                  className="text-sm px-3 py-1.5 bg-[var(--color-brand-lime)] text-[#111] rounded-lg font-bold disabled:opacity-50">설정</button>
                 <button onClick={() => setShowAmountEdit(false)}
                   className="text-sm px-3 py-1.5 bg-[#f0f0f0] text-[#555] rounded-lg">취소</button>
               </div>
@@ -143,7 +143,7 @@ export function FinanceClient({ clubId, members, duesData, isManager, year, mont
         </div>
         <div className="w-full bg-[#f0f0f0] rounded-full h-2">
           <div
-            className="bg-[#beff00] h-2 rounded-full transition-all"
+            className="bg-[var(--color-brand-lime)] h-2 rounded-full transition-all"
             style={{ width: `${members.length > 0 ? (paidCount / members.length) * 100 : 0}%` }}
           />
         </div>
@@ -174,9 +174,9 @@ export function FinanceClient({ clubId, members, duesData, isManager, year, mont
                 </p>
               </div>
               {paid ? (
-                <span className="text-sm font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-full">✓ 완료</span>
+                <span className="text-sm font-bold text-[var(--color-brand-court)] bg-[var(--color-brand-court-bg)] px-3 py-1.5 rounded-full">✓ 완료</span>
               ) : (
-                <span className="text-sm font-bold text-orange-500 bg-orange-50 px-3 py-1.5 rounded-full">미납</span>
+                <span className="text-sm font-bold text-[var(--color-brand-streak)] bg-[var(--color-brand-streak-bg)] px-3 py-1.5 rounded-full">미납</span>
               )}
               {isManager && (
                 <button
@@ -185,7 +185,7 @@ export function FinanceClient({ clubId, members, duesData, isManager, year, mont
                   className={`text-sm px-3 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50 ${
                     paid
                       ? 'bg-[#f0f0f0] text-[#555] hover:bg-[#e0e0e0]'
-                      : 'bg-[#beff00] text-[#111] hover:brightness-95'
+                      : 'bg-[var(--color-brand-lime)] text-[#111] hover:brightness-95'
                   }`}
                 >
                   {paid ? '취소' : '납부확인'}

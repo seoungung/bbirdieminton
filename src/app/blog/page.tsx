@@ -115,7 +115,7 @@ export default function BlogPage() {
             v2.0 베타 기간, 모든 기능 무료입니다.
           </p>
           <Link
-            href="/login?next=%2Fclub%2Fhome"
+            href="/login?next=%2Fclubs"
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0a0a0a] text-white font-bold text-[13px] rounded-full hover:bg-[#222] transition-colors"
           >
             무료로 시작하기

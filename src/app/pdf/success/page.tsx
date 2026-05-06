@@ -46,14 +46,14 @@ export default async function PdfSuccessPage({ searchParams }: SuccessPageProps)
     <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl border border-[#e5e5e5] p-10 text-center max-w-md w-full">
         <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-5">
-          <CheckCircle2 size={28} className="text-[#10b981]" strokeWidth={2} />
+          <CheckCircle2 size={28} className="text-[var(--color-brand-court)]" strokeWidth={2} />
         </div>
         <h1 className="text-xl font-extrabold text-[#111] mb-2">결제가 완료됐습니다 🎉</h1>
         <p className="text-sm text-[#555] mb-1">주문번호: <span className="font-mono text-[#111]">{orderId}</span></p>
         <p className="text-sm text-[#999] mb-8">결제하신 이메일로 PDF 다운로드 링크를 발송해드립니다.</p>
         <a
           href="#"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[#beff00] text-[#0a0a0a] rounded-xl text-sm font-extrabold hover:bg-[#a8e600] transition-colors mb-4"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-brand-lime)] text-[#0a0a0a] rounded-xl text-sm font-extrabold hover:bg-[var(--color-brand-lime-dim)] transition-colors mb-4"
         >
           <Download size={15} />
           PDF 다운로드

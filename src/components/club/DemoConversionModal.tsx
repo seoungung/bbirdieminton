@@ -83,10 +83,10 @@ export function DemoConversionModal() {
 
         {/* Hero */}
         <div className="bg-gradient-to-br from-[#0a0a0a] via-[#0a0a0a] to-[#1a1a1a] text-white px-8 pt-10 pb-8 text-center relative overflow-hidden">
-          <div className="absolute top-4 right-4 text-[#beff00] animate-pulse">
+          <div className="absolute top-4 right-4 text-[var(--color-brand-lime)] animate-pulse">
             <Sparkles size={20} strokeWidth={2} />
           </div>
-          <div className="w-14 h-14 rounded-2xl bg-[#beff00] flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 rounded-2xl bg-[var(--color-brand-lime)] flex items-center justify-center mx-auto mb-4">
             <Image src="/symbol_birdieminton-black.png" alt="버디민턴" width={32} height={32} className="h-8 w-auto" />
           </div>
           <h2 id="conversion-title" className="text-2xl font-extrabold tracking-tight mb-2">

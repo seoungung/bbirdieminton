@@ -80,7 +80,7 @@ export function JoinRequestsClient({ clubId, initialRequests }: Props) {
               <button
                 onClick={() => handleApprove(req)}
                 disabled={isPending}
-                className="flex items-center gap-1 px-3 py-2 bg-[#beff00] rounded-xl text-xs font-bold text-[#111] hover:brightness-95 transition-all disabled:opacity-50"
+                className="flex items-center gap-1 px-3 py-2 bg-[var(--color-brand-lime)] rounded-xl text-xs font-bold text-[#111] hover:brightness-95 transition-all disabled:opacity-50"
               >
                 <Check size={13} />승인
               </button>

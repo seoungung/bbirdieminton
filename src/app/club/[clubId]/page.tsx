@@ -89,7 +89,7 @@ export default async function ClubHomePage({ params }: PageProps) {
   if (!clubUserId) redirect('/login')
 
   const membership = await getMyMembership(supabase, clubId, clubUserId)
-  if (!membership) redirect('/club/home')
+  if (!membership) redirect('/clubs')
 
   const [
     clubResult,

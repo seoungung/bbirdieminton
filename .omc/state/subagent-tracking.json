@@ -1,62 +1,26 @@
 {
   "agents": [
     {
-      "agent_id": "a301c5837cfed2436",
-      "agent_type": "oh-my-claudecode:executor",
-      "started_at": "2026-04-22T23:14:50.124Z",
+      "agent_id": "adaf425d38a2d48d3",
+      "agent_type": "oh-my-claudecode:designer-high",
+      "started_at": "2026-04-28T09:30:24.680Z",
       "parent_mode": "none",
       "status": "failed",
-      "completed_at": "2026-04-22T23:16:03.007Z",
-      "duration_ms": 72883
+      "completed_at": "2026-04-28T09:38:08.191Z",
+      "duration_ms": 463511
     },
     {
-      "agent_id": "ae7b4eef0a99a88fd",
-      "agent_type": "oh-my-claudecode:executor",
-      "started_at": "2026-04-22T23:15:11.811Z",
+      "agent_id": "ab65f64fb7cdd9de1",
+      "agent_type": "oh-my-claudecode:explore-medium",
+      "started_at": "2026-04-30T05:48:03.216Z",
       "parent_mode": "none",
       "status": "failed",
-      "completed_at": "2026-04-22T23:16:02.210Z",
-      "duration_ms": 50399
-    },
-    {
-      "agent_id": "aa629086722a55097",
-      "agent_type": "oh-my-claudecode:executor",
-      "started_at": "2026-04-22T23:30:47.722Z",
-      "parent_mode": "none",
-      "status": "failed",
-      "completed_at": "2026-04-22T23:31:45.832Z",
-      "duration_ms": 58110
-    },
-    {
-      "agent_id": "af2ccf240bdbca715",
-      "agent_type": "oh-my-claudecode:researcher",
-      "started_at": "2026-04-22T23:30:54.128Z",
-      "parent_mode": "none",
-      "status": "failed",
-      "completed_at": "2026-04-22T23:32:51.371Z",
-      "duration_ms": 117243
-    },
-    {
-      "agent_id": "a760a1aad1f10c30e",
-      "agent_type": "oh-my-claudecode:executor",
-      "started_at": "2026-04-22T23:35:00.640Z",
-      "parent_mode": "none",
-      "status": "failed",
-      "completed_at": "2026-04-22T23:37:26.614Z",
-      "duration_ms": 145974
-    },
-    {
-      "agent_id": "ac1575184efbb5e36",
-      "agent_type": "oh-my-claudecode:executor-low",
-      "started_at": "2026-04-22T23:35:22.729Z",
-      "parent_mode": "none",
-      "status": "failed",
-      "completed_at": "2026-04-22T23:36:14.555Z",
-      "duration_ms": 51826
+      "completed_at": "2026-04-30T05:49:11.918Z",
+      "duration_ms": 68702
     }
   ],
-  "total_spawned": 6,
+  "total_spawned": 2,
   "total_completed": 0,
-  "total_failed": 6,
-  "last_updated": "2026-04-22T23:37:26.616Z"
+  "total_failed": 2,
+  "last_updated": "2026-04-30T05:49:11.919Z"
 }

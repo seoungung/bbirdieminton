@@ -103,7 +103,7 @@ export function ContactForm() {
       )}
 
       {state?.success && (
-        <div className="flex items-start gap-2 text-[13px] text-[#10b981] bg-[#ecfdf5] px-4 py-3 rounded-lg">
+        <div className="flex items-start gap-2 text-[13px] text-[var(--color-brand-court)] bg-[var(--color-brand-court-bg)] px-4 py-3 rounded-lg">
           <CheckCircle2 size={15} className="flex-shrink-0 mt-0.5" />
           <span>{state.success}</span>
         </div>

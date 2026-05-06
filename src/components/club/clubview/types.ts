@@ -50,14 +50,14 @@ export interface GameSessionItem {
 }
 
 export const AVATAR_COLORS = [
-  '#beff00', '#c8f5ff', '#ffd6e0', '#ffd700',
+  '#DBE64C', '#c8f5ff', '#ffd6e0', '#ffd700',
   '#d4f5d4', '#e8d4ff', '#ffd4b3', '#b3e8ff',
 ]
 
 export const MEMBERS_PREVIEW = 7
 
 export const THUMB_COLORS = [
-  '#beff00', '#c8f5ff', '#ffd6e0', '#ffd700',
+  '#DBE64C', '#c8f5ff', '#ffd6e0', '#ffd700',
   '#d4f5d4', '#e8d4ff', '#ffd4b3', '#b3e8ff',
   '#f0f0f0', '#0a0a0a',
 ]

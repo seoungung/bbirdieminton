@@ -151,7 +151,7 @@ export function ImportClient({ clubId, clubName, isDemo = false, recentLogs = []
       )}
 
       {result && (
-        <div className="flex items-start gap-2 px-4 py-3 bg-[#f0fff0] border border-[#beff00] rounded-xl text-sm text-[#2d6a00]">
+        <div className="flex items-start gap-2 px-4 py-3 bg-[var(--color-brand-court-bg)] border border-[var(--color-brand-court)] rounded-xl text-sm text-[var(--color-brand-court-deep)]">
           <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
           <div>
             <p className="font-bold">임포트 완료</p>
@@ -249,7 +249,7 @@ function ImportCard<T extends MemberRow | DuesRow>({
         </div>
         <button
           onClick={onDownload}
-          className="flex items-center gap-1.5 px-3 py-2 border border-[#e5e5e5] text-[#555] text-xs font-semibold rounded-xl hover:border-[#beff00] hover:text-[#111] transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 border border-[#e5e5e5] text-[#555] text-xs font-semibold rounded-xl hover:border-[var(--color-brand-lime)] hover:text-[#111] transition-colors"
         >
           <Download size={13} />
           템플릿
@@ -268,7 +268,7 @@ function ImportCard<T extends MemberRow | DuesRow>({
               e.target.value = ''
             }}
           />
-          <div className="border-2 border-dashed border-[#e5e5e5] rounded-xl p-6 text-center cursor-pointer hover:border-[#beff00] hover:bg-[#f8fff0] transition-colors">
+          <div className="border-2 border-dashed border-[#e5e5e5] rounded-xl p-6 text-center cursor-pointer hover:border-[var(--color-brand-lime)] hover:bg-[var(--color-brand-bg-sub)] transition-colors">
             <Upload size={24} className="mx-auto text-[#bbb] mb-2" />
             <p className="text-sm text-[#555] font-semibold">엑셀 파일 선택</p>
             <p className="text-xs text-[#bbb] mt-1">.xlsx 파일만 지원</p>
@@ -360,7 +360,7 @@ function ImportCard<T extends MemberRow | DuesRow>({
             <button
               onClick={onConfirm}
               disabled={isPending || validCount === 0}
-              className="flex-1 py-2.5 bg-[#beff00] text-[#111] text-sm font-bold rounded-xl hover:brightness-95 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+              className="flex-1 py-2.5 bg-[var(--color-brand-lime)] text-[#111] text-sm font-bold rounded-xl hover:brightness-95 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
             >
               {isPending ? (
                 <>

@@ -80,7 +80,7 @@ export default async function ProfilePage() {
         {/* 빠른 링크 */}
         <section className="bg-white rounded-2xl border border-[#e5e5e5] overflow-hidden mb-5">
           <Link
-            href="/club/home"
+            href="/clubs"
             className="block px-6 py-4 text-[14px] font-semibold text-[#111] hover:bg-[#f8f8f8] transition-colors border-b border-[#f0f0f0]"
           >
             내 모임 목록 →

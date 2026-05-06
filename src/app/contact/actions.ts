@@ -37,7 +37,7 @@ export async function submitContactAction(
   const subject = `[버디민턴 문의] ${category} — ${name}`
   const html = `
     <div style="font-family: -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <h2 style="color: #0a0a0a; border-bottom: 2px solid #beff00; padding-bottom: 10px;">
+      <h2 style="color: #0a0a0a; border-bottom: 2px solid #DBE64C; padding-bottom: 10px;">
         버디민턴 1:1 문의
       </h2>
       <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">

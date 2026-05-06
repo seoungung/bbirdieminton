@@ -1,12 +1,12 @@
 'use client'
 
 const SWATCHES = [
-  { value: '#beff00', label: 'lime' },
-  { value: '#10b981', label: 'court' },
-  { value: '#2563eb', label: 'team-a' },
-  { value: '#dc2626', label: 'team-b' },
-  { value: '#f59e0b', label: 'streak' },
-  { value: '#8b5cf6', label: 'elite' },
+  { value: '#DBE64C', label: 'lime' },
+  { value: '#00804C', label: 'court' },
+  { value: '#1E488F', label: 'team-a' },
+  { value: '#ee433f', label: 'team-b' },
+  { value: '#ee433f', label: 'streak' },
+  { value: '#001F3F', label: 'elite' },
   { value: '#e5e5e5', label: 'neutral' },
 ] as const
 

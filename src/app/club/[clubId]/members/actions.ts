@@ -98,6 +98,36 @@ export async function removeMemberAction(memberId: string, clubId: string) {
   return { success: true }
 }
 
+// ── 성별 변경 (owner/manager 가능) ──────────────────────
+export async function updateMemberGenderAction(
+  memberId: string,
+  clubId: string,
+  gender: 'M' | 'F' | null
+) {
+  const supabase = await createClient()
+  const clubUserId = await getClubUserId(supabase)
+  if (!clubUserId) return { error: '권한이 없습니다.' }
+
+  const { data: myMembership } = await supabase
+    .from('club_members')
+    .select('role')
+    .eq('club_id', clubId)
+    .eq('user_id', clubUserId)
+    .single()
+  if (!myMembership || !['owner', 'manager'].includes(myMembership.role))
+    return { error: '권한이 없습니다.' }
+
+  const { error } = await supabase
+    .from('club_members')
+    .update({ gender })
+    .eq('id', memberId)
+  if (error) return { error: '성별 변경에 실패했습니다.' }
+
+  revalidatePath(`/club/${clubId}/members`)
+  revalidatePath(`/club/${clubId}/members/${memberId}`)
+  return { success: true }
+}
+
 // ── 초대코드 재발급 (owner 전용) ─────────────────────────
 export async function regenerateInviteCodeAction(clubId: string) {
   const supabase = await createClient()

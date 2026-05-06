@@ -14,11 +14,11 @@ type FAQ = { q: string; a: string }
 const FAQS: FAQ[] = [
   {
     q: '무료 플랜으로 어디까지 쓸 수 있나요?',
-    a: '최대 30명까지 가입 가능하며, 게임보드·랭킹·공지 등 핵심 기능을 전부 사용할 수 있습니다. 회비 정산 자동화는 Pro 플랜부터 제공됩니다.',
+    a: '최대 50명까지 가입 가능하며, 게임보드·실력 균형 자동 매칭·랭킹·공지·정기모임 RSVP·백업복원까지 핵심 운영 기능을 전부 쓸 수 있어요. 회비 자동 정산과 카카오 알림톡은 Pro 플랜부터 제공됩니다.',
   },
   {
-    q: 'v2.0 베타 기간 동안은 Pro 기능도 무료인가요?',
-    a: '네. v2.1 정식 출시 전까지 모든 유저에게 Pro 기능을 무료로 제공합니다. 그 이후에도 Free 플랜은 계속 무료입니다.',
+    q: 'v2.0 베타 기간 동안은 Pro·Team 기능도 무료인가요?',
+    a: '네. 베타 기간(약 1~3개월) 동안 모든 유저에게 Pro·Team 기능을 무료로 제공합니다. 정식 출시 후에도 Free 플랜은 계속 무료이며, 베타 가입자에게는 Pro 3개월 무료 혜택을 드립니다.',
   },
   {
     q: '카카오 계정 말고 다른 로그인 방법이 있나요?',
@@ -53,7 +53,7 @@ export function FAQSection() {
       className="border-t border-[#ebebeb] bg-[#fafafa]"
     >
       <div className="mx-auto max-w-[800px] px-6 py-20 sm:py-28">
-        <div className="mb-12 text-center sm:mb-14">
+        <div className="mb-12 sm:mb-14">
           <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.2em] text-[#999]">
             FAQ
           </p>

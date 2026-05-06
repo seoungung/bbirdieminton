@@ -28,11 +28,12 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
       let finalNext = next
-      // next가 기본값(/ 또는 /club/home)일 때만 last_visited 적용
+      // next가 기본값(/, /club/home, /clubs)일 때만 스마트 라우팅 적용
       // 사용자가 명시적 경로를 보낸 경우엔 그대로 존중
-      if (next === '/' || next === '/club/home') {
+      if (next === '/' || next === '/club/home' || next === '/clubs') {
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
+          // 1) last_visited_club_id 우선
           const { data: userRow } = await supabase
             .from('users')
             .select('last_visited_club_id')
@@ -40,6 +41,31 @@ export async function GET(request: NextRequest) {
             .maybeSingle()
           if (userRow?.last_visited_club_id) {
             finalNext = `/club/${userRow.last_visited_club_id}`
+          } else {
+            // 2) 가입한 첫 모임으로 진입 (단일 모임이면 자동 진입)
+            const { data: clubUserRow } = await supabase
+              .from('users')
+              .select('id')
+              .eq('birdieminton_user_id', user.id)
+              .maybeSingle()
+            if (clubUserRow?.id) {
+              const { data: firstMembership } = await supabase
+                .from('club_members')
+                .select('club_id')
+                .eq('user_id', clubUserRow.id)
+                .is('removed_at', null)
+                .order('joined_at', { ascending: true })
+                .limit(1)
+                .maybeSingle()
+              if (firstMembership?.club_id) {
+                finalNext = `/club/${firstMembership.club_id}`
+              } else {
+                // 3) 가입 모임 0개 → 둘러보기로
+                finalNext = '/clubs'
+              }
+            } else {
+              finalNext = '/clubs'
+            }
           }
         }
       }

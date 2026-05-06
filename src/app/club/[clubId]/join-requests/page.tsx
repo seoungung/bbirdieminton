@@ -4,7 +4,6 @@ import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
 import { UserPlus } from 'lucide-react'
 import { JoinRequestsClient } from './JoinRequestsClient'
-import { BackButton } from '@/components/club/BackButton'
 import { getJoinRequestsAction } from './actions'
 import type { Metadata } from 'next'
 
@@ -31,7 +30,7 @@ export default async function JoinRequestsPage({ params }: Props) {
   if (!clubUserId) redirect('/login')
 
   const membership = await getMyMembership(supabase, clubId, clubUserId)
-  if (!membership) redirect('/club/home')
+  if (!membership) redirect('/clubs')
 
   if (!['owner', 'manager'].includes(membership.role)) {
     redirect(`/club/${clubId}`)
@@ -43,7 +42,6 @@ export default async function JoinRequestsPage({ params }: Props) {
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
         <div className="max-w-[1088px] mx-auto flex items-center gap-3">
-          <BackButton fallback={`/club/${clubId}`} />
           <div>
             <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
               <UserPlus size={16} strokeWidth={2} />

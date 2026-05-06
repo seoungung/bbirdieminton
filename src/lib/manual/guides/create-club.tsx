@@ -10,8 +10,8 @@ export function CreateClubGuide() {
           카카오톡 가입부터 첫 회원 초대까지 약 5분이면 끝납니다.
         </p>
 
-        <div className="bg-[#ecfdf5] border border-[#d1fae5] rounded-2xl p-5 my-8">
-          <p className="flex items-center gap-2 text-[13px] font-bold text-[#059669] mb-2">
+        <div className="bg-[var(--color-brand-court-bg)] border border-[var(--color-brand-court-soft)] rounded-2xl p-5 my-8">
+          <p className="flex items-center gap-2 text-[13px] font-bold text-[var(--color-brand-court)] mb-2">
             <Lightbulb size={15} strokeWidth={2.5} />
             이 가이드는 이런 분께
           </p>
@@ -29,15 +29,15 @@ export function CreateClubGuide() {
         </h2>
         <ul className="space-y-2.5 text-[15px] text-[#222] leading-[1.7] my-6">
           <li className="flex items-start gap-2.5">
-            <CheckCircle2 size={18} className="text-[#10b981] mt-0.5 shrink-0" strokeWidth={2.5} />
+            <CheckCircle2 size={18} className="text-[var(--color-brand-court)] mt-0.5 shrink-0" strokeWidth={2.5} />
             <span><strong>카카오톡 계정</strong> — 회원가입에 사용됩니다</span>
           </li>
           <li className="flex items-start gap-2.5">
-            <CheckCircle2 size={18} className="text-[#10b981] mt-0.5 shrink-0" strokeWidth={2.5} />
+            <CheckCircle2 size={18} className="text-[var(--color-brand-court)] mt-0.5 shrink-0" strokeWidth={2.5} />
             <span><strong>모임 이름</strong> — 나중에 변경 가능 (예: 관악 셔틀러스)</span>
           </li>
           <li className="flex items-start gap-2.5">
-            <CheckCircle2 size={18} className="text-[#10b981] mt-0.5 shrink-0" strokeWidth={2.5} />
+            <CheckCircle2 size={18} className="text-[var(--color-brand-court)] mt-0.5 shrink-0" strokeWidth={2.5} />
             <span><strong>활동 지역·요일</strong> — 회원 모집 시 노출되는 정보</span>
           </li>
         </ul>
@@ -58,7 +58,7 @@ export function CreateClubGuide() {
           [ 스크린샷 — 카카오 로그인 화면 ]
         </div>
 
-        <div className="bg-[#fffbeb] border border-[#fef3c7] rounded-xl p-4 my-5">
+        <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 my-5">
           <p className="flex items-start gap-2 text-[13px] text-[#92400e] leading-relaxed">
             <AlertCircle size={15} className="mt-0.5 shrink-0" />
             <span>
@@ -124,7 +124,7 @@ export function CreateClubGuide() {
         <div className="bg-[#0a0a0a] text-white rounded-2xl p-6 my-6 font-mono text-center">
           <p className="text-[11px] text-white/50 uppercase tracking-widest mb-2">초대 링크 예시</p>
           <p className="text-[15px] sm:text-[16px] break-all">
-            birdieminton.com/join/<span className="text-[#beff00]">A1B2C3D4</span>
+            birdieminton.com/join/<span className="text-[var(--color-brand-lime)]">A1B2C3D4</span>
           </p>
         </div>
 

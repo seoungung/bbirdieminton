@@ -12,7 +12,7 @@ export default function BusinessPage() {
       <div className="max-w-2xl mx-auto px-5 py-14">
 
         {/* 헤더 */}
-        <p className="text-xs font-bold text-[#beff00] uppercase tracking-widest mb-3">Legal</p>
+        <p className="text-xs font-bold text-[var(--color-brand-lime)] uppercase tracking-widest mb-3">Legal</p>
         <h1 className="text-[1.8rem] font-extrabold mb-2">사업자 정보 확인</h1>
         <p className="text-[0.85rem] text-[#999] mb-10">
           전자상거래 등에서의 소비자보호에 관한 법률에 따라 사업자 정보를 공개합니다.
