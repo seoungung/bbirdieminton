@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import {
   Home, Gamepad2, Trophy, Users, Wallet, Settings as SettingsIcon,
@@ -12,14 +13,17 @@ import {
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { ClubSwitcher, type ClubOption } from './ClubSwitcher'
-import { DemoWelcomeModal } from './DemoWelcomeModal'
-import { DemoConversionModal } from './DemoConversionModal'
-import { DemoTour } from './DemoTour'
-import { DemoMissionWidget } from './DemoMissionWidget'
-import { HelpFloatingWidget } from './HelpFloatingWidget'
 import { SidebarSearch } from './SidebarSearch'
 import { SidebarNotificationBell } from './SidebarNotificationBell'
 import { SidebarUserMenu } from './SidebarUserMenu'
+
+/* Demo* 컴포넌트는 isDemo=true 인 경우에만 렌더 — 일반 사용자에게는 코드 다운로드되지 않도록 dynamic import.
+ * SSR=false: 서버 렌더 불필요 (모달/투어 UI). HelpFloatingWidget 도 below-fold 라 lazy. */
+const DemoWelcomeModal    = dynamic(() => import('./DemoWelcomeModal').then(m => ({ default: m.DemoWelcomeModal })),       { ssr: false })
+const DemoConversionModal = dynamic(() => import('./DemoConversionModal').then(m => ({ default: m.DemoConversionModal })), { ssr: false })
+const DemoTour            = dynamic(() => import('./DemoTour').then(m => ({ default: m.DemoTour })),                       { ssr: false })
+const DemoMissionWidget   = dynamic(() => import('./DemoMissionWidget').then(m => ({ default: m.DemoMissionWidget })),     { ssr: false })
+const HelpFloatingWidget  = dynamic(() => import('./HelpFloatingWidget').then(m => ({ default: m.HelpFloatingWidget })),   { ssr: false })
 
 /* ── 사이드바 메뉴 아이템 타입 ── */
 interface NavItem {

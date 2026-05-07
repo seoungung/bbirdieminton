@@ -4,10 +4,16 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { ChevronLeft, ChevronRight, Menu, X } from 'lucide-react'
 import { SaaSSidebar } from './SaaSSidebar'
 import type { SaaSClubItem } from './SaaSClubList'
-import { HelpFloatingWidget } from '@/components/club/HelpFloatingWidget'
+
+/* below-fold floating widget — 첫 페인트 후 lazy 로드 */
+const HelpFloatingWidget = dynamic(
+  () => import('@/components/club/HelpFloatingWidget').then(m => ({ default: m.HelpFloatingWidget })),
+  { ssr: false },
+)
 
 interface Props {
   pageTitle?: string
