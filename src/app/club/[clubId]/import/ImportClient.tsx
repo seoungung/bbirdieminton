@@ -3,10 +3,12 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Download, Upload, FileSpreadsheet, CheckCircle2, XCircle, AlertTriangle, Loader2, FileDown } from 'lucide-react'
-import ExcelJS from 'exceljs'
 import { validateMemberRow, validateDuesRow } from '@/lib/club/import/validate'
 import { MEMBER_COLUMNS, DUES_COLUMNS, type ImportType, type ValidatedRow, type MemberRow, type DuesRow } from '@/lib/club/import/types'
 import { importMembersAction, importDuesAction } from './actions'
+
+/* ExcelJS 는 ~700KB 의 무거운 라이브러리 — 파일 업로드 시점에만 동적 import.
+ * /import 페이지 로드 자체는 ExcelJS 없이 빠르게 진입. */
 
 interface LogItem {
   id: string
@@ -52,6 +54,8 @@ export function ImportClient({ clubId, clubName, isDemo = false, recentLogs = []
     setError(null)
     try {
       const buffer = await file.arrayBuffer()
+      // ExcelJS 는 첫 업로드 시점에만 로드 (700KB 청크 lazy)
+      const ExcelJS = (await import('exceljs')).default
       const workbook = new ExcelJS.Workbook()
       await workbook.xlsx.load(buffer)
       const sheet = workbook.worksheets[0]
