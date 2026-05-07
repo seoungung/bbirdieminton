@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Users, MapPin } from 'lucide-react'
+import { ClubThumbnailFallback } from '@/components/club/cards/ClubThumbnailFallback'
 
 export type ClubsLiveItem = {
   id: string
@@ -101,14 +102,18 @@ export function ClubsLiveCarousel({ clubs }: { clubs: ClubsLiveItem[] }) {
                 href={`/clubs/${club.id}`}
                 className="group flex h-full flex-col rounded-2xl border border-[#e5e5e5] bg-white overflow-hidden transition-all hover:border-[#0a0a0a]/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.15)]"
               >
-                <div
-                  className="aspect-[16/9] w-full"
-                  style={{
-                    background: club.thumbnail_url
-                      ? `url(${club.thumbnail_url}) center/cover`
-                      : club.thumbnail_color ?? '#f0f0f0',
-                  }}
-                />
+                <div className="relative aspect-[16/9] w-full overflow-hidden">
+                  {club.thumbnail_url ? (
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background: `url(${club.thumbnail_url}) center/cover`,
+                      }}
+                    />
+                  ) : (
+                    <ClubThumbnailFallback logoSize={56} />
+                  )}
+                </div>
                 <div className="flex flex-1 flex-col p-5">
                   <h3
                     className="mb-2 text-[16px] font-extrabold tracking-[-0.01em] text-[#0a0a0a]"

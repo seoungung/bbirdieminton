@@ -6,12 +6,10 @@ import { createClient } from '@/lib/supabase/client'
 import { createClubAction } from '@/app/club/create/actions'
 import { FormSection } from '@/components/club/createClub/FormSection'
 import { CategoryChips, type Category } from '@/components/club/createClub/CategoryChips'
-import { ColorSwatchPicker, type SwatchColor } from '@/components/club/createClub/ColorSwatchPicker'
 import { ThumbnailUpload } from '@/components/club/createClub/ThumbnailUpload'
 import { TagPicker } from '@/components/club/createClub/TagPicker'
 import { FeeInputs } from '@/components/club/createClub/FeeInputs'
 import { FaqEditor } from '@/components/club/createClub/FaqEditor'
-import { PhotoMultiUpload } from '@/components/club/createClub/PhotoMultiUpload'
 import type { ClubTag } from '@/lib/club/tags'
 import type { ClubFAQ } from '@/types/club'
 
@@ -54,7 +52,6 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [category, setCategory] = useState<Category>('동호회')
-  const [thumbColor, setThumbColor] = useState<SwatchColor>('#00804C')
   const [imageFile, setImageFile] = useState<File | null>(null)
 
   // ── Phase A state ──────────────────────────────────────────
@@ -64,7 +61,6 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
   const [feeNote, setFeeNote] = useState('')
   const [scheduleSummary, setScheduleSummary] = useState('')
   const [ownerBio, setOwnerBio] = useState('')
-  const [photoFiles, setPhotoFiles] = useState<File[]>([])
   const [faqs, setFaqs] = useState<ClubFAQ[]>([])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -77,7 +73,7 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
       const supabase = createClient()
       let thumbnailUrl = ''
 
-      // 1) 대표 썸네일 업로드
+      // 1) 대표 썸네일 업로드 (선택)
       if (imageFile) {
         const ext = imageFile.name.split('.').pop() ?? 'jpg'
         const path = `cover/${Date.now()}.${ext}`
@@ -89,17 +85,7 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
         thumbnailUrl = url
       }
 
-      // 2) 활동 사진 multi-upload
-      const photoUrls: string[] = []
-      for (let i = 0; i < photoFiles.length; i++) {
-        const f = photoFiles[i]
-        const ext = f.name.split('.').pop() ?? 'jpg'
-        const path = `gallery/${Date.now()}-${i}.${ext}`
-        const url = await uploadWithFallback(supabase, f, path)
-        if (url) photoUrls.push(url)
-      }
-
-      // 3) FormData 보강
+      // 2) FormData 보강
       fd.set('thumbnail_url', thumbnailUrl)
       fd.set('tags', JSON.stringify(tags))
       fd.set('fee_monthly', feeMonthly)
@@ -107,7 +93,6 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
       fd.set('fee_note', feeNote)
       fd.set('owner_bio', ownerBio)
       fd.set('schedule_summary', scheduleSummary)
-      fd.set('photo_urls', JSON.stringify(photoUrls))
       fd.set('faqs', JSON.stringify(faqs))
 
       const result = await createClubAction(fd)
@@ -117,11 +102,14 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
 
   return (
     <div className="flex justify-center">
-      <form onSubmit={handleSubmit} className="w-full max-w-md">
+      <form onSubmit={handleSubmit} className="w-full max-w-3xl">
         <div className="bg-white border border-[#f0f0f0] rounded-3xl p-6 sm:p-8 space-y-8">
 
           {/* 섹션 1 — 기본 정보 */}
           <FormSection title="기본 정보">
+            {/* 대표 썸네일 — 모임 이름 위 */}
+            <ThumbnailUpload onFileChange={(file) => setImageFile(file)} />
+
             <div>
               <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
                 모임 이름 <span className="text-[var(--color-brand-streak)]">*</span>
@@ -135,7 +123,7 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
 
             <CategoryChips value={category} onChange={setCategory} />
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">지역</label>
                 <input
@@ -172,20 +160,32 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
 
           <div className="border-t border-[#f0f0f0]" />
 
-          {/* 섹션 3 — 활동 정보 (일정 / 회비) */}
+          {/* 섹션 3 — 활동 정보 (일정 / 회비 / 코트수) */}
           <FormSection title="활동 정보">
-            <div>
-              <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
-                정기 일정 요약 <span className="text-[#bbb] font-normal">(선택)</span>
-              </label>
-              <input
-                type="text"
-                placeholder="예: 매주 화/목 19:00~22:00"
-                maxLength={80}
-                value={scheduleSummary}
-                onChange={(e) => setScheduleSummary(e.target.value)}
-                className={inputCls}
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
+                  정기 일정 요약 <span className="text-[#bbb] font-normal">(선택)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="예: 매주 화/목 19:00~22:00"
+                  maxLength={80}
+                  value={scheduleSummary}
+                  onChange={(e) => setScheduleSummary(e.target.value)}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">최대 코트 수</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number" name="court_count" min={1} max={20} defaultValue={5}
+                    className="w-24 border border-[#ebebeb] rounded-xl px-4 py-2.5 text-sm text-[#111] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] focus:bg-white transition-colors text-center"
+                  />
+                  <span className="text-[12px] text-[#999]">면 (1~20)</span>
+                </div>
+              </div>
             </div>
 
             <FeeInputs
@@ -219,36 +219,7 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
 
           <div className="border-t border-[#f0f0f0]" />
 
-          {/* 섹션 5 — 운영 설정 (코트 수 / 색상 / 대표 이미지 / 활동 사진) */}
-          <FormSection title="운영 설정">
-            <div>
-              <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">최대 코트 수</label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="number" name="court_count" min={1} max={20} defaultValue={5}
-                  className="w-24 border border-[#ebebeb] rounded-xl px-4 py-2.5 text-sm text-[#111] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] focus:bg-white transition-colors text-center"
-                />
-                <span className="text-[12px] text-[#999]">면 (1~20)</span>
-              </div>
-              <p className="text-[11px] text-[#999] mt-1.5 leading-relaxed">
-                운영 가능한 최대 코트 수예요. 게임 시작 시 1~최대값 사이로 조정할 수 있어요.
-              </p>
-            </div>
-
-            <ColorSwatchPicker
-              value={thumbColor}
-              onChange={setThumbColor}
-              inputName="thumbnail_color"
-            />
-
-            <ThumbnailUpload onFileChange={(file) => setImageFile(file)} />
-
-            <PhotoMultiUpload files={photoFiles} onChange={setPhotoFiles} />
-          </FormSection>
-
-          <div className="border-t border-[#f0f0f0]" />
-
-          {/* 섹션 6 — FAQ */}
+          {/* 섹션 5 — FAQ */}
           <FormSection title="FAQ">
             <FaqEditor value={faqs} onChange={setFaqs} />
           </FormSection>

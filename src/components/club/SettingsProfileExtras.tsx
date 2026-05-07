@@ -2,14 +2,15 @@
 
 import { useState, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { FormSection } from '@/components/club/createClub/FormSection'
+import { CategoryChips, type Category } from '@/components/club/createClub/CategoryChips'
+import { ThumbnailUpload } from '@/components/club/createClub/ThumbnailUpload'
 import { TagPicker } from '@/components/club/createClub/TagPicker'
 import { FeeInputs } from '@/components/club/createClub/FeeInputs'
 import { FaqEditor } from '@/components/club/createClub/FaqEditor'
-import { PhotoMultiUpload } from '@/components/club/createClub/PhotoMultiUpload'
 import { updateClubProfileExtrasAction } from '@/app/club/[clubId]/settings/actions'
 import type { ClubTag } from '@/lib/club/tags'
 import type { Club, ClubFAQ } from '@/types/club'
-import { X } from 'lucide-react'
 
 interface Props {
   club: Club
@@ -23,6 +24,8 @@ const inputCls =
 
 const PRIMARY_BUCKET = 'clubs'
 const FALLBACK_BUCKET = 'club-thumbnails'
+
+const CATEGORIES: Category[] = ['동호회', '클럽']
 
 async function uploadWithFallback(
   supabase: ReturnType<typeof createClient>,
@@ -45,11 +48,26 @@ async function uploadWithFallback(
 }
 
 /**
- * 운영자(매니저+) 가 모임 프로필의 Phase A 신규 정보를 편집하는 카드.
- * - 태그 / 회비 / 일정 / 운영자 소개 / 활동 사진 / FAQ
+ * 운영자(매니저+) 가 모임 프로필 전체를 편집하는 카드.
+ * - 기본 정보(이름·카테고리·지역·장소·소개) + 태그 + 활동 정보(일정·회비) + 운영자 정보 + FAQ
+ * - ClubCreateForm 의 섹션 구조와 통일.
  * - SettingsClient 안에서 isManager 일 때만 렌더링.
  */
 export function SettingsProfileExtras({ club, isManager }: Props) {
+  // ── 기본 정보 ──
+  const [name, setName] = useState(club.name)
+  const [description, setDescription] = useState(club.description ?? '')
+  const [location, setLocation] = useState(club.location ?? '')
+  const [activityPlace, setActivityPlace] = useState(club.activity_place ?? '')
+  const initialCategory = (
+    CATEGORIES.includes((club.category ?? '동호회') as Category)
+      ? (club.category ?? '동호회')
+      : '동호회'
+  ) as Category
+  const [category, setCategory] = useState<Category>(initialCategory)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+
+  // ── 분위기/활동/운영자/FAQ ──
   const [tags, setTags] = useState<ClubTag[]>(
     (club.tags ?? []).filter((t): t is ClubTag => typeof t === 'string') as ClubTag[],
   )
@@ -65,13 +83,6 @@ export function SettingsProfileExtras({ club, isManager }: Props) {
   const [feeNote, setFeeNote] = useState(club.fee_note ?? '')
   const [ownerBio, setOwnerBio] = useState(club.owner_bio ?? '')
   const [contactUrl, setContactUrl] = useState(club.contact_url ?? '')
-
-  // 사진: 기존 URL + 신규 파일 분리 관리.
-  const [existingPhotoUrls, setExistingPhotoUrls] = useState<string[]>(
-    Array.isArray(club.photo_urls) ? club.photo_urls : [],
-  )
-  const [newPhotoFiles, setNewPhotoFiles] = useState<File[]>([])
-
   const [faqs, setFaqs] = useState<ClubFAQ[]>(
     Array.isArray(club.faqs) ? club.faqs : [],
   )
@@ -82,9 +93,6 @@ export function SettingsProfileExtras({ club, isManager }: Props) {
 
   if (!isManager) return null
 
-  const totalPhotos = existingPhotoUrls.length + newPhotoFiles.length
-  const remainingSlots = Math.max(0, 6 - existingPhotoUrls.length)
-
   const handleSave = () => {
     setError(null)
     setSavedFlash(false)
@@ -92,26 +100,32 @@ export function SettingsProfileExtras({ club, isManager }: Props) {
     startTransition(async () => {
       const supabase = createClient()
 
-      // 1) 신규 파일 업로드
-      const newUrls: string[] = []
-      for (let i = 0; i < newPhotoFiles.length; i++) {
-        const f = newPhotoFiles[i]
-        const ext = f.name.split('.').pop() ?? 'jpg'
-        const path = `${club.id}/gallery/${Date.now()}-${i}.${ext}`
-        const url = await uploadWithFallback(supabase, f, path)
-        if (url) newUrls.push(url)
+      // 1) 신규 썸네일 업로드 (선택)
+      let nextThumbnailUrl: string | null | undefined = undefined
+      if (imageFile) {
+        const ext = imageFile.name.split('.').pop() ?? 'jpg'
+        const path = `${club.id}/cover/${Date.now()}.${ext}`
+        const url = await uploadWithFallback(supabase, imageFile, path)
+        if (!url) {
+          setError('대표 이미지 업로드에 실패했어요. 다시 시도해주세요.')
+          return
+        }
+        nextThumbnailUrl = url
       }
 
-      const finalPhotoUrls = [...existingPhotoUrls, ...newUrls].slice(0, 6)
-
       const result = await updateClubProfileExtrasAction(club.id, {
+        name,
+        description,
+        location,
+        activity_place: activityPlace,
+        category,
+        ...(nextThumbnailUrl !== undefined ? { thumbnail_url: nextThumbnailUrl } : {}),
         tags,
         fee_monthly: feeMonthly ? Number(feeMonthly) : null,
         fee_per_session: feePerSession ? Number(feePerSession) : null,
         fee_note: feeNote,
         owner_bio: ownerBio,
         schedule_summary: scheduleSummary,
-        photo_urls: finalPhotoUrls,
         faqs,
         contact_url: contactUrl,
       })
@@ -121,129 +135,153 @@ export function SettingsProfileExtras({ club, isManager }: Props) {
         return
       }
 
-      // 업로드 성공 → 신규 파일 비우고 기존 URL 동기화
-      setExistingPhotoUrls(finalPhotoUrls)
-      setNewPhotoFiles([])
+      setImageFile(null)
       setSavedFlash(true)
       setTimeout(() => setSavedFlash(false), 2400)
     })
   }
 
   return (
-    <div className="bg-white border border-[#e5e5e5] rounded-2xl p-4 space-y-5">
-      <p className="text-xs font-bold text-[#999]">모임 프로필 (가입 전 페이지)</p>
+    <div className="bg-white border border-[#f0f0f0] rounded-3xl p-6 sm:p-8 space-y-8">
 
-      {/* 태그 */}
-      <TagPicker value={tags} onChange={setTags} />
-
-      {/* 정기 일정 */}
-      <div>
-        <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
-          정기 일정 요약 <span className="text-[#bbb] font-normal">(선택)</span>
-        </label>
-        <input
-          type="text"
-          placeholder="예: 매주 화/목 19:00~22:00"
-          maxLength={80}
-          value={scheduleSummary}
-          onChange={(e) => setScheduleSummary(e.target.value)}
-          className={inputCls}
+      {/* 섹션 1 — 기본 정보 */}
+      <FormSection title="기본 정보">
+        <ThumbnailUpload
+          onFileChange={(file) => setImageFile(file)}
+          initialUrl={club.thumbnail_url ?? null}
         />
-      </div>
 
-      {/* 회비 */}
-      <FeeInputs
-        feeMonthly={feeMonthly}
-        onFeeMonthlyChange={setFeeMonthly}
-        feePerSession={feePerSession}
-        onFeePerSessionChange={setFeePerSession}
-        feeNote={feeNote}
-        onFeeNoteChange={setFeeNote}
-      />
-
-      {/* 운영자 한 줄 소개 */}
-      <div>
-        <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
-          운영자 한 줄 소개
-        </label>
-        <input
-          type="text"
-          placeholder="예: 10년차 동호인, 초심자 환영합니다"
-          maxLength={120}
-          value={ownerBio}
-          onChange={(e) => setOwnerBio(e.target.value)}
-          className={inputCls}
-        />
-      </div>
-
-      {/* 공개 연락처 — 가입 전 미리보기 페이지의 "메시지 보내기" 버튼이 이 값으로 활성화 */}
-      <div>
-        <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
-          공개 연락처 <span className="text-[#bbb] font-normal">(선택)</span>
-        </label>
-        <input
-          type="text"
-          placeholder="예: mailto:owner@email.com 또는 https://open.kakao.com/o/..."
-          maxLength={200}
-          value={contactUrl}
-          onChange={(e) => setContactUrl(e.target.value)}
-          className={inputCls}
-        />
-        <p className="mt-1.5 text-[11px] text-[#999] leading-relaxed">
-          가입 전 방문자가 운영자에게 직접 연락할 수 있는 링크예요. 입력하지 않으면 메시지 버튼은 노출되지 않아요.
-        </p>
-      </div>
-
-      {/* 활동 사진 — 기존 + 신규 */}
-      <div>
-        <div className="flex items-baseline justify-between mb-2">
-          <label className="text-[12px] font-semibold text-[#666]">
-            활동 사진 <span className="text-[#bbb] font-normal">(최대 6장)</span>
+        <div>
+          <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
+            모임 이름 <span className="text-[var(--color-brand-streak)]">*</span>
           </label>
-          <span className="text-[11px] text-[#999] tabular-nums">
-            {totalPhotos} / 6
-          </span>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="예: 관악구 화요일 배드민턴 모임"
+            maxLength={30}
+            className={inputCls}
+          />
         </div>
 
-        {existingPhotoUrls.length > 0 && (
-          <div className="grid grid-cols-3 gap-2 mb-2">
-            {existingPhotoUrls.map((url, i) => (
-              <div
-                key={url + i}
-                className="relative aspect-square rounded-xl overflow-hidden bg-[#f0f0f0] border border-[#ebebeb]"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={url}
-                  alt={`기존 활동 사진 ${i + 1}`}
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setExistingPhotoUrls((prev) =>
-                      prev.filter((_, idx) => idx !== i),
-                    )
-                  }
-                  aria-label="사진 제거"
-                  className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
-                >
-                  <X size={11} className="text-white" strokeWidth={2.5} />
-                </button>
-              </div>
-            ))}
+        <CategoryChips value={category} onChange={setCategory} />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">지역</label>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="예: 관악구"
+              maxLength={20}
+              className={inputCls}
+            />
           </div>
-        )}
+          <div>
+            <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">활동 장소</label>
+            <input
+              type="text"
+              value={activityPlace}
+              onChange={(e) => setActivityPlace(e.target.value)}
+              placeholder="예: 국사봉체육관"
+              maxLength={30}
+              className={inputCls}
+            />
+          </div>
+        </div>
 
-        <PhotoMultiUpload
-          files={newPhotoFiles}
-          onChange={setNewPhotoFiles}
-          max={Math.max(1, remainingSlots)}
+        <div>
+          <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">모임 소개</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="모임을 소개하는 글을 작성해주세요. (선택)"
+            rows={4}
+            maxLength={500}
+            className={`${inputCls} resize-none leading-relaxed`}
+          />
+        </div>
+      </FormSection>
+
+      <div className="border-t border-[#f0f0f0]" />
+
+      {/* 섹션 2 — 모임 분위기 */}
+      <FormSection title="모임 분위기">
+        <TagPicker value={tags} onChange={setTags} />
+      </FormSection>
+
+      <div className="border-t border-[#f0f0f0]" />
+
+      {/* 섹션 3 — 활동 정보 */}
+      <FormSection title="활동 정보">
+        <div>
+          <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
+            정기 일정 요약 <span className="text-[#bbb] font-normal">(선택)</span>
+          </label>
+          <input
+            type="text"
+            placeholder="예: 매주 화/목 19:00~22:00"
+            maxLength={80}
+            value={scheduleSummary}
+            onChange={(e) => setScheduleSummary(e.target.value)}
+            className={inputCls}
+          />
+        </div>
+
+        <FeeInputs
+          feeMonthly={feeMonthly}
+          onFeeMonthlyChange={setFeeMonthly}
+          feePerSession={feePerSession}
+          onFeePerSessionChange={setFeePerSession}
+          feeNote={feeNote}
+          onFeeNoteChange={setFeeNote}
         />
-      </div>
+      </FormSection>
 
-      {/* FAQ */}
-      <FaqEditor value={faqs} onChange={setFaqs} />
+      <div className="border-t border-[#f0f0f0]" />
+
+      {/* 섹션 4 — 운영자 정보 */}
+      <FormSection title="운영자 정보">
+        <div>
+          <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
+            운영자 한 줄 소개 <span className="text-[#bbb] font-normal">(선택)</span>
+          </label>
+          <input
+            type="text"
+            placeholder="예: 10년차 동호인, 초심자 환영합니다"
+            maxLength={120}
+            value={ownerBio}
+            onChange={(e) => setOwnerBio(e.target.value)}
+            className={inputCls}
+          />
+        </div>
+
+        <div>
+          <label className="text-[12px] font-semibold text-[#666] mb-1.5 block">
+            공개 연락처 <span className="text-[#bbb] font-normal">(선택)</span>
+          </label>
+          <input
+            type="text"
+            placeholder="예: mailto:owner@email.com 또는 https://open.kakao.com/o/..."
+            maxLength={200}
+            value={contactUrl}
+            onChange={(e) => setContactUrl(e.target.value)}
+            className={inputCls}
+          />
+          <p className="mt-1.5 text-[11px] text-[#999] leading-relaxed">
+            가입 전 방문자가 운영자에게 직접 연락할 수 있는 링크예요. 입력하지 않으면 메시지 버튼은 노출되지 않아요.
+          </p>
+        </div>
+      </FormSection>
+
+      <div className="border-t border-[#f0f0f0]" />
+
+      {/* 섹션 5 — FAQ */}
+      <FormSection title="FAQ">
+        <FaqEditor value={faqs} onChange={setFaqs} />
+      </FormSection>
 
       {error && (
         <p className="text-[12px] text-[var(--color-brand-streak)] bg-[var(--color-brand-streak-bg)] px-3 py-2 rounded-xl">
@@ -262,7 +300,7 @@ export function SettingsProfileExtras({ club, isManager }: Props) {
         disabled={isPending}
         className="w-full py-3 bg-[var(--color-brand-lime)] text-[#111] font-bold text-sm rounded-xl hover:brightness-95 transition-all disabled:opacity-50"
       >
-        {isPending ? '저장 중…' : '프로필 정보 저장'}
+        {isPending ? '저장 중…' : '모임 프로필 저장'}
       </button>
     </div>
   )

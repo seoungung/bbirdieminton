@@ -70,13 +70,22 @@ export async function updateClubProfileAction(
   return { success: true }
 }
 
-// ── Phase A — 모임 프로필 추가 정보 저장 ────────────────────
-// 태그/회비/일정/운영자 소개/사진/FAQ 일괄 update.
+// ── Phase A — 모임 프로필 통합 저장 ────────────────────
+// 기본 정보(이름/카테고리/지역/활동장소/소개) + 추가 정보(태그/회비/일정/운영자 소개/사진/FAQ) 일괄 update.
+// SettingsProfileExtras 의 단일 저장 흐름을 위해 통합.
 // 필드 단위가 아니라 폼 전체 저장 (단순화).
 // RLS 환경에서 컬럼 미존재 시 update 실패 → 에러 메시지로 안내.
 export async function updateClubProfileExtrasAction(
   clubId: string,
   data: {
+    // 기본 정보
+    name?: string
+    description?: string | null
+    location?: string | null
+    activity_place?: string | null
+    category?: string
+    thumbnail_url?: string | null
+    // 추가 정보
     tags?: string[]
     fee_monthly?: number | null
     fee_per_session?: number | null
@@ -102,6 +111,32 @@ export async function updateClubProfileExtrasAction(
     return { error: '운영진(클럽장·매니저)만 변경할 수 있습니다.' }
 
   const patch: Record<string, unknown> = {}
+
+  // ── 기본 정보 ──
+  if (data.name !== undefined) {
+    const nameErr = validateClubName(data.name)
+    if (nameErr) return { error: nameErr }
+    patch.name = data.name.trim()
+  }
+  if (data.description !== undefined) {
+    if (data.description) {
+      const descErr = validateClubDescription(data.description)
+      if (descErr) return { error: descErr }
+    }
+    patch.description = data.description?.trim() || null
+  }
+  if (data.location !== undefined) {
+    patch.location = data.location?.trim() || null
+  }
+  if (data.activity_place !== undefined) {
+    patch.activity_place = data.activity_place?.trim() || null
+  }
+  if (data.category !== undefined) {
+    patch.category = data.category
+  }
+  if (data.thumbnail_url !== undefined) {
+    patch.thumbnail_url = data.thumbnail_url || null
+  }
 
   if (data.tags !== undefined) {
     patch.tags = sanitizeClubTags(data.tags)
@@ -178,6 +213,7 @@ export async function updateClubProfileExtrasAction(
   }
 
   revalidatePath(`/clubs/${clubId}`)
+  revalidatePath(`/club/${clubId}`)
   revalidatePath(`/club/${clubId}/settings`)
   return { success: true }
 }

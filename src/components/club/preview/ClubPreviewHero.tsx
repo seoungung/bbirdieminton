@@ -3,12 +3,13 @@
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
+import { ClubThumbnailFallback } from '@/components/club/cards/ClubThumbnailFallback'
 
 interface Props {
   name: string
   thumbnailUrl: string | null
-  thumbnailColor: string
+  /** @deprecated 더 이상 사용하지 않음. 기본 썸네일은 브랜드 톤으로 통일. */
+  thumbnailColor?: string
   category: string | null
   location: string | null
   memberCount: number
@@ -29,13 +30,11 @@ interface Props {
 export function ClubPreviewHero({
   name,
   thumbnailUrl,
-  thumbnailColor,
   category,
   location,
   memberCount,
   photoUrls,
 }: Props) {
-  const initial = name.charAt(0).toUpperCase()
   const meta = [location, category].filter(Boolean).join(' · ')
 
   /* 썸네일 + 활동 사진 — 중복 제거 후 합치기 */
@@ -140,26 +139,7 @@ export function ClubPreviewHero({
             </div>
           ))
         ) : (
-          <div
-            className="absolute inset-0 flex items-center justify-center select-none"
-            style={{
-              background: `linear-gradient(150deg, ${thumbnailColor} 0%, ${thumbnailColor}dd 50%, ${thumbnailColor}99 100%)`,
-            }}
-            aria-hidden
-          >
-            <span
-              className="text-[120px] sm:text-[140px] font-black leading-none tracking-tighter"
-              style={{ color: 'rgba(0,0,0,0.15)' }}
-            >
-              {initial}
-            </span>
-            <ShuttlecockIcon
-              size={48}
-              strokeWidth={1}
-              className="absolute bottom-5 right-5 opacity-15"
-              aria-label="셔틀콕"
-            />
-          </div>
+          <ClubThumbnailFallback logoSize={120} />
         )}
 
         {/* 가독성 오버레이 — 이미지 있을 때만 (캐러셀 모든 슬라이드 공통) */}
