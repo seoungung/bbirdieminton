@@ -102,7 +102,7 @@ export function ClubPreviewHero({
   }
 
   return (
-    <section className="max-w-[720px] mx-auto">
+    <section className="max-w-[1088px] mx-auto">
       {/* 배너 — 모바일 5/3, 데스크톱 16/9, 280px 높이 캡 */}
       <div
         ref={containerRef}

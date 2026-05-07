@@ -1,7 +1,8 @@
 'use client'
-import { useCallback, useSyncExternalStore } from 'react'
+import { useCallback, useMemo, useSyncExternalStore } from 'react'
 import { ClubsHero } from './ClubsHero'
 import { ClubsCardGrid } from './ClubsCardGrid'
+import { isNewClub } from '@/lib/club/isNewClub'
 import type { ClubDiscoveryItem } from './types'
 
 export type ClubsTab = 'all' | 'mine' | 'saved' | 'recent'
@@ -64,20 +65,33 @@ function useLocalIds(key: string): string[] {
 }
 
 /**
- * /clubs 발견 페이지 — Phase 1 단순 구조 (Hero + 그리드 + 사이드바 둘러보기 nav 연동).
+ * 전체 모임 정렬:
+ *  1) 14일 이내 신규 모임을 상단으로 (NEW 배지와 함께 노출).
+ *  2) 그 안에서 createdAt 내림차순.
+ *  3) 14일이 지난 모임도 createdAt 내림차순.
+ */
+function sortByNewThenRecent(clubs: ClubDiscoveryItem[]): ClubDiscoveryItem[] {
+  return [...clubs].sort((a, b) => {
+    const aNew = isNewClub(a.createdAt) ? 1 : 0
+    const bNew = isNewClub(b.createdAt) ? 1 : 0
+    if (aNew !== bNew) return bNew - aNew
+    const aTime = new Date(a.createdAt).getTime() || 0
+    const bTime = new Date(b.createdAt).getTime() || 0
+    return bTime - aTime
+  })
+}
+
+/**
+ * /clubs 발견 페이지.
  *
- * 사이드바의 "둘러보기" 4개 메뉴 (전체/MY/찜/최근) 와 동작.
- * `tab` query param 으로 어떤 카테고리를 표시할지 결정한다.
+ * 'all' 탭: 두 섹션 분리 노출.
+ *   1. 체험용 모임 — 데모 클럽 고정 (당분간 페이지 상단 고정).
+ *   2. 전체 모임 — 실제 모임. 14일 이내 신규는 'NEW' 배지 + 상단 정렬, 무한스크롤.
  *
- * 찜/최근 본 모임은 `localStorage` (favoriteClubs / recentClubs) 기반.
- *  · SSR 단계: 빈 배열 반환 (서버는 알 수 없음)
- *  · 클라이언트 hydration 후: useSyncExternalStore 로 실제 값 노출
- *  · 다른 탭에서 변경 시 'storage' 이벤트로 자동 갱신
+ * 'mine'/'saved'/'recent' 탭: 단일 리스트 (데모 분리 X, 무한스크롤 X).
+ *  · 찜/최근은 localStorage(favoriteClubs / recentClubs) 기반.
  *
- * Phase 2 큐레이션 (인기/신규/모집중) 컴포넌트는 보존됨:
- *  · `ClubsCurationSection.tsx`
- *  · `ClubsMiniCard.tsx`
- * 클럽 볼륨이 충분히 쌓이면 (~10~15개+) 재활성화 후보.
+ * Phase 2 큐레이션 컴포넌트(`ClubsCurationSection`, `ClubsMiniCard`)는 보존됨 — 클럽 볼륨 충분 시 재활성.
  */
 interface Props {
   /** 전체 모임 (실제 + 데모) */
@@ -92,6 +106,50 @@ export function ClubsDiscoveryClient({ clubs, myClubs, tab = 'all' }: Props) {
   const savedIds = useLocalIds(FAV_KEY)
   const recentIds = useLocalIds(RECENT_KEY)
 
+  // ── 'all' 탭: 데모/실제 분리 + NEW 정렬 ──
+  const demoClubs = useMemo(
+    () => clubs.filter((c) => c.isDemo),
+    [clubs],
+  )
+  const realClubsSorted = useMemo(
+    () => sortByNewThenRecent(clubs.filter((c) => !c.isDemo)),
+    [clubs],
+  )
+
+  if (tab === 'all') {
+    return (
+      <div>
+        <ClubsHero />
+        {demoClubs.length > 0 && (
+          <>
+            <div className="bg-[var(--color-brand-bg-sub)]">
+              <ClubsCardGrid
+                clubs={demoClubs}
+                title="체험용 모임"
+                emptyMessage="체험용 모임이 없어요"
+              />
+            </div>
+            {/* 섹션 구분 — 소모임/네이버카페 스타일 그레이 스트립 */}
+            <div
+              className="h-3 w-full bg-[var(--color-brand-bg-muted)] border-y border-[var(--color-brand-border-sub)]"
+              role="separator"
+              aria-hidden
+            />
+          </>
+        )}
+        <ClubsCardGrid
+          clubs={realClubsSorted}
+          title="전체 모임"
+          emptyMessage="등록된 모임이 아직 없어요"
+          infiniteScroll
+          initialBatch={20}
+          loadMore={20}
+        />
+      </div>
+    )
+  }
+
+  // ── 그 외 탭: 단일 리스트 ──
   let displayClubs: ClubDiscoveryItem[]
   let title: string
   let emptyMessage: string
@@ -112,12 +170,10 @@ export function ClubsDiscoveryClient({ clubs, myClubs, tab = 'all' }: Props) {
       title = '최근 본 모임'
       emptyMessage = '최근 본 모임이 없어요'
       break
-    case 'all':
     default:
       displayClubs = clubs
-      title = '전체 모임'
+      title = '모임'
       emptyMessage = '등록된 모임이 아직 없어요'
-      break
   }
 
   return (

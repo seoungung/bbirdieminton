@@ -6,7 +6,8 @@ import { createClient } from '@/lib/supabase/client'
 import type { ClubMemberWithUser, PlayerStats } from '@/types/club'
 import type { RatingMap } from '@/lib/club/client'
 import { updatePlayerStatsForMatch } from '@/app/club/[clubId]/ranking/actions'
-import { buildRankMap, gradeToSkill } from '@/lib/club/grade'
+import { addPlayersToActiveSessionAction } from '@/app/club/[clubId]/gameboard/actions'
+import { buildRankMap, gradeToSkill, type Grade } from '@/lib/club/grade'
 import {
   type Phase,
   type AssignMode,
@@ -964,6 +965,109 @@ export function GameBoardClient({
     }
   }, [isDemo, sessionDbId, courts])
 
+  /* ── 진행 중 세션에 회원/게스트 추가 (PlayingPhase 헤더 +회원 / +게스트) ── */
+  const handleAddPlayersInPlay = useCallback(
+    async (data: {
+      memberIds?: string[]
+      guests?: Array<{ name: string; gender: 'M' | 'F' | null; grade: Grade | null }>
+    }) => {
+      const memberIds = (data.memberIds ?? []).filter(Boolean)
+      const guests = (data.guests ?? []).filter((g) => g && g.name.trim().length > 0)
+      if (memberIds.length === 0 && guests.length === 0) return
+
+      const now = Date.now()
+
+      /* 데모 모드 — DB 호출 없이 로컬 playerMap 만 갱신 */
+      if (isDemo) {
+        setPlayerMap((prev) => {
+          const next = new Map(prev)
+          for (const mid of memberIds) {
+            if (next.has(mid)) continue
+            const member = members.find((m) => m.id === mid)
+            if (!member) continue
+            next.set(mid, {
+              memberId: mid,
+              name: member.user?.name ?? '?',
+              skillScore: member.skill_score,
+              muScore: ratingsMap[mid]?.mu,
+              phiScore: ratingsMap[mid]?.phi,
+              rank: rankMap.get(mid),
+              gender: member.gender ?? null,
+              todayGames: 0,
+              waitingSince: now,
+              status: 'waiting',
+            })
+          }
+          for (const g of guests) {
+            const id = `guest-demo-${Math.random().toString(36).slice(2, 9)}`
+            next.set(id, {
+              memberId: id,
+              name: g.name.trim().slice(0, 40),
+              skillScore: gradeToSkill(g.grade) ?? 50,
+              gender: g.gender ?? null,
+              todayGames: 0,
+              waitingSince: now,
+              status: 'waiting',
+            })
+          }
+          return next
+        })
+        return
+      }
+
+      /* 실 세션 — sessionDbId 필수, 서버 액션 호출 */
+      if (!sessionDbId) {
+        setError('세션이 시작되지 않았어요.')
+        return
+      }
+
+      const result = await addPlayersToActiveSessionAction(clubId, sessionDbId, {
+        memberIds,
+        guests,
+      })
+      if (result.error) {
+        setError(result.error)
+        return
+      }
+
+      setError(null)
+      setPlayerMap((prev) => {
+        const next = new Map(prev)
+        for (const mid of result.addedMemberIds ?? []) {
+          if (next.has(mid)) continue
+          const member = members.find((m) => m.id === mid)
+          if (!member) continue
+          next.set(mid, {
+            memberId: mid,
+            name: member.user?.name ?? '?',
+            skillScore: member.skill_score,
+            muScore: ratingsMap[mid]?.mu,
+            phiScore: ratingsMap[mid]?.phi,
+            rank: rankMap.get(mid),
+            gender: member.gender ?? null,
+            todayGames: 0,
+            waitingSince: now,
+            status: 'waiting',
+          })
+        }
+        for (const g of result.addedGuests ?? []) {
+          const id = `guest-${g.id}`
+          next.set(id, {
+            memberId: id,
+            name: g.name,
+            skillScore: gradeToSkill((g.grade ?? null) as Grade | null) ?? 50,
+            gender: g.gender ?? null,
+            todayGames: 0,
+            waitingSince: now,
+            status: 'waiting',
+          })
+        }
+        return next
+      })
+    },
+    [isDemo, sessionDbId, clubId, members, ratingsMap, rankMap],
+  )
+
   /* ══════════════════════════════════════
      렌더
   ══════════════════════════════════════ */
@@ -1044,6 +1148,8 @@ export function GameBoardClient({
         onAddCourt={handleAddCourt}
         onRemoveCourt={handleRemoveCourt}
         onTogglePlayerStatus={handleTogglePlayerStatus}
+        members={members}
+        onAddPlayers={handleAddPlayersInPlay}
       />
     </>
   )

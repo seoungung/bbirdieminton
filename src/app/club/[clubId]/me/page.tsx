@@ -57,7 +57,7 @@ export default async function MyCardPage({ params }: PageProps) {
   return (
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
-        <div className="max-w-[720px] mx-auto flex items-center gap-3">
+        <div className="max-w-[1088px] mx-auto flex items-center gap-3">
           <div>
             <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
               <Trophy size={16} strokeWidth={2} />내 카드
@@ -69,7 +69,7 @@ export default async function MyCardPage({ params }: PageProps) {
         </div>
       </header>
 
-      <main className="max-w-[720px] mx-auto px-4 py-5 space-y-4">
+      <main className="max-w-[1088px] mx-auto px-4 py-5 space-y-4">
         {/* 등급 카드 */}
         <GradeCard grade={grade} mu={mu} phi={phi} progress={progress} />
 
@@ -322,7 +322,7 @@ function DemoMyCard() {
   return (
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
-        <div className="max-w-[720px] mx-auto">
+        <div className="max-w-[1088px] mx-auto">
           <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
             <Trophy size={16} strokeWidth={2} />내 카드
           </h1>
@@ -331,7 +331,7 @@ function DemoMyCard() {
           </p>
         </div>
       </header>
-      <main className="max-w-[720px] mx-auto px-4 py-5 space-y-4">
+      <main className="max-w-[1088px] mx-auto px-4 py-5 space-y-4">
         <GradeCard grade={demoGrade} mu={demoMu} phi={92} progress={progress} />
         <StatsCard gamesPlayed={28} updatedAt={today.toISOString()} mu={demoMu} skillScore={62} />
         <HistoryCard history={demoHistory} />

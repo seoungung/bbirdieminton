@@ -5,17 +5,20 @@ import Image from 'next/image'
 import {
   AlertCircle, Printer, Plus, Minus, Flame, Trophy,
   RefreshCw, Check, Coffee, Play, Sparkles, Scale, HeartHandshake,
-  Undo2, ArrowUp, ArrowDown, Trash2,
+  Undo2, ArrowUp, ArrowDown, Trash2, UserPlus, UserPlus2,
 } from 'lucide-react'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
-import { scoreToGrade } from '@/lib/club/grade'
+import { scoreToGrade, type Grade } from '@/lib/club/grade'
 import { cn } from '@/lib/utils'
 import { useLongPress } from '@/hooks/useLongPress'
+import type { ClubMemberWithUser } from '@/types/club'
 import type {
   CourtEntry, PlayerEntry, DialogState, GameMode, KingStreaks, AssignMode,
 } from './types'
 import { formatDuration, pickTeams } from './types'
 import { CustomPickOverlay } from './playing/CustomPickOverlay'
+import { MemberPickerModal } from './setup/MemberPickerModal'
+import { GuestAddModal } from './setup/GuestAddModal'
 
 /* ── 배정 모드 (Phase 4) — 자동 랜덤 / 실력 균등 / 신입 친화 3개만 노출 ──
  *   freshness ↔ 자동 랜덤 (파트너 중복 최소화 — 일반 사용자엔 "랜덤"으로 보임)
@@ -783,6 +786,13 @@ interface Props {
   onRemoveCourt?: () => void
   /** 상태 전환: waiting / resting / departed (playing 상태는 무시) */
   onTogglePlayerStatus?: (memberId: string, target: 'waiting' | 'resting' | 'departed') => void
+  /** 회원/게스트 추가 — 진행 중 세션에 출석/게스트 인입.
+   *  members 와 onAddPlayers 둘 다 있으면 헤더에 "+회원/+게스트" 버튼 노출. */
+  members?: ClubMemberWithUser[]
+  onAddPlayers?: (data: {
+    memberIds?: string[]
+    guests?: Array<{ name: string; gender: 'M' | 'F' | null; grade: Grade | null }>
+  }) => void | Promise<void>
 }
 
 export function PlayingPhase({
@@ -810,8 +820,25 @@ export function PlayingPhase({
   onAddCourt,
   onRemoveCourt,
   onTogglePlayerStatus,
+  members,
+  onAddPlayers,
 }: Props) {
   const allPlayers = useMemo(() => Array.from(playerMap.values()), [playerMap])
+
+  /* 회원/게스트 추가 모달 상태 — 운영진이 진행 중 세션에 인원 인입 */
+  const [memberPickerOpen, setMemberPickerOpen] = useState(false)
+  const [guestAddOpen, setGuestAddOpen] = useState(false)
+  const canAddPlayers = !!members && !!onAddPlayers
+  /* 이미 playerMap 에 있는 회원 — 멤버 피커에서 비활성 처리 */
+  const memberIdsAlreadyIn = useMemo(() => {
+    const set = new Set<string>()
+    for (const p of playerMap.values()) {
+      if (!p.memberId.startsWith('guest-') && !p.memberId.startsWith('temp-')) {
+        set.add(p.memberId)
+      }
+    }
+    return set
+  }, [playerMap])
 
   /** 부모 elapsed 가 1초마다 갱신되므로 그 시점의 "지금"을 동일 시각으로 한 번만 계산. */
   const now = Date.now()
@@ -1173,6 +1200,32 @@ export function PlayingPhase({
                 {/* 라벨 — 좁은 화면 숨김 */}
                 <span className="hidden px-1.5 text-[11px] font-semibold text-white/70 md:inline">코트 수</span>
               </div>
+
+              {/* 회원/게스트 추가 — 진행 중에도 늦게 도착한 회원 / 갑작스런 게스트 인입 가능 */}
+              {canAddPlayers && (
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setMemberPickerOpen(true)}
+                    disabled={isPending}
+                    title="회원 추가"
+                    className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-white/20 active:scale-95 disabled:opacity-50 transition-all md:px-3 md:py-1.5 md:text-xs"
+                  >
+                    <UserPlus size={12} strokeWidth={2.4} />
+                    <span className="hidden md:inline">회원</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGuestAddOpen(true)}
+                    disabled={isPending}
+                    title="게스트 추가"
+                    className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-white/20 active:scale-95 disabled:opacity-50 transition-all md:px-3 md:py-1.5 md:text-xs"
+                  >
+                    <UserPlus2 size={12} strokeWidth={2.4} />
+                    <span className="hidden md:inline">게스트</span>
+                  </button>
+                </div>
+              )}
 
               <button
                 type="button"
@@ -1552,6 +1605,32 @@ export function PlayingPhase({
           onDelete={() => handleQueueDelete(queueCtxMenu.qIdx)}
           onClose={() => setQueueCtxMenu(null)}
         />
+      )}
+
+      {/* 회원/게스트 추가 모달 (진행 중 세션 인입) */}
+      {canAddPlayers && members && onAddPlayers && (
+        <>
+          <MemberPickerModal
+            open={memberPickerOpen}
+            members={members}
+            alreadySelectedIds={memberIdsAlreadyIn}
+            onClose={() => setMemberPickerOpen(false)}
+            onConfirm={async (ids) => {
+              setMemberPickerOpen(false)
+              if (ids.length === 0) return
+              await onAddPlayers({ memberIds: ids })
+            }}
+          />
+          <GuestAddModal
+            open={guestAddOpen}
+            onClose={() => setGuestAddOpen(false)}
+            onConfirm={async (guests) => {
+              setGuestAddOpen(false)
+              if (guests.length === 0) return
+              await onAddPlayers({ guests })
+            }}
+          />
+        </>
       )}
     </div>
   )

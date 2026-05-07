@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 function PageHeader({ clubId }: { clubId: string }) {
   return (
     <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
-      <div className="max-w-[720px] mx-auto flex items-center gap-3">
+      <div className="max-w-[1088px] mx-auto flex items-center gap-3">
         <div>
           <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
             <CalendarDays size={16} strokeWidth={2} />
@@ -52,7 +52,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     return (
       <div>
         <PageHeader clubId={clubId} />
-        <main className="max-w-[720px] mx-auto px-4 py-5">
+        <main className="max-w-[1088px] mx-auto px-4 py-5">
           <EventDetailClient
             clubId={clubId}
             event={demo.event}
@@ -137,7 +137,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   return (
     <div>
       <PageHeader clubId={clubId} />
-      <main className="max-w-[720px] mx-auto px-4 py-5">
+      <main className="max-w-[1088px] mx-auto px-4 py-5">
         <EventDetailClient
           clubId={clubId}
           event={detail}

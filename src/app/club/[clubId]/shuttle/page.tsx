@@ -104,7 +104,7 @@ export default async function ShuttlePage({ params }: Props) {
         </div>
       </header>
 
-      <main className="max-w-[720px] mx-auto px-4 py-5 space-y-5">
+      <main className="max-w-[1088px] mx-auto px-4 py-5 space-y-5">
         {/* 진행 중 세션이 있고 출석자가 있을 때 — Tracker 자동 노출 */}
         {activeSession && sessionSubmissions?.submissions && sessionSubmissions.submissions.length > 0 && (
           <section>

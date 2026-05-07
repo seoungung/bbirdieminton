@@ -27,7 +27,7 @@ export function ClubPreviewHeader({ name }: Props) {
      * 모바일에서는 top-14 (SaaSShell 모바일 헤더 높이만큼) 으로 stacking 조정.
      */
     <header className="sticky top-14 md:top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-[#f0f0f0] h-14 flex items-center">
-      <div className="max-w-[720px] w-full mx-auto px-3 flex items-center gap-2">
+      <div className="max-w-[1088px] w-full mx-auto px-3 flex items-center gap-2">
         <BackButton
           fallback="/clubs"
           className="flex items-center justify-center w-10 h-10 -ml-1 rounded-full text-[#222] hover:bg-[#f5f5f5] transition-colors"

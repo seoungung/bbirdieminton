@@ -1,4 +1,4 @@
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
@@ -8,6 +8,7 @@ import {
   type JoinRequestStatus,
 } from '@/app/club/[clubId]/join-requests/actions'
 import { ClubPreviewClient } from '@/components/club/preview/ClubPreviewClient'
+import { DEMO_CLUBS } from '@/lib/club/demoData'
 import type {
   ClubPreview,
   ClubPreviewVibe,
@@ -97,9 +98,43 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function ClubPreviewPage({ params }: PageProps) {
   const { clubId } = await params
 
-  /* 데모 클럽: preview 가 아니라 그대로 데모 대시보드로 진입 */
+  /* 데모 클럽: DEMO_CLUBS 데이터로 프리뷰 렌더링 (Supabase RPC 우회).
+   * 하단 CTA 는 isMember=true 로 두어 "모임 들어가기" → /club/demo-id 흐름. */
   if (clubId.startsWith('demo-')) {
-    redirect(`/club/${clubId}`)
+    const demo = DEMO_CLUBS.find((d) => d.id === clubId)
+    if (!demo) notFound()
+
+    return (
+      <ClubPreviewClient
+        clubId={demo.id}
+        name={demo.name}
+        description={demo.description}
+        location={demo.location}
+        activityPlace={demo.activityPlace}
+        category={demo.category}
+        courtCount={demo.court_count}
+        thumbnailColor={demo.thumbnailColor}
+        thumbnailUrl={null}
+        ownerName={demo.leaderName}
+        ownerProfileImg={null}
+        memberCount={demo.memberCount}
+        upcomingEvents={[]}
+        recentMembers={[]}
+        isLoggedIn
+        isMember
+        myJoinStatus={null}
+        tags={[]}
+        feeMonthly={null}
+        feePerSession={null}
+        feeNote={null}
+        ownerBio={null}
+        photoUrls={[]}
+        scheduleSummary={null}
+        faqs={[]}
+        vibe={null}
+        contactUrl={null}
+      />
+    )
   }
 
   const supabase = await createClient()

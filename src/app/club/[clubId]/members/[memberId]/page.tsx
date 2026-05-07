@@ -152,7 +152,7 @@ function MemberDetailView({
   return (
     <div>
       <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
-        <div className="max-w-[720px] mx-auto flex items-center gap-3">
+        <div className="max-w-[1088px] mx-auto flex items-center gap-3">
           <div>
             <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
               <UserIcon size={16} strokeWidth={2} />회원 프로필
@@ -162,7 +162,7 @@ function MemberDetailView({
         </div>
       </header>
 
-      <main className="max-w-[720px] mx-auto px-4 py-5 space-y-4">
+      <main className="max-w-[1088px] mx-auto px-4 py-5 space-y-4">
         {/* 멤버 카드 */}
         <section className="bg-white rounded-2xl border border-[#e5e5e5] p-6">
           <div className="flex items-center gap-4">

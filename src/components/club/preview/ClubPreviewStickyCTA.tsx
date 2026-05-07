@@ -54,7 +54,7 @@ export function ClubPreviewStickyCTA({
       className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-[#ebebeb]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="max-w-[720px] mx-auto px-4 py-3">
+      <div className="max-w-[1088px] mx-auto px-4 py-3">
         <div className="flex items-center gap-2.5">
           {/* 찜 — 시각 자리 (향후 phase) */}
           <button
