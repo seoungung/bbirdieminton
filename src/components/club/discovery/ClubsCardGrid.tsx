@@ -9,6 +9,10 @@ interface Props {
   emptyMessage?: string
 }
 
+/**
+ * 모임 리스트 컨테이너 — 단일 컬럼, 행 사이 미세 디바이더.
+ * (소모임/네이버카페 리스트 패턴)
+ */
 export function ClubsCardGrid({
   clubs,
   title = '전체 모임',
@@ -16,7 +20,7 @@ export function ClubsCardGrid({
 }: Props) {
   if (clubs.length === 0) {
     return (
-      <section className="max-w-[1088px] mx-auto px-4 py-12">
+      <section className="max-w-[840px] mx-auto px-4 py-12">
         <div className="rounded-2xl border border-dashed border-[var(--color-brand-border)] bg-[var(--color-surface-sub)] py-16 text-center">
           <p className="text-sm text-[var(--color-brand-text-muted)]">
             {emptyMessage}
@@ -27,16 +31,17 @@ export function ClubsCardGrid({
   }
 
   return (
-    <section className="max-w-[1088px] mx-auto px-4 py-6 md:py-8">
-      <div className="mb-4 flex items-baseline justify-between">
-        <h2 className="text-lg font-bold text-[var(--color-text-strong)]">
+    <section className="max-w-[840px] mx-auto px-4 py-6 md:py-8">
+      <div className="mb-3 flex items-baseline justify-between px-1">
+        <h2 className="text-lg font-bold text-[var(--color-brand-text)]">
           {title}
           <span className="ml-2 text-sm font-medium text-[var(--color-brand-text-muted)] tabular-nums">
             {clubs.length}개
           </span>
         </h2>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <div className="bg-white border border-[var(--color-brand-border)] rounded-2xl overflow-hidden divide-y divide-[var(--color-brand-border-sub)]">
         {clubs.map((club) => (
           <ClubsCard key={club.id} club={club} />
         ))}
