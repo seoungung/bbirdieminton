@@ -191,6 +191,50 @@ export async function setRsvpAction(
   return { success: true }
 }
 
+// ── 대기 신청 (만석 시) ──────────────────────────────────
+/**
+ * 만석 정모에 대기 등록.
+ * RPC join_event_waitlist 가 정원/멤버십/race 검증 모두 처리.
+ * 정원 여유 있으면 바로 참석하라고 안내 메시지 반환.
+ */
+export async function joinWaitlistAction(
+  clubId: string,
+  eventId: string
+): Promise<{ success?: true; position?: number; error?: string }> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('join_event_waitlist', {
+    p_event_id: eventId,
+  })
+  if (error) return { error: '대기 신청 중 오류가 발생했어요.' }
+  const result = data as { ok?: boolean; position?: number; error?: string } | null
+  if (result?.error) return { error: result.error }
+
+  revalidatePath(`/club/${clubId}/events`)
+  revalidatePath(`/club/${clubId}/events/${eventId}`)
+  return {
+    success: true,
+    position: typeof result?.position === 'number' ? result.position : undefined,
+  }
+}
+
+// ── 대기 취소 ──────────────────────────────────────────────
+export async function cancelWaitlistAction(
+  clubId: string,
+  eventId: string
+): Promise<{ success?: true; error?: string }> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('cancel_waitlist_entry', {
+    p_event_id: eventId,
+  })
+  if (error) return { error: '대기 취소 중 오류가 발생했어요.' }
+  const result = data as { ok?: boolean; error?: string } | null
+  if (result?.error) return { error: result.error }
+
+  revalidatePath(`/club/${clubId}/events`)
+  revalidatePath(`/club/${clubId}/events/${eventId}`)
+  return { success: true }
+}
+
 // ── 다가오는 이벤트 갯수 (대시보드 위젯) ───────────────────
 export async function getUpcomingEventsCountAction(
   clubId: string

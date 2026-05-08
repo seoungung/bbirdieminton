@@ -13,6 +13,8 @@ import {
   setRsvpAction,
   updateEventAction,
   deleteEventAction,
+  joinWaitlistAction,
+  cancelWaitlistAction,
   type EventInput,
   type EventListRow,
 } from '@/app/club/[clubId]/events/actions'
@@ -25,6 +27,10 @@ interface Props {
   myStatus: EventAttendStatus | null
   isManager: boolean
   isDemo?: boolean
+  /** 현재 대기 인원 수 */
+  waitlistCount: number
+  /** 본인 대기 순번 (1, 2, 3 ...). 대기중 아니면 null */
+  myWaitlistPosition: number | null
 }
 
 export function EventDetailClient({
@@ -34,6 +40,8 @@ export function EventDetailClient({
   myStatus,
   isManager,
   isDemo,
+  waitlistCount,
+  myWaitlistPosition,
 }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -64,6 +72,40 @@ export function EventDetailClient({
     }
     startTransition(async () => {
       const result = await setRsvpAction(clubId, event.id, next)
+      if (result.error) {
+        alert(result.error)
+        return
+      }
+      router.refresh()
+    })
+  }
+
+  function handleJoinWaitlist() {
+    if (isDemo) {
+      alert('체험 모드에서는 대기 신청이 저장되지 않습니다.')
+      return
+    }
+    if (isPast) {
+      alert('이미 지난 정기모임은 대기할 수 없습니다.')
+      return
+    }
+    startTransition(async () => {
+      const result = await joinWaitlistAction(clubId, event.id)
+      if (result.error) {
+        alert(result.error)
+        return
+      }
+      router.refresh()
+    })
+  }
+
+  function handleCancelWaitlist() {
+    if (isDemo) {
+      alert('체험 모드에서는 대기 취소가 저장되지 않습니다.')
+      return
+    }
+    startTransition(async () => {
+      const result = await cancelWaitlistAction(clubId, event.id)
       if (result.error) {
         alert(result.error)
         return
@@ -124,6 +166,10 @@ export function EventDetailClient({
           isFull={isFull}
           isPending={isPending}
           onChange={handleRsvp}
+          waitlistCount={waitlistCount}
+          myWaitlistPosition={myWaitlistPosition}
+          onJoinWaitlist={handleJoinWaitlist}
+          onCancelWaitlist={handleCancelWaitlist}
         />
       )}
 

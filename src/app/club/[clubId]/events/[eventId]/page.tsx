@@ -60,6 +60,8 @@ export default async function EventDetailPage({ params }: PageProps) {
             myStatus={demo.myStatus}
             isManager={false}
             isDemo
+            waitlistCount={0}
+            myWaitlistPosition={null}
           />
         </main>
       </div>
@@ -120,6 +122,18 @@ export default async function EventDetailPage({ params }: PageProps) {
   const myStatus =
     attendees.find((a) => a.member_id === membership.id)?.status ?? null
 
+  /* 대기 명단 — RLS 로 클럽 멤버만 SELECT 가능 */
+  const { data: waitlistRows } = await supabase
+    .from('event_waitlist')
+    .select('member_id, position')
+    .eq('event_id', eventId)
+    .eq('status', 'waiting')
+    .order('position', { ascending: true })
+
+  const waitlistCount = waitlistRows?.length ?? 0
+  const myWaitlistPosition =
+    waitlistRows?.find((r) => r.member_id === membership.id)?.position ?? null
+
   const detail: EventDetail = {
     id: ev.id,
     club_id: ev.club_id,
@@ -144,6 +158,8 @@ export default async function EventDetailPage({ params }: PageProps) {
           attendees={attendees}
           myStatus={myStatus}
           isManager={isManager}
+          waitlistCount={waitlistCount}
+          myWaitlistPosition={myWaitlistPosition}
         />
       </main>
     </div>
