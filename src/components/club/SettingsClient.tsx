@@ -149,10 +149,13 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
   }
 
   return (
-    <div className="space-y-6">
-      {/* 초대코드 */}
-      <div className="bg-white border border-[#e5e5e5] rounded-2xl p-4">
-        <p className="text-xs font-bold text-[#999] mb-2">초대코드</p>
+    <div className="space-y-9">
+      {/* ── 초대코드 ── */}
+      <section>
+        <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[var(--color-text-strong)] mb-3">
+          초대코드
+        </h2>
+        <div className="bg-white border border-[#e5e5e5] rounded-2xl p-4">
         <div className="flex items-center justify-between gap-2">
           <span className="font-mono font-bold text-xl tracking-widest text-[#111] uppercase">
             {codeRegen ?? club.invite_code}
@@ -200,12 +203,16 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
         <p className="mt-3 text-[11px] text-[#999]">
           카톡 초대를 누르면 받는 사람이 카드를 눌러 곧바로 가입 페이지로 이동해요.
         </p>
-      </div>
+        </div>
+      </section>
 
-      {/* 최대 코트 수 — 운영진만 변경 가능 */}
+      {/* ── 최대 코트 수 — 운영진만 변경 가능 ── */}
       {isManager && (
-        <div className="bg-white border border-[#e5e5e5] rounded-2xl p-4">
-          <p className="text-xs font-bold text-[#999] mb-3">최대 코트 수</p>
+        <section>
+          <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[var(--color-text-strong)] mb-3">
+            최대 코트 수
+          </h2>
+          <div className="bg-white border border-[#e5e5e5] rounded-2xl p-4">
           <div className="flex items-center gap-3">
             <input
               type="number"
@@ -225,16 +232,20 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
           <p className="text-[11px] text-[#999] mt-1.5 leading-relaxed">
             이 모임이 운영할 수 있는 최대 코트 수예요. 매 게임 시작 시 그날 사용할 코트 수를 1~최대값 사이로 조정할 수 있어요.
           </p>
-        </div>
+          </div>
+        </section>
       )}
 
-      {/* Phase A — 모임 프로필 (가입 전 페이지) 편집 */}
+      {/* ── 모임 프로필 (가입 전 페이지) 편집 — 자체 헤딩 보유 ── */}
       {isManager && <SettingsProfileExtras club={club} isManager={isManager} />}
 
-      {/* 게임 규칙 — 운영진만 변경 가능 */}
+      {/* ── 게임 규칙 — 운영진만 변경 가능 ── */}
       {isManager && (
-        <div className="bg-white border border-[#e5e5e5] rounded-2xl p-4">
-          <p className="text-xs font-bold text-[#999] mb-1">게임 규칙</p>
+        <section>
+          <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[var(--color-text-strong)] mb-3">
+            게임 규칙
+          </h2>
+          <div className="bg-white border border-[#e5e5e5] rounded-2xl p-4">
           <p className="text-[12px] text-[#666] leading-relaxed mb-3">
             한국 클럽·동호회는 <strong className="text-[#111]">25점 듀스</strong>가 표준,
             정식 대회는 <strong className="text-[#111]">21점</strong>입니다.
@@ -270,12 +281,15 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
             · 듀스 시 2점 차로 종료 · 강제 종료점은 종료점+9
             ({pointTarget === 21 ? '21→30' : '25→34'})
           </p>
-        </div>
+          </div>
+        </section>
       )}
 
-      {/* 멤버 목록 */}
-      <div>
-        <p className="text-xs font-bold text-[#999] mb-2">멤버 {members.length}명</p>
+      {/* ── 멤버 목록 ── */}
+      <section>
+        <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[var(--color-text-strong)] mb-3">
+          멤버 <span className="text-[#999] font-semibold tabular-nums">{members.length}</span>
+        </h2>
         <div className="space-y-2">
           {members.map((m) => (
             <div
@@ -315,9 +329,9 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
             </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* 나가기 */}
+      {/* ── 위험 영역 (나가기/삭제) ── */}
       {!isOwner && (
         <button
           onClick={leaveClub}
