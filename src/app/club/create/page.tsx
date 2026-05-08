@@ -15,14 +15,19 @@ export default async function ClubCreatePage({ searchParams }: PageProps) {
   const params = await searchParams
   const isDemoPreview = params.demo === '1'
 
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  /* 데모 미리보기 모드 — 로그인 검사 우회 (UI 미리보기만 가능, submit 차단됨) */
+  let clubUserId = 'demo-preview'
+  if (!isDemoPreview) {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) redirect('/login')
 
-  const clubUserId = await getClubUserId(supabase)
-  if (!clubUserId) redirect('/login')
+    const realClubUserId = await getClubUserId(supabase)
+    if (!realClubUserId) redirect('/login')
+    clubUserId = realClubUserId
+  }
 
   return (
     <div>
