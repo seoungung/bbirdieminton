@@ -112,9 +112,9 @@ export default async function ClubPreviewPage({ params }: PageProps) {
       name: m.name,
       profile_img:
         m.gender === 'F'
-          ? '/avatar-f.svg'
+          ? '/avatar-f.png'
           : m.gender === 'M'
-          ? '/avatar-m.svg'
+          ? '/avatar-m.png'
           : null,
       role:
         m.role === 'owner'
@@ -137,9 +137,9 @@ export default async function ClubPreviewPage({ params }: PageProps) {
       name: m.name,
       profile_img:
         m.gender === 'F'
-          ? '/avatar-f.svg'
+          ? '/avatar-f.png'
           : m.gender === 'M'
-          ? '/avatar-m.svg'
+          ? '/avatar-m.png'
           : null,
     }))
     const satAttendees = DEMO_MEMBERS.slice(6, 21).map((m) => ({
@@ -147,9 +147,9 @@ export default async function ClubPreviewPage({ params }: PageProps) {
       name: m.name,
       profile_img:
         m.gender === 'F'
-          ? '/avatar-f.svg'
+          ? '/avatar-f.png'
           : m.gender === 'M'
-          ? '/avatar-m.svg'
+          ? '/avatar-m.png'
           : null,
     }))
     const upcomingDemoEvents = [
@@ -215,7 +215,7 @@ export default async function ClubPreviewPage({ params }: PageProps) {
         thumbnailColor={demo.thumbnailColor}
         thumbnailUrl={null}
         ownerName={demo.leaderName}
-        ownerProfileImg="/avatar-m.svg"
+        ownerProfileImg="/avatar-m.png"
         memberCount={demo.memberCount}
         upcomingEvents={upcomingDemoEvents}
         recentMembers={recentDemoMembers}
