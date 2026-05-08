@@ -1,30 +1,55 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
   <defs>
-    <linearGradient id="bodyF" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f4a48b"/>
-      <stop offset="50%" stop-color="#ed8d8d"/>
-      <stop offset="100%" stop-color="#c93e88"/>
-    </linearGradient>
-    <radialGradient id="faceF" cx="0.4" cy="0.35" r="0.7">
-      <stop offset="0%" stop-color="#ffd6c1"/>
-      <stop offset="100%" stop-color="#e8a99a"/>
+    <!-- 몸통 — 좌상단 밝음 → 우하단 진한 핑크 -->
+    <radialGradient id="bodyF" cx="0.35" cy="0.25" r="0.95">
+      <stop offset="0%" stop-color="#ffd4b3"/>
+      <stop offset="35%" stop-color="#f4a48b"/>
+      <stop offset="70%" stop-color="#e0608b"/>
+      <stop offset="100%" stop-color="#a82066"/>
     </radialGradient>
-    <linearGradient id="hairF" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#5b3326"/>
-      <stop offset="100%" stop-color="#3a1f17"/>
+    <!-- 얼굴 -->
+    <radialGradient id="faceF" cx="0.4" cy="0.3" r="0.9">
+      <stop offset="0%" stop-color="#fff0e1"/>
+      <stop offset="55%" stop-color="#f5c8a8"/>
+      <stop offset="100%" stop-color="#d99a7d"/>
+    </radialGradient>
+    <!-- 머리카락 -->
+    <linearGradient id="hairF" x1="0.3" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#5a3527"/>
+      <stop offset="60%" stop-color="#3d1f15"/>
+      <stop offset="100%" stop-color="#28140d"/>
     </linearGradient>
+    <!-- 머리 묶음 — 살짝 어두운 톤 -->
+    <radialGradient id="bunF" cx="0.4" cy="0.35" r="0.7">
+      <stop offset="0%" stop-color="#5a3527"/>
+      <stop offset="100%" stop-color="#28140d"/>
+    </radialGradient>
+    <!-- 광택 highlight -->
+    <radialGradient id="shineF" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.6)"/>
+      <stop offset="60%" stop-color="rgba(255,255,255,0.1)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
   </defs>
-  <!-- 배경 채움 (둥근 카드 안에서 보일 때 자연스럽도록 투명) -->
-  <rect width="200" height="200" fill="#fafafa"/>
+
   <!-- 몸통 — 둥근 캡슐 -->
-  <ellipse cx="100" cy="160" rx="58" ry="44" fill="url(#bodyF)"/>
-  <!-- 머리 — 둥근 -->
-  <circle cx="100" cy="80" r="42" fill="url(#faceF)"/>
-  <!-- 머리카락 — 정수리 + 옆 -->
-  <path d="M58 80 Q60 38 100 38 Q140 38 142 80 Q140 60 130 50 Q115 60 100 60 Q85 60 70 50 Q60 60 58 80 Z" fill="url(#hairF)"/>
-  <!-- 머리 묶음 (bun) -->
-  <ellipse cx="100" cy="32" rx="20" ry="14" fill="url(#hairF)"/>
-  <!-- 옆머리 살짝 흘러내림 -->
-  <path d="M62 78 Q60 95 64 110 Q62 92 64 80 Z" fill="url(#hairF)"/>
-  <path d="M138 78 Q140 95 136 110 Q138 92 136 80 Z" fill="url(#hairF)"/>
+  <ellipse cx="100" cy="158" rx="60" ry="44" fill="url(#bodyF)"/>
+  <!-- 몸통 광택 (좌상단) -->
+  <ellipse cx="78" cy="138" rx="22" ry="14" fill="url(#shineF)" opacity="0.55"/>
+
+  <!-- 머리 -->
+  <circle cx="100" cy="84" r="40" fill="url(#faceF)"/>
+  <!-- 얼굴 광택 -->
+  <ellipse cx="86" cy="72" rx="14" ry="10" fill="url(#shineF)" opacity="0.45"/>
+
+  <!-- 머리카락 — 정수리에서 측두까지 자연스럽게 감싸는 곡선 -->
+  <path d="M62 90 Q60 50 100 46 Q140 50 138 90 Q138 70 130 60 Q118 70 100 70 Q82 70 70 60 Q62 70 62 90 Z" fill="url(#hairF)"/>
+  <!-- 옆머리 흘러내림 (좌/우) -->
+  <path d="M62 88 Q56 100 60 116 Q60 102 64 90 Z" fill="url(#hairF)"/>
+  <path d="M138 88 Q144 100 140 116 Q140 102 136 90 Z" fill="url(#hairF)"/>
+
+  <!-- 정수리 머리 묶음 (bun) -->
+  <ellipse cx="100" cy="38" rx="22" ry="15" fill="url(#bunF)"/>
+  <!-- bun 광택 -->
+  <ellipse cx="92" cy="32" rx="9" ry="4" fill="rgba(255,255,255,0.25)"/>
 </svg>

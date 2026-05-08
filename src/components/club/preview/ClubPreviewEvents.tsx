@@ -60,53 +60,46 @@ function EventRow({ event }: { event: ClubPreviewEvent }) {
   const visibleAvatars = participants.slice(0, 8)
   const remainingSlots = Math.max(0, event.going_count - visibleAvatars.length)
 
-  return (
-    <li className="relative bg-white border border-[#ebebeb] rounded-2xl p-4 sm:p-5 hover:border-[#d8d8d8] transition-colors">
-      <div className="flex items-start gap-3 sm:gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
-            <DayBadge label={label} tone={tone} />
-            {isFull && (
-              <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-[#f0f0f0] text-[#999] uppercase tracking-wider">
-                마감
-              </span>
-            )}
-          </div>
-          <p className="font-bold text-[16px] sm:text-[17px] text-[#111] leading-snug break-keep">
-            {event.title}
-          </p>
-
-          <dl className="mt-2.5 space-y-1 text-[12.5px] text-[#666]">
-            <KeyValue label="일시">
-              <span className="text-[#333]">{dateLine}</span>
-              {timeLine && <span className="text-[#999]"> · {timeLine}</span>}
-            </KeyValue>
-            {event.place && (
-              <KeyValue label="위치">
-                <span className="truncate">{event.place}</span>
-              </KeyValue>
-            )}
-            {event.fee && (
-              <KeyValue label="비용">
-                <span className="truncate">{event.fee}</span>
-              </KeyValue>
-            )}
-            <KeyValue label="참석">
-              <span className="text-[#333] font-semibold tabular-nums">
-                {attendLabel}
-              </span>
-            </KeyValue>
-          </dl>
-        </div>
-
-        {/* 우측 썸네일 — 셔틀콕 일러스트 */}
-        <div
-          className="hidden sm:flex shrink-0 w-32 h-20 rounded-xl items-center justify-center bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court-deep)] overflow-hidden"
-          aria-hidden
-        >
-          <CalendarDays size={28} strokeWidth={1.6} />
-        </div>
+  /* 좌측 컨텐츠 (모바일 전체 폭, md+ flex-1) — badge/title/meta/avatars/actions */
+  const leftContent = (
+    <div className="flex-1 min-w-0 flex flex-col">
+      {/* badge 줄 */}
+      <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+        <DayBadge label={label} tone={tone} />
+        {isFull && (
+          <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-[#f0f0f0] text-[#999] uppercase tracking-wider">
+            마감
+          </span>
+        )}
       </div>
+
+      {/* 제목 */}
+      <p className="font-bold text-[16px] sm:text-[17px] text-[#111] leading-snug break-keep">
+        {event.title}
+      </p>
+
+      {/* 메타 */}
+      <dl className="mt-2.5 space-y-1 text-[12.5px] text-[#666]">
+        <KeyValue label="일시">
+          <span className="text-[#333]">{dateLine}</span>
+          {timeLine && <span className="text-[#999]"> · {timeLine}</span>}
+        </KeyValue>
+        {event.place && (
+          <KeyValue label="위치">
+            <span className="truncate">{event.place}</span>
+          </KeyValue>
+        )}
+        {event.fee && (
+          <KeyValue label="비용">
+            <span className="truncate">{event.fee}</span>
+          </KeyValue>
+        )}
+        <KeyValue label="참석">
+          <span className="text-[#333] font-semibold tabular-nums">
+            {attendLabel}
+          </span>
+        </KeyValue>
+      </dl>
 
       {/* 참석자 아바타 줄 — 최대 8명 + 남은 인원 placeholder */}
       <div className="mt-4 flex items-center gap-1.5 sm:gap-2">
@@ -129,7 +122,7 @@ function EventRow({ event }: { event: ClubPreviewEvent }) {
         )}
       </div>
 
-      {/* 액션 버튼 줄 — 가입 전이라 모두 비활성. 가입 후 활성. */}
+      {/* 액션 버튼 줄 — 가입 전이라 모두 비활성 */}
       <div className="mt-3 flex items-center gap-1.5 sm:gap-2">
         <ActionIconButton ariaLabel="찜">
           <Heart size={18} strokeWidth={2} />
@@ -153,6 +146,26 @@ function EventRow({ event }: { event: ClubPreviewEvent }) {
         >
           {isFull ? '마감' : '참석'}
         </button>
+      </div>
+    </div>
+  )
+
+  /* 우측 썸네일 — md+ 에서만 노출. 모바일은 표시 안 함. */
+  const rightThumbnail = (
+    <div
+      className="hidden md:flex shrink-0 md:w-[280px] lg:w-[340px] aspect-[16/10] rounded-xl items-center justify-center bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court-deep)] overflow-hidden"
+      aria-hidden
+    >
+      <CalendarDays size={56} strokeWidth={1.4} />
+    </div>
+  )
+
+  return (
+    <li className="relative bg-white border border-[#ebebeb] rounded-2xl p-4 sm:p-5 hover:border-[#d8d8d8] transition-colors">
+      {/* md+ 에서 좌(텍스트) + 우(썸네일) 가로 배치, 모바일에서 단일 컬럼 */}
+      <div className="flex flex-col md:flex-row md:items-stretch md:gap-5">
+        {leftContent}
+        {rightThumbnail}
       </div>
     </li>
   )

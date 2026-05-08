@@ -1,27 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
   <defs>
-    <linearGradient id="bodyM" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f4b27a"/>
-      <stop offset="50%" stop-color="#e87b3c"/>
-      <stop offset="100%" stop-color="#b53324"/>
-    </linearGradient>
-    <radialGradient id="faceM" cx="0.4" cy="0.35" r="0.7">
-      <stop offset="0%" stop-color="#ffd6c1"/>
-      <stop offset="100%" stop-color="#e8a99a"/>
+    <!-- 몸통 — 좌상단 밝음 → 우하단 진한 레드 -->
+    <radialGradient id="bodyM" cx="0.35" cy="0.25" r="0.95">
+      <stop offset="0%" stop-color="#ffd4a3"/>
+      <stop offset="35%" stop-color="#f4a065"/>
+      <stop offset="70%" stop-color="#e25c2b"/>
+      <stop offset="100%" stop-color="#992112"/>
     </radialGradient>
-    <linearGradient id="hairM" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#5b3326"/>
-      <stop offset="100%" stop-color="#3a1f17"/>
+    <radialGradient id="faceM" cx="0.4" cy="0.3" r="0.9">
+      <stop offset="0%" stop-color="#fff0e1"/>
+      <stop offset="55%" stop-color="#f5c8a8"/>
+      <stop offset="100%" stop-color="#d99a7d"/>
+    </radialGradient>
+    <linearGradient id="hairM" x1="0.3" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#5a3527"/>
+      <stop offset="60%" stop-color="#3d1f15"/>
+      <stop offset="100%" stop-color="#28140d"/>
     </linearGradient>
+    <radialGradient id="shineM" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.6)"/>
+      <stop offset="60%" stop-color="rgba(255,255,255,0.1)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
   </defs>
-  <rect width="200" height="200" fill="#fafafa"/>
+
   <!-- 몸통 -->
-  <ellipse cx="100" cy="160" rx="58" ry="44" fill="url(#bodyM)"/>
+  <ellipse cx="100" cy="158" rx="60" ry="44" fill="url(#bodyM)"/>
+  <ellipse cx="78" cy="138" rx="22" ry="14" fill="url(#shineM)" opacity="0.55"/>
+
   <!-- 머리 -->
-  <circle cx="100" cy="80" r="42" fill="url(#faceM)"/>
-  <!-- 머리카락 — 짧은 남자 스타일 -->
-  <path d="M60 78 Q62 40 100 40 Q138 40 140 78 Q138 64 130 56 Q115 62 100 60 Q85 62 70 56 Q62 64 60 78 Z" fill="url(#hairM)"/>
-  <!-- 옆 헤어라인 살짝 -->
-  <path d="M60 76 Q58 84 60 92 Q60 84 62 78 Z" fill="url(#hairM)"/>
-  <path d="M140 76 Q142 84 140 92 Q140 84 138 78 Z" fill="url(#hairM)"/>
+  <circle cx="100" cy="84" r="40" fill="url(#faceM)"/>
+  <ellipse cx="86" cy="72" rx="14" ry="10" fill="url(#shineM)" opacity="0.45"/>
+
+  <!-- 머리카락 — 짧은 남성 스타일, 자연스러운 헤어라인 -->
+  <path d="M62 88 Q60 46 100 44 Q140 46 138 88 Q138 70 132 62 Q120 70 100 68 Q80 70 68 62 Q62 70 62 88 Z" fill="url(#hairM)"/>
+  <!-- 옆머리 짧게 -->
+  <path d="M62 88 Q60 96 62 104 Q62 96 64 90 Z" fill="url(#hairM)"/>
+  <path d="M138 88 Q140 96 138 104 Q138 96 136 90 Z" fill="url(#hairM)"/>
+  <!-- 헤어 위 광택 -->
+  <ellipse cx="92" cy="56" rx="14" ry="4" fill="rgba(255,255,255,0.18)"/>
 </svg>
