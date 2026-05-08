@@ -283,11 +283,11 @@ AFTER UPDATE OR DELETE ON club_event_attendances
 FOR EACH ROW
 EXECUTE FUNCTION promote_first_waiter();
 
--- ─── 6. 헬퍼 view (선택) — 정모 대기 수 + 첫 대기자 조회 단순화 ───
--- 페이지 쿼리에서 join_count 계산을 위해. RLS 자동 적용.
+-- ─── 6. 헬퍼 view (선택) — 정모 대기 수 집계, RLS 자동 적용 ───
+-- COUNT(*) FILTER 절은 캐스팅 (::INT) 보다 먼저 파싱되어야 해서 괄호로 감쌈.
 CREATE OR REPLACE VIEW event_waitlist_summary AS
 SELECT
   event_id,
-  COUNT(*)::INT FILTER (WHERE status = 'waiting') AS waiting_count
+  (COUNT(*) FILTER (WHERE status = 'waiting'))::INT AS waiting_count
 FROM event_waitlist
 GROUP BY event_id;
