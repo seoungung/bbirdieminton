@@ -185,10 +185,100 @@ export async function setRsvpAction(
   const result = data as { ok?: boolean; error?: string } | null
   if (result?.error) return { error: result.error }
 
+  /* going → not_going 전환 시: trigger 가 첫 대기자를 자동 승격시킬 수 있음.
+   * 최근 5초 내 promoted 된 row 를 찾아 본인에게 push 알림 발송.
+   * (push 실패는 RSVP 응답 자체에 영향 X) */
+  if (status === 'not_going') {
+    void notifyRecentlyPromoted(clubId, eventId).catch((e) => {
+      console.warn('[waitlist] push notify error', e)
+    })
+  }
+
   revalidatePath(`/club/${clubId}/events`)
   revalidatePath(`/club/${clubId}/events/${eventId}`)
   revalidatePath(`/club/${clubId}`)
   return { success: true }
+}
+
+/* ── 대기 자동 승격자에게 push 알림 ── */
+async function notifyRecentlyPromoted(
+  clubId: string,
+  eventId: string,
+): Promise<void> {
+  const { sendPushToUsers } = await import('@/lib/notifications/push')
+  const { sendKakaoNoti } = await import('@/lib/notifications/kakao')
+
+  const supabase = await createClient()
+
+  /* 최근 5초 내 승격된 대기자 + user_id + 이벤트 컨텍스트 */
+  const fiveSecondsAgo = new Date(Date.now() - 5_000).toISOString()
+  const { data: promoted } = await supabase
+    .from('event_waitlist')
+    .select(`
+      member_id,
+      promoted_at,
+      member:club_members(user_id)
+    `)
+    .eq('event_id', eventId)
+    .eq('status', 'promoted')
+    .gte('promoted_at', fiveSecondsAgo)
+
+  if (!promoted || promoted.length === 0) return
+
+  /* 이벤트 + 클럽 정보 한 번 가져옴 (알림 본문 구성용) */
+  const { data: ev } = await supabase
+    .from('club_events')
+    .select('title, event_date, club:clubs(name)')
+    .eq('id', eventId)
+    .maybeSingle()
+
+  type PromotedRow = {
+    member_id: string
+    member: { user_id: string }[] | { user_id: string } | null
+  }
+  const rows = (promoted as unknown as PromotedRow[]) ?? []
+
+  const userIds = rows
+    .map((r) => {
+      const m = Array.isArray(r.member) ? r.member[0] : r.member
+      return m?.user_id
+    })
+    .filter((id): id is string => !!id)
+
+  type EvRow = {
+    title: string
+    event_date: string
+    club: { name: string | null }[] | { name: string | null } | null
+  }
+  const evRow = (ev as unknown as EvRow | null) ?? null
+  const evClub = evRow ? (Array.isArray(evRow.club) ? evRow.club[0] : evRow.club) : null
+  const clubName = evClub?.name ?? '모임'
+  const eventTitle = evRow?.title ?? '정기모임'
+
+  /* 1) Web Push 알림 — 즉시 발송 (브라우저 SW 가 처리) */
+  if (userIds.length > 0) {
+    await sendPushToUsers(userIds, {
+      title: `🎉 ${eventTitle} 참석 확정`,
+      body: `대기 중이던 ${clubName} 정모에 자리가 났어요. 참석으로 자동 승격됐어요.`,
+      url: `/club/${clubId}/events/${eventId}`,
+      tag: `event-${eventId}-promoted`,
+    })
+  }
+
+  /* 2) 카카오 알림톡 — 현재 STUB.
+   *    실 발송하려면: users 테이블에 phone 컬럼 추가 + Kakao 비즈 연동.
+   *    placeholder 호출은 콘솔 로그만 남김. */
+  for (const _r of rows) {
+    await sendKakaoNoti({
+      to: '',  // TODO: users.phone 컬럼 추가 시 채움
+      templateCode: 'WAITLIST_PROMOTED',
+      variables: {
+        clubName,
+        eventTitle,
+        eventDate: evRow?.event_date ?? '',
+      },
+    })
+  }
 }
 
 // ── 대기 신청 (만석 시) ──────────────────────────────────

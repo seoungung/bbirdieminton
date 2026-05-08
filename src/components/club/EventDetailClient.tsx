@@ -7,7 +7,8 @@ import { EventFormDialog } from './EventFormDialog'
 import { EventHero } from './events/EventHero'
 import { RsvpToggle } from './events/RsvpToggle'
 import { AttendeeList } from './events/AttendeeList'
-import type { EventDetail, AttendeeRow } from './events/types'
+import { WaitlistList } from './events/WaitlistList'
+import type { EventDetail, AttendeeRow, WaitlistEntry } from './events/types'
 import { todayKST } from '@/lib/date'
 import {
   setRsvpAction,
@@ -27,10 +28,14 @@ interface Props {
   myStatus: EventAttendStatus | null
   isManager: boolean
   isDemo?: boolean
+  /** 본인 club_members.id — 대기 명단 본인 강조용 */
+  myMemberId?: string | null
   /** 현재 대기 인원 수 */
   waitlistCount: number
   /** 본인 대기 순번 (1, 2, 3 ...). 대기중 아니면 null */
   myWaitlistPosition: number | null
+  /** 대기 명단 (position asc, 비공개 모드 시 빈 배열) */
+  waitlistEntries?: WaitlistEntry[]
 }
 
 export function EventDetailClient({
@@ -40,8 +45,10 @@ export function EventDetailClient({
   myStatus,
   isManager,
   isDemo,
+  myMemberId,
   waitlistCount,
   myWaitlistPosition,
+  waitlistEntries = [],
 }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -174,6 +181,10 @@ export function EventDetailClient({
       )}
 
       <AttendeeList going={going} notGoing={notGoing} />
+
+      {!isPast && (
+        <WaitlistList entries={waitlistEntries} myMemberId={myMemberId} />
+      )}
 
       {editing && (
         <EventFormDialog

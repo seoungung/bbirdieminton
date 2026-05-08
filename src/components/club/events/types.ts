@@ -21,3 +21,13 @@ export interface AttendeeRow {
   skill: number
   updated_at: string
 }
+
+/** 대기 명단 행 — position asc 정렬된 active waiting 항목 */
+export interface WaitlistEntry {
+  member_id: string
+  name: string
+  position: number
+  /** ISO timestamp — 신청 순서 표시용 */
+  joined_at: string
+  skill: number
+}

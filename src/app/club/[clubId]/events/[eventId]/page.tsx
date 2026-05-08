@@ -8,7 +8,7 @@ import { DEMO_CLUBS } from '@/lib/club/demoData'
 import { buildDemoEventDetail } from '@/lib/club/eventsDemo'
 import type { Metadata } from 'next'
 import type { EventAttendStatus } from '@/types/club'
-import type { EventDetail, AttendeeRow } from '@/components/club/events/types'
+import type { EventDetail, AttendeeRow, WaitlistEntry } from '@/components/club/events/types'
 
 interface PageProps {
   params: Promise<{ clubId: string; eventId: string }>
@@ -122,17 +122,41 @@ export default async function EventDetailPage({ params }: PageProps) {
   const myStatus =
     attendees.find((a) => a.member_id === membership.id)?.status ?? null
 
-  /* 대기 명단 — RLS 로 클럽 멤버만 SELECT 가능 */
-  const { data: waitlistRows } = await supabase
+  /* 대기 명단 + 이름 — RLS 로 클럽 멤버만 SELECT 가능 */
+  const { data: waitlistRaw } = await supabase
     .from('event_waitlist')
-    .select('member_id, position')
+    .select(`
+      member_id,
+      position,
+      joined_at,
+      member:club_members(user:users(name), skill_score)
+    `)
     .eq('event_id', eventId)
     .eq('status', 'waiting')
     .order('position', { ascending: true })
 
-  const waitlistCount = waitlistRows?.length ?? 0
+  type WaitlistRaw = {
+    member_id: string
+    position: number
+    joined_at: string
+    member: {
+      user: { name: string } | null
+      skill_score: number | null
+    } | null
+  }
+  const waitlistEntries: WaitlistEntry[] = ((waitlistRaw as WaitlistRaw[] | null) ?? []).map(
+    (r) => ({
+      member_id: r.member_id,
+      name: r.member?.user?.name ?? '이름없음',
+      position: r.position,
+      joined_at: r.joined_at,
+      skill: r.member?.skill_score ?? 0,
+    }),
+  )
+
+  const waitlistCount = waitlistEntries.length
   const myWaitlistPosition =
-    waitlistRows?.find((r) => r.member_id === membership.id)?.position ?? null
+    waitlistEntries.find((r) => r.member_id === membership.id)?.position ?? null
 
   const detail: EventDetail = {
     id: ev.id,
@@ -158,8 +182,10 @@ export default async function EventDetailPage({ params }: PageProps) {
           attendees={attendees}
           myStatus={myStatus}
           isManager={isManager}
+          myMemberId={membership.id}
           waitlistCount={waitlistCount}
           myWaitlistPosition={myWaitlistPosition}
+          waitlistEntries={waitlistEntries}
         />
       </main>
     </div>
