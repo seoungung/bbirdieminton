@@ -6,7 +6,15 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: '모임 만들기 | 버디민턴', description: '새로운 배드민턴 동호회 모임을 만들어보세요' }
 
-export default async function ClubCreatePage() {
+interface PageProps {
+  /* `?demo=1` 로 진입 시 폼은 정상 열리지만 submit 은 차단 — UI 미리보기용 */
+  searchParams: Promise<{ demo?: string }>
+}
+
+export default async function ClubCreatePage({ searchParams }: PageProps) {
+  const params = await searchParams
+  const isDemoPreview = params.demo === '1'
+
   const supabase = await createClient()
   const {
     data: { user },
@@ -30,9 +38,24 @@ export default async function ClubCreatePage() {
         </div>
       </section>
 
+      {/* ── 데모 미리보기 배너 ── */}
+      {isDemoPreview && (
+        <div className="bg-[var(--color-brand-lime)] px-4 py-2.5 border-b border-[#0a0a0a]/10">
+          <div className="max-w-[1088px] mx-auto flex items-center gap-2 text-[12.5px] text-[#0a0a0a]">
+            <span className="inline-flex items-center rounded-full bg-[#0a0a0a] text-[var(--color-brand-lime)] px-2 py-0.5 text-[10px] font-bold tracking-wide shrink-0">
+              미리보기
+            </span>
+            <span>
+              <strong>체험 모드</strong>입니다. 폼은 그대로 사용해보실 수 있지만,
+              <strong> 실제로 모임은 생성되지 않아요.</strong>
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* ── 폼 본문 ── */}
       <main className="max-w-[1088px] mx-auto px-4 py-8">
-        <ClubCreateForm clubUserId={clubUserId} />
+        <ClubCreateForm clubUserId={clubUserId} isDemoPreview={isDemoPreview} />
       </main>
     </div>
   )

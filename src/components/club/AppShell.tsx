@@ -302,7 +302,7 @@ export function AppShell({
           </p>
           <div className="flex items-center gap-2">
             <Link
-              href="/club/create"
+              href="/club/create?demo=1"
               className="text-[12px] font-bold bg-[var(--color-brand-lime)] text-[#0a0a0a] px-3.5 py-1.5 rounded-full hover:bg-[var(--color-brand-lime-dim)] transition-colors whitespace-nowrap"
             >
               내 모임 만들기 →

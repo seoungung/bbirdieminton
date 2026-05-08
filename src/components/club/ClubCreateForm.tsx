@@ -43,7 +43,14 @@ async function uploadWithFallback(
   return data.publicUrl
 }
 
-export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
+export function ClubCreateForm({
+  clubUserId: _,
+  isDemoPreview = false,
+}: {
+  clubUserId: string
+  /** true 시 폼은 정상 동작하지만 submit 시 alert + 차단 (실제 DB 생성 X) */
+  isDemoPreview?: boolean
+}) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -64,6 +71,14 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
     const fd = new FormData(e.currentTarget)
     fd.set('category', category)
     setError(null)
+
+    /* 데모 미리보기 모드 — 실제 생성 차단 + 안내 */
+    if (isDemoPreview) {
+      alert(
+        '체험 모드입니다.\n실제로 모임을 만들려면 상단 배너의 X 버튼을 눌러 체험을 종료하고 본인 계정으로 다시 시도해주세요.',
+      )
+      return
+    }
 
     startTransition(async () => {
       const supabase = createClient()
@@ -227,10 +242,21 @@ export function ClubCreateForm({ clubUserId: _ }: { clubUserId: string }) {
 
         <div className="mt-5 space-y-2">
           <button
-            type="submit" disabled={isPending}
-            className="w-full py-3 bg-[var(--color-brand-lime)] text-[#111] font-bold text-base rounded-xl hover:brightness-95 transition-all disabled:opacity-50"
+            type="submit"
+            disabled={isPending}
+            className={
+              'w-full py-3 font-bold text-base rounded-xl transition-all disabled:opacity-50 ' +
+              (isDemoPreview
+                ? 'bg-[#f0f0f0] text-[#999] hover:bg-[#e8e8e8]'
+                : 'bg-[var(--color-brand-lime)] text-[#111] hover:brightness-95')
+            }
+            title={isDemoPreview ? '체험 모드 — 실제 생성 차단' : undefined}
           >
-            {isPending ? '생성 중...' : '모임 만들기'}
+            {isPending
+              ? '생성 중...'
+              : isDemoPreview
+              ? '모임 만들기 (체험 차단)'
+              : '모임 만들기'}
           </button>
           <button
             type="button" onClick={() => router.back()}
