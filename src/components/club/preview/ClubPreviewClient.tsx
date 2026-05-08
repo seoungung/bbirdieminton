@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react'
 import { ClubPreviewHeader } from './ClubPreviewHeader'
 import { ClubPreviewHero } from './ClubPreviewHero'
 import { ClubPreviewIdentityTags } from './ClubPreviewIdentityTags'
-import { ClubPreviewKpiGrid } from './ClubPreviewKpiGrid'
 import { ClubPreviewAbout } from './ClubPreviewAbout'
 import { ClubPreviewOwnerCard } from './ClubPreviewOwnerCard'
 import { ClubPreviewVibe } from './ClubPreviewVibe'
@@ -155,15 +154,13 @@ export function ClubPreviewClient(props: ClubPreviewClientProps) {
           photoUrls={photoUrls}
         />
 
-        {/* 태그 — Hero 메타 바로 아래, 결정 정보 강화 */}
-        <div className="max-w-[1088px] mx-auto">
-          <ClubPreviewIdentityTags tags={tags} />
-        </div>
-
-        <div className="max-w-[1088px] mx-auto px-4 pt-3 pb-2 space-y-9">
-          {/* ── 모임 분위기 (4 KPI 카드) — 모임 소개 위 ────────────────
+        <div className="max-w-[1088px] mx-auto px-4 pt-5 pb-2 space-y-9">
+          {/* ── 모임 분위기 (4 KPI 카드) — 첫 섹션 ─────────────────
              정기 일정 / 평균 출석 / 최근 가입 / 급수 분포 한눈에 */}
           <ClubPreviewVibe stats={vibe} scheduleSummary={scheduleSummary} />
+
+          {/* ── 태그 (모임 분위기 아래) ─────────────────────────── */}
+          <ClubPreviewIdentityTags tags={tags} />
 
           {/* ── 모임 소개 ─────────────────────────────────────── */}
           <ClubPreviewAbout
@@ -187,17 +184,6 @@ export function ClubPreviewClient(props: ClubPreviewClientProps) {
 
           {/* ── 모임 멤버 ─────────────────────────────────────── */}
           <ClubPreviewMembers members={recentMembers} totalCount={memberCount} />
-
-          {/* ── 가격·위치·코트 KPI (보조) ──────────────────────── */}
-          <ClubPreviewKpiGrid
-            location={location}
-            activityPlace={activityPlace}
-            scheduleSummary={scheduleSummary}
-            feeMonthly={feeMonthly}
-            feePerSession={feePerSession}
-            feeNote={feeNote}
-            memberCount={memberCount}
-          />
 
           {/* ── FAQ ───────────────────────────────────────────── */}
           <ClubPreviewFAQ faqs={faqs} />

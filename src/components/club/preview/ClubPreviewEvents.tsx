@@ -1,8 +1,9 @@
 'use client'
 
-import { CalendarDays, MapPin, Users, Coins } from 'lucide-react'
+import Image from 'next/image'
+import { CalendarDays, Heart, Share2, CalendarPlus, UserCircle2 } from 'lucide-react'
 import { parseEventDate, todayKST } from '@/lib/date'
-import type { ClubPreviewEvent } from '@/types/club'
+import type { ClubPreviewEvent, ClubPreviewParticipant } from '@/types/club'
 
 interface Props {
   events: ClubPreviewEvent[]
@@ -55,9 +56,13 @@ function EventRow({ event }: { event: ClubPreviewEvent }) {
       ? `${event.going_count}/${event.max_attend}명`
       : `${event.going_count}명 참석`
 
+  const participants = event.participants ?? []
+  const visibleAvatars = participants.slice(0, 8)
+  const remainingSlots = Math.max(0, event.going_count - visibleAvatars.length)
+
   return (
-    <li className="relative bg-white border border-[#ebebeb] rounded-2xl p-4 hover:border-[#d8d8d8] transition-colors">
-      <div className="flex items-start gap-3">
+    <li className="relative bg-white border border-[#ebebeb] rounded-2xl p-4 sm:p-5 hover:border-[#d8d8d8] transition-colors">
+      <div className="flex items-start gap-3 sm:gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
             <DayBadge label={label} tone={tone} />
@@ -67,44 +72,137 @@ function EventRow({ event }: { event: ClubPreviewEvent }) {
               </span>
             )}
           </div>
-          <p className="font-bold text-[15px] text-[#111] leading-snug break-keep">
+          <p className="font-bold text-[16px] sm:text-[17px] text-[#111] leading-snug break-keep">
             {event.title}
           </p>
 
-          <dl className="mt-2 space-y-1 text-[12.5px] text-[#666]">
-            <Row icon={<CalendarDays size={12} strokeWidth={2.2} />}>
+          <dl className="mt-2.5 space-y-1 text-[12.5px] text-[#666]">
+            <KeyValue label="일시">
               <span className="text-[#333]">{dateLine}</span>
-              {timeLine && (
-                <span className="text-[#999]"> · {timeLine}</span>
-              )}
-            </Row>
+              {timeLine && <span className="text-[#999]"> · {timeLine}</span>}
+            </KeyValue>
             {event.place && (
-              <Row icon={<MapPin size={12} strokeWidth={2.2} />}>
+              <KeyValue label="위치">
                 <span className="truncate">{event.place}</span>
-              </Row>
+              </KeyValue>
             )}
-            <Row icon={<Users size={12} strokeWidth={2.5} />}>
+            {event.fee && (
+              <KeyValue label="비용">
+                <span className="truncate">{event.fee}</span>
+              </KeyValue>
+            )}
+            <KeyValue label="참석">
               <span className="text-[#333] font-semibold tabular-nums">
                 {attendLabel}
               </span>
-            </Row>
-            {event.fee && (
-              <Row icon={<Coins size={12} strokeWidth={2.2} />}>
-                <span className="truncate">{event.fee}</span>
-              </Row>
-            )}
+            </KeyValue>
           </dl>
         </div>
 
-        {/* 우측 미니 썸네일 (정보성 데코) */}
+        {/* 우측 썸네일 — 셔틀콕 일러스트 */}
         <div
-          className="hidden sm:flex shrink-0 w-14 h-14 rounded-xl items-center justify-center bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court-deep)]"
+          className="hidden sm:flex shrink-0 w-32 h-20 rounded-xl items-center justify-center bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court-deep)] overflow-hidden"
           aria-hidden
         >
-          <CalendarDays size={22} strokeWidth={1.8} />
+          <CalendarDays size={28} strokeWidth={1.6} />
         </div>
       </div>
+
+      {/* 참석자 아바타 줄 — 최대 8명 + 남은 인원 placeholder */}
+      <div className="mt-4 flex items-center gap-1.5 sm:gap-2">
+        {visibleAvatars.map((p) => (
+          <ParticipantAvatar key={p.id} participant={p} />
+        ))}
+        {Array.from({ length: Math.min(remainingSlots, 8 - visibleAvatars.length) }).map((_, i) => (
+          <div
+            key={`placeholder-${i}`}
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f0f0f0] flex items-center justify-center text-[#bbb]"
+            aria-hidden
+          >
+            <UserCircle2 size={20} strokeWidth={1.6} />
+          </div>
+        ))}
+        {remainingSlots > 8 - visibleAvatars.length && (
+          <span className="text-[11px] font-semibold text-[#999] tabular-nums ml-1">
+            +{remainingSlots - (8 - visibleAvatars.length)}
+          </span>
+        )}
+      </div>
+
+      {/* 액션 버튼 줄 — 가입 전이라 모두 비활성. 가입 후 활성. */}
+      <div className="mt-3 flex items-center gap-1.5 sm:gap-2">
+        <ActionIconButton ariaLabel="찜">
+          <Heart size={18} strokeWidth={2} />
+        </ActionIconButton>
+        <ActionIconButton ariaLabel="공유">
+          <Share2 size={18} strokeWidth={2} />
+        </ActionIconButton>
+        <ActionIconButton ariaLabel="캘린더 추가">
+          <CalendarPlus size={18} strokeWidth={2} />
+        </ActionIconButton>
+        <button
+          type="button"
+          disabled
+          className={
+            'flex-1 h-11 rounded-xl font-extrabold text-[14px] transition-all disabled:cursor-not-allowed ' +
+            (isFull
+              ? 'bg-[#f0f0f0] text-[#999]'
+              : 'bg-[var(--color-brand-court)] text-white opacity-70')
+          }
+          title="가입 후 참석할 수 있어요"
+        >
+          {isFull ? '마감' : '참석'}
+        </button>
+      </div>
     </li>
+  )
+}
+
+function ParticipantAvatar({ participant }: { participant: ClubPreviewParticipant }) {
+  const initial = participant.name.charAt(0)
+  return (
+    <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden bg-[#e5e5e5] flex items-center justify-center text-[12px] font-bold text-[#666]">
+      {participant.profile_img ? (
+        <Image
+          src={participant.profile_img}
+          alt={participant.name}
+          fill
+          sizes="40px"
+          className="object-cover"
+        />
+      ) : (
+        <span aria-hidden>{initial}</span>
+      )}
+    </div>
+  )
+}
+
+function ActionIconButton({
+  children,
+  ariaLabel,
+}: {
+  children: React.ReactNode
+  ariaLabel: string
+}) {
+  return (
+    <button
+      type="button"
+      disabled
+      aria-label={ariaLabel}
+      title="가입 후 이용할 수 있어요"
+      className="w-11 h-11 rounded-xl border border-[#ebebeb] bg-white text-[#999] flex items-center justify-center hover:bg-[#fafafa] disabled:cursor-not-allowed"
+    >
+      {children}
+    </button>
+  )
+}
+
+function KeyValue({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-baseline gap-2 min-w-0">
+      <dt className="text-[#bbb] text-[12px] shrink-0 w-[36px]">{label}</dt>
+      <dd className="min-w-0 truncate">{children}</dd>
+    </div>
   )
 }
 
@@ -132,20 +230,6 @@ function DayBadge({
   )
 }
 
-function Row({
-  icon,
-  children,
-}: {
-  icon: React.ReactNode
-  children: React.ReactNode
-}) {
-  return (
-    <div className="flex items-center gap-1.5 min-w-0">
-      <span className="text-[#bbb] shrink-0">{icon}</span>
-      <span className="min-w-0 truncate">{children}</span>
-    </div>
-  )
-}
 
 function getDayLabel(eventDateStr: string): {
   label: string

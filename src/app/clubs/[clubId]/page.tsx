@@ -8,7 +8,7 @@ import {
   type JoinRequestStatus,
 } from '@/app/club/[clubId]/join-requests/actions'
 import { ClubPreviewClient } from '@/components/club/preview/ClubPreviewClient'
-import { DEMO_CLUBS } from '@/lib/club/demoData'
+import { DEMO_CLUBS, DEMO_MEMBERS } from '@/lib/club/demoData'
 import type {
   ClubPreview,
   ClubPreviewVibe,
@@ -99,10 +99,52 @@ export default async function ClubPreviewPage({ params }: PageProps) {
   const { clubId } = await params
 
   /* 데모 클럽: DEMO_CLUBS 데이터로 프리뷰 렌더링 (Supabase RPC 우회).
-   * 하단 CTA 는 isMember=true 로 두어 "모임 들어가기" → /club/demo-id 흐름. */
+   * 하단 CTA 는 isMember=true 로 두어 "모임 들어가기" → /club/demo-id 흐름.
+   * recentMembers / vibe 는 DEMO_MEMBERS 로 합성해 멤버 그리드·분위기 카드 살아 보이게. */
   if (clubId.startsWith('demo-')) {
     const demo = DEMO_CLUBS.find((d) => d.id === clubId)
     if (!demo) notFound()
+
+    /* 데모 멤버를 ClubPreviewMember 형식으로 변환 — joined_at 은 최근일수록 가까운 시점 */
+    const recentDemoMembers = DEMO_MEMBERS.map((m, idx) => ({
+      id: m.id,
+      name: m.name,
+      profile_img: null as string | null,
+      role:
+        m.role === 'owner'
+          ? ('owner' as const)
+          : m.role === 'manager'
+          ? ('manager' as const)
+          : ('member' as const),
+      /* 첫 멤버는 60일 전 가입(오너), 이후 점점 최근으로 — 마지막 3명 정도가 NEW(7일 이내) */
+      joined_at: new Date(
+        Date.now() - (DEMO_MEMBERS.length - idx) * 2 * 24 * 60 * 60 * 1000,
+      ).toISOString(),
+    }))
+
+    /* 데모 vibe — 4 KPI 카드 노출용 */
+    const demoVibe = {
+      total_members: DEMO_MEMBERS.length,
+      male_count: DEMO_MEMBERS.filter((m) => m.gender === 'M').length,
+      female_count: DEMO_MEMBERS.filter((m) => m.gender === 'F').length,
+      recent_join_30d: 5,
+      avg_attendance_30d: 12.4,
+      grade_distribution: DEMO_MEMBERS.reduce(
+        (acc, m) => {
+          /* skill_score → 등급 매핑은 별도 헬퍼가 있지만, level 컬럼을 단순 매핑 */
+          const lvl = m.level
+          let g: 'S' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' = 'F'
+          if (lvl === 'B조' || lvl === 'A조') g = 'B'
+          else if (lvl === 'C조') g = 'C'
+          else if (lvl === 'D조') g = 'D'
+          else if (lvl === '초심자') g = 'E'
+          else if (lvl === '왕초보') g = 'F'
+          acc[g] = (acc[g] ?? 0) + 1
+          return acc
+        },
+        {} as Record<'S' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F', number>,
+      ),
+    }
 
     return (
       <ClubPreviewClient
@@ -119,19 +161,19 @@ export default async function ClubPreviewPage({ params }: PageProps) {
         ownerProfileImg={null}
         memberCount={demo.memberCount}
         upcomingEvents={[]}
-        recentMembers={[]}
+        recentMembers={recentDemoMembers}
         isLoggedIn
         isMember
         myJoinStatus={null}
-        tags={[]}
+        tags={['초보환영', '여성친화', '주말활발']}
         feeMonthly={null}
         feePerSession={null}
         feeNote={null}
-        ownerBio={null}
+        ownerBio="10년차 동호인, 초심자 환영합니다"
         photoUrls={[]}
-        scheduleSummary={null}
+        scheduleSummary="매주 토/일 11:00~15:00"
         faqs={[]}
-        vibe={null}
+        vibe={demoVibe}
         contactUrl={null}
       />
     )

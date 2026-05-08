@@ -59,7 +59,7 @@ export function ClubPreviewVibe({ stats, scheduleSummary }: Props) {
         모임 분위기
       </h2>
 
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
         <KpiCard
           icon={<CalendarDays size={14} strokeWidth={2.2} />}
           label="정기 일정"

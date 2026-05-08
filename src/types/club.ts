@@ -304,6 +304,13 @@ export interface Notification {
 
 // ── 비멤버 미리보기 (get_club_preview RPC) ─────────────────
 
+/** preview 페이지 참가자 표시 (Event 카드 아바타 줄) */
+export interface ClubPreviewParticipant {
+  id: string
+  name: string
+  profile_img: string | null
+}
+
 /** preview 페이지 정기모임 카드 */
 export interface ClubPreviewEvent {
   id: string
@@ -319,6 +326,8 @@ export interface ClubPreviewEvent {
   /** 0 = 무제한 */
   max_attend: number
   going_count: number
+  /** 참석 확정 멤버 — preview 카드 아바타 렌더용 (최대 8명 표시, RPC 확장 필요) */
+  participants?: ClubPreviewParticipant[]
 }
 
 /** preview 페이지 멤버 미리보기 */
