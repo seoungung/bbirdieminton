@@ -19,9 +19,9 @@ export function ClubPreviewMembers({ members, totalCount }: Props) {
   return (
     <section>
       <div className="flex items-baseline justify-between mb-3">
-        <h3 className="text-[16px] font-bold text-[#111]">
-          모임 멤버 <span className="text-[#999] font-semibold">({totalCount})</span>
-        </h3>
+        <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[var(--color-text-strong)]">
+          모임 멤버 <span className="text-[#999] font-semibold tabular-nums">{totalCount}</span>
+        </h2>
         <span className="text-[11px] font-medium text-[#999] inline-flex items-center gap-0.5">
           최근 가입
           <ChevronDown size={12} strokeWidth={2.2} />

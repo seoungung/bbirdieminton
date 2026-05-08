@@ -25,9 +25,9 @@ export function ClubPreviewAbout({
 
   return (
     <section>
-      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#bbb] mb-2.5">
+      <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[var(--color-text-strong)] mb-3">
         모임 소개
-      </p>
+      </h2>
       {description ? (
         <p className="text-[14px] leading-[1.7] text-[#333] whitespace-pre-wrap break-keep">
           {description}

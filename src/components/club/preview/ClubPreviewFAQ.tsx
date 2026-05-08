@@ -24,9 +24,9 @@ export function ClubPreviewFAQ({ faqs }: Props) {
 
   return (
     <section>
-      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#bbb] mb-2.5">
+      <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[var(--color-text-strong)] mb-3">
         자주 묻는 질문
-      </p>
+      </h2>
 
       <ul className="space-y-2">
         {list.map((f, i) => (

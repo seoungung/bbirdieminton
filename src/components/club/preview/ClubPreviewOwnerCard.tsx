@@ -37,9 +37,9 @@ export function ClubPreviewOwnerCard({
 
   return (
     <section>
-      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#bbb] mb-2.5">
-        운영자
-      </p>
+      <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[var(--color-text-strong)] mb-3">
+        운영진
+      </h2>
       <div className="flex items-center gap-3 rounded-2xl border border-[#ebebeb] bg-white px-4 py-4">
         <Avatar name={ownerName} profileImg={ownerProfileImg} initial={initial} />
         <div className="flex-1 min-w-0">

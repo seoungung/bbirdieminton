@@ -5,13 +5,11 @@ import { ClubPreviewHeader } from './ClubPreviewHeader'
 import { ClubPreviewHero } from './ClubPreviewHero'
 import { ClubPreviewIdentityTags } from './ClubPreviewIdentityTags'
 import { ClubPreviewKpiGrid } from './ClubPreviewKpiGrid'
-import { ClubPreviewSchedule } from './ClubPreviewSchedule'
 import { ClubPreviewAbout } from './ClubPreviewAbout'
 import { ClubPreviewOwnerCard } from './ClubPreviewOwnerCard'
 import { ClubPreviewVibe } from './ClubPreviewVibe'
 import { ClubPreviewEvents } from './ClubPreviewEvents'
 import { ClubPreviewMembers } from './ClubPreviewMembers'
-import { ClubPreviewPhotoGallery } from './ClubPreviewPhotoGallery'
 import { ClubPreviewFAQ } from './ClubPreviewFAQ'
 import { ClubPreviewStickyCTA } from './ClubPreviewStickyCTA'
 import {
@@ -163,7 +161,34 @@ export function ClubPreviewClient(props: ClubPreviewClientProps) {
         </div>
 
         <div className="max-w-[1088px] mx-auto px-4 pt-3 pb-2 space-y-9">
-          {/* KPI 그리드 — 위치/일정/회비/멤버 한눈에 */}
+          {/* ── 모임 분위기 (4 KPI 카드) — 모임 소개 위 ────────────────
+             정기 일정 / 평균 출석 / 최근 가입 / 급수 분포 한눈에 */}
+          <ClubPreviewVibe stats={vibe} scheduleSummary={scheduleSummary} />
+
+          {/* ── 모임 소개 ─────────────────────────────────────── */}
+          <ClubPreviewAbout
+            description={description}
+            ownerName={ownerName}
+            activityPlace={activityPlace}
+            courtCount={courtCount}
+          />
+
+          {/* ── 정모 일정 ─────────────────────────────────────── */}
+          <ClubPreviewEvents events={upcomingEvents} />
+
+          {/* ── 운영진 ────────────────────────────────────────── */}
+          <ClubPreviewOwnerCard
+            ownerName={ownerName}
+            ownerProfileImg={ownerProfileImg}
+            ownerBio={ownerBio}
+            contactUrl={contactUrl}
+            clubName={name}
+          />
+
+          {/* ── 모임 멤버 ─────────────────────────────────────── */}
+          <ClubPreviewMembers members={recentMembers} totalCount={memberCount} />
+
+          {/* ── 가격·위치·코트 KPI (보조) ──────────────────────── */}
           <ClubPreviewKpiGrid
             location={location}
             activityPlace={activityPlace}
@@ -174,39 +199,7 @@ export function ClubPreviewClient(props: ClubPreviewClientProps) {
             memberCount={memberCount}
           />
 
-          {/* 정기 일정 (자유 텍스트) */}
-          <ClubPreviewSchedule
-            scheduleSummary={scheduleSummary}
-            activityPlace={activityPlace}
-          />
-
-          <ClubPreviewAbout
-            description={description}
-            ownerName={ownerName}
-            activityPlace={activityPlace}
-            courtCount={courtCount}
-          />
-
-          {/* 운영자 카드 */}
-          <ClubPreviewOwnerCard
-            ownerName={ownerName}
-            ownerProfileImg={ownerProfileImg}
-            ownerBio={ownerBio}
-            contactUrl={contactUrl}
-            clubName={name}
-          />
-
-          {/* 모임 분위기 (통계) */}
-          <ClubPreviewVibe stats={vibe} />
-
-          <ClubPreviewEvents events={upcomingEvents} />
-
-          <ClubPreviewMembers members={recentMembers} totalCount={memberCount} />
-
-          {/* 활동 사진 */}
-          <ClubPreviewPhotoGallery photos={photoUrls} clubName={name} />
-
-          {/* FAQ */}
+          {/* ── FAQ ───────────────────────────────────────────── */}
           <ClubPreviewFAQ faqs={faqs} />
 
           {(flash || error) && (

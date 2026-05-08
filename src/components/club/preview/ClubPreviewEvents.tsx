@@ -16,7 +16,9 @@ export function ClubPreviewEvents({ events }: Props) {
   return (
     <section>
       <div className="flex items-baseline justify-between mb-3">
-        <h3 className="text-[16px] font-bold text-[#111]">정기모임</h3>
+        <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[var(--color-text-strong)]">
+          정모 일정 <span className="text-[#999] font-semibold tabular-nums">{events.length}</span>
+        </h2>
         {events.length > 0 && (
           <span className="text-[11px] font-medium text-[#999]">
             가입 후 참여 가능
