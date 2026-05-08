@@ -9,6 +9,7 @@ import {
   updateNoticeAction,
   deleteNoticeAction,
 } from '@/app/club/[clubId]/notices/actions'
+import { inputCls, textareaCls } from '@/lib/forms/inputClassName'
 
 interface Props {
   clubId: string
@@ -261,7 +262,7 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
                     onChange={(e) =>
                       setModal({ ...modal, type: e.target.value as NoticeType })
                     }
-                    className="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-sm text-[#111] focus:outline-none focus:border-[#0a0a0a]"
+                    className={inputCls}
                   >
                     <option value="announcement">공지알림</option>
                     <option value="event">이벤트</option>
@@ -288,7 +289,7 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
                   value={modal.title}
                   onChange={(e) => setModal({ ...modal, title: e.target.value })}
                   placeholder="공지 제목을 입력하세요"
-                  className="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-sm text-[#111] placeholder:text-[#999] focus:outline-none focus:border-[#0a0a0a]"
+                  className={inputCls}
                 />
               </div>
               <div>
@@ -298,7 +299,7 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
                   value={modal.body}
                   onChange={(e) => setModal({ ...modal, body: e.target.value })}
                   placeholder="공지 내용을 입력하세요"
-                  className="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-sm text-[#111] placeholder:text-[#999] focus:outline-none focus:border-[#0a0a0a] resize-none"
+                  className={textareaCls}
                 />
               </div>
             </div>

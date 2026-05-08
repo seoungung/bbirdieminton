@@ -9,6 +9,7 @@ import { TagPicker } from '@/components/club/createClub/TagPicker'
 import { FeeInputs } from '@/components/club/createClub/FeeInputs'
 import { FaqEditor } from '@/components/club/createClub/FaqEditor'
 import { updateClubProfileExtrasAction } from '@/app/club/[clubId]/settings/actions'
+import { inputCls } from '@/lib/forms/inputClassName'
 import type { ClubTag } from '@/lib/club/tags'
 import type { Club, ClubFAQ } from '@/types/club'
 
@@ -16,11 +17,6 @@ interface Props {
   club: Club
   isManager: boolean
 }
-
-const inputCls =
-  'w-full border border-[#ebebeb] rounded-xl px-4 py-2.5 text-sm text-[#111] ' +
-  'placeholder:text-[#bbb] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] ' +
-  'focus:bg-white transition-colors'
 
 const PRIMARY_BUCKET = 'clubs'
 const FALLBACK_BUCKET = 'club-thumbnails'

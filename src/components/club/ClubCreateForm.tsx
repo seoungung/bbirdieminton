@@ -10,13 +10,9 @@ import { ThumbnailUpload } from '@/components/club/createClub/ThumbnailUpload'
 import { TagPicker } from '@/components/club/createClub/TagPicker'
 import { FeeInputs } from '@/components/club/createClub/FeeInputs'
 import { FaqEditor } from '@/components/club/createClub/FaqEditor'
+import { inputCls } from '@/lib/forms/inputClassName'
 import type { ClubTag } from '@/lib/club/tags'
 import type { ClubFAQ } from '@/types/club'
-
-const inputCls =
-  'w-full border border-[#ebebeb] rounded-xl px-4 py-2.5 text-sm text-[#111] ' +
-  'placeholder:text-[#bbb] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] ' +
-  'focus:bg-white transition-colors'
 
 /** 스토리지 버킷 — 신규 'clubs' 버킷이 적용된 환경이면 그쪽,
  *  미적용이면 기존 'club-thumbnails' 으로 fallback. */

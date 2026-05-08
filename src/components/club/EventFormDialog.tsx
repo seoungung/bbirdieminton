@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { X, Trash2 } from 'lucide-react'
 import type { EventInput, EventListRow } from '@/app/club/[clubId]/events/actions'
 import { Field } from './events/Field'
+import { inputCls } from '@/lib/forms/inputClassName'
 
 interface Props {
   mode: 'create' | 'edit'
@@ -113,7 +114,7 @@ export function EventFormDialog({
               value={form.title}
               onChange={(e) => update('title', e.target.value)}
               placeholder="예: 4월 정기 토요민턴"
-              className="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-sm text-[#111] placeholder:text-[#999] focus:outline-none focus:border-[#0a0a0a]"
+              className={inputCls}
             />
           </Field>
 
@@ -122,7 +123,7 @@ export function EventFormDialog({
               type="date"
               value={form.event_date}
               onChange={(e) => update('event_date', e.target.value)}
-              className="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-sm text-[#111] focus:outline-none focus:border-[#0a0a0a]"
+              className={inputCls}
             />
           </Field>
 
@@ -132,7 +133,7 @@ export function EventFormDialog({
                 type="time"
                 value={form.start_time}
                 onChange={(e) => update('start_time', e.target.value)}
-                className="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-sm text-[#111] focus:outline-none focus:border-[#0a0a0a]"
+                className={inputCls}
               />
             </Field>
             <Field label="종료 시간">
@@ -140,7 +141,7 @@ export function EventFormDialog({
                 type="time"
                 value={form.end_time}
                 onChange={(e) => update('end_time', e.target.value)}
-                className="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-sm text-[#111] focus:outline-none focus:border-[#0a0a0a]"
+                className={inputCls}
               />
             </Field>
           </div>
@@ -151,7 +152,7 @@ export function EventFormDialog({
               value={form.place}
               onChange={(e) => update('place', e.target.value)}
               placeholder="예: 국사봉체육관 A코트"
-              className="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-sm text-[#111] placeholder:text-[#999] focus:outline-none focus:border-[#0a0a0a]"
+              className={inputCls}
             />
           </Field>
 
@@ -161,7 +162,7 @@ export function EventFormDialog({
               value={form.fee}
               onChange={(e) => update('fee', e.target.value)}
               placeholder="예: 회비 + 입장료 5,000원"
-              className="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-sm text-[#111] placeholder:text-[#999] focus:outline-none focus:border-[#0a0a0a]"
+              className={inputCls}
             />
           </Field>
 
@@ -173,7 +174,7 @@ export function EventFormDialog({
               step={1}
               value={form.max_attend}
               onChange={(e) => update('max_attend', Number(e.target.value))}
-              className="w-full border border-[#e5e5e5] rounded-lg px-3 py-2 text-sm text-[#111] focus:outline-none focus:border-[#0a0a0a] tabular-nums"
+              className={`${inputCls} tabular-nums`}
             />
           </Field>
         </div>
