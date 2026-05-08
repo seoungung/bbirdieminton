@@ -1,16 +1,29 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import dynamic from 'next/dynamic'
 import { ClubPreviewHeader } from './ClubPreviewHeader'
 import { ClubPreviewHero } from './ClubPreviewHero'
 import { ClubPreviewIdentityTags } from './ClubPreviewIdentityTags'
 import { ClubPreviewAbout } from './ClubPreviewAbout'
-import { ClubPreviewOwnerCard } from './ClubPreviewOwnerCard'
 import { ClubPreviewVibe } from './ClubPreviewVibe'
 import { ClubPreviewEvents } from './ClubPreviewEvents'
-import { ClubPreviewMembers } from './ClubPreviewMembers'
-import { ClubPreviewFAQ } from './ClubPreviewFAQ'
 import { ClubPreviewStickyCTA } from './ClubPreviewStickyCTA'
+
+/* below-fold 섹션 — 별도 청크로 분리. 첫 페인트 직후 비동기 로드.
+ * ssr: true 유지 (HTML 에 포함되어 SEO + LCP 에 영향 없음)
+ * 실제 효과: 클라이언트 JS 청크가 작아져 hydration 빨라짐. */
+const ClubPreviewOwnerCard = dynamic(
+  () => import('./ClubPreviewOwnerCard').then((m) => ({ default: m.ClubPreviewOwnerCard })),
+)
+const ClubPreviewMembers = dynamic(
+  () => import('./ClubPreviewMembers').then((m) => ({ default: m.ClubPreviewMembers })),
+)
+/* FAQ 는 accordion 닫혀있는 게 기본이라 truly below-fold + 거의 안 봄 — ssr 제외 */
+const ClubPreviewFAQ = dynamic(
+  () => import('./ClubPreviewFAQ').then((m) => ({ default: m.ClubPreviewFAQ })),
+  { ssr: false },
+)
 import {
   submitJoinRequestAction,
   cancelJoinRequestAction,
