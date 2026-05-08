@@ -105,11 +105,17 @@ export default async function ClubPreviewPage({ params }: PageProps) {
     const demo = DEMO_CLUBS.find((d) => d.id === clubId)
     if (!demo) notFound()
 
-    /* 데모 멤버를 ClubPreviewMember 형식으로 변환 — joined_at 은 최근일수록 가까운 시점 */
+    /* 데모 멤버를 ClubPreviewMember 형식으로 변환 — joined_at 은 최근일수록 가까운 시점.
+     * 프로필 이미지는 성별별 SVG 아바타 (저작권 free, /public 정적 자산). */
     const recentDemoMembers = DEMO_MEMBERS.map((m, idx) => ({
       id: m.id,
       name: m.name,
-      profile_img: null as string | null,
+      profile_img:
+        m.gender === 'F'
+          ? '/avatar-f.svg'
+          : m.gender === 'M'
+          ? '/avatar-m.svg'
+          : null,
       role:
         m.role === 'owner'
           ? ('owner' as const)
@@ -121,6 +127,57 @@ export default async function ClubPreviewPage({ params }: PageProps) {
         Date.now() - (DEMO_MEMBERS.length - idx) * 2 * 24 * 60 * 60 * 1000,
       ).toISOString(),
     }))
+
+    /* 데모 정모 일정 — 첨부 이미지의 콕플레이 패턴 차용 (오늘/내일).
+     * participants: 데모 멤버 일부를 참석자로 매핑 (성별별 아바타). */
+    const todayMs = Date.now()
+    const tomorrowMs = todayMs + 24 * 60 * 60 * 1000
+    const friAttendees = DEMO_MEMBERS.slice(0, 6).map((m) => ({
+      id: m.id,
+      name: m.name,
+      profile_img:
+        m.gender === 'F'
+          ? '/avatar-f.svg'
+          : m.gender === 'M'
+          ? '/avatar-m.svg'
+          : null,
+    }))
+    const satAttendees = DEMO_MEMBERS.slice(6, 21).map((m) => ({
+      id: m.id,
+      name: m.name,
+      profile_img:
+        m.gender === 'F'
+          ? '/avatar-f.svg'
+          : m.gender === 'M'
+          ? '/avatar-m.svg'
+          : null,
+    }))
+    const upcomingDemoEvents = [
+      {
+        id: 'demo-event-fri',
+        title: '금요 정모',
+        event_date: new Date(todayMs).toISOString().slice(0, 10),
+        start_time: '19:00:00',
+        end_time: '22:00:00',
+        place: '관악구민체육센터',
+        fee: '체육관 입장비',
+        max_attend: 24,
+        going_count: 7,
+        participants: friAttendees,
+      },
+      {
+        id: 'demo-event-sat',
+        title: '토요 정모',
+        event_date: new Date(tomorrowMs).toISOString().slice(0, 10),
+        start_time: '11:00:00',
+        end_time: '15:00:00',
+        place: '국사봉체육관',
+        fee: '체육관 입장비',
+        max_attend: 23,
+        going_count: 15,
+        participants: satAttendees,
+      },
+    ]
 
     /* 데모 vibe — 4 KPI 카드 노출용 */
     const demoVibe = {
@@ -158,9 +215,9 @@ export default async function ClubPreviewPage({ params }: PageProps) {
         thumbnailColor={demo.thumbnailColor}
         thumbnailUrl={null}
         ownerName={demo.leaderName}
-        ownerProfileImg={null}
+        ownerProfileImg="/avatar-m.svg"
         memberCount={demo.memberCount}
-        upcomingEvents={[]}
+        upcomingEvents={upcomingDemoEvents}
         recentMembers={recentDemoMembers}
         isLoggedIn
         isMember
