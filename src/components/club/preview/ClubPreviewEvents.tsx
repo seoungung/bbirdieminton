@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { CalendarDays, Heart, Share2, CalendarPlus, UserCircle2 } from 'lucide-react'
+import { CalendarDays, Share2, Clock, UserCircle2 } from 'lucide-react'
 import { parseEventDate, todayKST } from '@/lib/date'
 import type { ClubPreviewEvent, ClubPreviewParticipant } from '@/types/club'
 
@@ -60,112 +60,117 @@ function EventRow({ event }: { event: ClubPreviewEvent }) {
   const visibleAvatars = participants.slice(0, 8)
   const remainingSlots = Math.max(0, event.going_count - visibleAvatars.length)
 
-  /* 좌측 컨텐츠 (모바일 전체 폭, md+ flex-1) — badge/title/meta/avatars/actions */
-  const leftContent = (
-    <div className="flex-1 min-w-0 flex flex-col">
-      {/* badge 줄 */}
-      <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
-        <DayBadge label={label} tone={tone} />
-        {isFull && (
-          <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-[#f0f0f0] text-[#999] uppercase tracking-wider">
-            마감
-          </span>
-        )}
-      </div>
-
-      {/* 제목 */}
-      <p className="font-bold text-[16px] sm:text-[17px] text-[#111] leading-snug break-keep">
-        {event.title}
-      </p>
-
-      {/* 메타 */}
-      <dl className="mt-2.5 space-y-1 text-[12.5px] text-[#666]">
-        <KeyValue label="일시">
-          <span className="text-[#333]">{dateLine}</span>
-          {timeLine && <span className="text-[#999]"> · {timeLine}</span>}
-        </KeyValue>
-        {event.place && (
-          <KeyValue label="위치">
-            <span className="truncate">{event.place}</span>
-          </KeyValue>
-        )}
-        {event.fee && (
-          <KeyValue label="비용">
-            <span className="truncate">{event.fee}</span>
-          </KeyValue>
-        )}
-        <KeyValue label="참석">
-          <span className="text-[#333] font-semibold tabular-nums">
-            {attendLabel}
-          </span>
-        </KeyValue>
-      </dl>
-
-      {/* 참석자 아바타 줄 — 최대 8명 + 남은 인원 placeholder */}
-      <div className="mt-4 flex items-center gap-1.5 sm:gap-2">
-        {visibleAvatars.map((p) => (
-          <ParticipantAvatar key={p.id} participant={p} />
-        ))}
-        {Array.from({ length: Math.min(remainingSlots, 8 - visibleAvatars.length) }).map((_, i) => (
-          <div
-            key={`placeholder-${i}`}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f0f0f0] flex items-center justify-center text-[#bbb]"
-            aria-hidden
-          >
-            <UserCircle2 size={20} strokeWidth={1.6} />
-          </div>
-        ))}
-        {remainingSlots > 8 - visibleAvatars.length && (
-          <span className="text-[11px] font-semibold text-[#999] tabular-nums ml-1">
-            +{remainingSlots - (8 - visibleAvatars.length)}
-          </span>
-        )}
-      </div>
-
-      {/* 액션 버튼 줄 — 가입 전이라 모두 비활성 */}
-      <div className="mt-3 flex items-center gap-1.5 sm:gap-2">
-        <ActionIconButton ariaLabel="찜">
-          <Heart size={18} strokeWidth={2} />
-        </ActionIconButton>
-        <ActionIconButton ariaLabel="공유">
-          <Share2 size={18} strokeWidth={2} />
-        </ActionIconButton>
-        <ActionIconButton ariaLabel="캘린더 추가">
-          <CalendarPlus size={18} strokeWidth={2} />
-        </ActionIconButton>
-        <button
-          type="button"
-          disabled
-          className={
-            'flex-1 h-11 rounded-xl font-extrabold text-[14px] transition-all disabled:cursor-not-allowed ' +
-            (isFull
-              ? 'bg-[#f0f0f0] text-[#999]'
-              : 'bg-[var(--color-brand-court)] text-white opacity-70')
-          }
-          title="가입 후 참석할 수 있어요"
-        >
-          {isFull ? '마감' : '참석'}
-        </button>
-      </div>
-    </div>
-  )
-
-  /* 우측 썸네일 — md+ 에서만 노출. 모바일은 표시 안 함. */
-  const rightThumbnail = (
-    <div
-      className="hidden md:flex shrink-0 md:w-[280px] lg:w-[340px] aspect-[16/10] rounded-xl items-center justify-center bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court-deep)] overflow-hidden"
-      aria-hidden
-    >
-      <CalendarDays size={56} strokeWidth={1.4} />
+  /* 액션 줄 — 공유 / 대기 / 참석.
+   *  · 모바일: 좌측 컨텐츠 맨 아래
+   *  · 데스크톱(md+): 우측 이미지 아래
+   * 두 위치에 동일하게 노출, 화면 폭에 따라 한쪽만 활성. */
+  const actionRow = (
+    <div className="flex items-center gap-1.5 sm:gap-2">
+      <ActionIconButton ariaLabel="공유">
+        <Share2 size={18} strokeWidth={2} />
+      </ActionIconButton>
+      <ActionIconButton ariaLabel="대기 신청 (만석 시)">
+        <Clock size={18} strokeWidth={2} />
+      </ActionIconButton>
+      <button
+        type="button"
+        disabled
+        className={
+          'flex-1 h-11 rounded-xl font-extrabold text-[14px] transition-all disabled:cursor-not-allowed ' +
+          (isFull
+            ? 'bg-[#f0f0f0] text-[#999]'
+            : 'bg-[var(--color-brand-court)] text-white opacity-70')
+        }
+        title="가입 후 참석할 수 있어요"
+      >
+        {isFull ? '마감' : '참석'}
+      </button>
     </div>
   )
 
   return (
     <li className="relative bg-white border border-[#ebebeb] rounded-2xl p-4 sm:p-5 hover:border-[#d8d8d8] transition-colors">
-      {/* md+ 에서 좌(텍스트) + 우(썸네일) 가로 배치, 모바일에서 단일 컬럼 */}
+      {/* md+ 에서 좌(텍스트) + 우(이미지+액션) 가로 배치, 모바일에서 단일 컬럼 */}
       <div className="flex flex-col md:flex-row md:items-stretch md:gap-5">
-        {leftContent}
-        {rightThumbnail}
+
+        {/* ─── 좌측 — 정보 + 아바타 ─── */}
+        <div className="flex-1 min-w-0 flex flex-col">
+          {/* badge 줄 */}
+          <div className="flex items-center gap-1.5 mb-1.5 flex-wrap">
+            <DayBadge label={label} tone={tone} />
+            {isFull && (
+              <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-[#f0f0f0] text-[#999] uppercase tracking-wider">
+                마감
+              </span>
+            )}
+          </div>
+
+          {/* 제목 */}
+          <p className="font-bold text-[16px] sm:text-[17px] text-[#111] leading-snug break-keep">
+            {event.title}
+          </p>
+
+          {/* 메타 */}
+          <dl className="mt-2.5 space-y-1 text-[12.5px] text-[#666]">
+            <KeyValue label="일시">
+              <span className="text-[#333]">{dateLine}</span>
+              {timeLine && <span className="text-[#999]"> · {timeLine}</span>}
+            </KeyValue>
+            {event.place && (
+              <KeyValue label="위치">
+                <span className="truncate">{event.place}</span>
+              </KeyValue>
+            )}
+            {event.fee && (
+              <KeyValue label="비용">
+                <span className="truncate">{event.fee}</span>
+              </KeyValue>
+            )}
+            <KeyValue label="참석">
+              <span className="text-[#333] font-semibold tabular-nums">
+                {attendLabel}
+              </span>
+            </KeyValue>
+          </dl>
+
+          {/* 참석자 아바타 줄 — 최대 8명 + 남은 인원 placeholder */}
+          <div className="mt-4 flex items-center gap-1.5 sm:gap-2">
+            {visibleAvatars.map((p) => (
+              <ParticipantAvatar key={p.id} participant={p} />
+            ))}
+            {Array.from({ length: Math.min(remainingSlots, 8 - visibleAvatars.length) }).map((_, i) => (
+              <div
+                key={`placeholder-${i}`}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#f0f0f0] flex items-center justify-center text-[#bbb]"
+                aria-hidden
+              >
+                <UserCircle2 size={20} strokeWidth={1.6} />
+              </div>
+            ))}
+            {remainingSlots > 8 - visibleAvatars.length && (
+              <span className="text-[11px] font-semibold text-[#999] tabular-nums ml-1">
+                +{remainingSlots - (8 - visibleAvatars.length)}
+              </span>
+            )}
+          </div>
+
+          {/* 모바일 전용 — 액션 줄 (좌측 컨텐츠 맨 아래) */}
+          <div className="md:hidden mt-3">
+            {actionRow}
+          </div>
+        </div>
+
+        {/* ─── 우측 — 이미지 + 액션 (md+ 에서만 노출) ─── */}
+        <div className="hidden md:flex md:flex-col md:w-[280px] lg:w-[340px] shrink-0 gap-3">
+          <div
+            className="aspect-[16/10] rounded-xl flex items-center justify-center bg-[var(--color-brand-court-bg)] text-[var(--color-brand-court-deep)] overflow-hidden"
+            aria-hidden
+          >
+            <CalendarDays size={56} strokeWidth={1.4} />
+          </div>
+          {/* 데스크톱 — 액션 줄을 이미지 바로 아래에 */}
+          {actionRow}
+        </div>
       </div>
     </li>
   )
