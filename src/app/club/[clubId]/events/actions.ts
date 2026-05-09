@@ -267,17 +267,19 @@ async function notifyRecentlyPromoted(
 
   /* 2) 카카오 알림톡 — 현재 STUB.
    *    실 발송하려면: users 테이블에 phone 컬럼 추가 + Kakao 비즈 연동.
-   *    placeholder 호출은 콘솔 로그만 남김. */
-  for (const _r of rows) {
-    await sendKakaoNoti({
-      to: '',  // TODO: users.phone 컬럼 추가 시 채움
-      templateCode: 'WAITLIST_PROMOTED',
-      variables: {
-        clubName,
-        eventTitle,
-        eventDate: evRow?.event_date ?? '',
-      },
-    })
+   *    KAKAO_NOTI_ENABLED=true 환경변수 설정 전까지는 루프를 건너뜀. */
+  if (process.env.KAKAO_NOTI_ENABLED === 'true') {
+    for (const _r of rows) {
+      await sendKakaoNoti({
+        to: '',  // TODO: users.phone 컬럼 추가 시 채움
+        templateCode: 'WAITLIST_PROMOTED',
+        variables: {
+          clubName,
+          eventTitle,
+          eventDate: evRow?.event_date ?? '',
+        },
+      })
+    }
   }
 }
 

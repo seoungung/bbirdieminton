@@ -2,6 +2,7 @@
 
 import { Plus, Trash2 } from 'lucide-react'
 import type { ClubFAQ } from '@/types/club'
+import { inputClsCompact } from '@/lib/forms/inputClassName'
 
 interface FaqEditorProps {
   value: ClubFAQ[]
@@ -9,11 +10,6 @@ interface FaqEditorProps {
   /** 최대 FAQ 개수 — 기본 6개 */
   max?: number
 }
-
-const inputCls =
-  'w-full border border-[#ebebeb] rounded-xl px-3 py-2 text-[13px] text-[#111] ' +
-  'placeholder:text-[#bbb] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] ' +
-  'focus:bg-white transition-colors'
 
 /**
  * Q&A 페어 multi-add 에디터.
@@ -70,7 +66,7 @@ export function FaqEditor({ value, onChange, max = 6 }: FaqEditorProps) {
                   maxLength={120}
                   value={f.question}
                   onChange={(e) => updateAt(i, { question: e.target.value })}
-                  className={inputCls}
+                  className={inputClsCompact}
                 />
                 <button
                   type="button"
@@ -91,7 +87,7 @@ export function FaqEditor({ value, onChange, max = 6 }: FaqEditorProps) {
                   maxLength={500}
                   value={f.answer}
                   onChange={(e) => updateAt(i, { answer: e.target.value })}
-                  className={`${inputCls} resize-none leading-relaxed`}
+                  className={`${inputClsCompact} resize-none leading-relaxed`}
                 />
                 <span className="shrink-0 mt-1 w-7 h-7" aria-hidden />
               </div>

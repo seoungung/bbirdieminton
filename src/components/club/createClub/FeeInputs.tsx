@@ -1,5 +1,7 @@
 'use client'
 
+import { inputCls } from '@/lib/forms/inputClassName'
+
 interface FeeInputsProps {
   feeMonthly: string
   onFeeMonthlyChange: (v: string) => void
@@ -8,11 +10,6 @@ interface FeeInputsProps {
   feeNote: string
   onFeeNoteChange: (v: string) => void
 }
-
-const inputCls =
-  'w-full border border-[#ebebeb] rounded-xl px-4 py-2.5 text-sm text-[#111] ' +
-  'placeholder:text-[#bbb] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] ' +
-  'focus:bg-white transition-colors'
 
 /**
  * 회비 입력 필드 묶음.

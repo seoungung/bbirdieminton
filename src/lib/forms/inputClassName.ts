@@ -27,3 +27,11 @@ export const inputCls =
  * Textarea 전용 — input 스타일 + resize-none + leading-relaxed.
  */
 export const textareaCls = `${inputCls} resize-none leading-relaxed`
+
+/**
+ * Compact variant — text-[13px], px-3 py-2 (내부 폼, FAQ 에디터 등 좁은 공간).
+ */
+export const inputClsCompact =
+  'w-full border border-[#ebebeb] rounded-xl px-3 py-2 text-[13px] text-[#111] ' +
+  'placeholder:text-[#bbb] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] ' +
+  'focus:bg-white transition-colors'

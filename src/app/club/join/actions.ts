@@ -9,7 +9,7 @@ export async function joinClubAction(formData: FormData) {
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: '로그인이 필요합니다.' }
+  if (!user || user.is_anonymous) return { error: '로그인이 필요합니다.' }
 
   const { data, error } = await supabase
     .rpc('join_club_by_invite_code', { p_invite_code: code })

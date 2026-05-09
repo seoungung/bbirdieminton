@@ -38,7 +38,9 @@ export async function submitJoinRequestAction(
   clubId: string,
 ): Promise<{ success?: true; error?: string; alreadyMember?: boolean }> {
   const supabase = await createClient()
-  const clubUserId = await getClubUserId(supabase)
+  const { data: { user: authUser } } = await supabase.auth.getUser()
+  if (!authUser || authUser.is_anonymous) return { error: '로그인이 필요합니다.' }
+  const clubUserId = await getClubUserId(supabase, authUser)
   if (!clubUserId) return { error: '로그인이 필요합니다.' }
 
   // 이미 멤버인지 확인

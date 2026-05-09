@@ -17,7 +17,7 @@ export async function updateNicknameAction(
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) return { error: '로그인이 필요합니다.' }
+  if (!user || user.is_anonymous) return { error: '로그인이 필요합니다.' }
 
   const { error } = await supabase
     .from('users')

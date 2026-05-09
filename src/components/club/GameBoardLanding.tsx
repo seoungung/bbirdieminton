@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, X, ChevronRight, Users, Shield, Gamepad2, Clipboard, Zap, Trophy } from 'lucide-react'
 import { createClubAction } from '@/app/club/create/actions'
+import { inputCls, textareaCls } from '@/lib/forms/inputClassName'
 
 type IconComp = React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>
 
@@ -162,7 +163,7 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
                   placeholder="예: 화요일 배드민턴 모임"
                   maxLength={30}
                   required
-                  className="w-full border border-[#ebebeb] rounded-xl px-4 py-2.5 text-sm text-[#111] placeholder:text-[#bbb] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] focus:bg-white transition-colors"
+                  className={inputCls}
                 />
               </div>
 
@@ -173,7 +174,7 @@ export function GameBoardLanding({ isLoggedIn }: Props) {
                   placeholder="모임에 대한 간단한 소개를 작성해주세요"
                   rows={3}
                   maxLength={200}
-                  className="w-full border border-[#ebebeb] rounded-xl px-4 py-2.5 text-sm text-[#111] placeholder:text-[#bbb] bg-[#fafafa] focus:outline-none focus:border-[#0a0a0a] focus:bg-white transition-colors resize-none leading-relaxed"
+                  className={textareaCls}
                 />
               </div>
 

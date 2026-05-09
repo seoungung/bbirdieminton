@@ -50,7 +50,7 @@ export async function proxy(request: NextRequest) {
 export const config = {
   /*
    * 클럽 앱 경로에만 인증 미들웨어 적용.
-   * 마케팅(/), /features, /pricing, /demo, /pdf 등 공개 페이지는 제외.
+   * 마케팅(/), /features, /pricing, /demo 등 공개 페이지는 제외.
    */
   matcher: ['/club/(.*)'],
 }

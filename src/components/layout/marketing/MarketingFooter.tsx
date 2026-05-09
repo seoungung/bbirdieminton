@@ -31,7 +31,6 @@ export function MarketingFooter() {
             <ul className="space-y-2 text-[12px] text-[#666]">
               <li><Link href="/demo"    className="hover:text-[#111] transition-colors">체험하기</Link></li>
               <li><Link href="/pricing" className="hover:text-[#111] transition-colors">가격</Link></li>
-              <li><Link href="/shop"    className="hover:text-[#111] transition-colors">SHOP</Link></li>
             </ul>
           </div>
 

@@ -70,7 +70,6 @@ export async function getNoticesAction(clubId: string): Promise<NoticeRow[]> {
 // ── 공지 작성 ─────────────────────────────────────────────
 export async function createNoticeAction(
   clubId: string,
-  authorMemberId: string,
   data: {
     title: string
     body: string
@@ -85,7 +84,7 @@ export async function createNoticeAction(
 
   const { data: membership } = await supabase
     .from('club_members')
-    .select('role')
+    .select('id, role')
     .eq('club_id', clubId)
     .eq('user_id', clubUserId)
     .single()
@@ -99,7 +98,7 @@ export async function createNoticeAction(
 
   const { error } = await supabase.from('notices').insert({
     club_id: clubId,
-    author_member_id: authorMemberId,
+    author_member_id: membership.id,
     title: data.title.trim(),
     body: data.body.trim(),
     type: data.type,

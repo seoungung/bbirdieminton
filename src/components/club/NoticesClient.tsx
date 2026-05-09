@@ -81,7 +81,7 @@ export function NoticesClient({ clubId, initialNotices, isOwner, myMemberId }: P
     startTransition(async () => {
       const result =
         modal.mode === 'create'
-          ? await createNoticeAction(clubId, myMemberId, {
+          ? await createNoticeAction(clubId, {
               title: modal.title,
               body: modal.body,
               type: modal.type,

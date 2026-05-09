@@ -31,7 +31,7 @@ export default function TermsPage() {
               <li>&ldquo;몰&rdquo;이란 회사가 재화 또는 용역을 이용자에게 제공하기 위하여 컴퓨터 등 정보통신설비를 이용하여 재화 등을 거래할 수 있도록 설정한 가상의 영업장을 말합니다.</li>
               <li>&ldquo;이용자&rdquo;란 몰에 접속하여 이 약관에 따라 몰이 제공하는 서비스를 받는 회원 및 비회원을 말합니다.</li>
               <li>&ldquo;회원&rdquo;이란 몰에 회원등록을 한 자로서, 계속적으로 몰이 제공하는 서비스를 이용할 수 있는 자를 말합니다.</li>
-              <li>&ldquo;디지털콘텐츠&rdquo;란 전자적 형태로 제작·처리된 내용물로서 회사가 제공하는 PDF 형태의 가이드북 등을 포함합니다.</li>
+              <li>&ldquo;콘텐츠&rdquo;란 회사가 서비스를 통해 제공하는 정보·자료 등을 말합니다.</li>
             </ol>
           </Section>
 
@@ -50,7 +50,6 @@ export default function TermsPage() {
                 <ul className="list-disc pl-5 mt-2 space-y-1">
                   <li>배드민턴 라켓 도감 및 정보 제공 서비스</li>
                   <li>배드민턴 레벨 진단 퀴즈 서비스</li>
-                  <li>배드민턴 관련 디지털 콘텐츠(PDF 가이드) 판매 서비스</li>
                   <li>이메일 뉴스레터 서비스</li>
                   <li>기타 회사가 정하는 서비스</li>
                 </ul>
@@ -73,25 +72,14 @@ export default function TermsPage() {
             </ol>
           </Section>
 
-          <Section title="제6조 (디지털콘텐츠의 제공 및 청약철회)">
-            <ol className="list-decimal pl-5 space-y-2">
-              <li>디지털콘텐츠(PDF 파일 등)는 결제 완료 후 이메일 또는 다운로드 링크를 통해 즉시 제공됩니다.</li>
-              <li>
-                <strong>청약철회 제한:</strong> 「전자상거래 등에서의 소비자보호에 관한 법률」 제17조 제2항 제5호에 따라, 복제 가능한 디지털콘텐츠의 경우 이용자가 파일을 다운로드하거나 콘텐츠에 접근한 이후에는 청약철회가 제한됩니다. 단, 파일을 다운로드하지 않은 경우 또는 콘텐츠에 접근하지 않은 경우에는 구매일로부터 7일 이내에 청약철회를 요청할 수 있습니다.
-              </li>
-              <li>청약철회 요청은 hello@birdieminton.com으로 이메일 요청하시기 바랍니다.</li>
-              <li>환급은 청약철회가 인정되는 경우 3영업일 이내에 처리됩니다.</li>
-            </ol>
-          </Section>
-
-          <Section title="제7조 (개인정보보호)">
+          <Section title="제6조 (개인정보보호)">
             <p>
               회사는 이용자의 개인정보를 보호하기 위하여 「개인정보보호법」 등 관련 법령에서 정하는 바를 준수합니다.
               개인정보의 처리에 관한 사항은 별도의 <a href="/privacy" className="text-[var(--color-brand-lime)] underline">개인정보처리방침</a>에 따릅니다.
             </p>
           </Section>
 
-          <Section title="제8조 (회사의 의무)">
+          <Section title="제7조 (회사의 의무)">
             <ol className="list-decimal pl-5 space-y-2">
               <li>회사는 법령과 이 약관이 금지하거나 공서양속에 반하는 행위를 하지 않으며 지속적·안정적으로 재화·서비스를 제공하기 위해 노력합니다.</li>
               <li>회사는 이용자가 안전하게 서비스를 이용할 수 있도록 개인정보보호를 위한 보안 시스템을 구축합니다.</li>
@@ -99,7 +87,7 @@ export default function TermsPage() {
             </ol>
           </Section>
 
-          <Section title="제9조 (이용자의 의무)">
+          <Section title="제8조 (이용자의 의무)">
             <p>이용자는 다음 행위를 하여서는 안 됩니다.</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>회원가입 신청 또는 변경 시 허위 내용 등록</li>
@@ -108,25 +96,24 @@ export default function TermsPage() {
               <li>몰이 정한 정보 이외의 정보(컴퓨터 프로그램 등) 송신 또는 게시</li>
               <li>몰 기타 제3자의 저작권 등 지적재산권 침해</li>
               <li>몰 기타 제3자의 명예를 손상시키거나 업무를 방해하는 행위</li>
-              <li>구매한 디지털콘텐츠를 무단 복제·배포·공유하는 행위</li>
             </ul>
           </Section>
 
-          <Section title="제10조 (저작권 및 지적재산권)">
+          <Section title="제9조 (저작권 및 지적재산권)">
             <ol className="list-decimal pl-5 space-y-2">
-              <li>몰이 제공하는 콘텐츠(라켓 도감, 가이드, 퀴즈, PDF 파일 등)에 대한 저작권 및 지적재산권은 회사에 귀속됩니다.</li>
+              <li>몰이 제공하는 콘텐츠(라켓 도감, 가이드, 퀴즈 등)에 대한 저작권 및 지적재산권은 회사에 귀속됩니다.</li>
               <li>이용자는 몰 이용으로 얻은 정보를 회사의 사전 승낙 없이 복제·송신·출판·배포·방송 등의 방법으로 영리 목적으로 이용하거나 제3자에게 이용하게 해서는 안 됩니다.</li>
             </ol>
           </Section>
 
-          <Section title="제11조 (분쟁 해결)">
+          <Section title="제10조 (분쟁 해결)">
             <ol className="list-decimal pl-5 space-y-2">
               <li>회사는 이용자로부터 제출되는 불만 사항 및 의견을 최우선적으로 처리합니다. 처리하기 어려울 경우 이용자에게 그 사유와 처리 일정을 즉시 통보합니다.</li>
               <li>회사와 이용자 간 발생한 분쟁은 전자상거래 등에서의 소비자보호에 관한 법률에서 정하는 절차에 따릅니다.</li>
             </ol>
           </Section>
 
-          <Section title="제12조 (재판권 및 준거법)">
+          <Section title="제11조 (재판권 및 준거법)">
             <ol className="list-decimal pl-5 space-y-2">
               <li>회사와 이용자 간에 발생한 전자상거래 분쟁에 관한 소송은 민사소송법상의 관할법원에 제기합니다.</li>
               <li>회사와 이용자 간에 제기된 소송에는 대한민국 법을 적용합니다.</li>

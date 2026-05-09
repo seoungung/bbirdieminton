@@ -15,6 +15,7 @@ import {
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { ROLE_LABEL } from '@/lib/club/labels'
 import { SettingsProfileExtras } from '@/components/club/SettingsProfileExtras'
+import { inputCls } from '@/lib/forms/inputClassName'
 
 interface Props {
   club: Club
@@ -222,7 +223,7 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
               onChange={(e) => setCourtCount(Number(e.target.value))}
               onBlur={handleCourtCountSave}
               disabled={isPending}
-              className="w-24 border border-[#e5e5e5] rounded-xl px-4 py-2.5 text-sm text-[#111] focus:outline-none focus:border-[var(--color-brand-lime)] bg-white transition-colors text-center disabled:opacity-50"
+              className={`${inputCls} w-24 text-center disabled:opacity-50`}
             />
             <span className="text-sm text-[#999]">면 (1~20)</span>
           </div>
