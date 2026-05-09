@@ -605,10 +605,12 @@ CREATE POLICY notices_delete ON public.notices
 
 -- ============================================================
 -- P1-6. notifications 테이블
+-- 실 코드는 club_id 단위로만 조회/갱신함 (user_id 미사용).
+-- 프로덕션 schema 와 충돌 없도록 club-membership 기반 RLS 로 단순화.
+-- 향후 사용자별 알림 도입 시 user_id 컬럼 별도 마이그레이션으로 추가.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS public.notifications (
   id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id    UUID        REFERENCES public.users(id) ON DELETE CASCADE,
   club_id    UUID        REFERENCES public.clubs(id) ON DELETE CASCADE,
   type       TEXT        NOT NULL,
   payload    JSONB       NOT NULL DEFAULT '{}'::jsonb,
@@ -616,24 +618,37 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_notifications_user_club_read
-  ON public.notifications(user_id, club_id, read_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_club_read
+  ON public.notifications(club_id, read_at);
 
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
--- 본인 row: SELECT
+-- 클럽 멤버 SELECT — 같은 클럽의 알림 조회 가능
 DROP POLICY IF EXISTS notifications_select ON public.notifications;
 CREATE POLICY notifications_select ON public.notifications
   FOR SELECT USING (
-    user_id = auth_club_user_id()
+    EXISTS (
+      SELECT 1 FROM public.club_members cm
+      WHERE cm.club_id = notifications.club_id
+        AND cm.user_id = auth_club_user_id()
+        AND cm.removed_at IS NULL
+    )
   );
 
--- 본인 row: UPDATE (read_at 갱신 등)
+-- 클럽 멤버 UPDATE — read_at 갱신 등
 DROP POLICY IF EXISTS notifications_update ON public.notifications;
 CREATE POLICY notifications_update ON public.notifications
   FOR UPDATE USING (
-    user_id = auth_club_user_id()
+    EXISTS (
+      SELECT 1 FROM public.club_members cm
+      WHERE cm.club_id = notifications.club_id
+        AND cm.user_id = auth_club_user_id()
+        AND cm.removed_at IS NULL
+    )
   );
+
+-- 기존에 잘못 만들어진 user_id 기반 정책/인덱스 제거 (재실행 안전망)
+DROP INDEX IF EXISTS idx_notifications_user_club_read;
 
 
 -- ============================================================
