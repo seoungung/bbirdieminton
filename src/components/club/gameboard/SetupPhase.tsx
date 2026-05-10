@@ -509,7 +509,7 @@ export function SetupPhase({
                       href={`/club/${clubId}/import`}
                       className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-[#0a0a0a] border border-[#e5e5e5] text-xs font-bold rounded-full hover:border-[#0a0a0a] transition-colors"
                     >
-                      엑셀로 일괄 등록
+                      엑셀로 멤버 가져오기
                     </Link>
                   </div>
                 )}

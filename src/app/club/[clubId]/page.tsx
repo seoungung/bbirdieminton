@@ -130,6 +130,8 @@ export default async function ClubHomePage({ params }: PageProps) {
     leaderName = owner?.name ?? '-'
   }
 
+  const isManager = ['owner', 'manager'].includes(membership.role)
+
   const members: MemberViewItem[] = (membersResult ?? []).map(m => ({
     id: m.id,
     name: m.user?.name ?? '이름없음',
@@ -195,6 +197,7 @@ export default async function ClubHomePage({ params }: PageProps) {
       members={members}
       regularSessions={regularSessions}
       gameSessions={gameSessions}
+      isManager={isManager}
     />
   )
 }

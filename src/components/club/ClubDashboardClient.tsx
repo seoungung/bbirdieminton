@@ -4,7 +4,7 @@ import Link from 'next/link'
 import {
   ChevronRight, Trophy, Users, Calendar, Gamepad2,
   Wallet, Sparkles, TrendingUp, Clock, Megaphone, ClipboardList,
-  Settings as SettingsIcon,
+  Settings as SettingsIcon, FileSpreadsheet,
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { GradeBadge } from '@/components/club/GradeBadge'
@@ -25,6 +25,7 @@ interface Props {
   regularSessions: RegularSessionItem[]
   gameSessions: GameSessionItem[]
   isDemo?: boolean
+  isManager?: boolean
 }
 
 /**
@@ -46,6 +47,7 @@ export function ClubDashboardClient({
   regularSessions,
   gameSessions,
   isDemo,
+  isManager,
 }: Props) {
   /* ── 집계 ── */
   const topRankings = [...members]
@@ -248,6 +250,17 @@ export function ClubDashboardClient({
             accent="info"
           />
         </div>
+        {isManager && !isDemo && (
+          <div className="mt-2.5 flex justify-end">
+            <Link
+              href={`/club/${clubId}/import`}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#555] border border-[#e5e5e5] px-3 py-1.5 rounded-xl hover:bg-[#f8f8f8] transition-colors"
+            >
+              <FileSpreadsheet size={13} />
+              엑셀로 멤버 가져오기
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* 5. 최신 블로그 */}

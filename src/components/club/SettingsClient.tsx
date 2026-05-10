@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Copy, LogOut, Crown, Shield, User, Trash2, MessageCircle } from 'lucide-react'
+import Link from 'next/link'
+import { Copy, LogOut, Crown, Shield, User, Trash2, MessageCircle, FileSpreadsheet } from 'lucide-react'
 import type { Club, ClubMemberWithUser, MemberRole } from '@/types/club'
 import { updateMemberRoleAction, regenerateInviteCodeAction } from '@/app/club/[clubId]/members/actions'
 import { shareToKakao } from '@/lib/kakao/share'
@@ -288,9 +289,20 @@ export function SettingsClient({ club, members, myMemberId, isOwner, isManager }
 
       {/* ── 멤버 목록 ── */}
       <section>
-        <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[var(--color-text-strong)] mb-3">
-          멤버 <span className="text-[#999] font-semibold tabular-nums">{members.length}</span>
-        </h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[var(--color-text-strong)]">
+            멤버 <span className="text-[#999] font-semibold tabular-nums">{members.length}</span>
+          </h2>
+          {isManager && (
+            <Link
+              href={`/club/${club.id}/import`}
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#555] border border-[#e5e5e5] px-3 py-1.5 rounded-xl hover:bg-[#f8f8f8] transition-colors"
+            >
+              <FileSpreadsheet size={13} />
+              엑셀로 멤버 가져오기
+            </Link>
+          )}
+        </div>
         <div className="space-y-2">
           {members.map((m) => (
             <div
