@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Wrench, LayoutDashboard, Users as UsersIcon, Building2, Upload } from 'lucide-react'
 import { assertMaster } from '@/lib/auth/master'
@@ -8,9 +8,15 @@ export const dynamic = 'force-dynamic'
 /**
  * /admin/** — 시스템 마스터 전용 트리.
  *
- * - 비마스터 / 비로그인 진입 시 notFound() — 페이지 존재 자체를 숨김.
- * - 모든 하위 페이지는 service-role admin client 로 데이터 조회 (RLS 우회).
- * - 읽기 전용. form/POST 핸들러 없음.
+ * 게이트:
+ * - 비로그인 → /login 으로 redirect (다른 보호 페이지와 동일 UX).
+ *   admin 라우트 패턴 자체는 이미 코드 public 이라 추가 노출 없음.
+ *   로그인 페이지는 일반 페이지와 구분 안 되므로 마스터 존재는 그대로 비공개.
+ * - 로그인 했으나 비마스터 → notFound() (마스터 존재 은닉).
+ * - 마스터 → 정상 렌더.
+ *
+ * 모든 하위 페이지는 service-role admin client 로 데이터 조회 (RLS 우회).
+ * 읽기 전용. form/POST 핸들러 없음.
  */
 export default async function AdminLayout({
   children,
@@ -19,7 +25,11 @@ export default async function AdminLayout({
 }) {
   const guard = await assertMaster()
   if ('error' in guard) {
-    // 비로그인이든 비마스터든 동일하게 404 — 존재 자체를 노출 안 함
+    if (guard.error === 'unauthenticated') {
+      // 비로그인 — 일반 페이지처럼 로그인으로 이동 (UX 일관성)
+      redirect('/login')
+    }
+    // 로그인 했으나 비마스터 — 마스터 존재 은닉
     notFound()
   }
 
