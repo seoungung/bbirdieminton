@@ -1,6 +1,7 @@
 import 'server-only'
 import type { SupabaseClient, User } from '@supabase/supabase-js'
-import { createClient, getAuthUser } from '@/lib/supabase/server'
+import { getAuthUser } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
  * 시스템 마스터(슈퍼어드민) 여부를 확인.
@@ -20,7 +21,8 @@ export async function isMaster(
     user !== undefined ? user : (await supabase.auth.getUser()).data.user
   if (!authUser) return false
 
-  const { data } = await supabase
+  const admin = createAdminClient()
+  const { data } = await admin
     .from('users')
     .select('is_master')
     .eq('birdieminton_user_id', authUser.id)
@@ -50,8 +52,8 @@ export async function assertMaster(): Promise<AssertMasterResult> {
   const authUser = await getAuthUser()
   if (!authUser) return { error: 'unauthenticated' }
 
-  const supabase = await createClient()
-  const { data } = await supabase
+  const admin = createAdminClient()
+  const { data } = await admin
     .from('users')
     .select('id, is_master')
     .eq('birdieminton_user_id', authUser.id)

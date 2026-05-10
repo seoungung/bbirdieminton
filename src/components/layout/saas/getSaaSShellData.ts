@@ -1,5 +1,6 @@
 import 'server-only'
 import { createClient, getAuthUser } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureClubUser, getClubUserId } from '@/lib/club/auth'
 import { getMyClubs } from '@/lib/club/client'
 import type { SaaSClubItem } from './SaaSClubList'
@@ -48,10 +49,11 @@ export async function getSaaSShellData(): Promise<SaaSShellData> {
   // is_master 조회 — 본인 row 는 RLS 상 본인이 읽을 수 있음.
   // 컬럼이 없는 (마이그레이션 미적용) 환경에서도 안전하게 false fallback.
   // Supabase builder 는 PromiseLike 를 반환하므로 Promise.resolve 로 감싸 catch 사용.
+  const admin = createAdminClient()
   const [clubs, masterRes] = await Promise.all([
     getMyClubs(supabase, clubUserId),
     Promise.resolve(
-      supabase
+      admin
         .from('users')
         .select('is_master')
         .eq('id', clubUserId)

@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient, getAuthUser } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
 import { AppShell } from '@/components/club/AppShell'
@@ -75,8 +76,11 @@ export default async function ClubDetailLayout({
     .update({ last_visited_club_id: clubId })
     .eq('id', clubUserId)
 
+  const adminClient = createAdminClient()
+
   /* 유저 프로필 + 읽지 않은 공지 수 + 소속 클럽 목록 + 마스터 여부 병렬 조회.
-   * is_master 는 마이그레이션 미적용 환경에서도 깨지지 않도록 PromiseLike 를 Promise.resolve 로 감싸 catch 가능하게. */
+   * is_master 는 RLS 우회를 위해 admin client 사용.
+   * 마이그레이션 미적용 환경에서도 깨지지 않도록 PromiseLike 를 Promise.resolve 로 감싸 catch 가능하게. */
   const [userProfileResult, unreadCount, clubsResult, isMaster] = await Promise.all([
     supabase.from('users').select('name').eq('id', clubUserId).single(),
     getUnreadCountAction(clubId).catch(() => 0),
@@ -87,7 +91,7 @@ export default async function ClubDetailLayout({
       .eq('user_id', clubUserId)
       .neq('club_id', clubId),
     Promise.resolve(
-      supabase
+      adminClient
         .from('users')
         .select('is_master')
         .eq('id', clubUserId)
