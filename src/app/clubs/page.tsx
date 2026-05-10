@@ -141,7 +141,7 @@ export default async function ClubsListingPage({ searchParams }: PageProps) {
     const realClubs = !error && data ? (data as PublicClubRow[]) : []
     const allClubs = [...toDiscoveryItems(realClubs), ...DEMO_DISCOVERY_ITEMS]
     return (
-      <SaaSShell myClubs={shellData.myClubs} user={shellData.user}>
+      <SaaSShell myClubs={shellData.myClubs} user={shellData.user} isMaster={shellData.isMaster}>
         <ClubsDiscoveryClient clubs={allClubs} myClubs={[]} tab={tab} />
       </SaaSShell>
     )
@@ -153,7 +153,7 @@ export default async function ClubsListingPage({ searchParams }: PageProps) {
   // clubUserId 미생성 (예외) → 데모만
   if (!clubUserId) {
     return (
-      <SaaSShell myClubs={shellData.myClubs} user={shellData.user}>
+      <SaaSShell myClubs={shellData.myClubs} user={shellData.user} isMaster={shellData.isMaster}>
         <ClubsDiscoveryClient
           clubs={[...DEMO_DISCOVERY_ITEMS]}
           myClubs={[]}
@@ -180,7 +180,7 @@ export default async function ClubsListingPage({ searchParams }: PageProps) {
   const myClubs = myClubsToDiscoveryItems(myClubRows, memberCountMap)
 
   return (
-    <SaaSShell myClubs={shellData.myClubs} user={shellData.user}>
+    <SaaSShell myClubs={shellData.myClubs} user={shellData.user} isMaster={shellData.isMaster}>
       <ClubsDiscoveryClient clubs={allClubs} myClubs={myClubs} tab={tab} />
     </SaaSShell>
   )

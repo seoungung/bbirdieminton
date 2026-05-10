@@ -19,6 +19,8 @@ interface Props {
   pageTitle?: string
   myClubs: SaaSClubItem[]
   user: { name: string; email: string; avatarUrl: string | null } | null
+  /** 시스템 마스터 여부 — getSaaSShellData() 가 채워서 전달 */
+  isMaster?: boolean
   children: React.ReactNode
 }
 
@@ -35,7 +37,7 @@ export type { SaaSClubItem }
  * 데스크톱에서는 별도 상단 헤더가 없고, 사이드바가 모든 navigation을 처리.
  * 우측 하단 floating 고객센터 위젯(HelpFloatingWidget) 포함 — AppShell과 동일.
  */
-export function SaaSShell({ pageTitle, myClubs, user, children }: Props) {
+export function SaaSShell({ pageTitle, myClubs, user, isMaster, children }: Props) {
   const pathname = usePathname()
   const [drawerOpen, setDrawerOpen] = useState(false)
 
@@ -103,6 +105,7 @@ export function SaaSShell({ pageTitle, myClubs, user, children }: Props) {
           myClubs={myClubs}
           user={user}
           collapsed={effectiveCollapsed}
+          isMaster={isMaster}
         />
         {/* 토글 버튼 — xl+ 에서만 노출 (그 이하는 강제 접힘이라 토글 의미 X) */}
         <button
@@ -142,6 +145,7 @@ export function SaaSShell({ pageTitle, myClubs, user, children }: Props) {
               user={user}
               collapsed={false}
               onNavigate={() => setDrawerOpen(false)}
+              isMaster={isMaster}
             />
           </aside>
         </div>

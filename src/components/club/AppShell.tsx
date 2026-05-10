@@ -52,6 +52,8 @@ interface Props {
   role?: 'owner' | 'manager' | 'member'
   /** 유저가 소속된 다른 클럽들 (현재 클럽 제외) */
   availableClubs?: ClubOption[]
+  /** 시스템 마스터(슈퍼어드민) 여부 — 사이드바 유저 메뉴 "관리자" 노출용 */
+  isMaster?: boolean
   children: React.ReactNode
 }
 
@@ -74,6 +76,7 @@ export function AppShell({
   unreadNoticeCount = 0,
   role,
   availableClubs = [],
+  isMaster,
   children,
 }: Props) {
   const pathname = usePathname()
@@ -262,6 +265,7 @@ export function AppShell({
             userEmail={userEmail ?? ''}
             avatarUrl={avatarUrl ?? null}
             collapsed={collapsed}
+            isMaster={isMaster}
           />
         </div>
       ) : (

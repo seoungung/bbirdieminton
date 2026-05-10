@@ -12,10 +12,10 @@ export default async function ClubCreateLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user, myClubs } = await getSaaSShellData()
+  const { user, myClubs, isMaster } = await getSaaSShellData()
 
   return (
-    <SaaSShell pageTitle="새 모임 만들기" myClubs={myClubs} user={user}>
+    <SaaSShell pageTitle="새 모임 만들기" myClubs={myClubs} user={user} isMaster={isMaster}>
       {children}
     </SaaSShell>
   )

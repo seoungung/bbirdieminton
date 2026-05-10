@@ -12,10 +12,10 @@ export default async function ClubPreviewLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user, myClubs } = await getSaaSShellData()
+  const { user, myClubs, isMaster } = await getSaaSShellData()
 
   return (
-    <SaaSShell myClubs={myClubs} user={user}>
+    <SaaSShell myClubs={myClubs} user={user} isMaster={isMaster}>
       {children}
     </SaaSShell>
   )

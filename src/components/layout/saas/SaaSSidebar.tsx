@@ -23,6 +23,8 @@ interface Props {
   collapsed: boolean
   /** 모바일 드로어에서 nav 클릭 시 드로어 닫기용 콜백 */
   onNavigate?: () => void
+  /** 시스템 마스터 여부 — true 일 때만 유저 메뉴에 "관리자" 항목 노출 */
+  isMaster?: boolean
 }
 
 interface DiscoverItem {
@@ -44,7 +46,7 @@ interface DiscoverItem {
  *  ⑤ "리소스" 섹션 — 사용설명서 / 블로그 (접힘 시 아이콘 only)
  *  ⑥ 하단 SidebarUserMenu (AppShell 재사용 — collapsed 모두 대응)
  */
-export function SaaSSidebar({ myClubs, user, collapsed, onNavigate }: Props) {
+export function SaaSSidebar({ myClubs, user, collapsed, onNavigate, isMaster }: Props) {
   const pathname = usePathname() ?? ''
   const searchParams = useSearchParams()
   const currentTab = searchParams?.get('tab') ?? null
@@ -277,6 +279,7 @@ export function SaaSSidebar({ myClubs, user, collapsed, onNavigate }: Props) {
             userEmail={user.email}
             avatarUrl={user.avatarUrl}
             collapsed={collapsed}
+            isMaster={isMaster}
           />
         </div>
       ) : (

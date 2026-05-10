@@ -7,6 +7,8 @@ import type { SaaSClubItem } from './SaaSClubList'
 export interface SaaSShellData {
   user: { name: string; email: string; avatarUrl: string | null } | null
   myClubs: SaaSClubItem[]
+  /** 시스템 마스터(슈퍼어드민) 여부 — true 일 때만 사이드바에 "관리자" 메뉴 노출 */
+  isMaster: boolean
 }
 
 /**
@@ -20,7 +22,7 @@ export interface SaaSShellData {
 export async function getSaaSShellData(): Promise<SaaSShellData> {
   const authUser = await getAuthUser()
   if (!authUser) {
-    return { user: null, myClubs: [] }
+    return { user: null, myClubs: [], isMaster: false }
   }
 
   const supabase = await createClient()
@@ -40,10 +42,25 @@ export async function getSaaSShellData(): Promise<SaaSShellData> {
   }
 
   if (!clubUserId) {
-    return { user, myClubs: [] }
+    return { user, myClubs: [], isMaster: false }
   }
 
-  const clubs = await getMyClubs(supabase, clubUserId)
+  // is_master 조회 — 본인 row 는 RLS 상 본인이 읽을 수 있음.
+  // 컬럼이 없는 (마이그레이션 미적용) 환경에서도 안전하게 false fallback.
+  // Supabase builder 는 PromiseLike 를 반환하므로 Promise.resolve 로 감싸 catch 사용.
+  const [clubs, masterRes] = await Promise.all([
+    getMyClubs(supabase, clubUserId),
+    Promise.resolve(
+      supabase
+        .from('users')
+        .select('is_master')
+        .eq('id', clubUserId)
+        .maybeSingle()
+    )
+      .then((r) => (r.data as { is_master?: boolean } | null)?.is_master === true)
+      .catch(() => false),
+  ])
+
   const myClubs: SaaSClubItem[] = clubs.map((c) => ({
     id: c.id,
     name: c.name,
@@ -51,5 +68,5 @@ export async function getSaaSShellData(): Promise<SaaSShellData> {
     thumbnailColor: c.thumbnail_color ?? null,
   }))
 
-  return { user, myClubs }
+  return { user, myClubs, isMaster: masterRes }
 }

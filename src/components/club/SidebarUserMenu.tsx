@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { User as UserIcon, Users, MessageSquare, LogOut, ChevronUp } from 'lucide-react'
+import { User as UserIcon, Users, MessageSquare, LogOut, ChevronUp, Wrench } from 'lucide-react'
 import { logout } from '@/app/login/actions'
 
 interface Props {
@@ -12,6 +12,8 @@ interface Props {
   avatarUrl: string | null
   /** 접힘 사이드바 (아이콘 only)일 때 true */
   collapsed: boolean
+  /** 시스템 마스터(슈퍼어드민) 여부 — true 일 때만 메뉴에 "관리자" 항목 노출 */
+  isMaster?: boolean
 }
 
 /**
@@ -22,7 +24,7 @@ interface Props {
  *
  * 마케팅 헤더용 UserMenu 와 별개로, 사이드바 좌측 하단에 anchor 되도록 위치 조정.
  */
-export function SidebarUserMenu({ userName, userEmail, avatarUrl, collapsed }: Props) {
+export function SidebarUserMenu({ userName, userEmail, avatarUrl, collapsed, isMaster }: Props) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const menuRef = useRef<HTMLDivElement>(null)
@@ -138,6 +140,31 @@ export function SidebarUserMenu({ userName, userEmail, avatarUrl, collapsed }: P
               onClick={() => setOpen(false)}
             />
           </nav>
+
+          {/* 마스터 전용 링크 — isMaster=true 일 때만 노출. 일반 유저에게는 절대 안 보임. */}
+          {isMaster && (
+            <>
+              <div className="border-t border-[#f0f0f0]" />
+              <nav className="py-1.5">
+                <Link
+                  href="/admin"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#fef2f2] transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-[#fee2e2] flex items-center justify-center text-[#b91c1c]">
+                    <Wrench size={14} strokeWidth={2} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-semibold text-[#b91c1c]">관리자</p>
+                    <p className="text-[11px] text-[#999] truncate mt-0.5">
+                      시스템 마스터 콘솔
+                    </p>
+                  </div>
+                </Link>
+              </nav>
+            </>
+          )}
 
           <div className="border-t border-[#f0f0f0]" />
 
