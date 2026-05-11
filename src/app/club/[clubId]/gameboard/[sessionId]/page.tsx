@@ -4,17 +4,13 @@ import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership, getClubMembers, getClubMemberRatings } from '@/lib/club/client'
 import { GameBoardClient } from '@/components/club/GameBoardClient'
 import { ClosedSessionClient } from '@/components/club/gameboard/closed/ClosedSessionClient'
-import { DEMO_CLUBS, DEMO_MEMBERS, DEMO_EVENTS, DEMO_MATCHES } from '@/lib/club/demoData'
 import type { Metadata } from 'next'
-import type { ClubMemberWithUser, MemberRole } from '@/types/club'
 import type { SessionGuest } from '@/components/club/gameboard/types'
 
 interface PageProps { params: Promise<{ clubId: string; sessionId: string }> }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { clubId } = await params
-  const demo = DEMO_CLUBS.find(c => c.id === clubId)
-  if (demo) return { title: `게임보드 | ${demo.name}`, description: '실시간 경기 배정 및 결과 입력' }
   const supabase = await createClient()
   const { data: club } = await supabase.from('clubs').select('name').eq('id', clubId).single()
   return { title: club ? `게임보드 | ${club.name}` : '게임보드 | 버디민턴', description: '실시간 경기 배정 및 결과 입력' }
@@ -22,11 +18,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function GameBoardSessionPage({ params }: PageProps) {
   const { clubId, sessionId } = await params
-
-  // ── 데모 분기 ──────────────────────────────────────────
-  if (clubId.startsWith('demo-')) {
-    return renderDemo(clubId, sessionId)
-  }
 
   // ── 실서비스 ──────────────────────────────────────────
   const supabase = await createClient()
@@ -246,105 +237,3 @@ export default async function GameBoardSessionPage({ params }: PageProps) {
   )
 }
 
-/* ─────────────────────────────────────────────────────────────
-   Demo 분기
-─────────────────────────────────────────────────────────────── */
-
-function renderDemo(clubId: string, sessionId: string) {
-  const demoClub = DEMO_CLUBS.find(c => c.id === clubId)
-  const clubName = demoClub?.name ?? '체험 모임'
-  const courtCount = demoClub?.court_count ?? 3
-
-  // demo-session-1 = in_progress
-  if (sessionId === 'demo-session-1') {
-    const today = new Date().toISOString().split('T')[0]
-
-    const demoMembers: ClubMemberWithUser[] = DEMO_MEMBERS.map(m => ({
-      id: m.id,
-      club_id: clubId,
-      user_id: m.id,
-      role: m.role as MemberRole,
-      skill_score: m.skill,
-      gender: m.gender,
-      joined_at: '2026-01-01T00:00:00Z',
-      removed_at: null,
-      user: {
-        id: m.id,
-        birdieminton_user_id: m.id,
-        name: m.name,
-        phone: null,
-        profile_img: null,
-        created_at: '2026-01-01T00:00:00Z',
-      },
-    }))
-
-    // 가짜 진행 데이터: 첫 12명 출석, 매치 없음 (재개 시 빈 코트 노출)
-    const attendeeMemberIds = DEMO_MEMBERS.slice(0, 12).map(m => m.id)
-    const inProgressData = {
-      sessionId: 'demo-session-1',
-      sessionDate: today,
-      matches: [],
-      attendeeMemberIds,
-    }
-
-    return (
-      <GameBoardClient
-        clubId={clubId}
-        clubName={clubName}
-        shuttleDefaultPrice={2500}
-        settlementAccount={null}
-        courtCount={courtCount}
-        members={demoMembers}
-        stats={[]}
-        membership={{ id: 'demo-owner', role: 'owner' }}
-        inProgressData={inProgressData}
-        matchPointTarget={25}
-        events={DEMO_EVENTS}
-        autoResume
-        isDemo
-      />
-    )
-  }
-
-  // demo-session-2 = closed
-  if (sessionId === 'demo-session-2') {
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
-    const memberMap = new Map(DEMO_MEMBERS.map(m => [m.id, m]))
-
-    const closedAttendees = DEMO_MEMBERS.slice(0, 14).map(m => ({
-      memberId: m.id,
-      name: m.name,
-      skillScore: m.skill,
-      isGuest: false,
-    }))
-
-    // DEMO_MATCHES 중 어제 날짜 5건은 's25' 라벨 — 데모용으로 모두 사용
-    const demoMatches = DEMO_MATCHES.slice(0, 5).map((m, idx) => ({
-      id: m.id,
-      courtNumber: (idx % courtCount) + 1,
-      teamAScore: m.scoreA,
-      teamBScore: m.scoreB,
-      teamA: m.teamA.map(id => ({
-        memberId: id,
-        name: memberMap.get(id)?.name ?? '?',
-      })),
-      teamB: m.teamB.map(id => ({
-        memberId: id,
-        name: memberMap.get(id)?.name ?? '?',
-      })),
-    }))
-
-    return (
-      <ClosedSessionClient
-        clubId={clubId}
-        sessionDate={yesterday}
-        eventTitle="[데모] 저녁 게임"
-        eventPlace="체험 체육관"
-        attendees={closedAttendees}
-        matches={demoMatches}
-      />
-    )
-  }
-
-  notFound()
-}

@@ -14,7 +14,6 @@ interface ClubBase {
   court_count: number
   created_at: string
   memberCount?: number
-  isDemo?: boolean
   location?: string
   leaderName?: string
   thumbnailColor?: string
@@ -73,10 +72,9 @@ type PinterestClubCardProps =
 export function PinterestClubCard(props: PinterestClubCardProps) {
   const { mode, club } = props
   const isNew = isNewClub(club.created_at)
-  // 멤버/데모/내 모임 → 대시보드. 비멤버 → preview 라우트(/clubs/[id]).
+  // 멤버/내 모임 → 대시보드. 비멤버 → preview 라우트(/clubs/[id]).
   const isMember = mode === 'my' || (mode === 'all' && props.isMember)
-  const href =
-    isMember || club.isDemo ? `/club/${club.id}` : `/clubs/${club.id}`
+  const href = isMember ? `/club/${club.id}` : `/clubs/${club.id}`
 
   return (
     <div className="bg-white border border-[#f0f0f0] rounded-2xl overflow-hidden break-inside-avoid mb-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
@@ -87,7 +85,6 @@ export function PinterestClubCard(props: PinterestClubCardProps) {
           thumbnailUrl={club.thumbnail_url}
           thumbnailColor={club.thumbnailColor}
           isNew={isNew}
-          isDemo={club.isDemo}
         />
       </Link>
 
@@ -150,12 +147,12 @@ export function PinterestClubCard(props: PinterestClubCardProps) {
           <Link
             href={href}
             className={
-              props.isMember || club.isDemo
+              props.isMember
                 ? 'w-full flex items-center justify-center bg-[var(--color-brand-lime)] text-[#111] font-bold text-sm py-2 rounded-xl hover:brightness-95 transition-all'
                 : 'w-full flex items-center justify-center border border-[#e5e5e5] text-[#555] font-semibold text-sm py-2 rounded-xl hover:bg-[#f8f8f8] transition-all'
             }
           >
-            {props.isMember || club.isDemo ? '모임 보기' : '둘러보기'}
+            {props.isMember ? '모임 보기' : '둘러보기'}
           </Link>
         ) : (
           <Link

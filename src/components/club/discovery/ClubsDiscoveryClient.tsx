@@ -84,17 +84,15 @@ function sortByNewThenRecent(clubs: ClubDiscoveryItem[]): ClubDiscoveryItem[] {
 /**
  * /clubs 발견 페이지.
  *
- * 'all' 탭: 두 섹션 분리 노출.
- *   1. 체험용 모임 — 데모 클럽 고정 (당분간 페이지 상단 고정).
- *   2. 전체 모임 — 실제 모임. 14일 이내 신규는 'NEW' 배지 + 상단 정렬, 무한스크롤.
+ * 'all' 탭: 14일 이내 신규는 'NEW' 배지 + 상단 정렬, 무한스크롤.
  *
- * 'mine'/'saved'/'recent' 탭: 단일 리스트 (데모 분리 X, 무한스크롤 X).
+ * 'mine'/'saved'/'recent' 탭: 단일 리스트 (무한스크롤 X).
  *  · 찜/최근은 localStorage(favoriteClubs / recentClubs) 기반.
  *
  * Phase 2 큐레이션 컴포넌트(`ClubsCurationSection`, `ClubsMiniCard`)는 보존됨 — 클럽 볼륨 충분 시 재활성.
  */
 interface Props {
-  /** 전체 모임 (실제 + 데모) */
+  /** 전체 모임 */
   clubs: ClubDiscoveryItem[]
   /** 내가 가입한 모임 (비로그인 시 빈 배열) */
   myClubs: ClubDiscoveryItem[]
@@ -106,13 +104,9 @@ export function ClubsDiscoveryClient({ clubs, myClubs, tab = 'all' }: Props) {
   const savedIds = useLocalIds(FAV_KEY)
   const recentIds = useLocalIds(RECENT_KEY)
 
-  // ── 'all' 탭: 데모/실제 분리 + NEW 정렬 ──
-  const demoClubs = useMemo(
-    () => clubs.filter((c) => c.isDemo),
-    [clubs],
-  )
-  const realClubsSorted = useMemo(
-    () => sortByNewThenRecent(clubs.filter((c) => !c.isDemo)),
+  // ── 'all' 탭: NEW 정렬 ──
+  const sortedClubs = useMemo(
+    () => sortByNewThenRecent(clubs),
     [clubs],
   )
 
@@ -120,25 +114,8 @@ export function ClubsDiscoveryClient({ clubs, myClubs, tab = 'all' }: Props) {
     return (
       <div>
         <ClubsHero />
-        {demoClubs.length > 0 && (
-          <>
-            <div className="bg-[var(--color-brand-bg-sub)]">
-              <ClubsCardGrid
-                clubs={demoClubs}
-                title="체험용 모임"
-                emptyMessage="체험용 모임이 없어요"
-              />
-            </div>
-            {/* 섹션 구분 — 소모임/네이버카페 스타일 그레이 스트립 */}
-            <div
-              className="h-3 w-full bg-[var(--color-brand-bg-muted)] border-y border-[var(--color-brand-border-sub)]"
-              role="separator"
-              aria-hidden
-            />
-          </>
-        )}
         <ClubsCardGrid
-          clubs={realClubsSorted}
+          clubs={sortedClubs}
           title="전체 모임"
           emptyMessage="등록된 모임이 아직 없어요"
           infiniteScroll

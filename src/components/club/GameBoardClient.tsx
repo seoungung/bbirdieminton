@@ -48,8 +48,6 @@ interface Props {
   matchPointTarget?: 21 | 25
   /** 정기 모임 목록 (최근 7일 ~ 향후 30일) */
   events?: GameboardEvent[]
-  /** true 이면 체험 모드 — Supabase DB 쓰기를 모두 건너뜀 */
-  isDemo?: boolean
   /**
    * true 이면 inProgressData 가 있을 때 마운트 직후 자동으로 handleResumeGame() 을 1회 호출.
    * `/[sessionId]` 라우트(이미 in_progress 세션) 전용 — 사용자가 재개 배너를 누르지 않아도
@@ -72,7 +70,6 @@ export function GameBoardClient({
   inProgressData,
   matchPointTarget = 25,
   events = [],
-  isDemo = false,
   autoResume = false,
   guests = [],
 }: Props) {
@@ -157,7 +154,7 @@ export function GameBoardClient({
   const handleStartGame = useCallback(() => {
     const totalPlayers = Array.from(selectedPlayers).length
     if (totalPlayers < 4) { setError('최소 4명 필요합니다'); return }
-    if (!selectedEventId && !isDemo) { setError('정기 모임을 선택해주세요'); return }
+    if (!selectedEventId) { setError('정기 모임을 선택해주세요'); return }
     if (activeCourts < 1) { setError('코트 수는 1 이상이어야 합니다'); return }
 
     setError(null)
@@ -233,42 +230,6 @@ export function GameBoardClient({
           localHistory = updatePartnerHistory(localHistory, teamAIds, teamBIds)
         }
 
-        // 데모: DB 건너뜀 — 로컬 상태로 playing 페이즈 전환
-        if (isDemo) {
-          const newCourts: CourtEntry[] = Array.from({ length: capturedCourts }, (_, i) => ({
-            courtIndex: i,
-            matchDbId: null,
-            teamA: [],
-            teamB: [],
-            scoreA: 0,
-            scoreB: 0,
-            startedAt: 0,
-            isSaving: false,
-          }))
-          courtsPayload.forEach((cp, i) => {
-            if (i < newCourts.length) {
-              newCourts[i] = {
-                ...newCourts[i],
-                matchDbId: `demo-match-${i}-${Date.now()}`,
-                teamA: cp.team_a,
-                teamB: cp.team_b,
-                startedAt: now,
-              }
-              for (const id of [...cp.team_a, ...cp.team_b]) {
-                const p = newPlayerMap.get(id)
-                if (p) newPlayerMap.set(id, { ...p, status: 'playing' })
-              }
-            }
-          })
-          setSessionDbId(`demo-session-${Date.now()}`)
-          setPlayerMap(newPlayerMap)
-          setCourts(newCourts)
-          setGameStartedAt(now)
-          setElapsed(0)
-          setPhase('playing')
-          return
-        }
-
         // 실서비스: 2-step RPC (create_pending_session → start_pending_session)
         const supabase = createClient()
         const realAttendees = Array.from(capturedPlayers).filter(id => !id.startsWith('temp-'))
@@ -303,7 +264,7 @@ export function GameBoardClient({
         setError(e instanceof Error ? e.message : '알 수 없는 오류')
       }
     })
-  }, [selectedPlayers, selectedEventId, isDemo, activeCourts, assignMode, sessionDate, tempPlayers, members, ratingsMap, rankMap, clubId, membership.id, router])
+  }, [selectedPlayers, selectedEventId, activeCourts, assignMode, sessionDate, tempPlayers, members, ratingsMap, rankMap, clubId, membership.id, router])
 
   const togglePlayer = (memberId: string) =>
     setSelectedPlayers((prev) => {
@@ -425,31 +386,26 @@ export function GameBoardClient({
     setError(null)
 
     startTransition(async () => {
-      let matchId: string
-      if (!isDemo) {
-        const supabase = createClient()
-        const hasTempPlayer = [...teamAIds, ...teamBIds].some(id => id.startsWith('temp-'))
-        const { data: match, error: matchErr } = await supabase
-          .from('matches')
-          .insert({ session_id: capturedSessionId, court_number: courtIndex + 1, excluded_from_ranking: hasTempPlayer })
-          .select()
-          .single()
-        if (matchErr || !match) { setError('경기 배정에 실패했습니다'); return }
+      const supabase = createClient()
+      const hasTempPlayer = [...teamAIds, ...teamBIds].some(id => id.startsWith('temp-'))
+      const { data: match, error: matchErr } = await supabase
+        .from('matches')
+        .insert({ session_id: capturedSessionId, court_number: courtIndex + 1, excluded_from_ranking: hasTempPlayer })
+        .select()
+        .single()
+      if (matchErr || !match) { setError('경기 배정에 실패했습니다'); return }
 
-        const realPlayers = [...teamAIds, ...teamBIds].filter(id => !id.startsWith('temp-'))
-        if (realPlayers.length > 0) {
-          await supabase.from('match_players').insert(
-            realPlayers.map(id => ({
-              match_id: match.id,
-              member_id: id,
-              team: teamAIds.includes(id) ? 'A' : 'B',
-            }))
-          )
-        }
-        matchId = match.id
-      } else {
-        matchId = `demo-match-custom-${courtIndex}-${Date.now()}`
+      const realPlayers = [...teamAIds, ...teamBIds].filter(id => !id.startsWith('temp-'))
+      if (realPlayers.length > 0) {
+        await supabase.from('match_players').insert(
+          realPlayers.map(id => ({
+            match_id: match.id,
+            member_id: id,
+            team: teamAIds.includes(id) ? 'A' : 'B',
+          }))
+        )
       }
+      const matchId = match.id
 
       setCourts(prev => prev.map((c, i) =>
         i !== courtIndex ? c : {
@@ -507,36 +463,30 @@ export function GameBoardClient({
 
       const [teamA, teamB] = result
 
-      let matchId: string
-      if (!isDemo) {
-        const supabase = createClient()
-        const hasTempPlayer = [...teamA, ...teamB].some(p => p.memberId.startsWith('temp-'))
-        const { data: match, error: matchErr } = await supabase
-          .from('matches')
-          .insert({
-            session_id: capturedSessionId,
-            court_number: courtIndex + 1,
-            excluded_from_ranking: hasTempPlayer,
-          })
-          .select()
-          .single()
-        if (matchErr || !match) { setError('경기 배정에 실패했습니다'); return }
+      const supabase = createClient()
+      const hasTempPlayer = [...teamA, ...teamB].some(p => p.memberId.startsWith('temp-'))
+      const { data: match, error: matchErr } = await supabase
+        .from('matches')
+        .insert({
+          session_id: capturedSessionId,
+          court_number: courtIndex + 1,
+          excluded_from_ranking: hasTempPlayer,
+        })
+        .select()
+        .single()
+      if (matchErr || !match) { setError('경기 배정에 실패했습니다'); return }
 
-        const realPlayers = [...teamA, ...teamB].filter(p => !p.memberId.startsWith('temp-'))
-        if (realPlayers.length > 0) {
-          await supabase.from('match_players').insert(
-            realPlayers.map(p => ({
-              match_id: match.id,
-              member_id: p.memberId,
-              team: teamA.some(a => a.memberId === p.memberId) ? 'A' : 'B',
-            }))
-          )
-        }
-        matchId = match.id
-      } else {
-        // 체험 모드: 가짜 matchId
-        matchId = `demo-match-${courtIndex}-${Date.now()}`
+      const realPlayers = [...teamA, ...teamB].filter(p => !p.memberId.startsWith('temp-'))
+      if (realPlayers.length > 0) {
+        await supabase.from('match_players').insert(
+          realPlayers.map(p => ({
+            match_id: match.id,
+            member_id: p.memberId,
+            team: teamA.some(a => a.memberId === p.memberId) ? 'A' : 'B',
+          }))
+        )
       }
+      const matchId = match.id
 
       setCourts((prev) =>
         prev.map((c, i) =>
@@ -605,21 +555,19 @@ export function GameBoardClient({
     setCourts((prev) => prev.map((c, i) => (i === courtIndex ? { ...c, isSaving: true } : c)))
 
     startTransition(async () => {
-      if (!isDemo) {
-        const supabase = createClient()
-        const { error: updateErr } = await supabase
-          .from('matches')
-          .update({ team_a_score: scoreA, team_b_score: scoreB })
-          .eq('id', matchDbId)
+      const supabase = createClient()
+      const { error: updateErr } = await supabase
+        .from('matches')
+        .update({ team_a_score: scoreA, team_b_score: scoreB })
+        .eq('id', matchDbId)
 
-        if (updateErr) {
-          setError('점수 저장에 실패했습니다')
-          setCourts((prev) => prev.map((c, i) => (i === courtIndex ? { ...c, isSaving: false } : c)))
-          return
-        }
-
-        updatePlayerStatsForMatch(matchDbId, clubId, null, null, scoreA, scoreB).catch(console.error)
+      if (updateErr) {
+        setError('점수 저장에 실패했습니다')
+        setCourts((prev) => prev.map((c, i) => (i === courtIndex ? { ...c, isSaving: false } : c)))
+        return
       }
+
+      updatePlayerStatsForMatch(matchDbId, clubId, null, null, scoreA, scoreB).catch(console.error)
 
       const now = Date.now()
 
@@ -671,43 +619,38 @@ export function GameBoardClient({
         const newTeamA = winners
         const newTeamB = challengers.map(p => p.memberId)
 
-        let newMatchId: string
-        if (!isDemo) {
-          const supabase = createClient()
-          const hasTempPlayer = [...newTeamA, ...newTeamB].some(id => id.startsWith('temp-'))
-          const { data: newMatch, error: matchErr } = await supabase
-            .from('matches')
-            .insert({ session_id: capturedSessionId, court_number: courtIndex + 1, excluded_from_ranking: hasTempPlayer })
-            .select()
-            .single()
+        const supabase = createClient()
+        const hasTempPlayer = [...newTeamA, ...newTeamB].some(id => id.startsWith('temp-'))
+        const { data: newMatch, error: matchErr } = await supabase
+          .from('matches')
+          .insert({ session_id: capturedSessionId, court_number: courtIndex + 1, excluded_from_ranking: hasTempPlayer })
+          .select()
+          .single()
 
-          if (matchErr || !newMatch) {
-            setError('다음 경기 배정에 실패했습니다')
-            setPlayerMap(nextPlayerMap)
-            setCourts(prev =>
-              prev.map((c, i) =>
-                i === courtIndex
-                  ? { ...c, matchDbId: null, teamA: [], teamB: [], scoreA: 0, scoreB: 0, startedAt: 0, isSaving: false }
-                  : c
-              )
+        if (matchErr || !newMatch) {
+          setError('다음 경기 배정에 실패했습니다')
+          setPlayerMap(nextPlayerMap)
+          setCourts(prev =>
+            prev.map((c, i) =>
+              i === courtIndex
+                ? { ...c, matchDbId: null, teamA: [], teamB: [], scoreA: 0, scoreB: 0, startedAt: 0, isSaving: false }
+                : c
             )
-            return
-          }
-
-          const realPlayers = [...newTeamA, ...newTeamB].filter(id => !id.startsWith('temp-'))
-          if (realPlayers.length > 0) {
-            await supabase.from('match_players').insert(
-              realPlayers.map(id => ({
-                match_id: newMatch.id,
-                member_id: id,
-                team: newTeamA.includes(id) ? 'A' : 'B',
-              }))
-            )
-          }
-          newMatchId = newMatch.id
-        } else {
-          newMatchId = `demo-match-king-${courtIndex}-${Date.now()}`
+          )
+          return
         }
+
+        const realPlayers = [...newTeamA, ...newTeamB].filter(id => !id.startsWith('temp-'))
+        if (realPlayers.length > 0) {
+          await supabase.from('match_players').insert(
+            realPlayers.map(id => ({
+              match_id: newMatch.id,
+              member_id: id,
+              team: newTeamA.includes(id) ? 'A' : 'B',
+            }))
+          )
+        }
+        const newMatchId = newMatch.id
 
         // 도전자를 playing 상태로
         for (const p of challengers) {
@@ -763,7 +706,7 @@ export function GameBoardClient({
       onConfirm: () => {
         setDialog(null)
         startTransition(async () => {
-          if (!isDemo && matchDbId) {
+          if (matchDbId) {
             const supabase = createClient()
             await supabase.from('match_players').delete().eq('match_id', matchDbId)
             await supabase.from('matches').delete().eq('id', matchDbId)
@@ -791,7 +734,7 @@ export function GameBoardClient({
   /* ── 마감 내부 로직: 세션 closed 후 /view?tab=게임보드 로 이동 ── */
   const finalizeEndGameInternal = useCallback(
     async (sessionId: string | null) => {
-      if (!isDemo && sessionId) {
+      if (sessionId) {
         const supabase = createClient()
         await supabase.from('sessions').update({ status: 'closed' }).eq('id', sessionId)
       }
@@ -807,12 +750,10 @@ export function GameBoardClient({
       setSelectedPlayers(new Set())
       setTempPlayers([])
 
-      /* 데모는 게임보드 페이지 내에서 머물고 (세션 DB 없음), 실제는 모임 뷰의 게임보드 탭으로 이동해 히스토리 확인 */
-      if (!isDemo) {
-        router.push(`/club/${clubId}?tab=${encodeURIComponent('게임보드')}`)
-      }
+      /* 모임 뷰의 게임보드 탭으로 이동해 히스토리 확인 */
+      router.push(`/club/${clubId}?tab=${encodeURIComponent('게임보드')}`)
     },
-    [isDemo, courtCount, router, clubId]
+    [courtCount, router, clubId]
   )
 
   /* ── 게임 전체 종료 ── */
@@ -826,18 +767,16 @@ export function GameBoardClient({
     ).length
 
     startTransition(async () => {
-      if (!isDemo) {
-        const supabase = createClient()
-        for (const court of capturedCourts) {
-          if (court.matchDbId && court.teamA.length > 0) {
-            await supabase
-              .from('matches')
-              .update({ team_a_score: court.scoreA, team_b_score: court.scoreB })
-              .eq('id', court.matchDbId)
-            // 스탯 업데이트 (코트별, fire-and-forget)
-            updatePlayerStatsForMatch(court.matchDbId, clubId, null, null, court.scoreA, court.scoreB)
-              .catch(console.error)
-          }
+      const supabase = createClient()
+      for (const court of capturedCourts) {
+        if (court.matchDbId && court.teamA.length > 0) {
+          await supabase
+            .from('matches')
+            .update({ team_a_score: court.scoreA, team_b_score: court.scoreB })
+            .eq('id', court.matchDbId)
+          // 스탯 업데이트 (코트별, fire-and-forget)
+          updatePlayerStatsForMatch(court.matchDbId, clubId, null, null, court.scoreA, court.scoreB)
+            .catch(console.error)
         }
       }
 
@@ -858,7 +797,7 @@ export function GameBoardClient({
       onConfirm: () => {
         setDialog(null)
         startTransition(async () => {
-          if (!isDemo && capturedSessionId) {
+          if (capturedSessionId) {
             const supabase = createClient()
             const { data: matches } = await supabase.from('matches').select('id').eq('session_id', capturedSessionId)
             for (const m of matches ?? []) {
@@ -879,7 +818,7 @@ export function GameBoardClient({
           setActiveCourts(courtCount)
           setSelectedPlayers(new Set())
           setTempPlayers([])
-          if (!isDemo) router.refresh()
+          router.refresh()
         })
       },
     })
@@ -929,7 +868,7 @@ export function GameBoardClient({
     })
     setActiveCourts(c => c + 1)
 
-    if (!isDemo && sessionDbId) {
+    if (sessionDbId) {
       startTransition(async () => {
         const supabase = createClient()
         await supabase
@@ -938,7 +877,7 @@ export function GameBoardClient({
           .eq('id', sessionDbId)
       })
     }
-  }, [isDemo, sessionDbId, courts.length])
+  }, [sessionDbId, courts.length])
 
   /* ── 코트 제거 (in_progress 중) — 마지막 코트가 빈 경우만 ── */
   const handleRemoveCourt = useCallback(() => {
@@ -951,7 +890,7 @@ export function GameBoardClient({
     })
     setActiveCourts(c => Math.max(1, c - 1))
 
-    if (!isDemo && sessionDbId && courts.length > 1) {
+    if (sessionDbId && courts.length > 1) {
       const last = courts[courts.length - 1]
       if (last && last.matchDbId === null && last.teamA.length === 0 && last.teamB.length === 0) {
         startTransition(async () => {
@@ -963,7 +902,7 @@ export function GameBoardClient({
         })
       }
     }
-  }, [isDemo, sessionDbId, courts])
+  }, [sessionDbId, courts])
 
   /* ── 진행 중 세션에 회원/게스트 추가 (PlayingPhase 헤더 +회원 / +게스트) ── */
   const handleAddPlayersInPlay = useCallback(
@@ -976,44 +915,6 @@ export function GameBoardClient({
       if (memberIds.length === 0 && guests.length === 0) return
 
       const now = Date.now()
-
-      /* 데모 모드 — DB 호출 없이 로컬 playerMap 만 갱신 */
-      if (isDemo) {
-        setPlayerMap((prev) => {
-          const next = new Map(prev)
-          for (const mid of memberIds) {
-            if (next.has(mid)) continue
-            const member = members.find((m) => m.id === mid)
-            if (!member) continue
-            next.set(mid, {
-              memberId: mid,
-              name: member.user?.name ?? '?',
-              skillScore: member.skill_score,
-              muScore: ratingsMap[mid]?.mu,
-              phiScore: ratingsMap[mid]?.phi,
-              rank: rankMap.get(mid),
-              gender: member.gender ?? null,
-              todayGames: 0,
-              waitingSince: now,
-              status: 'waiting',
-            })
-          }
-          for (const g of guests) {
-            const id = `guest-demo-${Math.random().toString(36).slice(2, 9)}`
-            next.set(id, {
-              memberId: id,
-              name: g.name.trim().slice(0, 40),
-              skillScore: gradeToSkill(g.grade) ?? 50,
-              gender: g.gender ?? null,
-              todayGames: 0,
-              waitingSince: now,
-              status: 'waiting',
-            })
-          }
-          return next
-        })
-        return
-      }
 
       /* 실 세션 — sessionDbId 필수, 서버 액션 호출 */
       if (!sessionDbId) {
@@ -1065,7 +966,7 @@ export function GameBoardClient({
         return next
       })
     },
-    [isDemo, sessionDbId, clubId, members, ratingsMap, rankMap],
+    [sessionDbId, clubId, members, ratingsMap, rankMap],
   )
 
   /* ══════════════════════════════════════
@@ -1088,7 +989,6 @@ export function GameBoardClient({
         inProgressData={inProgressData}
         isPending={isPending}
         error={error}
-        isDemo={isDemo}
         events={events}
         selectedEventId={selectedEventId}
         onBack={() => {

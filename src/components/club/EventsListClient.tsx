@@ -17,12 +17,11 @@ interface Props {
   upcoming: EventListRow[]
   past: EventListRow[]
   isManager: boolean
-  isDemo?: boolean
 }
 
 type Tab = 'upcoming' | 'past'
 
-export function EventsListClient({ clubId, upcoming, past, isManager, isDemo }: Props) {
+export function EventsListClient({ clubId, upcoming, past, isManager }: Props) {
   const router = useRouter()
   const [tab, setTab] = useState<Tab>('upcoming')
   const [dialog, setDialog] = useState<{ mode: 'create' | 'edit'; initial?: EventListRow } | null>(
@@ -33,10 +32,6 @@ export function EventsListClient({ clubId, upcoming, past, isManager, isDemo }: 
   const list = tab === 'upcoming' ? upcoming : past
 
   function openCreate() {
-    if (isDemo) {
-      alert('체험 모드에서는 정기모임을 만들 수 없습니다.')
-      return
-    }
     setDialog({ mode: 'create' })
   }
 
@@ -46,11 +41,6 @@ export function EventsListClient({ clubId, upcoming, past, isManager, isDemo }: 
 
   function handleSubmit(data: EventInput) {
     if (!dialog) return
-    if (isDemo) {
-      alert('체험 모드에서는 저장되지 않습니다.')
-      setDialog(null)
-      return
-    }
     startTransition(async () => {
       const result =
         dialog.mode === 'create'
@@ -66,11 +56,6 @@ export function EventsListClient({ clubId, upcoming, past, isManager, isDemo }: 
   }
 
   function handleDelete(eventId: string) {
-    if (isDemo) {
-      alert('체험 모드에서는 삭제되지 않습니다.')
-      setDialog(null)
-      return
-    }
     if (!window.confirm('정말 삭제하시겠습니까? 참가자 RSVP도 함께 사라집니다.')) return
     startTransition(async () => {
       const result = await deleteEventAction(clubId, eventId)

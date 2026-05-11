@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { Gamepad2 } from 'lucide-react'
 import { createClient, getAuthUser } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
-import { DEMO_CLUBS } from '@/lib/club/demoData'
 import { GameboardListClient, type SessionItem } from '@/components/club/gameboard/list/GameboardListClient'
 import type { Metadata } from 'next'
 
@@ -12,8 +11,6 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { clubId } = await params
-  const demo = DEMO_CLUBS.find(c => c.id === clubId)
-  if (demo) return { title: `게임보드 | ${demo.name}`, description: '게임보드 목록' }
   const supabase = await createClient()
   const { data: club } = await supabase.from('clubs').select('name').eq('id', clubId).single()
   return { title: club ? `게임보드 | ${club.name}` : '게임보드 | 버디민턴', description: '게임보드 목록' }
@@ -21,46 +18,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function GameboardListPage({ params }: PageProps) {
   const { clubId } = await params
-
-  // ── 데모 모드 ──────────────────────────────────────────────
-  if (clubId.startsWith('demo-')) {
-    const today = new Date().toISOString().split('T')[0]
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
-
-    const demoGrouped = {
-      in_progress: [
-        {
-          id: 'demo-session-1',
-          session_date: today,
-          status: 'in_progress' as const,
-          court_count: 3,
-          notes: null,
-          created_at: new Date().toISOString(),
-          event_id: null,
-          event: { id: 'demo-event-1', title: '[데모] 저녁 게임', event_date: today, place: null },
-          attendance_count: 12,
-        },
-      ],
-      closed: [
-        {
-          id: 'demo-session-2',
-          session_date: yesterday,
-          status: 'closed' as const,
-          court_count: 3,
-          notes: null,
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-          event_id: null,
-          event: { id: 'demo-event-2', title: '[데모] 저녁 게임', event_date: yesterday, place: null },
-          attendance_count: 14,
-        },
-      ],
-    }
-
-    const demoClub = DEMO_CLUBS.find(c => c.id === clubId)
-    const clubName = demoClub?.name ?? '체험 모임'
-
-    return <GameboardListPageShell clubId={clubId} clubName={clubName} grouped={demoGrouped} />
-  }
 
   // ── 실서비스 ───────────────────────────────────────────────
   const supabase = await createClient()

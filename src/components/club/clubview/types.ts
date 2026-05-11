@@ -3,7 +3,7 @@
 export type Tab = '홈' | '공지' | '게시판' | '앨범' | '정기모임' | '게임보드' | '운영&관리' | '설정'
 export const TABS: Tab[] = ['홈', '공지', '게시판', '앨범', '정기모임', '게임보드', '운영&관리', '설정']
 
-export type UserStatus = 'demo' | 'guest' | 'non-member' | 'member'
+export type UserStatus = 'guest' | 'non-member' | 'member'
 
 export interface ClubViewData {
   id: string

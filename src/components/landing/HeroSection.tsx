@@ -140,7 +140,7 @@ export function HeroSection({ isLoggedIn }: HeroSectionProps = {}) {
         {/* CTA */}
         <div className="mt-10 flex flex-col items-start gap-4 sm:mt-12 sm:flex-row sm:items-center">
           <Link
-            href="/demo"
+            href="/login?next=%2Fclub%2Fcreate"
             className="group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-[var(--color-brand-lime)] px-8 text-[15px] font-extrabold text-[#0a0a0a] shadow-[0_12px_28px_-10px_rgba(219,230,76,0.45)] transition-all hover:bg-[var(--color-brand-lime-dim)] hover:shadow-[0_14px_32px_-8px_rgba(219,230,76,0.55)] focus:outline-none focus:ring-4 focus:ring-[var(--color-brand-lime)]/40 sm:h-[60px] sm:w-auto sm:px-10 sm:text-[16px]"
           >
             1분 안에 직접 만들어보세요

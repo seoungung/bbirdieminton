@@ -2,7 +2,6 @@ import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership, getClubMembers } from '@/lib/club/client'
-import { DEMO_CLUBS, DEMO_MEMBERS, DEMO_REGULAR_SESSIONS, DEMO_SESSIONS } from '@/lib/club/demoData'
 import { ClubDashboardClient } from '@/components/club/ClubDashboardClient'
 import { todayKST, parseEventDate } from '@/lib/date'
 import type { Metadata } from 'next'
@@ -12,8 +11,6 @@ interface PageProps { params: Promise<{ clubId: string }> }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { clubId } = await params
-  const demo = DEMO_CLUBS.find(c => c.id === clubId)
-  if (demo) return { title: `${demo.name} | 버디민턴`, description: `${demo.name} 대시보드` }
   const supabase = await createClient()
   const { data: club } = await supabase.from('clubs').select('name').eq('id', clubId).single()
   return {
@@ -24,59 +21,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ClubHomePage({ params }: PageProps) {
   const { clubId } = await params
-
-  /* ── 데모 모임 ── */
-  if (clubId.startsWith('demo-')) {
-    const demo = DEMO_CLUBS.find(c => c.id === clubId)
-    if (!demo) notFound()
-
-    const members: MemberViewItem[] = DEMO_MEMBERS.map(m => ({
-      id: m.id,
-      name: m.name,
-      role: m.role as 'owner' | 'manager' | 'member',
-      skill: m.skill,
-      level: m.level,
-    }))
-
-    const regularSessions: RegularSessionItem[] = DEMO_REGULAR_SESSIONS.map(r => ({
-      id: r.id,
-      title: r.title,
-      dayOfWeek: r.dayOfWeek,
-      time: r.time,
-      place: r.place,
-      fee: r.fee,
-      nextDate: r.nextDate,
-      maxAttend: r.maxAttend,
-      currentAttend: r.currentAttend,
-      thumbnailColor: r.thumbnailColor,
-      imageUrls: r.imageUrls,
-    }))
-
-    const gameSessions: GameSessionItem[] = DEMO_SESSIONS.map(s => ({
-      id: s.id,
-      sessionDate: s.sessionDate,
-      status: s.status,
-      notes: s.notes,
-    }))
-
-    return (
-      <ClubDashboardClient
-        clubId={clubId}
-        clubName={demo.name}
-        clubDescription={demo.description}
-        clubLocation={demo.location}
-        activityPlace={demo.activityPlace}
-        category={demo.category}
-        leaderName={demo.leaderName}
-        memberCount={demo.memberCount}
-        courtCount={demo.court_count}
-        members={members}
-        regularSessions={regularSessions}
-        gameSessions={gameSessions}
-        isDemo
-      />
-    )
-  }
 
   /* ── 실제 모임 ── */
   const supabase = await createClient()

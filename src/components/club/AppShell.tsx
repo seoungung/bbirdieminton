@@ -17,12 +17,7 @@ import { SidebarSearch } from './SidebarSearch'
 import { SidebarNotificationBell } from './SidebarNotificationBell'
 import { SidebarUserMenu } from './SidebarUserMenu'
 
-/* Demo* 컴포넌트는 isDemo=true 인 경우에만 렌더 — 일반 사용자에게는 코드 다운로드되지 않도록 dynamic import.
- * SSR=false: 서버 렌더 불필요 (모달/투어 UI). HelpFloatingWidget 도 below-fold 라 lazy. */
-const DemoWelcomeModal    = dynamic(() => import('./DemoWelcomeModal').then(m => ({ default: m.DemoWelcomeModal })),       { ssr: false })
-const DemoConversionModal = dynamic(() => import('./DemoConversionModal').then(m => ({ default: m.DemoConversionModal })), { ssr: false })
-const DemoTour            = dynamic(() => import('./DemoTour').then(m => ({ default: m.DemoTour })),                       { ssr: false })
-const DemoMissionWidget   = dynamic(() => import('./DemoMissionWidget').then(m => ({ default: m.DemoMissionWidget })),     { ssr: false })
+/* HelpFloatingWidget 은 below-fold 라 lazy. SSR=false 로 서버 렌더 스킵. */
 const HelpFloatingWidget  = dynamic(() => import('./HelpFloatingWidget').then(m => ({ default: m.HelpFloatingWidget })),   { ssr: false })
 
 /* ── 사이드바 메뉴 아이템 타입 ── */
@@ -43,7 +38,6 @@ interface Props {
   leaderName?: string | null
   thumbnailColor?: string
   isOwner: boolean
-  isDemo?: boolean
   userName?: string
   userEmail?: string
   avatarUrl?: string | null
@@ -69,7 +63,6 @@ export function AppShell({
   clubLocation,
   thumbnailColor,
   isOwner,
-  isDemo,
   userName,
   userEmail,
   avatarUrl,
@@ -81,7 +74,6 @@ export function AppShell({
 }: Props) {
   const pathname = usePathname()
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const [demoBannerHidden, setDemoBannerHidden] = useState(false)
 
   /* 데스크톱 사이드바 접기/펼치기 — localStorage 영구 저장.
    * xl+ (≥1280px) 에서만 토글 의미 있음. xl 미만은 항상 접힌 상태. */
@@ -172,7 +164,6 @@ export function AppShell({
     name: clubName,
     location: clubLocation,
     thumbnailColor,
-    isDemo,
     role,
   }
 
@@ -287,42 +278,6 @@ export function AppShell({
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
-      {/* ── 데모 모달·투어·미션 (인쇄 시 모두 숨김) ── */}
-      {isDemo && (
-        <div className="print:hidden">
-          <DemoWelcomeModal />
-          <DemoTour clubId={clubId} />
-          <DemoMissionWidget clubId={clubId} />
-          <DemoConversionModal />
-        </div>
-      )}
-
-      {/* ── 데모 배너 ── */}
-      {isDemo && !demoBannerHidden && (
-        <div className="sticky top-0 z-50 bg-[#0a0a0a] text-white flex items-center justify-between px-4 py-2.5 print:hidden">
-          <p className="text-[13px] font-medium flex items-center gap-2">
-            <span className="text-[var(--color-brand-lime)]">●</span>
-            체험 중 · 모든 데이터는 가상입니다
-          </p>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/club/create?demo=1"
-              className="text-[12px] font-bold bg-[var(--color-brand-lime)] text-[#0a0a0a] px-3.5 py-1.5 rounded-full hover:bg-[var(--color-brand-lime-dim)] transition-colors whitespace-nowrap"
-            >
-              내 모임 만들기 →
-            </Link>
-            <button
-              type="button"
-              onClick={() => setDemoBannerHidden(true)}
-              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-              aria-label="배너 닫기"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* ── 사이드바 (md+ 노출) ──
           · md ~ xl 미만: 강제 접힘 (68px, 아이콘 only)
           · xl+: 사용자 설정 따라 220px 펼침 또는 68px 접힘 (토글 가능)

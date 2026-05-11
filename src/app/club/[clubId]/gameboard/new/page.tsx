@@ -3,17 +3,13 @@ import { createClient, getAuthUser } from '@/lib/supabase/server'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership, getClubMembers, getClubMemberRatings } from '@/lib/club/client'
 import { GameBoardClient } from '@/components/club/GameBoardClient'
-import { DEMO_CLUBS, DEMO_MEMBERS, DEMO_EVENTS } from '@/lib/club/demoData'
 import type { Metadata } from 'next'
-import type { ClubMemberWithUser, MemberRole } from '@/types/club'
 import type { GameboardEvent } from '@/components/club/gameboard/types'
 
 interface GameBoardMetadataProps { params: Promise<{ clubId: string }> }
 
 export async function generateMetadata({ params }: GameBoardMetadataProps): Promise<Metadata> {
   const { clubId } = await params
-  const demo = DEMO_CLUBS.find(c => c.id === clubId)
-  if (demo) return { title: `게임보드 | ${demo.name}`, description: '실시간 경기 배정 및 결과 입력' }
   const supabase = await createClient()
   const { data: club } = await supabase.from('clubs').select('name').eq('id', clubId).single()
   return { title: club ? `게임보드 | ${club.name}` : '게임보드 | 버디민턴', description: '실시간 경기 배정 및 결과 입력' }
@@ -25,48 +21,6 @@ export default async function GameBoardPage({
   params: Promise<{ clubId: string }>
 }) {
   const { clubId } = await params
-
-  // ── 데모 모임: 인증 없이 목 데이터로 GameBoardClient 렌더 ──
-  if (clubId.startsWith('demo-')) {
-    const demoClub = DEMO_CLUBS.find(c => c.id === clubId)
-    const courtCount = demoClub?.court_count ?? 3
-
-    const demoMembers: ClubMemberWithUser[] = DEMO_MEMBERS.map(m => ({
-      id: m.id,
-      club_id: clubId,
-      user_id: m.id,
-      role: m.role as MemberRole,
-      skill_score: m.skill,
-      gender: m.gender,
-      joined_at: '2026-01-01T00:00:00Z',
-      removed_at: null,
-      user: {
-        id: m.id,
-        birdieminton_user_id: m.id,
-        name: m.name,
-        phone: null,
-        profile_img: null,
-        created_at: '2026-01-01T00:00:00Z',
-      },
-    }))
-
-    return (
-      <GameBoardClient
-        clubId={clubId}
-        clubName={demoClub?.name ?? '체험 모임'}
-        shuttleDefaultPrice={2500}
-        settlementAccount={null}
-        courtCount={courtCount}
-        members={demoMembers}
-        stats={[]}
-        membership={{ id: 'demo-owner', role: 'owner' }}
-        inProgressData={null}
-        matchPointTarget={25}
-        events={DEMO_EVENTS}
-        isDemo
-      />
-    )
-  }
 
   const supabase = await createClient()
 

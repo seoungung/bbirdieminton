@@ -4,8 +4,6 @@ import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
 import { CalendarDays } from 'lucide-react'
 import { EventDetailClient } from '@/components/club/EventDetailClient'
-import { DEMO_CLUBS } from '@/lib/club/demoData'
-import { buildDemoEventDetail } from '@/lib/club/eventsDemo'
 import type { Metadata } from 'next'
 import type { EventAttendStatus } from '@/types/club'
 import type { EventDetail, AttendeeRow, WaitlistEntry } from '@/components/club/events/types'
@@ -16,8 +14,6 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { clubId } = await params
-  const demo = DEMO_CLUBS.find((c) => c.id === clubId)
-  if (demo) return { title: `정기모임 | ${demo.name}`, description: '정기모임 상세' }
   const supabase = await createClient()
   const { data: club } = await supabase.from('clubs').select('name').eq('id', clubId).single()
   return {
@@ -44,29 +40,6 @@ function PageHeader({ clubId }: { clubId: string }) {
 
 export default async function EventDetailPage({ params }: PageProps) {
   const { clubId, eventId } = await params
-
-  /* ── 데모 ── */
-  if (clubId.startsWith('demo-')) {
-    const demo = buildDemoEventDetail(clubId, eventId)
-    if (!demo) notFound()
-    return (
-      <div>
-        <PageHeader clubId={clubId} />
-        <main className="max-w-[1088px] mx-auto px-4 py-5">
-          <EventDetailClient
-            clubId={clubId}
-            event={demo.event}
-            attendees={demo.attendees}
-            myStatus={demo.myStatus}
-            isManager={false}
-            isDemo
-            waitlistCount={0}
-            myWaitlistPosition={null}
-          />
-        </main>
-      </div>
-    )
-  }
 
   /* ── 실제 ── */
   const supabase = await createClient()

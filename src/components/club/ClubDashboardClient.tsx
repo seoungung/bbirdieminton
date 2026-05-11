@@ -24,7 +24,6 @@ interface Props {
   members: MemberViewItem[]
   regularSessions: RegularSessionItem[]
   gameSessions: GameSessionItem[]
-  isDemo?: boolean
   isManager?: boolean
 }
 
@@ -46,7 +45,6 @@ export function ClubDashboardClient({
   members,
   regularSessions,
   gameSessions,
-  isDemo,
   isManager,
 }: Props) {
   /* ── 집계 ── */
@@ -71,7 +69,7 @@ export function ClubDashboardClient({
           <div className="flex items-center gap-1.5 mb-2">
             <Sparkles size={12} className="text-[var(--color-brand-lime)]" strokeWidth={2.5} />
             <span className="text-[11px] font-bold text-[var(--color-brand-lime)] uppercase tracking-widest">
-              {isDemo ? '체험하기' : '오늘의 모임'}
+              오늘의 모임
             </span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold text-white mb-1 leading-tight">
@@ -250,7 +248,7 @@ export function ClubDashboardClient({
             accent="info"
           />
         </div>
-        {isManager && !isDemo && (
+        {isManager && (
           <div className="mt-2.5 flex justify-end">
             <Link
               href={`/club/${clubId}/import`}
@@ -371,7 +369,7 @@ function Chip({ children }: { children: React.ReactNode }) {
   )
 }
 
-/* ── KPI/Shortcut/Empty/Activity (DemoDashboardClient과 동일 패턴) ── */
+/* ── KPI/Shortcut/Empty/Activity ── */
 /* 3색 토큰 매핑: primary (라임 CTA) / success (코트 그린) / info (네이비 elite) */
 type AccentTone = 'primary' | 'success' | 'info'
 

@@ -4,8 +4,6 @@ import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
 import { CalendarDays } from 'lucide-react'
 import { EventsListClient } from '@/components/club/EventsListClient'
-import { DEMO_CLUBS } from '@/lib/club/demoData'
-import { buildDemoEventsList } from '@/lib/club/eventsDemo'
 import { todayKST } from '@/lib/date'
 import type { Metadata } from 'next'
 import type { EventListRow } from '@/app/club/[clubId]/events/actions'
@@ -17,10 +15,6 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { clubId } = await params
-  const demo = DEMO_CLUBS.find((c) => c.id === clubId)
-  if (demo) {
-    return { title: `정기모임 | ${demo.name}`, description: '모임 정기 일정 및 참석' }
-  }
   const supabase = await createClient()
   const { data: club } = await supabase.from('clubs').select('name').eq('id', clubId).single()
   return {
@@ -47,25 +41,6 @@ function PageHeader({ clubId }: { clubId: string }) {
 
 export default async function EventsListPage({ params }: PageProps) {
   const { clubId } = await params
-
-  /* ── 데모 모임 ── */
-  if (clubId.startsWith('demo-')) {
-    const { upcoming, past } = buildDemoEventsList(clubId)
-    return (
-      <div>
-        <PageHeader clubId={clubId} />
-        <main className="max-w-[1088px] mx-auto px-4 py-5">
-          <EventsListClient
-            clubId={clubId}
-            upcoming={upcoming}
-            past={past}
-            isManager={false}
-            isDemo
-          />
-        </main>
-      </div>
-    )
-  }
 
   /* ── 실제 모임 ── */
   const supabase = await createClient()

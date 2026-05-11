@@ -29,7 +29,6 @@ export function MarketingFooter() {
           <div>
             <p className="text-[12px] font-semibold text-[#111] mb-3">서비스</p>
             <ul className="space-y-2 text-[12px] text-[#666]">
-              <li><Link href="/demo"    className="hover:text-[#111] transition-colors">체험하기</Link></li>
               <li><Link href="/pricing" className="hover:text-[#111] transition-colors">가격</Link></li>
             </ul>
           </div>

@@ -17,7 +17,7 @@ interface Props {
  * 14일 이내 신규 모임은 제목 옆 'NEW' 배지 자동 노출.
  */
 export function ClubsCard({ club, hideNewBadge = false }: Props) {
-  const showNew = !hideNewBadge && !club.isDemo && isNewClub(club.createdAt)
+  const showNew = !hideNewBadge && isNewClub(club.createdAt)
 
   return (
     <Link

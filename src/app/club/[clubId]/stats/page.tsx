@@ -22,7 +22,6 @@ import {
   type Grade,
 } from '@/lib/club/grade'
 import { muToGrade } from '@/lib/club/glicko2'
-import { DEMO_CLUBS } from '@/lib/club/demoData'
 import type { ClubMemberWithUser } from '@/types/club'
 
 interface PageProps {
@@ -31,22 +30,15 @@ interface PageProps {
 
 const GRADES: Grade[] = ['S', 'A', 'B', 'C', 'D', 'E', 'F']
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { clubId } = await params
-  const demo = DEMO_CLUBS.find((c) => c.id === clubId)
-  const name = demo?.name
+export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: name ? `분석 | ${name}` : '분석 | 버디민턴',
+    title: '분석 | 버디민턴',
     description: '클럽 등급 분포, 최근 변동, 신입 적응 모니터링',
   }
 }
 
 export default async function StatsPage({ params }: PageProps) {
   const { clubId } = await params
-
-  if (clubId.startsWith('demo-')) {
-    return <DemoStats />
-  }
 
   const supabase = await createClient()
   const {
@@ -537,98 +529,3 @@ function NewMemberRiskCard({
   )
 }
 
-// ── 데모 ──────────────────────────────────────────────────
-function DemoStats() {
-  const demoMembers: ClubMemberWithUser[] = Array.from({ length: 22 }).map(
-    (_, i) => ({
-      id: `demo-m-${i}`,
-      club_id: 'demo-1',
-      user_id: `demo-u-${i}`,
-      role: 'member',
-      skill_score: [85, 78, 72, 65, 60, 55, 48, 42, 38, 30, 25][i % 11],
-      joined_at:
-        i < 4
-          ? new Date(Date.now() - i * 5 * 86400000).toISOString()
-          : '2026-01-01T00:00:00Z',
-      removed_at: null,
-      user: {
-        id: `demo-u-${i}`,
-        birdieminton_user_id: `demo-u-${i}`,
-        name: `회원${i + 1}`,
-        phone: null,
-        profile_img: null,
-        created_at: '2026-01-01T00:00:00Z',
-      },
-    }),
-  )
-  // 일부만 레이팅
-  const ratingsMap: Record<string, { mu: number; phi: number; sigma: number }> = {}
-  for (let i = 0; i < 16; i++) {
-    ratingsMap[`demo-m-${i}`] = {
-      mu: [1900, 1820, 1700, 1620, 1560, 1500, 1450, 1400, 1350, 1300, 1250][
-        i % 11
-      ],
-      phi: 100,
-      sigma: 0.06,
-    }
-  }
-  // Top mover 데이터
-  const recentDelta: Record<string, { totalDelta: number; matchCount: number }> = {
-    'demo-m-0': { totalDelta: 42, matchCount: 8 },
-    'demo-m-3': { totalDelta: -28, matchCount: 6 },
-    'demo-m-5': { totalDelta: 35, matchCount: 9 },
-    'demo-m-7': { totalDelta: -22, matchCount: 5 },
-    'demo-m-2': { totalDelta: 19, matchCount: 7 },
-  }
-  const attendanceCounts: Record<string, number> = {
-    'demo-m-0': 12,
-    'demo-m-1': 0,  // 신입 - 0회
-    'demo-m-2': 1,  // 신입 - 1회
-    'demo-m-3': 8,  // 신입이지만 잘 옴
-  }
-
-  // 출석 트렌드 — 4주 데모
-  const today = new Date()
-  const dayOfWeek = today.getDay()
-  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
-  const lastMonday = new Date(today)
-  lastMonday.setDate(today.getDate() - daysSinceMonday)
-  lastMonday.setHours(0, 0, 0, 0)
-  const weeklyTrend: WeeklyAttendance[] = [3, 2, 4, 3].map((sessions, i) => {
-    const wkStart = new Date(lastMonday)
-    wkStart.setDate(lastMonday.getDate() - (3 - i) * 7)
-    const attendees = sessions * [16, 14, 18, 19][i]
-    return {
-      weekStart: wkStart.toISOString().slice(0, 10),
-      sessions,
-      attendees,
-      avgPerSession: attendees / sessions,
-    }
-  })
-
-  // 회비 납부율 — 3개월 데모
-  const duesPayment: MonthlyDuesPayment[] = []
-  for (let i = 2; i >= 0; i--) {
-    const d = new Date(today.getFullYear(), today.getMonth() - i, 1)
-    const totalDue = 22
-    const paidCount = [22, 20, 17][2 - i]
-    duesPayment.push({
-      year: d.getFullYear(),
-      month: d.getMonth() + 1,
-      totalDue,
-      paidCount,
-      paidRate: paidCount / totalDue,
-    })
-  }
-
-  return (
-    <StatsView
-      members={demoMembers}
-      ratingsMap={ratingsMap}
-      recentDelta={recentDelta}
-      attendanceCounts={attendanceCounts}
-      weeklyTrend={weeklyTrend}
-      duesPayment={duesPayment}
-    />
-  )
-}

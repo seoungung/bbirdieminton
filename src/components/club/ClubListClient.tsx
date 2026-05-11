@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Search, Plus, Clock, Heart, Gamepad2 } from 'lucide-react'
+import { Search, Plus, Clock, Heart } from 'lucide-react'
 import { PinterestClubCard } from '@/components/club/cards/PinterestClubCard'
 import { ClubListEmptyState } from '@/components/club/cards/ClubListEmptyState'
 import { ClubListModal } from '@/components/club/cards/ClubListModal'
@@ -18,7 +18,6 @@ interface Club {
   created_at: string
   memberCount?: number
   myRole?: MemberRole
-  isDemo?: boolean
   location?: string
   leaderName?: string
   thumbnailColor?: string
@@ -103,25 +102,6 @@ export function ClubListClient({ myClubs, allClubs, isGuest, hideAllTab }: ClubL
 
       {/* ── 모달 ── */}
       {modal && <ClubListModal type={modal} onClose={() => setModal(null)} />}
-
-      {/* ── 게스트 배너 ── */}
-      {isGuest && (
-        <div className="mb-5 bg-[#0a0a0a] rounded-2xl px-5 py-4 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-base font-bold text-white inline-flex items-center gap-2">
-              <Gamepad2 size={18} strokeWidth={2.2} />
-              게스트로 체험 중
-            </p>
-            <p className="text-sm text-white/50 mt-0.5">체험용 모임을 클릭해서 게임보드를 경험해보세요</p>
-          </div>
-          <Link
-            href="/login?next=%2Fclubs"
-            className="shrink-0 text-sm font-bold px-4 py-2 bg-[var(--color-brand-lime)] text-[#111] rounded-xl hover:brightness-95 transition-all"
-          >
-            내 모임 만들기 →
-          </Link>
-        </div>
-      )}
 
       {/* ── 상단 바 ── */}
       <div className="flex items-center justify-between flex-wrap gap-y-3 mb-5">

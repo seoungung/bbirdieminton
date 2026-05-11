@@ -7,7 +7,6 @@ import { ClubsDiscoveryClient } from '@/components/club/discovery/ClubsDiscovery
 import type { ClubDiscoveryItem } from '@/components/club/discovery/types'
 import { SaaSShell } from '@/components/layout/saas/SaaSShell'
 import { getSaaSShellData } from '@/components/layout/saas/getSaaSShellData'
-import { DEMO_CLUBS } from '@/lib/club/demoData'
 import type { ClubWithRole } from '@/types/club'
 
 export const metadata: Metadata = {
@@ -82,23 +81,6 @@ function myClubsToDiscoveryItems(
   }))
 }
 
-const DEMO_DISCOVERY_ITEMS: ClubDiscoveryItem[] = DEMO_CLUBS.map((d) => ({
-  id: d.id,
-  name: d.name,
-  description: d.description,
-  location: d.location,
-  activityPlace: d.activityPlace,
-  category: d.category,
-  thumbnailUrl: null,
-  thumbnailColor: d.thumbnailColor,
-  memberCount: d.memberCount,
-  courtCount: d.court_count,
-  isAcceptingMembers: true,
-  ownerName: d.leaderName,
-  isDemo: true,
-  createdAt: d.created_at,
-}))
-
 type ClubsTab = 'all' | 'mine' | 'saved' | 'recent'
 
 function parseTab(raw: string | undefined): ClubsTab {
@@ -117,7 +99,7 @@ interface PageProps {
  *   · ?tab=mine   → MY 모임 (getMyClubs 결과)
  *   · ?tab=saved  → 찜한 모임 (localStorage 'favoriteClubs')
  *   · ?tab=recent → 최근 본 모임 (localStorage 'recentClubs')
- *   · 그 외/없음 → 전체 모임 (실제 + 데모)
+ *   · 그 외/없음 → 전체 모임
  *
  * Phase 2 큐레이션 (인기/신규/모집중) 은 클럽 볼륨 부족으로 미렌더.
  * 컴포넌트는 보존됨 (`discovery/ClubsCurationSection.tsx`, `ClubsMiniCard.tsx`).
@@ -135,11 +117,11 @@ export default async function ClubsListingPage({ searchParams }: PageProps) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // 비로그인 → 전체 모임 + 데모만, myClubs=[]
+  // 비로그인 → 전체 모임만, myClubs=[]
   if (!user) {
     const { data, error } = await supabase.rpc('list_public_clubs', { p_limit: 60 })
     const realClubs = !error && data ? (data as PublicClubRow[]) : []
-    const allClubs = [...toDiscoveryItems(realClubs), ...DEMO_DISCOVERY_ITEMS]
+    const allClubs = toDiscoveryItems(realClubs)
     return (
       <SaaSShell myClubs={shellData.myClubs} user={shellData.user} isMaster={shellData.isMaster}>
         <ClubsDiscoveryClient clubs={allClubs} myClubs={[]} tab={tab} />
@@ -150,12 +132,12 @@ export default async function ClubsListingPage({ searchParams }: PageProps) {
   await ensureClubUser(supabase, user).catch(() => {})
   const clubUserId = await getClubUserId(supabase, user)
 
-  // clubUserId 미생성 (예외) → 데모만
+  // clubUserId 미생성 (예외) → 빈 리스트
   if (!clubUserId) {
     return (
       <SaaSShell myClubs={shellData.myClubs} user={shellData.user} isMaster={shellData.isMaster}>
         <ClubsDiscoveryClient
-          clubs={[...DEMO_DISCOVERY_ITEMS]}
+          clubs={[]}
           myClubs={[]}
           tab={tab}
         />
@@ -163,7 +145,7 @@ export default async function ClubsListingPage({ searchParams }: PageProps) {
     )
   }
 
-  // 정상 — 전체 모임 + 데모 + 내 모임 모두 페치
+  // 정상 — 전체 모임 + 내 모임 페치
   const [rawAllClubsResult, myClubRows] = await Promise.all([
     supabase.rpc('list_public_clubs', { p_limit: 60 }),
     getMyClubs(supabase, clubUserId).catch(() => [] as ClubWithRole[]),
@@ -176,7 +158,7 @@ export default async function ClubsListingPage({ searchParams }: PageProps) {
     memberCountMap[r.id] = r.member_count
   }
 
-  const allClubs = [...toDiscoveryItems(realClubs), ...DEMO_DISCOVERY_ITEMS]
+  const allClubs = toDiscoveryItems(realClubs)
   const myClubs = myClubsToDiscoveryItems(myClubRows, memberCountMap)
 
   return (

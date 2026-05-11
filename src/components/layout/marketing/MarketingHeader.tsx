@@ -9,7 +9,6 @@ import { logout } from '@/app/login/actions'
 import { UserMenu } from './UserMenu'
 
 const navLinks = [
-  { href: '/demo',    label: '체험하기' },
   { href: '/clubs',   label: '모임 둘러보기' },
   { href: '/blog',    label: '블로그' },
   { href: '/manual',  label: '사용설명서' },

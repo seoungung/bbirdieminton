@@ -27,7 +27,6 @@ interface Props {
   attendees: AttendeeRow[]
   myStatus: EventAttendStatus | null
   isManager: boolean
-  isDemo?: boolean
   /** 본인 club_members.id — 대기 명단 본인 강조용 */
   myMemberId?: string | null
   /** 현재 대기 인원 수 */
@@ -44,7 +43,6 @@ export function EventDetailClient({
   attendees,
   myStatus,
   isManager,
-  isDemo,
   myMemberId,
   waitlistCount,
   myWaitlistPosition,
@@ -69,10 +67,6 @@ export function EventDetailClient({
   const isMineGoing = myStatus === 'going'
 
   function handleRsvp(next: EventAttendStatus) {
-    if (isDemo) {
-      alert('체험 모드에서는 RSVP가 저장되지 않습니다.')
-      return
-    }
     if (isPast) {
       alert('이미 지난 정기모임은 RSVP를 변경할 수 없습니다.')
       return
@@ -88,10 +82,6 @@ export function EventDetailClient({
   }
 
   function handleJoinWaitlist() {
-    if (isDemo) {
-      alert('체험 모드에서는 대기 신청이 저장되지 않습니다.')
-      return
-    }
     if (isPast) {
       alert('이미 지난 정기모임은 대기할 수 없습니다.')
       return
@@ -107,10 +97,6 @@ export function EventDetailClient({
   }
 
   function handleCancelWaitlist() {
-    if (isDemo) {
-      alert('체험 모드에서는 대기 취소가 저장되지 않습니다.')
-      return
-    }
     startTransition(async () => {
       const result = await cancelWaitlistAction(clubId, event.id)
       if (result.error) {
@@ -122,11 +108,6 @@ export function EventDetailClient({
   }
 
   function handleEdit(data: EventInput) {
-    if (isDemo) {
-      alert('체험 모드에서는 저장되지 않습니다.')
-      setEditing(false)
-      return
-    }
     startTransition(async () => {
       const result = await updateEventAction(clubId, event.id, data)
       if (result.error) {
@@ -139,11 +120,6 @@ export function EventDetailClient({
   }
 
   function handleDelete() {
-    if (isDemo) {
-      alert('체험 모드에서는 삭제되지 않습니다.')
-      setEditing(false)
-      return
-    }
     if (!window.confirm('정말 삭제하시겠습니까? 참가자 RSVP도 함께 사라집니다.')) return
     startTransition(async () => {
       const result = await deleteEventAction(clubId, event.id)

@@ -22,7 +22,6 @@ interface LogItem {
 interface Props {
   clubId: string
   clubName: string
-  isDemo?: boolean
   recentLogs?: LogItem[]
 }
 
@@ -32,7 +31,7 @@ type PreviewState<T> = {
   fileName: string
 }
 
-export function ImportClient({ clubId, clubName, isDemo = false, recentLogs = [] }: Props) {
+export function ImportClient({ clubId, clubName, recentLogs = [] }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [memberPreview, setMemberPreview] = useState<PreviewState<MemberRow> | null>(null)
@@ -42,10 +41,6 @@ export function ImportClient({ clubId, clubName, isDemo = false, recentLogs = []
 
   // ── 템플릿 다운로드 ─────────────────────────────
   const downloadTemplate = (type: ImportType) => {
-    if (isDemo) {
-      setError('체험 모드에서는 템플릿을 실제로 다운받을 수 없어요 (실제 가입 후 이용 가능)')
-      return
-    }
     window.location.href = `/api/club/${clubId}/import/template?type=${type}`
   }
 

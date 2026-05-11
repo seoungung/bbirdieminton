@@ -35,16 +35,16 @@ export default function ManualPage() {
       <section className="bg-[#fafafa] border-t border-[#f0f0f0] px-8 py-16">
         <div className="max-w-[640px] mx-auto text-center">
           <h2 className="text-2xl font-extrabold text-[#111] mb-3">
-            바로 사용해 보고 싶으신가요?
+            바로 시작해보고 싶으신가요?
           </h2>
           <p className="text-[14px] text-[#666] mb-6">
-            로그인 없이 데모 모임을 체험해 볼 수 있습니다.
+            지금 모임을 만들고 가이드와 함께 운영해보세요.
           </p>
           <Link
-            href="/demo"
+            href="/login?next=%2Fclub%2Fcreate"
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0a0a0a] text-white font-bold text-[13px] rounded-full hover:bg-[#222] transition-colors"
           >
-            체험하기
+            모임 만들기
             <ArrowRight size={14} />
           </Link>
         </div>

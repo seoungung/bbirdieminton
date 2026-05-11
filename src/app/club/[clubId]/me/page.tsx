@@ -7,29 +7,20 @@ import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership, getMemberRatingDetail } from '@/lib/club/client'
 import { GRADE_COLOR, GRADE_LABEL, scoreToGrade } from '@/lib/club/grade'
 import { gradeProgress, muToGrade } from '@/lib/club/glicko2'
-import { DEMO_CLUBS } from '@/lib/club/demoData'
 
 interface PageProps {
   params: Promise<{ clubId: string }>
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { clubId } = await params
-  const demo = DEMO_CLUBS.find((c) => c.id === clubId)
-  const name = demo?.name
+export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: name ? `내 카드 | ${name}` : '내 카드 | 버디민턴',
+    title: '내 카드 | 버디민턴',
     description: '내 등급, 내 점수, 최근 경기 변동',
   }
 }
 
 export default async function MyCardPage({ params }: PageProps) {
   const { clubId } = await params
-
-  // 데모 클럽: 가짜 데이터로 시각화
-  if (clubId.startsWith('demo-')) {
-    return <DemoMyCard />
-  }
 
   const supabase = await createClient()
   const {
@@ -300,42 +291,3 @@ function HistoryCard({
   )
 }
 
-// ── 데모 ──────────────────────────────────────────────────
-function DemoMyCard() {
-  const demoMu = 1654
-  const demoGrade = muToGrade(demoMu)
-  const progress = gradeProgress(demoMu)
-  const today = new Date()
-  const demoHistory = Array.from({ length: 8 }).map((_, i) => {
-    const d = new Date(today)
-    d.setDate(d.getDate() - i * 3)
-    const delta = [12, -5, 18, -8, 9, -3, 15, -10][i]
-    const mu = demoMu - [12, -5, 18, -8, 9, -3, 15, -10].slice(0, i + 1).reduce((a, b) => a + b, 0)
-    return {
-      mu,
-      delta_mu: delta,
-      recorded_at: d.toISOString(),
-      match_id: 'demo',
-    }
-  })
-
-  return (
-    <div>
-      <header className="bg-white border-b border-[#e5e5e5] px-4 py-3">
-        <div className="max-w-[1088px] mx-auto">
-          <h1 className="text-base font-bold text-[#111] inline-flex items-center gap-1.5">
-            <Trophy size={16} strokeWidth={2} />내 카드
-          </h1>
-          <p className="text-xs text-[#999] mt-0.5">
-            체험 데이터 · 실제 모임에서는 본인 경기 기반으로 표시
-          </p>
-        </div>
-      </header>
-      <main className="max-w-[1088px] mx-auto px-4 py-5 space-y-4">
-        <GradeCard grade={demoGrade} mu={demoMu} phi={92} progress={progress} />
-        <StatsCard gamesPlayed={28} updatedAt={today.toISOString()} mu={demoMu} skillScore={62} />
-        <HistoryCard history={demoHistory} />
-      </main>
-    </div>
-  )
-}

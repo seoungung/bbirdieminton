@@ -4,15 +4,12 @@ import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership, getClubMembers } from '@/lib/club/client'
 import { Settings as SettingsIcon } from 'lucide-react'
 import { SettingsClient } from '@/components/club/SettingsClient'
-import { DEMO_CLUBS } from '@/lib/club/demoData'
 import type { Metadata } from 'next'
 
 interface SettingsMetadataProps { params: Promise<{ clubId: string }> }
 
 export async function generateMetadata({ params }: SettingsMetadataProps): Promise<Metadata> {
   const { clubId } = await params
-  const demo = DEMO_CLUBS.find(c => c.id === clubId)
-  if (demo) return { title: `게임보드 설정 | ${demo.name}`, description: '게임보드 설정 및 모임 관리' }
   const supabase = await createClient()
   const { data: club } = await supabase.from('clubs').select('name').eq('id', clubId).single()
   return { title: club ? `게임보드 설정 | ${club.name}` : '게임보드 설정 | 버디민턴', description: '게임보드 설정 및 모임 관리' }
@@ -24,8 +21,6 @@ export default async function SettingsPage({
   params: Promise<{ clubId: string }>
 }) {
   const { clubId } = await params
-  // 데모 모드는 모임 설정 미제공 — 데모 대시보드로 안전 회귀
-  if (clubId.startsWith('demo-')) redirect(`/club/${clubId}`)
   const supabase = await createClient()
   const {
     data: { user },

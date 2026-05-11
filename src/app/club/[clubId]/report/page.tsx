@@ -18,7 +18,6 @@ import {
 } from '@/lib/club/client'
 import { GRADE_COLOR, GRADE_LABEL, scoreToGrade, type Grade } from '@/lib/club/grade'
 import { muToGrade } from '@/lib/club/glicko2'
-import { DEMO_CLUBS } from '@/lib/club/demoData'
 import type { ClubMemberWithUser } from '@/types/club'
 import { ReportShareBar } from '@/components/club/ReportShareBar'
 
@@ -36,12 +35,9 @@ function parseDays(input: string | undefined): DaysRange {
   return (VALID_RANGES as readonly number[]).includes(n) ? (n as DaysRange) : 90
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { clubId } = await params
-  const demo = DEMO_CLUBS.find((c) => c.id === clubId)
-  const name = demo?.name ?? '버디민턴'
+export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: `시즌 리포트 | ${name}`,
+    title: '시즌 리포트 | 버디민턴',
     description: '모임 활동 요약 — 등급 분포, 변동 Top 5, 출석 챔피언, 회비 납부',
   }
 }
@@ -50,10 +46,6 @@ export default async function ReportPage({ params, searchParams }: PageProps) {
   const { clubId } = await params
   const { days: daysParam } = await searchParams
   const days = parseDays(daysParam)
-
-  if (clubId.startsWith('demo-')) {
-    return <DemoReport days={days} clubId={clubId} />
-  }
 
   const supabase = await createClient()
   const {
@@ -506,82 +498,3 @@ function SectionTitle({
   )
 }
 
-// ── 데모 ──────────────────────────────────────────────────
-function DemoReport({ days, clubId }: { days: DaysRange; clubId: string }) {
-  const today = new Date()
-  const demoMembers: ClubMemberWithUser[] = Array.from({ length: 22 }).map((_, i) => ({
-    id: `demo-m-${i}`,
-    club_id: clubId,
-    user_id: `demo-u-${i}`,
-    role: 'member',
-    skill_score: [85, 78, 72, 65, 60, 55, 48, 42, 38, 30, 25][i % 11],
-    joined_at: '2026-01-01T00:00:00Z',
-    removed_at: null,
-    user: {
-      id: `demo-u-${i}`,
-      birdieminton_user_id: `demo-u-${i}`,
-      name: ['민준', '서연', '지호', '유나', '태양', '소희', '준서', '채원', '도윤', '예린', '시우', '하은', '재현', '나은', '건우', '수아', '준호', '지원', '동현', '아인', '윤서', '성훈'][i] ?? `회원${i + 1}`,
-      phone: null,
-      profile_img: null,
-      created_at: '2026-01-01T00:00:00Z',
-    },
-  }))
-  const ratingsMap: Record<string, { mu: number; phi: number; sigma: number }> = {}
-  for (let i = 0; i < 16; i++) {
-    ratingsMap[`demo-m-${i}`] = {
-      mu: [1900, 1820, 1700, 1620, 1560, 1500, 1450, 1400, 1350, 1300, 1250][i % 11],
-      phi: 100,
-      sigma: 0.06,
-    }
-  }
-  const recentDelta: Record<string, { totalDelta: number; matchCount: number }> = {
-    'demo-m-0': { totalDelta: 42, matchCount: 8 },
-    'demo-m-3': { totalDelta: -28, matchCount: 6 },
-    'demo-m-5': { totalDelta: 35, matchCount: 9 },
-    'demo-m-7': { totalDelta: -22, matchCount: 5 },
-    'demo-m-2': { totalDelta: 19, matchCount: 7 },
-  }
-  const champions: AttendanceChampion[] = [
-    { memberId: 'demo-m-0', attendances: 14 },
-    { memberId: 'demo-m-2', attendances: 12 },
-    { memberId: 'demo-m-5', attendances: 11 },
-    { memberId: 'demo-m-3', attendances: 10 },
-    { memberId: 'demo-m-7', attendances: 9 },
-  ]
-  const activity: ClubActivitySummary = {
-    sessions: 14,
-    matches: 96,
-    activeMembers: 22,
-    totalAttendances: 244,
-    avgAttendancePerSession: 244 / 14,
-  }
-  const monthsForDues = days <= 30 ? 1 : days <= 90 ? 3 : 12
-  const duesPayment: MonthlyDuesPayment[] = []
-  for (let i = monthsForDues - 1; i >= 0; i--) {
-    const d = new Date(today.getFullYear(), today.getMonth() - i, 1)
-    const totalDue = 22
-    const seq = [22, 20, 17, 19, 18, 21, 22, 20, 19, 18, 21, 22]
-    const paidCount = seq[Math.min(seq.length - 1, monthsForDues - 1 - i)]
-    duesPayment.push({
-      year: d.getFullYear(),
-      month: d.getMonth() + 1,
-      totalDue,
-      paidCount,
-      paidRate: paidCount / totalDue,
-    })
-  }
-
-  return (
-    <ReportView
-      clubId={clubId}
-      clubName="체험 모임"
-      days={days}
-      members={demoMembers}
-      ratingsMap={ratingsMap}
-      recentDelta={recentDelta}
-      activity={activity}
-      champions={champions}
-      duesPayment={duesPayment}
-    />
-  )
-}

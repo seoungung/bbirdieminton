@@ -5,7 +5,6 @@ import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
 import { AppShell } from '@/components/club/AppShell'
 import type { ClubOption } from '@/components/club/ClubSwitcher'
-import { DEMO_CLUBS } from '@/lib/club/demoData'
 import { getUnreadCountAction } from '@/app/club/[clubId]/notices/actions'
 
 export default async function ClubDetailLayout({
@@ -16,28 +15,6 @@ export default async function ClubDetailLayout({
   params: Promise<{ clubId: string }>
 }) {
   const { clubId } = await params
-
-  /* ── 데모 모임: 인증 없이 데모 데이터로 AppShell 렌더 ── */
-  if (clubId.startsWith('demo-')) {
-    const demo = DEMO_CLUBS.find(c => c.id === clubId)
-    return (
-      <AppShell
-        clubId={clubId}
-        clubName={demo?.name ?? '체험 모임'}
-        clubLocation={demo?.location ?? null}
-        leaderName={demo?.leaderName ?? null}
-        thumbnailColor={demo?.thumbnailColor}
-        isOwner={false}
-        isDemo
-        userName="체험자"
-        userEmail="demo@birdieminton.com"
-        avatarUrl={null}
-        role="member"
-      >
-        {children}
-      </AppShell>
-    )
-  }
 
   /* ── 실제 모임: 인증 + 멤버십 확인 ── */
   const [user, supabase] = await Promise.all([getAuthUser(), createClient()])

@@ -13,33 +13,18 @@ import {
 } from '@/lib/club/client'
 import { GRADE_COLOR, GRADE_LABEL, scoreToGrade, type Grade } from '@/lib/club/grade'
 import { muToGrade } from '@/lib/club/glicko2'
-import { DEMO_CLUBS, DEMO_MEMBERS } from '@/lib/club/demoData'
 import { GenderEditor } from './GenderEditor'
 
 interface PageProps {
   params: Promise<{ clubId: string; memberId: string }>
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { clubId, memberId } = await params
-  const demo = DEMO_CLUBS.find((c) => c.id === clubId)
-  if (demo) {
-    const m = DEMO_MEMBERS.find((m) => m.id === memberId)
-    return {
-      title: `${m?.name ?? '회원'} | ${demo.name}`,
-      description: '클럽 회원 프로필',
-    }
-  }
+export async function generateMetadata(): Promise<Metadata> {
   return { title: '회원 프로필 | 버디민턴', description: '클럽 회원 프로필' }
 }
 
 export default async function MemberDetailPage({ params }: PageProps) {
   const { clubId, memberId } = await params
-
-  // 데모: 가짜 데이터
-  if (clubId.startsWith('demo-')) {
-    return <DemoMemberDetail memberId={memberId} clubId={clubId} />
-  }
 
   const supabase = await createClient()
   const {
@@ -305,61 +290,3 @@ function Stat({
   )
 }
 
-// ── 데모 ──────────────────────────────────────────────────
-function DemoMemberDetail({
-  memberId,
-  clubId,
-}: {
-  memberId: string
-  clubId: string
-}) {
-  const m = DEMO_MEMBERS.find((m) => m.id === memberId)
-  if (!m) {
-    return (
-      <div className="p-8 text-center text-sm text-[#999]">
-        <p className="font-bold text-[#111] mb-2">회원을 찾을 수 없어요</p>
-        <a
-          href={`/club/${clubId}/members`}
-          className="text-[12px] text-[var(--color-brand-court)] hover:underline"
-        >
-          ← 회원 목록으로
-        </a>
-      </div>
-    )
-  }
-  const grade = scoreToGrade(m.skill)
-  const wins = 14
-  const losses = 6
-  const games = wins + losses
-  const partners = DEMO_MEMBERS.slice(0, 3)
-    .filter((p) => p.id !== memberId)
-    .slice(0, 3)
-    .map((p, i) => ({
-      partnerMemberId: p.id,
-      matchesTogether: 8 - i * 2,
-      partnerName: p.name,
-      partnerGrade: scoreToGrade(p.skill),
-    }))
-
-  return (
-    <MemberDetailView
-      memberName={m.name}
-      profileImg={null}
-      grade={grade}
-      joinedAt="2026-01-15T00:00:00Z"
-      gender={null}
-      memberId={memberId}
-      clubId={clubId}
-      isManager={false}
-      stats={{
-        wins,
-        losses,
-        draws: 0,
-        games_played: games,
-        win_rate: wins / games,
-      }}
-      attendanceCount={12}
-      partners={partners}
-    />
-  )
-}

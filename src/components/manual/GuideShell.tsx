@@ -69,12 +69,6 @@ export function GuideShell({ entry, related = [], children }: Props) {
               문의하기
               <ArrowRight size={13} />
             </Link>
-            <Link
-              href="/demo"
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-[#0a0a0a] border border-[#e5e5e5] font-bold text-[13px] rounded-full hover:border-[#0a0a0a] transition-colors"
-            >
-              체험하기
-            </Link>
           </div>
         </div>
       </section>

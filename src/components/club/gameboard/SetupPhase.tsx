@@ -30,8 +30,6 @@ interface Props {
   inProgressData?: InProgressData | null
   isPending: boolean
   error: string | null
-  /** 체험 모드 — 빈 상태/멤버 0명 처리 분기 */
-  isDemo?: boolean
   /** 정기 모임 목록 */
   events?: GameboardEvent[]
   /** 선택된 정기 모임 ID */
@@ -96,7 +94,6 @@ export function SetupPhase({
   inProgressData,
   isPending,
   error,
-  isDemo,
   events = [],
   selectedEventId,
   onBack,
@@ -123,8 +120,8 @@ export function SetupPhase({
   /** 현재 선택된 이벤트 객체 */
   const selectedEvent = events.find(e => e.id === selectedEventId) ?? null
 
-  /** 이벤트 없음 & 비데모 → 빈 상태 가드 */
-  const showEmptyEventGuard = events.length === 0 && !isDemo
+  /** 이벤트 없음 → 빈 상태 가드 */
+  const showEmptyEventGuard = events.length === 0
 
   /** "오늘 게임 만들기" 가이드 배너 dismissal — localStorage 영구 저장.
    *  기본 false (= 안 닫힘 = 보임). 닫기 누르면 true 로 영구 저장. */
@@ -142,8 +139,8 @@ export function SetupPhase({
   const selectedCount = selectedPlayers.size
   const totalEligible = members.length + tempPlayers.length
   const canStart = selectedCount >= 4
-  /** 게임 시작 가능 조건: 정기 모임 선택 + 4명 이상 + 코트 1개 이상 (데모: 모임 선택 불필요) */
-  const canStartGame = (!!selectedEventId || !!isDemo) && selectedCount >= 4 && activeCourts >= 1
+  /** 게임 시작 가능 조건: 정기 모임 선택 + 4명 이상 + 코트 1개 이상 */
+  const canStartGame = !!selectedEventId && selectedCount >= 4 && activeCourts >= 1
 
   /**
    * 레벨 필터 칩에 표시할 등급 버킷.
@@ -497,7 +494,7 @@ export function SetupPhase({
                   게임을 시작하려면 먼저 회원을 등록해 주세요.<br />
                   초대코드 또는 엑셀 임포트로 한 번에 추가할 수 있어요.
                 </p>
-                {!isDemo && clubId && (
+                {clubId && (
                   <div className="flex gap-2 justify-center flex-wrap">
                     <Link
                       href={`/club/${clubId}/settings`}
@@ -512,9 +509,6 @@ export function SetupPhase({
                       엑셀로 멤버 가져오기
                     </Link>
                   </div>
-                )}
-                {isDemo && (
-                  <p className="text-[11px] text-[#bbb]">체험 모드에서는 게스트 추가하기로 임시 참가자를 추가해 보세요.</p>
                 )}
               </div>
             ) : (
@@ -659,7 +653,7 @@ export function SetupPhase({
               <span className="w-4 h-4 border-2 border-[var(--color-brand-ink)] border-t-transparent rounded-full animate-spin" />
               시작 중...
             </span>
-          ) : !selectedEventId && !isDemo ? (
+          ) : !selectedEventId ? (
             '정기 모임을 선택해주세요'
           ) : !canStart ? (
             `4명 이상 선택 필요 (현재 ${selectedCount}명)`

@@ -12,7 +12,6 @@ export interface ClubOption {
   name: string
   location?: string | null
   thumbnailColor?: string
-  isDemo?: boolean
   /** 현재 사용자의 이 클럽 내 역할 — 사이드바 클럽 카드에 배지로 표시 */
   role?: MemberRole
 }
@@ -85,12 +84,8 @@ export function ClubSwitcher({ current, available = [] }: Props) {
         <div className="flex-1 min-w-0 text-left">
           <p className="text-[14px] font-extrabold text-[#111] truncate">{current.name}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
-            {/* 역할 배지 — 운영자/매니저/회원 (체험 중 우선) */}
-            {current.isDemo ? (
-              <span className="inline-flex items-center rounded-full bg-[var(--color-brand-streak-bg)] text-[var(--color-brand-streak)] px-1.5 py-0 text-[10px] font-bold leading-[1.4]">
-                체험 중
-              </span>
-            ) : current.role ? (
+            {/* 역할 배지 — 운영자/매니저/회원 */}
+            {current.role ? (
               (() => {
                 const s = roleStyle(current.role)
                 return (
@@ -102,7 +97,7 @@ export function ClubSwitcher({ current, available = [] }: Props) {
                 )
               })()
             ) : null}
-            {!current.isDemo && current.location && (
+            {current.location && (
               <span className="text-[11px] text-[#999] truncate">{current.location}</span>
             )}
           </div>
@@ -181,7 +176,7 @@ function ClubRow({ club, isCurrent }: { club: ClubOption; isCurrent?: boolean })
       <div className="flex-1 min-w-0">
         <p className="text-[13px] font-semibold text-[#111] truncate">{club.name}</p>
         <p className="text-[11px] text-[#999] truncate">
-          {club.isDemo ? '체험' : club.location || '모임'}
+          {club.location || '모임'}
         </p>
       </div>
       {isCurrent && <Check size={13} className="text-[#0a0a0a] shrink-0" strokeWidth={2.5} />}

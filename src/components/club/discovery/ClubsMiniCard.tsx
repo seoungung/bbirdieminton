@@ -35,11 +35,6 @@ export function ClubsMiniCard({ club }: Props) {
             aria-hidden
           />
         )}
-        {club.isDemo && (
-          <span className="absolute top-2 right-2 inline-flex items-center rounded-full bg-[var(--color-brand-streak-bg)] text-[var(--color-brand-streak)] px-1.5 py-0 text-[10px] font-bold">
-            체험
-          </span>
-        )}
       </div>
       <div className="p-3 space-y-0.5">
         <h4 className="text-sm font-bold text-[var(--color-text-strong)] truncate">{club.name}</h4>

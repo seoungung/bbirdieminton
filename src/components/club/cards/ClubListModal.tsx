@@ -33,7 +33,7 @@ export function ClubListModal({ type, onClose }: ClubListModalProps) {
           <>
             <h2 className="text-xl font-extrabold text-[#111] text-center mb-2">모임을 만들 수 없어요</h2>
             <p className="text-sm text-[#777] text-center leading-relaxed mb-7">
-              체험 모드에서는 모임을 생성할 수 없어요.<br />로그인 후 이용해 주세요.
+              로그인 후 이용해 주세요.
             </p>
             <div className="flex flex-col gap-2">
               <Link

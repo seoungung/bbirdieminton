@@ -8,7 +8,6 @@ import {
   type JoinRequestStatus,
 } from '@/app/club/[clubId]/join-requests/actions'
 import { ClubPreviewClient } from '@/components/club/preview/ClubPreviewClient'
-import { DEMO_CLUBS, DEMO_MEMBERS } from '@/lib/club/demoData'
 import type {
   ClubPreview,
   ClubPreviewVibe,
@@ -23,29 +22,6 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { clubId } = await params
-
-  if (clubId.startsWith('demo-')) {
-    const title = '체험 모임 | 모임 둘러보기 | 버디민턴'
-    const description =
-      '버디민턴 체험용 모임 — 분위기·일정·회비를 미리 둘러보세요.'
-    return {
-      title,
-      description,
-      openGraph: {
-        title,
-        description,
-        type: 'website',
-        siteName: '버디민턴',
-        locale: 'ko_KR',
-        url: `https://birdieminton.com/clubs/${clubId}`,
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title,
-        description,
-      },
-    }
-  }
 
   const supabase = await createClient()
   const { data } = await supabase.rpc('get_club_preview', { p_club_id: clubId })
@@ -97,144 +73,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ClubPreviewPage({ params }: PageProps) {
   const { clubId } = await params
-
-  /* 데모 클럽: DEMO_CLUBS 데이터로 프리뷰 렌더링 (Supabase RPC 우회).
-   * 하단 CTA 는 isMember=true 로 두어 "모임 들어가기" → /club/demo-id 흐름.
-   * recentMembers / vibe 는 DEMO_MEMBERS 로 합성해 멤버 그리드·분위기 카드 살아 보이게. */
-  if (clubId.startsWith('demo-')) {
-    const demo = DEMO_CLUBS.find((d) => d.id === clubId)
-    if (!demo) notFound()
-
-    /* 데모 멤버를 ClubPreviewMember 형식으로 변환 — joined_at 은 최근일수록 가까운 시점.
-     * 프로필 이미지는 성별별 SVG 아바타 (저작권 free, /public 정적 자산). */
-    const recentDemoMembers = DEMO_MEMBERS.map((m, idx) => ({
-      id: m.id,
-      name: m.name,
-      profile_img:
-        m.gender === 'F'
-          ? '/avatar-f.png'
-          : m.gender === 'M'
-          ? '/avatar-m.png'
-          : null,
-      role:
-        m.role === 'owner'
-          ? ('owner' as const)
-          : m.role === 'manager'
-          ? ('manager' as const)
-          : ('member' as const),
-      /* 첫 멤버는 60일 전 가입(오너), 이후 점점 최근으로 — 마지막 3명 정도가 NEW(7일 이내) */
-      joined_at: new Date(
-        Date.now() - (DEMO_MEMBERS.length - idx) * 2 * 24 * 60 * 60 * 1000,
-      ).toISOString(),
-    }))
-
-    /* 데모 정모 일정 — 첨부 이미지의 콕플레이 패턴 차용 (오늘/내일).
-     * participants: 데모 멤버 일부를 참석자로 매핑 (성별별 아바타). */
-    const todayMs = Date.now()
-    const tomorrowMs = todayMs + 24 * 60 * 60 * 1000
-    const friAttendees = DEMO_MEMBERS.slice(0, 6).map((m) => ({
-      id: m.id,
-      name: m.name,
-      profile_img:
-        m.gender === 'F'
-          ? '/avatar-f.png'
-          : m.gender === 'M'
-          ? '/avatar-m.png'
-          : null,
-    }))
-    const satAttendees = DEMO_MEMBERS.slice(6, 21).map((m) => ({
-      id: m.id,
-      name: m.name,
-      profile_img:
-        m.gender === 'F'
-          ? '/avatar-f.png'
-          : m.gender === 'M'
-          ? '/avatar-m.png'
-          : null,
-    }))
-    const upcomingDemoEvents = [
-      {
-        id: 'demo-event-fri',
-        title: '금요 정모',
-        event_date: new Date(todayMs).toISOString().slice(0, 10),
-        start_time: '19:00:00',
-        end_time: '22:00:00',
-        place: '관악구민체육센터',
-        fee: '체육관 입장비',
-        max_attend: 24,
-        going_count: 7,
-        participants: friAttendees,
-      },
-      {
-        id: 'demo-event-sat',
-        title: '토요 정모',
-        event_date: new Date(tomorrowMs).toISOString().slice(0, 10),
-        start_time: '11:00:00',
-        end_time: '15:00:00',
-        place: '국사봉체육관',
-        fee: '체육관 입장비',
-        max_attend: 23,
-        going_count: 15,
-        participants: satAttendees,
-      },
-    ]
-
-    /* 데모 vibe — 4 KPI 카드 노출용 */
-    const demoVibe = {
-      total_members: DEMO_MEMBERS.length,
-      male_count: DEMO_MEMBERS.filter((m) => m.gender === 'M').length,
-      female_count: DEMO_MEMBERS.filter((m) => m.gender === 'F').length,
-      recent_join_30d: 5,
-      avg_attendance_30d: 12.4,
-      grade_distribution: DEMO_MEMBERS.reduce(
-        (acc, m) => {
-          /* skill_score → 등급 매핑은 별도 헬퍼가 있지만, level 컬럼을 단순 매핑 */
-          const lvl = m.level
-          let g: 'S' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' = 'F'
-          if (lvl === 'B조' || lvl === 'A조') g = 'B'
-          else if (lvl === 'C조') g = 'C'
-          else if (lvl === 'D조') g = 'D'
-          else if (lvl === '초심자') g = 'E'
-          else if (lvl === '왕초보') g = 'F'
-          acc[g] = (acc[g] ?? 0) + 1
-          return acc
-        },
-        {} as Record<'S' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F', number>,
-      ),
-    }
-
-    return (
-      <ClubPreviewClient
-        clubId={demo.id}
-        name={demo.name}
-        description={demo.description}
-        location={demo.location}
-        activityPlace={demo.activityPlace}
-        category={demo.category}
-        courtCount={demo.court_count}
-        thumbnailColor={demo.thumbnailColor}
-        thumbnailUrl={null}
-        ownerName={demo.leaderName}
-        ownerProfileImg="/avatar-m.png"
-        memberCount={demo.memberCount}
-        upcomingEvents={upcomingDemoEvents}
-        recentMembers={recentDemoMembers}
-        isLoggedIn
-        isMember
-        myJoinStatus={null}
-        tags={['초보환영', '여성친화', '주말활발']}
-        feeMonthly={null}
-        feePerSession={null}
-        feeNote={null}
-        ownerBio="10년차 동호인, 초심자 환영합니다"
-        photoUrls={[]}
-        scheduleSummary="매주 토/일 11:00~15:00"
-        faqs={[]}
-        vibe={demoVibe}
-        contactUrl={null}
-      />
-    )
-  }
 
   const supabase = await createClient()
 

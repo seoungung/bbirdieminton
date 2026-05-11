@@ -34,9 +34,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ShuttlePage({ params }: Props) {
   const { clubId } = await params
 
-  // 데모 분기 — 데모 사용자는 데모 대시보드로 안전 회귀
-  if (clubId.startsWith('demo-')) redirect(`/club/${clubId}`)
-
   const supabase = await createClient()
   const {
     data: { user },

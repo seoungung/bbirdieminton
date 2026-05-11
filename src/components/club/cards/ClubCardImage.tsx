@@ -9,7 +9,6 @@ interface ClubCardImageProps {
   /** @deprecated 더 이상 사용하지 않음. 단일 브랜드 톤으로 통일. */
   thumbnailColor?: string
   isNew?: boolean
-  isDemo?: boolean
 }
 
 /**
@@ -21,7 +20,6 @@ export function ClubCardImage({
   name,
   thumbnailUrl,
   isNew = false,
-  isDemo = false,
 }: ClubCardImageProps) {
   return (
     <div className="relative aspect-[4/5] w-full overflow-hidden rounded-t-2xl">
@@ -41,11 +39,6 @@ export function ClubCardImage({
       {isNew && (
         <span className="absolute top-3 left-3 text-[10px] font-extrabold px-2 py-0.5 bg-[#111] text-[var(--color-brand-lime)] rounded-md tracking-wider z-10 uppercase">
           NEW
-        </span>
-      )}
-      {isDemo && (
-        <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 bg-[var(--color-brand-lime)] text-[#111] rounded-md tracking-wide z-10">
-          체험용
         </span>
       )}
     </div>

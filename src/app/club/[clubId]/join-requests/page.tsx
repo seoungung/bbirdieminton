@@ -21,7 +21,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function JoinRequestsPage({ params }: Props) {
   const { clubId } = await params
-  if (clubId.startsWith('demo-')) redirect(`/club/${clubId}`)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')

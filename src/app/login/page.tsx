@@ -64,14 +64,6 @@ export default async function LoginPage({
           </p>
         </div>
 
-        {/* 데모 체험 링크 */}
-        <p className="text-center mt-5 text-[13px] text-[#999]">
-          로그인 없이 체험하고 싶다면?{' '}
-          <a href="/club/demo-1" className="text-[#555] font-semibold hover:text-[#111] transition-colors">
-            체험하기
-          </a>
-        </p>
-
       </div>
     </div>
   )

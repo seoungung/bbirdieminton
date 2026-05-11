@@ -40,11 +40,6 @@ export async function importMembersAction(
   clubId: string,
   rows: MemberRow[]
 ): Promise<ImportResult> {
-  // 데모 모임: DB 쓰기 없이 성공
-  if (clubId.startsWith('demo-')) {
-    return { success: true, added: rows.length, skipped: 0, failed: 0, message: '체험 모드: 실제 저장 안 됨' }
-  }
-
   const auth = await assertManager(clubId)
   if ('error' in auth) {
     return { success: false, added: 0, skipped: 0, failed: 0, errorDetail: auth.error }
@@ -150,10 +145,6 @@ export async function importDuesAction(
   clubId: string,
   rows: DuesRow[]
 ): Promise<ImportResult> {
-  if (clubId.startsWith('demo-')) {
-    return { success: true, added: rows.length, skipped: 0, failed: 0, message: '체험 모드: 실제 저장 안 됨' }
-  }
-
   const auth = await assertManager(clubId)
   if ('error' in auth) {
     return { success: false, added: 0, skipped: 0, failed: 0, errorDetail: auth.error }

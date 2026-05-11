@@ -13,7 +13,6 @@ export interface ClubDiscoveryItem {
 
   isAcceptingMembers?: boolean
   ownerName?: string | null
-  isDemo?: boolean
 
   createdAt: string
 }
