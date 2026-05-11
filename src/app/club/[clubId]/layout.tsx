@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient, getAuthUser } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { checkIsMaster } from '@/lib/auth/master'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
 import { AppShell } from '@/components/club/AppShell'
@@ -76,11 +76,10 @@ export default async function ClubDetailLayout({
     .update({ last_visited_club_id: clubId })
     .eq('id', clubUserId)
 
-  const adminClient = createAdminClient()
-
   /* 유저 프로필 + 읽지 않은 공지 수 + 소속 클럽 목록 + 마스터 여부 병렬 조회.
-   * is_master 는 RLS 우회를 위해 admin client 사용.
-   * 마이그레이션 미적용 환경에서도 깨지지 않도록 PromiseLike 를 Promise.resolve 로 감싸 catch 가능하게. */
+   * checkIsMaster() 는 React.cache 로 요청당 1회만 실제 admin client SELECT 를 수행.
+   * 동일 요청 안에서 다른 layout/page 가 다시 호출해도 추가 쿼리 0.
+   * 마이그레이션 미적용 환경에서도 깨지지 않도록 catch 로 false 폴백. */
   const [userProfileResult, unreadCount, clubsResult, isMaster] = await Promise.all([
     supabase.from('users').select('name').eq('id', clubUserId).single(),
     getUnreadCountAction(clubId).catch(() => 0),
@@ -90,15 +89,7 @@ export default async function ClubDetailLayout({
       .select('club:clubs(id, name, location, thumbnail_color)')
       .eq('user_id', clubUserId)
       .neq('club_id', clubId),
-    Promise.resolve(
-      adminClient
-        .from('users')
-        .select('is_master')
-        .eq('id', clubUserId)
-        .maybeSingle()
-    )
-      .then((r) => (r.data as { is_master?: boolean } | null)?.is_master === true)
-      .catch(() => false),
+    checkIsMaster().catch(() => false),
   ])
 
   const userProfile = userProfileResult.data

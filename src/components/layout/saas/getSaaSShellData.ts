@@ -1,6 +1,6 @@
 import 'server-only'
 import { createClient, getAuthUser } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { checkIsMaster } from '@/lib/auth/master'
 import { ensureClubUser, getClubUserId } from '@/lib/club/auth'
 import { getMyClubs } from '@/lib/club/client'
 import type { SaaSClubItem } from './SaaSClubList'
@@ -46,21 +46,12 @@ export async function getSaaSShellData(): Promise<SaaSShellData> {
     return { user, myClubs: [], isMaster: false }
   }
 
-  // is_master 조회 — 본인 row 는 RLS 상 본인이 읽을 수 있음.
-  // 컬럼이 없는 (마이그레이션 미적용) 환경에서도 안전하게 false fallback.
-  // Supabase builder 는 PromiseLike 를 반환하므로 Promise.resolve 로 감싸 catch 사용.
-  const admin = createAdminClient()
+  // is_master 조회 — checkIsMaster() 가 React.cache 로 요청당 1회만 실제 쿼리.
+  // 같은 요청 안에서 admin layout 등 다른 곳이 다시 호출해도 추가 비용 0.
+  // 마이그레이션 미적용 환경에서도 안전하게 false 로 떨어지도록 catch.
   const [clubs, masterRes] = await Promise.all([
     getMyClubs(supabase, clubUserId),
-    Promise.resolve(
-      admin
-        .from('users')
-        .select('is_master')
-        .eq('id', clubUserId)
-        .maybeSingle()
-    )
-      .then((r) => (r.data as { is_master?: boolean } | null)?.is_master === true)
-      .catch(() => false),
+    checkIsMaster().catch(() => false),
   ])
 
   const myClubs: SaaSClubItem[] = clubs.map((c) => ({
