@@ -226,8 +226,9 @@ export function ClubDashboardClient({
             accent="primary"
             primary
           />
+          {/* TODO Stage C: href → /session/{id}/summary 정산소 신설 후 교체 */}
           <ShortcutCard
-            href={`/club/${clubId}/settlements`}
+            href={`/club/${clubId}/finance`}
             Icon={Wallet}
             label="셔틀콕 정산"
             desc="비용 계산·납부"

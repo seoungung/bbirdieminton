@@ -69,22 +69,24 @@ export function FinanceClient({ clubId, members, duesData, isManager, year, mont
 
   return (
     <div className="space-y-4">
-      {/* 셔틀콕비 정산 링크 배너 */}
-      <Link
-        href={`/club/${clubId}/settlements`}
-        className="block bg-[var(--color-brand-court-bg)] border border-[var(--color-brand-court-soft)]/50 rounded-2xl p-4 hover:brightness-[0.98] transition-all"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white border border-[var(--color-brand-court-soft)]/50 flex items-center justify-center shrink-0">
-            <ShuttlecockIcon size={20} className="text-[var(--color-brand-court)]" strokeWidth={1.8} />
+      {/* 셔틀콕비 정산 링크 배너 — Stage C(/session/{id}/summary 정산소 신설) 전까지 hide */}
+      {false && (
+        <Link
+          href={`/club/${clubId}/settlements`}
+          className="block bg-[var(--color-brand-court-bg)] border border-[var(--color-brand-court-soft)]/50 rounded-2xl p-4 hover:brightness-[0.98] transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white border border-[var(--color-brand-court-soft)]/50 flex items-center justify-center shrink-0">
+              <ShuttlecockIcon size={20} className="text-[var(--color-brand-court)]" strokeWidth={1.8} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-[var(--color-brand-court-deep)]">셔틀콕비 정산</p>
+              <p className="text-xs text-[var(--color-brand-court)]/80 mt-0.5">세션별 셔틀콕 사용량과 납부 관리</p>
+            </div>
+            <ArrowRight size={16} className="text-[var(--color-brand-court)] shrink-0" />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-[var(--color-brand-court-deep)]">셔틀콕비 정산</p>
-            <p className="text-xs text-[var(--color-brand-court)]/80 mt-0.5">세션별 셔틀콕 사용량과 납부 관리</p>
-          </div>
-          <ArrowRight size={16} className="text-[var(--color-brand-court)] shrink-0" />
-        </div>
-      </Link>
+        </Link>
+      )}
 
       {/* 월간 요약 카드 */}
       <div className="grid grid-cols-3 gap-3">
