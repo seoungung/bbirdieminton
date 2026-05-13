@@ -9,6 +9,11 @@ import {
 } from 'lucide-react'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { scoreToGrade, type Grade } from '@/lib/club/grade'
+import {
+  getResultFromScores,
+  RESULT_DUMMY_SCORES,
+  type MatchResult,
+} from '@/lib/club/match-result'
 import { cn } from '@/lib/utils'
 import { useLongPress } from '@/hooks/useLongPress'
 import type { ClubMemberWithUser } from '@/types/club'
@@ -32,34 +37,21 @@ const ASSIGN_MODE_OPTS: { value: AssignMode; label: string; Icon: React.Componen
 ]
 
 /* ── 매치 결과 (PRD §3.3 — 3버튼) ──
- *  · 'A'    = A팀(좌팀) 승  → dummy scores (1, 0)
- *  · 'B'    = B팀(우팀) 승  → dummy scores (0, 1)
- *  · 'DRAW' = 무승부        → dummy scores (0, 0)
- *  · null   = 결과 미입력   → dummy scores (0, 0) (DRAW 와 동일하므로 UI 측 resultChoice 로 구분)
  *
- *  T0-3-3 마이그레이션 이전(W2) 임시 호환 매핑:
- *  - matches 테이블에는 winning_team 컬럼이 없으므로 team_a_score / team_b_score 로 결과를 인코딩.
- *  - update_player_stats_for_match RPC 의 기존 분기 (a>b / b>a / a==b) 가 그대로 win/loss/draw 카운트.
- *  - team_a_score IS NULL 은 "in-progress" sentinel — GameBoardClient.handleResumeGame 호환을 위해
- *    DRAW 도 (0,0) 으로 인코딩하여 NULL 을 쓰지 않음.
+ *  타입/헬퍼 본체는 `@/lib/club/match-result` 로 이동 (plan v2 §7.4 T0-2-2).
+ *  ranking/actions.ts 의 Glicko 갱신 진입점과 한 곳에서 정의된 단일 source of truth
+ *  를 공유한다. PlayingPhase 는 UI 코드에서 import 해서 사용 + 하위 테스트 호환을
+ *  위해 동일 심볼을 재 export (파일 하단).
  *
- *  T0-3-3 이후: matches.winning_team ('A'|'B'|'DRAW') 우선 사용, 이 fallback 은 호환 잔재.
+ *  W2 호환 매핑 (matches.winning_team 컬럼 도입 전):
+ *  - 3버튼 결과 → RESULT_DUMMY_SCORES 로 dummy 점수 페어 인코드 후 DB 저장.
+ *  - update_player_stats_for_match RPC 의 기존 분기 (a>b / b>a / a==b) 가 그대로
+ *    win/loss/draw 카운트.
+ *  - team_a_score IS NULL 은 "in-progress" sentinel — GameBoardClient.handleResumeGame
+ *    호환을 위해 DRAW 도 (0,0) 으로 인코딩하여 NULL 을 쓰지 않음.
+ *
+ *  T0-3-3 이후: matches.winning_team ('A'|'B'|'DRAW') 우선 사용, 이 fallback 은 회귀 polyfill.
  */
-type MatchResult = 'A' | 'B' | 'DRAW'
-
-/** dummy score → MatchResult 디코더 — getResultFromScores(1, 0) === 'A' 같은 식. */
-function getResultFromScores(scoreA: number, scoreB: number): MatchResult {
-  if (scoreA > scoreB) return 'A'
-  if (scoreB > scoreA) return 'B'
-  return 'DRAW'
-}
-
-/** MatchResult → dummy score 페어 인코더. UI 버튼 클릭 시 이 값으로 onScoreChange dispatch. */
-const RESULT_DUMMY_SCORES: Record<MatchResult, readonly [number, number]> = {
-  A: [1, 0],
-  B: [0, 1],
-  DRAW: [0, 0],
-}
 
 /* ── 풀 필터 칩 (4종 독립 필터) ── */
 type GenderFilter = 'all' | 'male' | 'female' | 'guest'
