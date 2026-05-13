@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import {
-  AlertCircle, Printer, Plus, Minus, Flame, Trophy,
+  AlertCircle, Printer, Plus, Minus, Trophy,
   RefreshCw, Check, Coffee, Play, Sparkles, Scale, HeartHandshake,
   Undo2, ArrowUp, ArrowDown, Trash2, UserPlus, UserPlus2,
 } from 'lucide-react'
@@ -31,17 +31,34 @@ const ASSIGN_MODE_OPTS: { value: AssignMode; label: string; Icon: React.Componen
   { value: 'newcomer_friendly', label: '신입 친화', Icon: HeartHandshake },
 ]
 
-/* ── 승자 판정 (21/25점 클럽 옵션) ── */
-type WinState = 'A' | 'B' | 'deuce' | null
+/* ── 매치 결과 (PRD §3.3 — 3버튼) ──
+ *  · 'A'    = A팀(좌팀) 승  → dummy scores (1, 0)
+ *  · 'B'    = B팀(우팀) 승  → dummy scores (0, 1)
+ *  · 'DRAW' = 무승부        → dummy scores (0, 0)
+ *  · null   = 결과 미입력   → dummy scores (0, 0) (DRAW 와 동일하므로 UI 측 resultChoice 로 구분)
+ *
+ *  T0-3-3 마이그레이션 이전(W2) 임시 호환 매핑:
+ *  - matches 테이블에는 winning_team 컬럼이 없으므로 team_a_score / team_b_score 로 결과를 인코딩.
+ *  - update_player_stats_for_match RPC 의 기존 분기 (a>b / b>a / a==b) 가 그대로 win/loss/draw 카운트.
+ *  - team_a_score IS NULL 은 "in-progress" sentinel — GameBoardClient.handleResumeGame 호환을 위해
+ *    DRAW 도 (0,0) 으로 인코딩하여 NULL 을 쓰지 않음.
+ *
+ *  T0-3-3 이후: matches.winning_team ('A'|'B'|'DRAW') 우선 사용, 이 fallback 은 호환 잔재.
+ */
+type MatchResult = 'A' | 'B' | 'DRAW'
 
-function getWinState(scoreA: number, scoreB: number, target: 21 | 25 = 25): WinState {
-  const max = Math.max(scoreA, scoreB)
-  if (max < target) return null
-  const diff = scoreA - scoreB
-  const cap = target + 9
-  if (max >= cap) return diff > 0 ? 'A' : 'B'
-  if (Math.abs(diff) >= 2) return diff > 0 ? 'A' : 'B'
-  return 'deuce'
+/** dummy score → MatchResult 디코더 — getResultFromScores(1, 0) === 'A' 같은 식. */
+function getResultFromScores(scoreA: number, scoreB: number): MatchResult {
+  if (scoreA > scoreB) return 'A'
+  if (scoreB > scoreA) return 'B'
+  return 'DRAW'
+}
+
+/** MatchResult → dummy score 페어 인코더. UI 버튼 클릭 시 이 값으로 onScoreChange dispatch. */
+const RESULT_DUMMY_SCORES: Record<MatchResult, readonly [number, number]> = {
+  A: [1, 0],
+  B: [0, 1],
+  DRAW: [0, 0],
 }
 
 /* ── 풀 필터 칩 (4종 독립 필터) ── */
@@ -346,254 +363,6 @@ function PlayerContextMenu({
   )
 }
 
-/* ── 점수 입력 모달 (D안: 키패드 방식) ────────────────────────
- * 좌·우팀 점수 동시 표시 + 활성 팀 키패드 입력 + 듀스/승자 자동 감지.
- * 키보드 단축키: 0~9 입력 / Backspace 백스페이스 / Tab 활성팀 전환 /
- *                Enter 저장 / ESC 취소. */
-function ScoreInputModal({
-  open,
-  initialScoreA,
-  initialScoreB,
-  matchPointTarget,
-  onClose,
-  onSave,
-}: {
-  open: boolean
-  initialScoreA: number
-  initialScoreB: number
-  matchPointTarget: 21 | 25
-  onClose: () => void
-  onSave: (scoreA: number, scoreB: number) => void
-}) {
-  const [scoreA, setScoreA] = useState(initialScoreA)
-  const [scoreB, setScoreB] = useState(initialScoreB)
-  const [activeTeam, setActiveTeam] = useState<'A' | 'B'>('A')
-  const [pendingInput, setPendingInput] = useState('')
-
-  /* open 될 때마다 props 로 초기화 */
-  useEffect(() => {
-    if (open) {
-      setScoreA(initialScoreA)
-      setScoreB(initialScoreB)
-      setActiveTeam('A')
-      setPendingInput('')
-    }
-  }, [open, initialScoreA, initialScoreB])
-
-  /* body 스크롤 잠금 */
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden'
-      return () => { document.body.style.overflow = '' }
-    }
-  }, [open])
-
-  const setActiveScore = (val: number) => {
-    const clamped = Math.max(0, Math.min(30, val))
-    if (activeTeam === 'A') setScoreA(clamped)
-    else setScoreB(clamped)
-  }
-
-  const handleDigit = (d: string) => {
-    const newInput = pendingInput + d
-    const parsed = parseInt(newInput, 10)
-    if (isNaN(parsed) || parsed > 30) return
-    setPendingInput(newInput)
-    setActiveScore(parsed)
-  }
-
-  const handleBackspace = () => {
-    const newInput = pendingInput.slice(0, -1)
-    setPendingInput(newInput)
-    const parsed = newInput === '' ? 0 : parseInt(newInput, 10) || 0
-    setActiveScore(parsed)
-  }
-
-  const handleClear = () => {
-    setPendingInput('')
-    setActiveScore(0)
-  }
-
-  const handleTeamSwitch = (team: 'A' | 'B') => {
-    setActiveTeam(team)
-    setPendingInput('')
-  }
-
-  const handleSave = useCallbackSafe(() => {
-    onSave(scoreA, scoreB)
-  }, [scoreA, scoreB, onSave])
-
-  /* 키보드 단축키 */
-  useEffect(() => {
-    if (!open) return
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { e.preventDefault(); onClose() }
-      else if (e.key === 'Enter') { e.preventDefault(); handleSave() }
-      else if (e.key === 'Tab') {
-        e.preventDefault()
-        handleTeamSwitch(activeTeam === 'A' ? 'B' : 'A')
-      } else if (/^[0-9]$/.test(e.key)) {
-        e.preventDefault()
-        handleDigit(e.key)
-      } else if (e.key === 'Backspace') {
-        e.preventDefault()
-        handleBackspace()
-      }
-    }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [open, activeTeam, pendingInput, scoreA, scoreB, handleSave])
-
-  if (!open) return null
-
-  const winState = getWinState(scoreA, scoreB, matchPointTarget)
-  const hasWinner = winState === 'A' || winState === 'B'
-
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} aria-hidden />
-      <div
-        className="relative z-10 w-full max-w-[420px] rounded-2xl bg-white p-5 shadow-xl"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="score-modal-title"
-      >
-        <h2 id="score-modal-title" className="mb-4 text-lg font-bold text-[var(--color-text-strong)]">
-          점수 입력
-        </h2>
-
-        {/* 양 팀 점수 표시 — 코트 팀 색상 (좌=그린 / 우=라임) */}
-        <div className="mb-3 grid grid-cols-[1fr_auto_1fr] items-stretch gap-2">
-          <button
-            type="button"
-            onClick={() => handleTeamSwitch('A')}
-            className={cn(
-              'flex flex-col items-center justify-center rounded-xl py-3 transition-all',
-              activeTeam === 'A'
-                ? 'bg-[var(--color-brand-court-team-a)]/10 ring-2 ring-[var(--color-brand-court-team-a)]'
-                : 'border border-[var(--color-brand-border)] hover:bg-[var(--color-surface-sub)]',
-            )}
-          >
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-brand-text-sub)]">
-              좌팀
-            </span>
-            <span className="text-5xl font-extrabold leading-none tabular-nums text-[var(--color-brand-court-team-a)]">
-              {scoreA}
-            </span>
-          </button>
-
-          <div className="flex items-center">
-            <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-brand-text-muted)]">vs</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => handleTeamSwitch('B')}
-            className={cn(
-              'flex flex-col items-center justify-center rounded-xl py-3 transition-all',
-              activeTeam === 'B'
-                ? 'bg-[var(--color-brand-court-team-b)]/20 ring-2 ring-[var(--color-brand-court-team-b)]'
-                : 'border border-[var(--color-brand-border)] hover:bg-[var(--color-surface-sub)]',
-            )}
-          >
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-brand-text-sub)]">
-              우팀
-            </span>
-            <span className="text-5xl font-extrabold leading-none tabular-nums text-[#7C7C00]">
-              {scoreB}
-            </span>
-          </button>
-        </div>
-
-        {/* 듀스 / 승자 자동 감지 — 가운데 정렬, 크게 */}
-        {winState === 'deuce' && (
-          <div className="mb-4 flex justify-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-4 py-1.5 text-base font-extrabold text-orange-600">
-              <Flame size={16} strokeWidth={2.6} /> 듀스
-            </span>
-          </div>
-        )}
-        {hasWinner && (
-          <div className="mb-4 flex justify-center">
-            <span
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-base font-extrabold',
-                winState === 'A'
-                  ? 'bg-[var(--color-brand-court-team-a)] text-white'
-                  : 'bg-[var(--color-brand-court-team-b)] text-[#0a0a0a]',
-              )}
-            >
-              <Trophy size={16} strokeWidth={2.6} /> {winState === 'A' ? '좌팀' : '우팀'} 승
-            </span>
-          </div>
-        )}
-
-        {/* 키패드 */}
-        <div className="mb-4 grid grid-cols-3 gap-2">
-          {(['1','2','3','4','5','6','7','8','9'] as const).map((d) => (
-            <button
-              key={d}
-              type="button"
-              onClick={() => handleDigit(d)}
-              className="h-12 rounded-lg bg-[var(--color-surface-muted)] text-base font-bold text-[var(--color-text-body)] transition-all hover:bg-[var(--color-brand-bg-muted)] active:scale-95"
-            >
-              {d}
-            </button>
-          ))}
-          <button
-            type="button"
-            onClick={handleClear}
-            className="h-12 rounded-lg bg-[var(--color-surface-muted)] text-sm font-bold text-[var(--color-brand-text-sub)] transition-all hover:bg-[var(--color-brand-bg-muted)] active:scale-95"
-            aria-label="0으로 초기화"
-          >
-            C
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDigit('0')}
-            className="h-12 rounded-lg bg-[var(--color-surface-muted)] text-base font-bold text-[var(--color-text-body)] transition-all hover:bg-[var(--color-brand-bg-muted)] active:scale-95"
-          >
-            0
-          </button>
-          <button
-            type="button"
-            onClick={handleBackspace}
-            className="h-12 rounded-lg bg-[var(--color-surface-muted)] text-base font-bold text-[var(--color-brand-text-sub)] transition-all hover:bg-[var(--color-brand-bg-muted)] active:scale-95"
-            aria-label="백스페이스"
-          >
-            ⌫
-          </button>
-        </div>
-
-        {/* 푸터: 취소 / 저장 */}
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 rounded-lg border border-[var(--color-brand-border)] bg-white py-3 text-sm font-bold text-[var(--color-text-body)] transition-colors hover:bg-[var(--color-surface-sub)]"
-          >
-            취소
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="flex-[2] rounded-lg bg-[var(--color-brand-ink)] py-3 text-sm font-extrabold text-[var(--color-brand-lime)] transition-all hover:brightness-110 active:scale-[0.99]"
-          >
-            저장
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* useEffect 내부 stale closure 방지용 — useCallback 대신 ref 패턴 */
-function useCallbackSafe<T extends (...args: never[]) => unknown>(fn: T, deps: React.DependencyList): T {
-  const ref = useRef(fn)
-  useEffect(() => { ref.current = fn }, deps) // eslint-disable-line react-hooks/exhaustive-deps
-  return useRef(((...args: never[]) => ref.current(...args)) as T).current
-}
-
 /* ── 대기순서 항목 컨텍스트 메뉴 ── */
 function QueueItemContextMenu({
   x,
@@ -765,7 +534,8 @@ interface Props {
   assignMode: AssignMode
   /** 기본 배정 방식 변경 */
   onAssignModeChange: (v: AssignMode) => void
-  /** 게임 종료 점수 (21 정식 / 25 일반) — 디폴트 25 */
+  /** 게임 종료 점수 (21 정식 / 25 일반) — PRD §3.3 3버튼 결과 입력으로 전환되며 dead.
+   *  호출처(GameBoardClient) 호환을 위해 prop 만 보존, 내부에선 사용 안 함. */
   matchPointTarget?: 21 | 25
   /** 이번 한 경기만 직접 배정 — 호환 보존 (UI 진입점 폐기). custom 모드는 GameBoardClient 가 호출 시에만 활성. */
   onOpenCustomPick: (courtIndex: number) => void
@@ -806,7 +576,6 @@ export function PlayingPhase({
   clubName,
   sessionDate,
   onAssignModeChange,
-  matchPointTarget = 25,
   customPickCourt,
   onCustomAssign,
   onCancelCustomPick,
@@ -1279,8 +1048,6 @@ export function PlayingPhase({
                 now={now}
                 playerMap={playerMap}
                 isPending={isPending}
-                waitingCount={waitingPlayers.length}
-                matchPointTarget={matchPointTarget}
                 onAssignCourt={onAssignCourt}
                 onScoreChange={onScoreChange}
                 onEndCourt={onEndCourt}
@@ -1638,15 +1405,14 @@ export function PlayingPhase({
 
 /* ── 코트 카드 ─────────────────────────────────────────────────
  * 흰 배경 + zinc 보더. 2x2 슬롯 (꽉 찬 색상 카드 / 빈 = 회색 placeholder).
- * 점수 +/- (좌:파랑 / 우:빨강), 가운데 vs / 듀스 / 승리.
+ * 결과 입력 = 3버튼 ([A팀 승] / [무승부] / [B팀 승]) — PRD §3.3.
+ * 점수 입력 UI (- 0 + / 키패드) 폐기. 결과는 dummy score 페어로 부모로 dispatch.
  */
 function CourtCard({
   court,
   now,
   playerMap,
   isPending,
-  waitingCount,
-  matchPointTarget,
   onAssignCourt,
   onScoreChange,
   onEndCourt,
@@ -1656,18 +1422,38 @@ function CourtCard({
   now: number
   playerMap: Map<string, PlayerEntry>
   isPending: boolean
-  waitingCount: number
-  matchPointTarget: 21 | 25
   onAssignCourt: (courtIndex: number) => void
   onScoreChange: (courtIndex: number, team: 'A' | 'B', delta: number) => void
   onEndCourt: (courtIndex: number) => void
   onCancelCourt: (courtIndex: number) => void
 }) {
   const isEmpty = court.teamA.length === 0
-  const winState = isEmpty ? null : getWinState(court.scoreA, court.scoreB, matchPointTarget)
-  const hasWinner = winState === 'A' || winState === 'B'
+  /** 사용자가 3버튼 중 하나라도 클릭했는지 (이번 라운드에 한해 로컬 추적).
+   *  matchDbId 가 변경되면(다음 매치 진입) "이전 round" 로 간주해 자동 null 복귀. */
+  const [resultChoice, setResultChoice] = useState<MatchResult | null>(null)
+  /** 직전 render 에서 본 matchDbId. React 권장 "deriving state when prop changes" 패턴.
+   *  useEffect 사용 시 cascading render 경고 발생 → 렌더 본문에서 즉시 reset. */
+  const [trackedMatchDbId, setTrackedMatchDbId] = useState<string | null>(court.matchDbId)
+  if (trackedMatchDbId !== court.matchDbId) {
+    setTrackedMatchDbId(court.matchDbId)
+    setResultChoice(null)
+  }
+  /** 최종 매치 결과 — 사용자가 명시 선택했으면 그 값, 안 했으면 null.
+   *  (점수 디코딩만으로는 DRAW vs "미선택" 을 구분할 수 없어 resultChoice 가 truth source.) */
+  const matchResult: MatchResult | null = resultChoice
   const courtElapsed = court.startedAt > 0 ? now - court.startedAt : 0
-  const [scoreModalOpen, setScoreModalOpen] = useState(false)
+
+  /** 3버튼 클릭 handler — 선택값을 dummy score 로 인코딩해 부모 onScoreChange 로 dispatch.
+   *  delta = 새 점수 - 현재 점수. 재선택 시에도 안전 (예: A 후 B 선택 → A delta -1, B delta +1). */
+  const handleResultPick = (result: MatchResult) => {
+    if (isEmpty || court.isSaving || isPending) return
+    const [newA, newB] = RESULT_DUMMY_SCORES[result]
+    const deltaA = newA - court.scoreA
+    const deltaB = newB - court.scoreB
+    if (deltaA !== 0) onScoreChange(court.courtIndex, 'A', deltaA)
+    if (deltaB !== 0) onScoreChange(court.courtIndex, 'B', deltaB)
+    setResultChoice(result)
+  }
 
   /* 슬롯 렌더 헬퍼 — 코트 카드는 위치 기반 (좌 A / 우 B), 성별과 무관.
      좌 = #00804C (deep green) + 흰 텍스트 / 우 = #EBE64C (lime) + 다크 텍스트 */
@@ -1708,11 +1494,23 @@ function CourtCard({
     )
   }
 
-  /* 우측 액션 버튼 — 경기 없음(isEmpty 또는 hasWinner) = 완료 / 경기중(active) = 취소 */
-  const showCompleteState = isEmpty || hasWinner
-  const completeAction = hasWinner
+  /** 결과 선택 완료 = 매치 종료 가능. 매치 선택 안 됐으면 "취소" 노출. */
+  const hasResult = matchResult !== null
+
+  /* 우측 액션 버튼 — 결과 선택됨 = 완료 / 진행 중 = 취소 / 빈 코트 = 완료(비활성) */
+  const showCompleteState = isEmpty || hasResult
+  const completeAction = hasResult
     ? () => onEndCourt(court.courtIndex)
     : undefined  // isEmpty 면 disabled
+
+  /** 승자 이름 합쳐 표시 (A 승 / B 승 시). 무승부엔 null. */
+  const winnerNames =
+    matchResult === 'A' || matchResult === 'B'
+      ? (matchResult === 'A' ? court.teamA : court.teamB)
+          .map((id) => playerMap.get(id)?.name)
+          .filter(Boolean)
+          .join(' · ')
+      : null
 
   return (
     <article className="relative flex flex-col rounded-xl border border-[var(--color-brand-border)] bg-white p-3 min-h-[170px]">
@@ -1724,12 +1522,12 @@ function CourtCard({
             {court.courtIndex + 1}코트
           </span>
         </div>
-        {/* 중앙: 상태 + 시간 (승자 표시는 점수 영역에서만 노출 — 중복 제거).
+        {/* 중앙: 상태 + 시간 (승자 표시는 결과 영역에서만 노출 — 중복 제거).
             진행중 = 검정 텍스트 + Mantis green 라이브 점 (펄스 애니메이션). */}
         <div className="justify-self-center text-center">
           {isEmpty ? (
             <span className="text-[11px] font-bold text-[var(--color-brand-text-muted)]">대기</span>
-          ) : hasWinner ? (
+          ) : hasResult ? (
             <span className="text-[11px] font-bold text-[var(--color-brand-text-sub)] tabular-nums">
               {formatDuration(courtElapsed)}
             </span>
@@ -1746,10 +1544,10 @@ function CourtCard({
             <button
               type="button"
               onClick={completeAction}
-              disabled={isEmpty || court.isSaving || isPending}
+              disabled={isEmpty || !hasResult || court.isSaving || isPending}
               className={cn(
                 'rounded-full px-2.5 py-1 text-[11px] font-extrabold transition-all active:scale-95 disabled:cursor-not-allowed',
-                hasWinner
+                hasResult
                   ? 'bg-[var(--color-brand-ink)] text-[var(--color-brand-lime)] hover:brightness-110 disabled:opacity-50'
                   : 'border border-[var(--color-brand-border)] bg-white text-[var(--color-brand-text-muted)] disabled:opacity-50',
               )}
@@ -1778,10 +1576,7 @@ function CourtCard({
         </div>
         <div className="flex flex-col items-center justify-center gap-1 px-1">
           <div className="w-px flex-1 bg-[#d4d4d4]" />
-          <span className={cn(
-            'text-xs font-bold uppercase tracking-widest',
-            isEmpty ? 'text-[var(--color-brand-text-muted)]' : 'text-[var(--color-brand-text-muted)]',
-          )}>vs</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-brand-text-muted)]">vs</span>
           <div className="w-px flex-1 bg-[#d4d4d4]" />
         </div>
         <div className="grid grid-rows-2 gap-2">
@@ -1790,74 +1585,99 @@ function CourtCard({
         </div>
       </div>
 
-      {/* 점수 영역 — 클릭 시 키패드 모달 열림 (D안: 직접 입력) */}
-      {(() => {
-        const winnerNames = hasWinner
-          ? (winState === 'A' ? court.teamA : court.teamB)
-              .map((id) => playerMap.get(id)?.name)
-              .filter(Boolean)
-              .join(' · ')
-          : null
-
-        return (
-          <button
-            type="button"
-            onClick={() => !isEmpty && setScoreModalOpen(true)}
-            disabled={isEmpty || court.isSaving || isPending}
-            className={cn(
-              'mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-lg p-2 transition-all',
-              isEmpty
-                ? 'cursor-not-allowed opacity-40'
-                : 'cursor-pointer hover:bg-[var(--color-surface-sub)] active:scale-[0.99]',
-            )}
-            aria-label="점수 입력"
-          >
-            <span className="text-4xl font-extrabold tabular-nums text-[var(--color-brand-court-team-a)] md:text-3xl">
-              {court.scoreA}
-            </span>
-            {winState === 'deuce' ? (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-orange-100 px-2 py-0.5 text-xs font-extrabold text-orange-600 md:text-[10px]">
-                <Flame size={11} strokeWidth={2.4} /> 듀스
-              </span>
-            ) : hasWinner ? (
+      {/* 결과 영역 (PRD §3.3) — 3버튼: [A팀 승] [무승부] [B팀 승]
+          · 빈 코트: 비활성 placeholder
+          · 진행중 (결과 미선택): 3버튼 활성
+          · 결과 선택됨: 승자 배지 표시 + 재선택 가능 (버튼 그대로 유지, 활성 = 현재 선택)
+       */}
+      {isEmpty ? (
+        <div className="mt-2 flex items-center justify-center rounded-lg border border-dashed border-[var(--color-brand-border)] bg-[var(--color-surface-sub)] p-3 text-[11px] font-bold text-[var(--color-brand-text-muted)]">
+          경기 대기 중
+        </div>
+      ) : (
+        <div className="mt-2 space-y-2">
+          {/* 결과 배지 — 선택됐을 때만 노출 (승자 이름 또는 "무승부") */}
+          {hasResult && (
+            <div className="flex justify-center">
               <span
                 className={cn(
-                  'inline-flex items-center gap-1 truncate rounded-lg px-2.5 py-1 text-xs font-extrabold whitespace-nowrap md:px-3 md:py-1.5 md:text-sm',
-                  winState === 'A'
+                  'inline-flex items-center gap-1 truncate rounded-full px-3 py-1 text-xs font-extrabold whitespace-nowrap md:text-sm',
+                  matchResult === 'A'
                     ? 'bg-[var(--color-brand-court-team-a)] text-white'
-                    : 'bg-[var(--color-brand-court-team-b)] text-[#0a0a0a]',
+                    : matchResult === 'B'
+                      ? 'bg-[var(--color-brand-court-team-b)] text-[#0a0a0a]'
+                      : 'bg-[var(--color-surface-muted)] text-[var(--color-brand-text-sub)]',
                 )}
               >
-                <Trophy size={13} strokeWidth={2.6} />
-                {winnerNames}
+                {matchResult === 'DRAW' ? (
+                  <>무승부</>
+                ) : (
+                  <>
+                    <Trophy size={13} strokeWidth={2.6} />
+                    {winnerNames}
+                  </>
+                )}
               </span>
-            ) : (
-              <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-brand-text-muted)]">
-                vs
-              </span>
-            )}
-            <span className="text-4xl font-extrabold tabular-nums text-[#7C7C00] md:text-3xl">
-              {court.scoreB}
-            </span>
-          </button>
-        )
-      })()}
+            </div>
+          )}
 
-      {/* 점수 입력 모달 */}
-      <ScoreInputModal
-        open={scoreModalOpen}
-        initialScoreA={court.scoreA}
-        initialScoreB={court.scoreB}
-        matchPointTarget={matchPointTarget}
-        onClose={() => setScoreModalOpen(false)}
-        onSave={(newA, newB) => {
-          const deltaA = newA - court.scoreA
-          const deltaB = newB - court.scoreB
-          if (deltaA !== 0) onScoreChange(court.courtIndex, 'A', deltaA)
-          if (deltaB !== 0) onScoreChange(court.courtIndex, 'B', deltaB)
-          setScoreModalOpen(false)
-        }}
-      />
+          {/* 3버튼 그리드: [A팀 승] [무승부] [B팀 승] */}
+          <div
+            className="grid grid-cols-[1fr_auto_1fr] gap-1.5"
+            role="group"
+            aria-label="매치 결과 선택"
+          >
+            <button
+              type="button"
+              onClick={() => handleResultPick('A')}
+              disabled={court.isSaving || isPending}
+              aria-pressed={matchResult === 'A'}
+              className={cn(
+                'inline-flex items-center justify-center gap-1 rounded-lg px-2 py-2.5 text-xs font-extrabold transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+                matchResult === 'A'
+                  ? 'bg-[var(--color-brand-court-team-a)] text-white ring-2 ring-offset-1 ring-[var(--color-brand-court-team-a)]'
+                  : 'border border-[var(--color-brand-court-team-a)] bg-white text-[var(--color-brand-court-team-a)] hover:bg-[var(--color-brand-court-team-a)]/10',
+              )}
+            >
+              <Trophy size={13} strokeWidth={2.6} />
+              A팀 승
+            </button>
+            <button
+              type="button"
+              onClick={() => handleResultPick('DRAW')}
+              disabled={court.isSaving || isPending}
+              aria-pressed={matchResult === 'DRAW'}
+              className={cn(
+                'inline-flex items-center justify-center rounded-lg px-2 py-2.5 text-xs font-extrabold transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap md:text-sm',
+                matchResult === 'DRAW'
+                  ? 'bg-[var(--color-brand-ink)] text-white ring-2 ring-offset-1 ring-[var(--color-brand-ink)]'
+                  : 'border border-[var(--color-brand-border)] bg-white text-[var(--color-brand-text-sub)] hover:bg-[var(--color-surface-sub)]',
+              )}
+            >
+              무승부
+            </button>
+            <button
+              type="button"
+              onClick={() => handleResultPick('B')}
+              disabled={court.isSaving || isPending}
+              aria-pressed={matchResult === 'B'}
+              className={cn(
+                'inline-flex items-center justify-center gap-1 rounded-lg px-2 py-2.5 text-xs font-extrabold transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+                matchResult === 'B'
+                  ? 'bg-[var(--color-brand-court-team-b)] text-[#0a0a0a] ring-2 ring-offset-1 ring-[var(--color-brand-court-team-b)]'
+                  : 'border border-[#7C7C00]/40 bg-white text-[#7C7C00] hover:bg-[var(--color-brand-court-team-b)]/20',
+              )}
+            >
+              B팀 승
+              <Trophy size={13} strokeWidth={2.6} />
+            </button>
+          </div>
+        </div>
+      )}
     </article>
   )
 }
+
+/* 외부에서 dummy score 인코딩을 디코딩해야 할 때 사용 (테스트 등). 현재 직접 호출처 없음. */
+export { getResultFromScores, RESULT_DUMMY_SCORES }
+export type { MatchResult }

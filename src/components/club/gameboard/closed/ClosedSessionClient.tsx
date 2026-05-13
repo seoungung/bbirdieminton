@@ -41,11 +41,19 @@ function formatEventDate(dateStr: string): string {
   return `${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`
 }
 
-function getWinner(a: number | null, b: number | null): 'A' | 'B' | null {
-  if (a === null || b === null) return null
+/** 매치 결과 디코딩 — W2 dummy score 호환 (PRD §3.3).
+ *  · a > b → A 승
+ *  · b > a → B 승
+ *  · a === b (양쪽 모두 non-null) → 무승부
+ *  · a === null || b === null → 미완료
+ *  T0-3-3 마이그 이후엔 matches.winning_team 컬럼 직독으로 교체 예정. */
+type MatchOutcome = 'A' | 'B' | 'DRAW' | 'INCOMPLETE'
+
+function getOutcome(a: number | null, b: number | null): MatchOutcome {
+  if (a === null || b === null) return 'INCOMPLETE'
   if (a > b) return 'A'
   if (b > a) return 'B'
-  return null
+  return 'DRAW'
 }
 
 export function ClosedSessionClient({
@@ -136,7 +144,9 @@ export function ClosedSessionClient({
           ) : (
             <div className="space-y-2">
               {sortedMatches.map(m => {
-                const winner = getWinner(m.teamAScore, m.teamBScore)
+                const outcome = getOutcome(m.teamAScore, m.teamBScore)
+                const winner: 'A' | 'B' | null =
+                  outcome === 'A' ? 'A' : outcome === 'B' ? 'B' : null
                 return (
                   <div
                     key={m.id}
@@ -146,18 +156,19 @@ export function ClosedSessionClient({
                       <span className="rounded bg-[var(--color-brand-court)] px-2 py-0.5 text-[11px] font-bold text-white">
                         {m.courtNumber}코트
                       </span>
-                      {winner === null && m.teamAScore === null ? (
+                      {outcome === 'INCOMPLETE' ? (
                         <span className="text-[11px] text-[var(--color-brand-text-muted)]">미완료</span>
-                      ) : winner === null ? (
-                        <span className="text-[11px] text-[var(--color-brand-text-muted)]">무승부</span>
+                      ) : outcome === 'DRAW' ? (
+                        <span className="text-[11px] font-bold text-[var(--color-brand-text-sub)]">무승부</span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--color-brand-streak)]">
                           <Trophy size={10} strokeWidth={2.4} />
-                          {winner}팀 승
+                          {outcome}팀 승
                         </span>
                       )}
                     </div>
 
+                    {/* PRD §3.3 — 점수 표시 폐기. 결과 라벨(승/무/미완료)만 노출. */}
                     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
                       {/* 팀 A */}
                       <div
@@ -176,25 +187,25 @@ export function ClosedSessionClient({
                         </p>
                       </div>
 
-                      {/* 점수 */}
-                      <div className="flex items-center gap-2 tabular-nums">
-                        <span
-                          className={cn(
-                            'text-xl font-extrabold w-7 text-center',
-                            winner === 'A' ? 'text-[var(--color-brand-team-a)]' : 'text-[var(--color-brand-text-muted)]',
-                          )}
-                        >
-                          {m.teamAScore ?? '–'}
-                        </span>
-                        <span className="text-[var(--color-brand-text-muted)] text-sm">:</span>
-                        <span
-                          className={cn(
-                            'text-xl font-extrabold w-7 text-center',
-                            winner === 'B' ? 'text-[var(--color-brand-team-b)]' : 'text-[var(--color-brand-text-muted)]',
-                          )}
-                        >
-                          {m.teamBScore ?? '–'}
-                        </span>
+                      {/* 중앙 결과 마커 — 점수 숫자 대신 라벨/심볼 */}
+                      <div className="flex items-center justify-center w-12">
+                        {outcome === 'INCOMPLETE' ? (
+                          <span className="text-[var(--color-brand-text-muted)] text-sm">–</span>
+                        ) : outcome === 'DRAW' ? (
+                          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--color-brand-text-sub)]">
+                            무
+                          </span>
+                        ) : (
+                          <Trophy
+                            size={18}
+                            strokeWidth={2.6}
+                            className={cn(
+                              winner === 'A'
+                                ? 'text-[var(--color-brand-team-a)]'
+                                : 'text-[var(--color-brand-team-b)]',
+                            )}
+                          />
+                        )}
                       </div>
 
                       {/* 팀 B */}

@@ -571,10 +571,20 @@ export function GameBoardClient({
 
       const now = Date.now()
 
-      if (capturedGameMode === 'king_of_court') {
-        /* ── 킹 오브 코트: 승자 유지, 도전자 자동 배정 ── */
-        const winners = scoreA >= scoreB ? teamA : teamB
-        const losers  = scoreA >= scoreB ? teamB : teamA
+      /* ── 매치 결과 디코딩 (PRD §3.3 — W2 dummy score 호환) ──
+       *  scoreA > scoreB → 'A'
+       *  scoreB > scoreA → 'B'
+       *  scoreA == scoreB → 'DRAW' (3버튼 [무승부] = (0,0) dummy 인코딩)
+       *  T0-3-3 마이그 이후엔 matches.winning_team 컬럼 직독으로 교체 예정.
+       */
+      const winningTeam: 'A' | 'B' | 'DRAW' =
+        scoreA > scoreB ? 'A' : scoreB > scoreA ? 'B' : 'DRAW'
+      const isDraw = winningTeam === 'DRAW'
+
+      if (capturedGameMode === 'king_of_court' && !isDraw) {
+        /* ── 킹 오브 코트: 승자 유지, 도전자 자동 배정 (무승부는 일반 종료로 폴백) ── */
+        const winners = winningTeam === 'A' ? teamA : teamB
+        const losers  = winningTeam === 'A' ? teamB : teamA
 
         // 킹 스트릭 업데이트
         setKingStreaks(prev => {
