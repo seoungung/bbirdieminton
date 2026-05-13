@@ -296,28 +296,14 @@ export function PricingClient() {
           })}
         </div>
 
-        {/* 가맹 심사 필수 안내 (정기결제 · 해지 · 사전 통보 정책) */}
-        <div className="max-w-[760px] mx-auto mt-12 text-center space-y-2">
-          <p className="text-[12px] text-white/60 leading-relaxed">
-            모든 유료 플랜은 <strong className="text-white/80">정기결제(자동결제)</strong>이며, 서비스 제공기간은 월간 1개월 / 연간 12개월입니다.
-            <br />
-            언제든 마이페이지 또는 이메일(
-            <a href="mailto:hello@birdieminton.com" className="underline hover:text-white">hello@birdieminton.com</a>
-            )로 해지 가능하며, 해지 후에도 이미 결제된 기간 종료 시점까지 유료 기능을 이용하실 수 있습니다.
-          </p>
-          <p className="text-[11px] text-white/40 leading-relaxed">
-            가격 인상은 적용 30일 전 사전 통보 후 회원 동의를 거쳐 진행됩니다.
-            무료에서 유료 플랜으로 자동 전환되는 경우 전환 7일 전 사전 통보됩니다.
-            결제 관련 자세한 내용은 <Link href="/policy/refund" className="underline hover:text-white">환불정책</Link>과 <Link href="/terms" className="underline hover:text-white">이용약관</Link>을 참고해주세요.
-          </p>
-          <p className="text-[12px] text-white/40 pt-2">
-            신용 · 체크카드 정기결제 지원 (토스페이먼츠) · 언제든 해지 가능
-          </p>
-        </div>
-
-        {/* 누적 인원 정책 한 줄 명시 */}
-        <p className="text-center text-[12px] text-white/45 mt-4 max-w-[760px] mx-auto leading-relaxed">
-          멤버 수 한도 초과 시 신규 가입 신청이 자동 차단되며, 하위 플랜으로 변경하셔도 기존 데이터는 유지되지만 한도 초과 상태에서는 새로운 정기 일정 개설이 제한됩니다.
+        {/* 가맹 심사 명시: 정기결제 + 해지 가능 (자세한 내용은 FAQ 참고) */}
+        <p className="text-center text-[12px] text-white/50 mt-12 max-w-[760px] mx-auto leading-relaxed">
+          모든 유료 플랜은 매월 자동 갱신되는 정기결제이며, 언제든 해지 가능합니다.
+          자세한 내용은 아래 FAQ ·{' '}
+          <Link href="/policy/refund" className="underline hover:text-white">환불정책</Link>
+          {' · '}
+          <Link href="/terms" className="underline hover:text-white">이용약관</Link>
+          {' '}참고
         </p>
       </section>
 
