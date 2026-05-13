@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   robots: { index: false },
 }
 
-const EFFECTIVE_DATE = '2026년 4월 8일'
+const EFFECTIVE_DATE = '2026년 5월 11일'
 
 export default function TermsPage() {
   return (
@@ -48,6 +48,7 @@ export default function TermsPage() {
             <ol className="list-decimal pl-5 space-y-2">
               <li>회사는 다음 서비스를 제공합니다.
                 <ul className="list-disc pl-5 mt-2 space-y-1">
+                  <li>배드민턴 동호회 운영 관리 SaaS 서비스 (Free / Basic / Pro 플랜)</li>
                   <li>배드민턴 라켓 도감 및 정보 제공 서비스</li>
                   <li>배드민턴 레벨 진단 퀴즈 서비스</li>
                   <li>이메일 뉴스레터 서비스</li>
@@ -72,14 +73,39 @@ export default function TermsPage() {
             </ol>
           </Section>
 
-          <Section title="제6조 (개인정보보호)">
+          <Section title="제6조 (정기결제 자동 갱신)">
+            <ol className="list-decimal pl-5 space-y-2">
+              <li>유료 플랜(Basic, Pro)은 매월 결제 주기마다 자동 갱신됩니다.</li>
+              <li>갱신 시점은 최초 결제일을 기준으로 매월 동일한 날짜이며, 서비스 제공기간은 월간 결제 1개월 / 연간 결제 12개월입니다.</li>
+              <li>가격 인상이 발생하는 경우, 회사는 변경 적용 30일 전 이메일·앱 내 알림 등으로 회원에게 통보하고, 회원의 명시적 동의를 받습니다.</li>
+              <li>무료 플랜에서 유료 플랜으로 자동 전환되는 경우, 회사는 전환 7일 전 회원에게 사전 통보합니다.</li>
+              <li>베타 기간 종료 후 유료 플랜으로 전환되는 경우(가격 변경에 해당), 회사는 전환 30일 전 회원에게 사전 통보 및 동의 절차를 거칩니다.</li>
+            </ol>
+          </Section>
+
+          <Section title="제7조 (구독 해지)">
+            <ol className="list-decimal pl-5 space-y-2">
+              <li>회원은 언제든 마이페이지의 결제 관리 메뉴 또는 이메일(hello@birdieminton.com)로 구독 해지를 신청할 수 있습니다.</li>
+              <li>해지 신청 시점부터 다음 결제는 청구되지 않으며, 이미 결제된 기간(current_period_end)까지는 유료 기능을 그대로 이용할 수 있습니다.</li>
+              <li>해지 후 빌링키는 즉시 또는 결제 주기 종료 시점에 폐기됩니다.</li>
+            </ol>
+          </Section>
+
+          <Section title="제8조 (결제 실패 처리)">
+            <ol className="list-decimal pl-5 space-y-2">
+              <li>정기결제 실패 시 회사는 최대 10일 동안 재시도 및 회원 안내를 진행합니다.</li>
+              <li>10일 이후에도 결제가 완료되지 않으면 자동으로 Free 플랜으로 다운그레이드되며, 기존 데이터는 유지됩니다.</li>
+            </ol>
+          </Section>
+
+          <Section title="제9조 (개인정보보호)">
             <p>
               회사는 이용자의 개인정보를 보호하기 위하여 「개인정보보호법」 등 관련 법령에서 정하는 바를 준수합니다.
               개인정보의 처리에 관한 사항은 별도의 <a href="/privacy" className="text-[var(--color-brand-lime)] underline">개인정보처리방침</a>에 따릅니다.
             </p>
           </Section>
 
-          <Section title="제7조 (회사의 의무)">
+          <Section title="제10조 (회사의 의무)">
             <ol className="list-decimal pl-5 space-y-2">
               <li>회사는 법령과 이 약관이 금지하거나 공서양속에 반하는 행위를 하지 않으며 지속적·안정적으로 재화·서비스를 제공하기 위해 노력합니다.</li>
               <li>회사는 이용자가 안전하게 서비스를 이용할 수 있도록 개인정보보호를 위한 보안 시스템을 구축합니다.</li>
@@ -87,7 +113,7 @@ export default function TermsPage() {
             </ol>
           </Section>
 
-          <Section title="제8조 (이용자의 의무)">
+          <Section title="제11조 (이용자의 의무)">
             <p>이용자는 다음 행위를 하여서는 안 됩니다.</p>
             <ul className="list-disc pl-5 mt-2 space-y-1">
               <li>회원가입 신청 또는 변경 시 허위 내용 등록</li>
@@ -99,21 +125,21 @@ export default function TermsPage() {
             </ul>
           </Section>
 
-          <Section title="제9조 (저작권 및 지적재산권)">
+          <Section title="제12조 (저작권 및 지적재산권)">
             <ol className="list-decimal pl-5 space-y-2">
               <li>몰이 제공하는 콘텐츠(라켓 도감, 가이드, 퀴즈 등)에 대한 저작권 및 지적재산권은 회사에 귀속됩니다.</li>
               <li>이용자는 몰 이용으로 얻은 정보를 회사의 사전 승낙 없이 복제·송신·출판·배포·방송 등의 방법으로 영리 목적으로 이용하거나 제3자에게 이용하게 해서는 안 됩니다.</li>
             </ol>
           </Section>
 
-          <Section title="제10조 (분쟁 해결)">
+          <Section title="제13조 (분쟁 해결)">
             <ol className="list-decimal pl-5 space-y-2">
               <li>회사는 이용자로부터 제출되는 불만 사항 및 의견을 최우선적으로 처리합니다. 처리하기 어려울 경우 이용자에게 그 사유와 처리 일정을 즉시 통보합니다.</li>
               <li>회사와 이용자 간 발생한 분쟁은 전자상거래 등에서의 소비자보호에 관한 법률에서 정하는 절차에 따릅니다.</li>
             </ol>
           </Section>
 
-          <Section title="제11조 (재판권 및 준거법)">
+          <Section title="제14조 (재판권 및 준거법)">
             <ol className="list-decimal pl-5 space-y-2">
               <li>회사와 이용자 간에 발생한 전자상거래 분쟁에 관한 소송은 민사소송법상의 관할법원에 제기합니다.</li>
               <li>회사와 이용자 간에 제기된 소송에는 대한민국 법을 적용합니다.</li>

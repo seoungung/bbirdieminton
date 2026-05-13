@@ -24,7 +24,7 @@ export default function BusinessPage() {
             { label: '상호', value: '버디민턴' },
             { label: '대표자', value: '양성웅' },
             { label: '사업자등록번호', value: '227-11-71746' },
-            { label: '통신판매업신고번호', value: '신고 진행 중' },
+            { label: '통신판매업신고번호', value: '취득 진행 중 (관할 구청 신청 완료)' },
             { label: '사업장 소재지', value: '서울특별시 관악구 은천로35다길 26-13, 101호' },
             { label: '과세유형', value: '간이과세자' },
             { label: '업태 / 종목', value: '도매 및 소매업 / 전자상거래 소매업' },
@@ -42,6 +42,10 @@ export default function BusinessPage() {
             </div>
           ))}
         </div>
+
+        <p className="text-[0.82rem] text-[#999] -mt-6 mb-10 leading-[1.7]">
+          * 통신판매업 신고는 현재 관할 구청에 신청 완료되어 절차 진행 중이며, 신고번호 취득 후 본 페이지에 즉시 게시됩니다.
+        </p>
 
         {/* 소비자 피해보상 안내 */}
         <div className="bg-[#f8f8f8] rounded-2xl p-6 mb-10">
