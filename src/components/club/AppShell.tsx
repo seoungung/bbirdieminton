@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import {
   Home, Gamepad2, Trophy, Users, Settings as SettingsIcon,
-  BarChart3, CalendarDays, Award, FileBarChart, Compass,
+  BarChart3, CalendarDays, Award, Compass,
   Menu, X, ChevronLeft, ChevronRight,
   BookOpen, Newspaper,
 } from 'lucide-react'
@@ -135,12 +135,16 @@ export function AppShell({
   ]
 
   /* T0-1-1: finance · notices · join-requests 는 settings 의 탭으로 흡수됨.
-   * 사이드바에서는 [관리] 단일 진입점만 노출. */
+   * 사이드바에서는 [관리] 단일 진입점만 노출.
+   *
+   * T0-1-2: stats 가 PRD §2.2 [스탯] 통합 허브 — 분석/랭킹/시즌 리포트 3탭.
+   *   - report 별도 nav 제거 (stats?tab=report 로 흡수).
+   *   - ranking 은 "커뮤니티" 섹션 유지 (회원도 진입 — 양쪽 미러링).
+   *   - stats nav 자체에는 ownerOnly·proOnly 안 검 — 페이지 안에서 탭별 분기. */
   const adminNav: NavItem[] = [
     { href: `/club/${clubId}/members`,   label: '회원',   Icon: Users,        ownerOnly: true },
     { href: `/club/${clubId}/shuttle`,   label: '셔틀콕', Icon: ShuttlecockIcon, ownerOnly: true },
-    { href: `/club/${clubId}/stats`,     label: '분석',   Icon: BarChart3,    ownerOnly: true, proOnly: true },
-    { href: `/club/${clubId}/report`,    label: '리포트', Icon: FileBarChart, ownerOnly: true, proOnly: true },
+    { href: `/club/${clubId}/stats`,     label: '스탯',   Icon: BarChart3 },
     { href: `/club/${clubId}/settings`,  label: '관리',   Icon: SettingsIcon, ownerOnly: true },
   ]
 
