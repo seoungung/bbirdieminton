@@ -7,11 +7,12 @@ import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import {
   Home, Gamepad2, Trophy, Users, Settings as SettingsIcon,
-  BarChart3, CalendarDays, Award, Compass,
+  BarChart3, CalendarDays, Compass,
   Menu, X, ChevronLeft, ChevronRight,
   BookOpen, Newspaper,
+  // Award: T0-1-6 hide (Stage A W5 /mypage 흡수 시 복구)
 } from 'lucide-react'
-import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
+// T0-1-4: ShuttlecockIcon import 제거 (사이드바 hide로 미사용). Stage C 에서 복구.
 import { ClubSwitcher, type ClubOption } from './ClubSwitcher'
 import { SidebarSearch } from './SidebarSearch'
 import { SidebarNotificationBell } from './SidebarNotificationBell'
@@ -131,7 +132,9 @@ export function AppShell({
 
   const communityNav: NavItem[] = [
     { href: `/club/${clubId}/ranking`,   label: '랭킹',   Icon: Trophy },
-    { href: `/club/${clubId}/me`,        label: '내 카드', Icon: Award },
+    // T0-1-6: /me 사이드바 hide. Stage A W5 에서 /mypage 로 흡수 예정.
+    // Stage 0 W2 의 Glicko mu/phi 전환 검증용으로 라우트 살려둠 (직접 URL 진입 가능).
+    // { href: `/club/${clubId}/me`,        label: '내 카드', Icon: Award },
   ]
 
   /* T0-1-1: finance · notices · join-requests 는 settings 의 탭으로 흡수됨.
@@ -143,7 +146,9 @@ export function AppShell({
    *   - stats nav 자체에는 ownerOnly·proOnly 안 검 — 페이지 안에서 탭별 분기. */
   const adminNav: NavItem[] = [
     { href: `/club/${clubId}/members`,   label: '회원',   Icon: Users,        ownerOnly: true },
-    { href: `/club/${clubId}/shuttle`,   label: '셔틀콕', Icon: ShuttlecockIcon, ownerOnly: true },
+    // T0-1-4: /shuttle 사이드바 hide. Stage C TC-1-5 에서 /session/{id}/summary 정산소로 통합 예정.
+    // 직접 URL 진입(/shuttle)은 가능 — 운영자 임시 접근용.
+    // { href: `/club/${clubId}/shuttle`,   label: '셔틀콕', Icon: ShuttlecockIcon, ownerOnly: true },
     { href: `/club/${clubId}/stats`,     label: '스탯',   Icon: BarChart3 },
     { href: `/club/${clubId}/settings`,  label: '관리',   Icon: SettingsIcon, ownerOnly: true },
   ]

@@ -502,12 +502,7 @@ export function SetupPhase({
                     >
                       초대코드 보기
                     </Link>
-                    <Link
-                      href={`/club/${clubId}/import`}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-[#0a0a0a] border border-[#e5e5e5] text-xs font-bold rounded-full hover:border-[#0a0a0a] transition-colors"
-                    >
-                      엑셀로 멤버 가져오기
-                    </Link>
+                    {/* T0-1-3: Stage 0 동안 엑셀 임포트 링크 hide. Stage E 에서 부활. */}
                   </div>
                 )}
               </div>

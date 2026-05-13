@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Crown, Shield, User, FileSpreadsheet } from 'lucide-react'
+// T0-1-3: Link import 제거 (엑셀 임포트 진입점 hide로 미사용). Stage E 복구 시 추가.
+import { Crown, Shield, User } from 'lucide-react'
 import type { Club, ClubMemberWithUser, MemberRole } from '@/types/club'
 import { updateMemberRoleAction } from '@/app/club/[clubId]/members/actions'
 import { updateClubProfileAction } from '@/app/club/[clubId]/settings/actions'
@@ -106,15 +106,7 @@ export function SettingsMembersClient({
           <h2 className="text-[18px] sm:text-[20px] font-extrabold text-[var(--color-text-strong)]">
             멤버 <span className="text-[#999] font-semibold tabular-nums">{members.length}</span>
           </h2>
-          {isManager && (
-            <Link
-              href={`/club/${club.id}/import`}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[#555] border border-[#e5e5e5] px-3 py-1.5 rounded-xl hover:bg-[#f8f8f8] transition-colors"
-            >
-              <FileSpreadsheet size={13} />
-              엑셀로 멤버 가져오기
-            </Link>
-          )}
+          {/* T0-1-3: 엑셀 임포트 진입점 hide (Stage E 부활 예정) */}
         </div>
         <div className="space-y-2">
           {members.map((m) => (

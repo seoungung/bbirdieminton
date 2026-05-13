@@ -4,7 +4,7 @@ import Link from 'next/link'
 import {
   ChevronRight, Trophy, Users, Calendar, Gamepad2,
   Wallet, Sparkles, TrendingUp, Clock, Megaphone, ClipboardList,
-  Settings as SettingsIcon, FileSpreadsheet,
+  Settings as SettingsIcon,
 } from 'lucide-react'
 import { ShuttlecockIcon } from '@/components/icons/ShuttlecockIcon'
 import { GradeBadge } from '@/components/club/GradeBadge'
@@ -45,7 +45,8 @@ export function ClubDashboardClient({
   members,
   regularSessions,
   gameSessions,
-  isManager,
+  // T0-1-3: isManager — 엑셀 임포트 진입점 hide 후 현재 미사용. Stage E 재오픈 시 복구.
+  // isManager,
 }: Props) {
   /* ── 집계 ── */
   const topRankings = [...members]
@@ -249,17 +250,7 @@ export function ClubDashboardClient({
             accent="info"
           />
         </div>
-        {isManager && (
-          <div className="mt-2.5 flex justify-end">
-            <Link
-              href={`/club/${clubId}/import`}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#555] border border-[#e5e5e5] px-3 py-1.5 rounded-xl hover:bg-[#f8f8f8] transition-colors"
-            >
-              <FileSpreadsheet size={13} />
-              엑셀로 멤버 가져오기
-            </Link>
-          </div>
-        )}
+        {/* T0-1-3: 엑셀 임포트 진입점 hide (Stage E 부활 예정) */}
       </section>
 
       {/* 5. 최신 블로그 */}

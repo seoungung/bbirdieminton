@@ -92,6 +92,24 @@ export default async function EventDetailPage({ params }: PageProps) {
   }))
 
   const isManager = ['owner', 'manager'].includes(membership.role)
+
+  // T0-1-5: PRD §3.3 — 출석부에 [+ 게스트 추가] 버튼 상시 노출.
+  // 해당 이벤트 날짜에 open/in_progress 상태인 세션이 있으면 sessionId 전달.
+  // 세션이 없으면 null → 버튼은 노출하되 클릭 시 게임보드 이동 안내.
+  let activeSessionIdForGuest: string | null = null
+  if (isManager) {
+    const { data: activeSession } = await supabase
+      .from('sessions')
+      .select('id')
+      .eq('club_id', clubId)
+      .eq('event_id', eventId)
+      .in('status', ['open', 'in_progress'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    activeSessionIdForGuest = activeSession?.id ?? null
+  }
+
   const myStatus =
     attendees.find((a) => a.member_id === membership.id)?.status ?? null
 
@@ -159,6 +177,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           waitlistCount={waitlistCount}
           myWaitlistPosition={myWaitlistPosition}
           waitlistEntries={waitlistEntries}
+          activeSessionId={activeSessionIdForGuest}
         />
       </main>
     </div>

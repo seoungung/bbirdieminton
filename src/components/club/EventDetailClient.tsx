@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { UserPlus2 } from 'lucide-react'
 import type { EventAttendStatus } from '@/types/club'
 import { EventFormDialog } from './EventFormDialog'
 import { EventHero } from './events/EventHero'
@@ -9,6 +10,7 @@ import { RsvpToggle } from './events/RsvpToggle'
 import { AttendeeList } from './events/AttendeeList'
 import { WaitlistList } from './events/WaitlistList'
 import type { EventDetail, AttendeeRow, WaitlistEntry } from './events/types'
+import { GuestAddModal } from './gameboard/setup/GuestAddModal'
 import { todayKST } from '@/lib/date'
 import {
   setRsvpAction,
@@ -19,6 +21,7 @@ import {
   type EventInput,
   type EventListRow,
 } from '@/app/club/[clubId]/events/actions'
+import { addPlayersToActiveSessionAction } from '@/app/club/[clubId]/gameboard/actions'
 
 
 interface Props {
@@ -35,6 +38,12 @@ interface Props {
   myWaitlistPosition: number | null
   /** 대기 명단 (position asc, 비공개 모드 시 빈 배열) */
   waitlistEntries?: WaitlistEntry[]
+  /**
+   * T0-1-5: PRD §3.3 — 출석부에 [+ 게스트 추가] 버튼 상시 노출.
+   * 이 이벤트에 연결된 open/in_progress 세션 ID. 없으면 null.
+   * isManager 일 때만 버튼 표시.
+   */
+  activeSessionId?: string | null
 }
 
 export function EventDetailClient({
@@ -47,10 +56,14 @@ export function EventDetailClient({
   waitlistCount,
   myWaitlistPosition,
   waitlistEntries = [],
+  activeSessionId = null,
 }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [editing, setEditing] = useState(false)
+  // T0-1-5: 게스트 추가 모달 상태
+  const [guestAddOpen, setGuestAddOpen] = useState(false)
+  const [guestError, setGuestError] = useState<string | null>(null)
 
   const going = useMemo(() => attendees.filter((a) => a.status === 'going'), [attendees])
   const notGoing = useMemo(
@@ -131,6 +144,23 @@ export function EventDetailClient({
     })
   }
 
+  // T0-1-5: 출석부 게스트 추가 — active session 이 있으면 session_guests 에 추가
+  async function handleGuestConfirm(
+    guests: Array<{ name: string; gender: 'M' | 'F' | null; grade: import('@/lib/club/grade').Grade | null }>
+  ) {
+    setGuestError(null)
+    if (!activeSessionId) {
+      setGuestError('현재 진행 중인 게임보드 세션이 없습니다. 게임보드에서 세션을 시작한 뒤 게스트를 추가해주세요.')
+      return
+    }
+    const result = await addPlayersToActiveSessionAction(clubId, activeSessionId, { guests })
+    if (result.error) {
+      setGuestError(result.error)
+      return
+    }
+    router.refresh()
+  }
+
   return (
     <div className="space-y-4">
       <EventHero
@@ -156,6 +186,25 @@ export function EventDetailClient({
         />
       )}
 
+      {/* T0-1-5: PRD §3.3 — 출석부에 [+ 게스트 추가] 버튼 상시 노출 (운영진만) */}
+      {isManager && (
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setGuestAddOpen(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#e5e5e5] bg-white text-[#111] text-sm font-semibold rounded-xl hover:border-[var(--color-brand-ink)] transition-colors"
+          >
+            <UserPlus2 size={15} strokeWidth={2.1} />
+            게스트 추가
+          </button>
+        </div>
+      )}
+      {guestError && (
+        <p className="text-xs text-[var(--color-brand-streak)] bg-[var(--color-brand-streak-bg)] rounded-xl px-3 py-2">
+          {guestError}
+        </p>
+      )}
+
       <AttendeeList going={going} notGoing={notGoing} />
 
       {!isPast && (
@@ -172,6 +221,13 @@ export function EventDetailClient({
           onDelete={handleDelete}
         />
       )}
+
+      {/* T0-1-5: 게스트 추가 모달 (게임보드 GuestAddModal 재사용) */}
+      <GuestAddModal
+        open={guestAddOpen}
+        onClose={() => { setGuestAddOpen(false); setGuestError(null) }}
+        onConfirm={handleGuestConfirm}
+      />
     </div>
   )
 }
