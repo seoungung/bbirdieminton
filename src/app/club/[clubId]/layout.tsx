@@ -4,6 +4,7 @@ import { checkIsMaster } from '@/lib/auth/master'
 import { getClubUserId } from '@/lib/club/auth'
 import { getMyMembership } from '@/lib/club/client'
 import { AppShell } from '@/components/club/AppShell'
+import { ClubTopTabs } from '@/components/club/ClubTopTabs'
 import type { ClubOption } from '@/components/club/ClubSwitcher'
 import { getUnreadCountAction } from '@/app/club/[clubId]/notices/actions'
 
@@ -89,6 +90,9 @@ export default async function ClubDetailLayout({
   const avatarUrl =
     (user.user_metadata?.avatar_url as string | undefined) ?? null
 
+  /* PRD §2.2 상단 탭 운영자 여부 — [관리] 탭 노출 제어 */
+  const isManager = membership.role === 'owner' || membership.role === 'manager'
+
   return (
     <AppShell
       clubId={clubId}
@@ -104,6 +108,7 @@ export default async function ClubDetailLayout({
       availableClubs={availableClubs}
       isMaster={isMaster}
     >
+      <ClubTopTabs clubId={clubId} isManager={isManager} />
       {children}
     </AppShell>
   )

@@ -1,16 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import {
-  Home, Gamepad2, Trophy, Users, Settings as SettingsIcon,
-  BarChart3, CalendarDays, Compass,
+  Home, Gamepad2, Trophy, Compass,
   Menu, X, ChevronLeft, ChevronRight,
   BookOpen, Newspaper,
-  // Award: T0-1-6 hide (Stage A W5 /mypage 흡수 시 복구)
+  // T0-1-7: Users / SettingsIcon / BarChart3 / CalendarDays 사이드바 hide
+  //   (PRD §2.2 상단 탭 [일정]·[멤버]·[스탯]·[관리] 으로 이동 — ClubTopTabs.tsx).
+  // T0-1-6: Award hide (Stage A W5 /mypage 흡수 시 복구).
 } from 'lucide-react'
 // T0-1-4: ShuttlecockIcon import 제거 (사이드바 hide로 미사용). Stage C 에서 복구.
 import { ClubSwitcher, type ClubOption } from './ClubSwitcher'
@@ -93,23 +94,32 @@ export function AppShell({
   }
 
   /* xl 브레이크포인트 (1280px) 감지 — 미만이면 사이드바 강제 접힘.
-   * 모바일 (< md, 768px)는 사이드바 자체가 안 보이고 햄버거 드로어만. */
-  const [isXlScreen, setIsXlScreen] = useState(false)
-  useEffect(() => {
-    const mql = window.matchMedia('(min-width: 1280px)')
-    setIsXlScreen(mql.matches)
-    const handler = (e: MediaQueryListEvent) => setIsXlScreen(e.matches)
-    mql.addEventListener('change', handler)
-    return () => mql.removeEventListener('change', handler)
-  }, [])
+   * 모바일 (< md, 768px)는 사이드바 자체가 안 보이고 햄버거 드로어만.
+   *
+   * useSyncExternalStore 패턴: useEffect 내부 setState 회피
+   * (react-hooks/set-state-in-effect 위반 방지). */
+  const isXlScreen = useSyncExternalStore(
+    (notify) => {
+      const mql = window.matchMedia('(min-width: 1280px)')
+      mql.addEventListener('change', notify)
+      return () => mql.removeEventListener('change', notify)
+    },
+    () => window.matchMedia('(min-width: 1280px)').matches,
+    () => false, // SSR snapshot
+  )
 
   /* 실효 접힘 상태: xl 미만이면 강제 접힘, xl+ 면 사용자 설정 따름 */
   const effectiveCollapsed = !isXlScreen || sidebarCollapsed
 
-  /* 경로 변경 시 드로어 자동 닫기 */
-  useEffect(() => {
-    setDrawerOpen(false)
-  }, [pathname])
+  /* 경로 변경 시 드로어 자동 닫기 — "Adjusting state while rendering" 패턴.
+   * useEffect 내부 setState (cascading renders) 회피하면서도
+   * useRef 렌더 중 접근(react-hooks/refs) 도 회피하기 위해 useState 로 이전 pathname 저장.
+   * React 공식 가이드: https://react.dev/reference/react/useState#storing-information-from-previous-renders */
+  const [prevPathname, setPrevPathname] = useState(pathname)
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname)
+    if (drawerOpen) setDrawerOpen(false)
+  }
 
   /* body 스크롤 잠금 (드로어 열림 시) */
   useEffect(() => {
@@ -123,34 +133,32 @@ export function AppShell({
     }
   }, [drawerOpen])
 
-  /* 네비게이션 아이템 정의 */
+  /* 네비게이션 아이템 정의.
+   *
+   * T0-1-7: PRD §2.2 상단 탭([일정]·[멤버]·[스탯]·[관리]) 신설에 따라
+   *   - `events`, `members`, `stats`, `settings` 는 사이드바에서 hide (ClubTopTabs 에서 처리).
+   *   - 사이드바에는 대시보드·게임보드·랭킹·리소스만 남김.
+   *   - 외부 진입점(Dashboard ShortcutCard, SetupPhase 등) 은 그대로 작동. */
   const mainNav: NavItem[] = [
     { href: `/club/${clubId}`,           label: '대시보드',   Icon: Home,         match: `/club/${clubId}` },
     { href: `/club/${clubId}/gameboard`, label: '게임보드',   Icon: Gamepad2 },
-    { href: `/club/${clubId}/events`,    label: '정기모임',   Icon: CalendarDays },
   ]
 
   const communityNav: NavItem[] = [
+    /* T0-1-2: 랭킹은 사이드바 유지 + stats?tab=ranking 양쪽 미러링.
+     *   회원도 직접 진입 가능해야 하므로 stats 통합 허브와는 별개로 사이드바 노출. */
     { href: `/club/${clubId}/ranking`,   label: '랭킹',   Icon: Trophy },
     // T0-1-6: /me 사이드바 hide. Stage A W5 에서 /mypage 로 흡수 예정.
     // Stage 0 W2 의 Glicko mu/phi 전환 검증용으로 라우트 살려둠 (직접 URL 진입 가능).
     // { href: `/club/${clubId}/me`,        label: '내 카드', Icon: Award },
   ]
 
-  /* T0-1-1: finance · notices · join-requests 는 settings 의 탭으로 흡수됨.
-   * 사이드바에서는 [관리] 단일 진입점만 노출.
-   *
-   * T0-1-2: stats 가 PRD §2.2 [스탯] 통합 허브 — 분석/랭킹/시즌 리포트 3탭.
-   *   - report 별도 nav 제거 (stats?tab=report 로 흡수).
-   *   - ranking 은 "커뮤니티" 섹션 유지 (회원도 진입 — 양쪽 미러링).
-   *   - stats nav 자체에는 ownerOnly·proOnly 안 검 — 페이지 안에서 탭별 분기. */
+  /* T0-1-7: adminNav 의 [회원]·[스탯]·[관리] 는 상단 탭으로 이동.
+   *   사이드바 [관리] 섹션은 비워둠 — NavSection 의 `items.length === 0` 가드로 헤더도 자동 hide. */
   const adminNav: NavItem[] = [
-    { href: `/club/${clubId}/members`,   label: '회원',   Icon: Users,        ownerOnly: true },
     // T0-1-4: /shuttle 사이드바 hide. Stage C TC-1-5 에서 /session/{id}/summary 정산소로 통합 예정.
     // 직접 URL 진입(/shuttle)은 가능 — 운영자 임시 접근용.
     // { href: `/club/${clubId}/shuttle`,   label: '셔틀콕', Icon: ShuttlecockIcon, ownerOnly: true },
-    { href: `/club/${clubId}/stats`,     label: '스탯',   Icon: BarChart3 },
-    { href: `/club/${clubId}/settings`,  label: '관리',   Icon: SettingsIcon, ownerOnly: true },
   ]
 
   const resourceNav: NavItem[] = [
