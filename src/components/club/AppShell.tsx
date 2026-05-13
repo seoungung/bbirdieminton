@@ -6,8 +6,8 @@ import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import { usePathname } from 'next/navigation'
 import {
-  Home, Gamepad2, Trophy, Users, Wallet, Settings as SettingsIcon,
-  Megaphone, BarChart3, CalendarDays, Award, FileBarChart, Compass,
+  Home, Gamepad2, Trophy, Users, Settings as SettingsIcon,
+  BarChart3, CalendarDays, Award, FileBarChart, Compass,
   Menu, X, ChevronLeft, ChevronRight,
   BookOpen, Newspaper,
 } from 'lucide-react'
@@ -132,16 +132,16 @@ export function AppShell({
   const communityNav: NavItem[] = [
     { href: `/club/${clubId}/ranking`,   label: '랭킹',   Icon: Trophy },
     { href: `/club/${clubId}/me`,        label: '내 카드', Icon: Award },
-    { href: `/club/${clubId}/notices`,   label: '공지',   Icon: Megaphone },
   ]
 
+  /* T0-1-1: finance · notices · join-requests 는 settings 의 탭으로 흡수됨.
+   * 사이드바에서는 [관리] 단일 진입점만 노출. */
   const adminNav: NavItem[] = [
     { href: `/club/${clubId}/members`,   label: '회원',   Icon: Users,        ownerOnly: true },
-    { href: `/club/${clubId}/finance`,   label: '회비',   Icon: Wallet,       ownerOnly: true },
     { href: `/club/${clubId}/shuttle`,   label: '셔틀콕', Icon: ShuttlecockIcon, ownerOnly: true },
     { href: `/club/${clubId}/stats`,     label: '분석',   Icon: BarChart3,    ownerOnly: true, proOnly: true },
     { href: `/club/${clubId}/report`,    label: '리포트', Icon: FileBarChart, ownerOnly: true, proOnly: true },
-    { href: `/club/${clubId}/settings`,  label: '설정',   Icon: SettingsIcon, ownerOnly: true },
+    { href: `/club/${clubId}/settings`,  label: '관리',   Icon: SettingsIcon, ownerOnly: true },
   ]
 
   const resourceNav: NavItem[] = [

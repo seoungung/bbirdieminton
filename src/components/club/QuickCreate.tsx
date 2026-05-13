@@ -43,7 +43,7 @@ export function QuickCreate({ clubId, isOwner }: Props) {
       description: '현장 팀 배정·경기 시작',
     },
     {
-      href: `/club/${clubId}/notices`,
+      href: `/club/${clubId}/settings?tab=notices`,
       Icon: Megaphone,
       label: '공지 작성',
       description: '회원에게 알림 발송',

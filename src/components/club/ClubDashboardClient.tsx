@@ -244,8 +244,8 @@ export function ClubDashboardClient({
           <ShortcutCard
             href={`/club/${clubId}/settings`}
             Icon={SettingsIcon}
-            label="운영·관리"
-            desc="회비·공지"
+            label="관리"
+            desc="회비·공지·가입신청"
             accent="info"
           />
         </div>

@@ -122,7 +122,7 @@ export function SidebarNotificationBell({
           <div className="max-h-[360px] overflow-y-auto">
             {unreadNoticeCount > 0 && (
               <Link
-                href={`/club/${clubId}/notices`}
+                href={`/club/${clubId}/settings?tab=notices`}
                 onClick={() => setOpen(false)}
                 role="menuitem"
                 className="flex items-start gap-3 px-5 py-3 hover:bg-[#f8f8f8] transition-colors border-l-2 border-[var(--color-brand-court)]"
