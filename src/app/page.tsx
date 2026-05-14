@@ -1,8 +1,19 @@
 import Link from 'next/link'
 import { getAuthUser } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export default async function Home() {
   const user = await getAuthUser()
+  let isMaster = false
+  if (user) {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('users')
+      .select('is_master')
+      .eq('id', user.id)
+      .maybeSingle()
+    isMaster = data?.is_master === true
+  }
 
   return (
     <main className="min-h-screen flex items-center justify-center p-8">
@@ -13,10 +24,18 @@ export default async function Home() {
         </div>
 
         {user ? (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <p className="text-sm">
               로그인됨: <strong>{user.email ?? user.id}</strong>
             </p>
+            {isMaster && (
+              <Link
+                href="/admin"
+                className="inline-block text-xs text-red-700 underline hover:text-red-900"
+              >
+                🔧 관리자
+              </Link>
+            )}
             <form action="/auth/signout" method="post">
               <button
                 type="submit"
