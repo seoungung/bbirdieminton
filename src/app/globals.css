@@ -1,5 +1,239 @@
+/* ──────────────────────────────────────────────────────────────────────
+   Pretendard Variable (Korean primary typeface)
+   Self-hosted via jsDelivr CDN — lightest path, swap on load.
+   MUST precede other @import / rules.
+   ────────────────────────────────────────────────────────────────────── */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css");
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────────────────────────────
+   버디민턴 디자인 시스템 v2 — Forest + Lime
+   - 라이트 모드 전용 (Stage E 에서 다크 추가)
+   - 사용자 직접 지정 팔레트, LAB 색 공간 그대로
+   - Primary: #003a0b (forest, dark green)
+   - Accent : #a5e119 (lime, shuttlecock energy)
+   - Surface: warm beige paper base — gray 가 아닌 따뜻한 종이
+   - 미세 청록 기 gray 가 cool neutral 역할
+   ────────────────────────────────────────────────────────────────────── */
+:root {
+  color-scheme: light;
+
+  /* ── Gray (자연스러운 neutral, 미세 청록 기) ─────────────────────── */
+  --color-gray-50:  lab(98.2596% -0.247031 -0.706708);
+  --color-gray-100: lab(96.1596% -0.0823438 -1.13575);
+  --color-gray-400: lab(65.9269% -0.832707 -8.17473);
+  --color-gray-500: lab(47.7841% -0.393182 -10.0268);
+  --color-gray-600: lab(35.6337% -1.58697 -10.8425);
+  --color-gray-700: lab(27.1134% -0.956401 -12.3224);
+  --color-gray-900: lab(8.11897% 0.811279 -12.254);
+
+  /* ── Greens (메인 톤) ──────────────────────────────────────────── */
+  --color-forest: lab(9.17465% -15.0476 13.2603);   /* #003a0b — primary */
+  --color-moss:   lab(20.2541% -26.7251 22.6621);
+  --color-olive:  lab(52.2709% -26.093 48.0812);
+  --color-grass:  lab(73.1471% -63.0988 45.5766);
+  --color-lime:   lab(83.1294% -37.8888 77.0534);   /* #a5e119 — accent */
+  --color-zest:   lab(96.1361% -21.6121 40.3968);
+  --color-mint:   lab(96.1676% -19.934 14.9203);
+
+  /* ── Cool tones ─────────────────────────────────────────────────── */
+  --color-sea:  lab(21.7612% -17.0277 -1.63025);
+  --color-lake: lab(66.9731% -18.7184 -2.11712);
+  --color-sky:  lab(90.7131% -9.05767 -4.73141);
+
+  /* ── Warm accents ───────────────────────────────────────────────── */
+  --color-coral:   lab(56.8518% 60.2092 52.7264);
+  --color-orchid:  lab(48.3529% 76.2459 -49.4888);
+  --color-violet:  lab(86.1952% 12.7769 -13.7106);
+  --color-red-600: lab(48.4493% 77.4328 61.5452);   /* destructive */
+
+  /* ── Beige (paper base, warm off-white) ─────────────────────────── */
+  --color-beige:     lab(98.5136% -0.649601 2.40903);
+  --color-beige-25:  lab(97.7221% -1.28773 4.82992);
+  --color-beige-50:  lab(93.4986% -1.54445 5.82529);
+  --color-beige-75:  lab(85.2969% -2.07692 7.9381);
+  --color-beige-100: lab(74.2584% -3.34919 13.2789);
+
+  /* ── shadcn 표준 매핑 (light) ───────────────────────────────────── */
+  --background:            var(--color-beige);
+  --foreground:            var(--color-gray-900);
+  --card:                  var(--color-beige);
+  --card-foreground:       var(--color-gray-900);
+  --popover:               var(--color-beige);
+  --popover-foreground:    var(--color-gray-900);
+  --primary:               var(--color-forest);
+  --primary-foreground:    var(--color-beige);
+  --secondary:             var(--color-beige-25);
+  --secondary-foreground:  var(--color-forest);
+  --muted:                 var(--color-beige-50);
+  --muted-foreground:      var(--color-gray-500);
+  --accent:                var(--color-lime);
+  --accent-foreground:     var(--color-forest);
+  --destructive:           var(--color-red-600);
+  --destructive-foreground: var(--color-beige);
+  --border:                var(--color-beige-50);
+  --input:                 var(--color-beige-50);
+  --ring:                  var(--color-lime);
+  --radius:                0.75rem;
+
+  /* ── 타이포그래피 ───────────────────────────────────────────────── */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+               system-ui, "Apple SD Gothic Neo", "Noto Sans KR", "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+
+  /* ── Spacing 토큰 (의미 기반) ───────────────────────────────────── */
+  --space-xs:  0.5rem;
+  --space-sm:  0.75rem;
+  --space-md:  1rem;
+  --space-lg:  1.5rem;
+  --space-xl:  2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 5rem;
+
+  /* ── Radius 토큰 ────────────────────────────────────────────────── */
+  --radius-sm:   0.5rem;
+  --radius-md:   0.75rem;
+  --radius-lg:   1rem;
+  --radius-xl:   1.25rem;
+  --radius-pill: 9999px;
+
+  /* ── 그림자 — forest 잉크 톤 ───────────────────────────────────── */
+  --shadow-sm:   0 1px 2px 0 rgb(0 58 11 / 0.05);
+  --shadow-md:   0 4px 12px -2px rgb(0 58 11 / 0.07), 0 2px 4px -2px rgb(0 58 11 / 0.04);
+  --shadow-lg:   0 12px 32px -8px rgb(0 58 11 / 0.12), 0 4px 8px -4px rgb(0 58 11 / 0.06);
+  --shadow-glow: 0 0 0 4px rgb(165 225 25 / 0.22);
+
+  /* ── 모션 ──────────────────────────────────────────────────────── */
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Tailwind v4 @theme — 토큰을 utility 로 노출
+   ────────────────────────────────────────────────────────────────────── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Gray scale */
+  --color-gray-50:  var(--color-gray-50);
+  --color-gray-100: var(--color-gray-100);
+  --color-gray-400: var(--color-gray-400);
+  --color-gray-500: var(--color-gray-500);
+  --color-gray-600: var(--color-gray-600);
+  --color-gray-700: var(--color-gray-700);
+  --color-gray-900: var(--color-gray-900);
+
+  /* Greens */
+  --color-forest: var(--color-forest);
+  --color-moss:   var(--color-moss);
+  --color-olive:  var(--color-olive);
+  --color-grass:  var(--color-grass);
+  --color-lime:   var(--color-lime);
+  --color-zest:   var(--color-zest);
+  --color-mint:   var(--color-mint);
+
+  /* Cool */
+  --color-sea:  var(--color-sea);
+  --color-lake: var(--color-lake);
+  --color-sky:  var(--color-sky);
+
+  /* Warm */
+  --color-coral:   var(--color-coral);
+  --color-orchid:  var(--color-orchid);
+  --color-violet:  var(--color-violet);
+  --color-red-600: var(--color-red-600);
+
+  /* Beige */
+  --color-beige:     var(--color-beige);
+  --color-beige-25:  var(--color-beige-25);
+  --color-beige-50:  var(--color-beige-50);
+  --color-beige-75:  var(--color-beige-75);
+  --color-beige-100: var(--color-beige-100);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Base
+   ────────────────────────────────────────────────────────────────────── */
+* {
+  border-color: var(--border);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "ss06", "tnum", "kern";
+  background: var(--background);
+  color: var(--foreground);
+  letter-spacing: -0.01em;
+}
+
+/* 숫자는 tabular — 통계/점수에 필수 */
+.tabular,
+[data-tabular] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Heading 위계 (-0.02em ~ -0.03em letter-spacing 으로 한국어 + 영문 균형) */
+h1, h2, h3, h4 {
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+/* Focus ring — 키보드만 (마우스 클릭 시 X) */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--color-zest);
+  color: var(--color-forest);
+}
+
+/* prefers-reduced-motion 존중 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
